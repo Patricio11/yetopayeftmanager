@@ -2,13 +2,16 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Mail, Lock, Eye, EyeOff, User, Building, ArrowRight, AlertCircle, CheckCircle, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
+import { authClient } from '@/lib/auth-client';
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -73,18 +76,37 @@ export default function RegisterPage() {
     }
 
     try {
-      // TODO: Implement Better Auth sign up
+      // Sign up with Better Auth
+      const { data, error } = await authClient.signUp.email({
+        email: formData.email,
+        password: formData.password,
+        name: formData.fullName,
+        image: undefined,
+        callbackURL: '/dashboard',
+      });
+
+      if (error) {
+        setErrors({
+          general: error.message || 'Registration failed. Please try again.'
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Show success message
       setNotification({ 
-        message: 'Account created! Please check your email to verify.', 
+        message: 'Account created successfully! Redirecting...', 
         type: 'success' 
       });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // TODO: Redirect to email verification page
-      // window.location.href = '/auth/verify';
+
+      // Wait a moment for the notification
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Redirect to dashboard (user is auto-logged in)
+      router.push('/dashboard');
+      router.refresh();
     } catch (error: any) {
+      console.error('Registration error:', error);
       setErrors({
         general: error.message || 'Registration failed. Please try again.'
       });

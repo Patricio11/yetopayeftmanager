@@ -2,16 +2,19 @@ import { notFound, redirect } from 'next/navigation';
 import PaymentInterface from '@/components/payment/PaymentInterface';
 
 interface PageProps {
-  params: {
+  params: Promise<{
     token: string;
-  };
+  }>;
 }
 
 export default async function PaymentPage({ params }: PageProps) {
   try {
+    // Await params in Next.js 15
+    const { token: urlToken } = await params;
+    
     // Call our new transaction init endpoint
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/eft/transactions/${params.token}/init`,
+      `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/eft/transactions/${urlToken}/init`,
       {
         cache: 'no-store', // Don't cache payment pages
       }

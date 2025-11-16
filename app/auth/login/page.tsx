@@ -2,13 +2,16 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
+import { authClient } from '@/lib/auth-client';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -46,18 +49,35 @@ export default function LoginPage() {
     }
 
     try {
-      // TODO: Implement Better Auth sign in
+      // Sign in with Better Auth
+      const { data, error } = await authClient.signIn.email({
+        email: formData.email,
+        password: formData.password,
+        rememberMe: formData.remember,
+      });
+
+      if (error) {
+        setErrors({
+          general: error.message || 'Invalid email or password. Please try again.'
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Show success message
       setNotification({ 
         message: 'Login successful! Redirecting...', 
         type: 'success' 
       });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // TODO: Redirect based on role
-      // window.location.href = '/dashboard';
+
+      // Wait a moment for the notification
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Redirect to dashboard
+      router.push('/dashboard');
+      router.refresh();
     } catch (error: any) {
+      console.error('Login error:', error);
       setErrors({
         general: error.message || 'Invalid email or password. Please try again.'
       });
