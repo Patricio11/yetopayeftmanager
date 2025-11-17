@@ -16,7 +16,7 @@ const jwtRequestSchema = z.object({
     merchant_name: z.string(),
     merchant_bank: z.string(),
     amount: z.string(),
-    notify_url: z.string().url(),
+    notify_url: z.string().url().or(z.literal('')).optional(),
   }).optional(),
 });
 

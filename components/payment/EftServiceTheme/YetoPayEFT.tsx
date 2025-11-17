@@ -20,6 +20,7 @@ type ApiInput = {
 };
 type ApiResponse = {
   success?: boolean;
+  ok?: boolean;
   step?: string;
   next_step?: string;
   title?: string;
@@ -228,28 +229,17 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
         });
         setBanks(initialData.banks);
         
-        // Generate JWT token for EFT service
-        const jwtResponse = await fetch(`${FRONTEND_API_BASE_URL}/eft/jwt`, {
+        // Generate JWT token for EFT service using public endpoint
+        const jwtResponse = await fetch(`${FRONTEND_API_BASE_URL}/eft/transactions/${initialData.token}/jwt`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            transactionId: initialData.transaction.id,
-            sessionData: {
-              merchant_account_number: initialData.merchantBankAccount.accountNumber,
-              merchant_account_name: initialData.merchantBankAccount.accountName,
-              merchant_account_type: initialData.merchantBankAccount.accountType,
-              merchant_reference: initialData.transaction.reference,
-              merchant_name: initialData.merchant.name,
-              merchant_bank: initialData.merchantBankAccount.bankCode,
-              amount: initialData.transaction.amount,
-              notify_url: initialData.transaction.notifyUrl || '',
-            },
-          }),
         });
         
         const jwtData = await jwtResponse.json();
-        if (jwtData.jwt_token) {
+        if (jwtData.success && jwtData.jwt_token) {
           setAuthSecretBearerToken(jwtData.jwt_token);
+        } else {
+          throw new Error(jwtData.message || 'Failed to generate JWT token');
         }
         
         setCurrentStep('init');
@@ -347,9 +337,10 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   // --- Network: call EFT API endpoints for bank/step ---
   const executeStepApi = async (bankCode: string, step: string, data: Record<string, any>) => {
     const url = `${EFT_API_BASE_URL}/${bankCode}/${step}?session_id=${sessionId}`;
+    console.log(`[EFT] Calling ${step} with data:`, data);
     const response = await fetch(url, { method: 'POST', headers: authHeader(), body: JSON.stringify({ ...data }) });
     const result: ApiResponse = await response.json();
-    console.log(result);
+    console.log(`[EFT] ${step} response:`, result);
     if (!response.ok) {
       const message = (result && (result.message as string)) || `An error occurred during '${step}'.`;
       throw new Error(message);
@@ -399,6 +390,15 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
           return;
         }
 
+        // If ok: false, stop the loop and show error
+        if (result.ok === false) {
+          setPageError(result.message || 'An error occurred');
+          setCurrentStep('error');
+          setIsLoading(false);
+          submitGuard.current = false;
+          return;
+        }
+
         // If the backend returns inputs (a form) or final (waiting for in-app approval) -> render UI and return control to user
         const stepToDisplay = result.step || result.next_step;
         if (result.inputs || stepToDisplay === 'final') {
@@ -433,7 +433,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   // --- Bank selection handler ---
   const handleBankSelect = (bank: Bank) => {
     setSelectedBank(bank);
-    handleStepExecution(bank.code, 'init', merchant);
+    handleStepExecution(bank.code, 'load_bank', merchant);
   };
 
     // -------------------------
@@ -536,7 +536,10 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
 
     if (hasErrors) { setFormErrors(newErrors); return; }
 
-    const nextStep = apiResponse.next_step || (currentStep === 'auth' ? 'setup' : '');
+    // Determine the next step: use current step if we're submitting a form with inputs
+    const nextStep = apiResponse.next_step || currentStep || '';
+    console.log('[EFT] Form submit - formData:', formData);
+    console.log('[EFT] Form submit - nextStep:', nextStep);
     if (selectedBank && nextStep) {
       handleStepExecution(selectedBank.code, nextStep, { ...formData });
     }
