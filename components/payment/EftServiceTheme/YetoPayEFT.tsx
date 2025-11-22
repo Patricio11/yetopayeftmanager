@@ -556,7 +556,9 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
 
     if (accountInput && selectedValue) {
       const selectedOption = accountInput.options?.find((opt) => opt.value === selectedValue);
-      const nextStep = apiResponse.next_step || 'payment';
+      // When on the 'select' step, we should call the 'select' endpoint with the chosen account
+      // The backend will then return the next step (payment/otp-payment)
+      const nextStep = apiResponse.next_step || 'select';
       if (selectedOption) {
         const payload = { account: { value: selectedOption.value, text: selectedOption.text } };
         handleStepExecution(selectedBank.code, nextStep, payload);
