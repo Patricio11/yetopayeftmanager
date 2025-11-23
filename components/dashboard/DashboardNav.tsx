@@ -3,11 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Home, Receipt, Settings, LogOut, Zap } from "lucide-react";
+import { Home, Receipt, Settings, LogOut, Zap, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export function DashboardNav() {
+interface DashboardNavProps {
+  userRole: string;
+}
+
+export function DashboardNav({ userRole }: DashboardNavProps) {
   const pathname = usePathname();
+  const isAdmin = userRole === "admin";
 
   const navItems = [
     {
@@ -20,6 +25,11 @@ export function DashboardNav() {
       href: "/dashboard/transactions",
       icon: Receipt,
     },
+    ...(isAdmin ? [{
+      title: "Banks",
+      href: "/dashboard/banks",
+      icon: Building2,
+    }] : []),
   ];
 
   return (
