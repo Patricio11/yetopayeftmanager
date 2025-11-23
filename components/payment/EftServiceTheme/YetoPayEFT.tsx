@@ -480,7 +480,11 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
 
   // --- Bank selection handler ---
   const handleBankSelect = async (bank: Bank) => {
+    // Prevent double-click
+    if (isLoading || selectedBank) return;
+    
     setSelectedBank(bank);
+    setIsLoading(true);
     
     // Update transaction status to "initiated" with selected bank
     try {
@@ -1117,8 +1121,8 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
               <button
                 key={bank.code}
                 onClick={() => handleBankSelect(bank)}
-                disabled={isLoading}
-                className="w-full p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition-all duration-200 flex items-center justify-between group disabled:opacity-50"
+                disabled={isLoading || selectedBank !== null}
+                className="w-full p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition-all duration-200 flex items-center justify-between group disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 <div className="flex items-center">
                   <div className="w-1 h-8 rounded-full mr-4" style={{ backgroundColor: bank.color || '#16a34a' }} />

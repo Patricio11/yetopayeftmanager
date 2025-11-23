@@ -74,6 +74,7 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
     color: "#10b981",
     branchCode: "",
     enabled: true,
+    displayOrder: 0,
   });
 
   const resetForm = () => {
@@ -83,6 +84,7 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
       color: "#10b981",
       branchCode: "",
       enabled: true,
+      displayOrder: 0,
     });
   };
 
@@ -223,6 +225,7 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
       color: bank.bank.color || "#10b981",
       branchCode: bank.bank.branchCode || "",
       enabled: bank.bank.enabled ?? true,
+      displayOrder: (bank.bank as any).displayOrder ?? 0,
     });
     setIsEditDialogOpen(true);
   };
@@ -699,6 +702,20 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
                 value={formData.branchCode}
                 onChange={(e) => setFormData({ ...formData, branchCode: e.target.value })}
               />
+            </div>
+
+            <div>
+              <Label htmlFor="edit-displayOrder">Display Order</Label>
+              <Input
+                id="edit-displayOrder"
+                type="number"
+                min="0"
+                value={formData.displayOrder}
+                onChange={(e) => setFormData({ ...formData, displayOrder: parseInt(e.target.value) || 0 })}
+              />
+              <p className="text-xs text-slate-500 mt-1">
+                Lower numbers appear first in payment selection
+              </p>
             </div>
 
             <div className="flex items-center gap-2">
