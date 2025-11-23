@@ -213,77 +213,93 @@ export function TransactionsClient({
         </div>
       </div>
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card className="p-6 bg-gradient-to-br from-white to-blue-50/50 dark:from-slate-800 dark:to-blue-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                <DollarSign className="w-6 h-6 text-white" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <Card className="p-5 bg-gradient-to-br from-white to-blue-50/50 dark:from-slate-800 dark:to-blue-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                  <DollarSign className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                  Total Volume
+                </h3>
               </div>
-              <TrendingUp className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <p className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+                R {initialStats.totalAmount.toFixed(2)}
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
+                {initialStats.totalCount} transactions
+              </p>
             </div>
-            <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2">
-              Total Volume
-            </h3>
-            <p className="text-2xl font-bold text-slate-900 dark:text-white">
-              R {initialStats.totalAmount.toFixed(2)}
-            </p>
-            <p className="text-xs text-slate-500 dark:text-slate-500 mt-2">
-              {initialStats.totalCount} transactions
-            </p>
-          </Card>
+            <TrendingUp className="w-4 h-4 text-blue-500 mt-1" />
+          </div>
+        </Card>
 
-        <Card className="p-6 bg-gradient-to-br from-white to-green-50/50 dark:from-slate-800 dark:to-green-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-                <CheckCircle className="w-6 h-6 text-white" />
+        <Card className="p-5 bg-gradient-to-br from-white to-green-50/50 dark:from-slate-800 dark:to-green-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-9 h-9 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                  <CheckCircle className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                  Completed
+                </h3>
               </div>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+                R {initialStats.completedAmount.toFixed(2)}
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
+                {initialStats.completedCount} successful
+              </p>
             </div>
-            <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2">
-              Completed
-            </h3>
-            <p className="text-2xl font-bold text-slate-900 dark:text-white">
-              R {initialStats.completedAmount.toFixed(2)}
-            </p>
-            <p className="text-xs text-slate-500 dark:text-slate-500 mt-2">
-              {initialStats.completedCount} successful
-            </p>
-          </Card>
+          </div>
+        </Card>
 
-        <Card className="p-6 bg-gradient-to-br from-white to-amber-50/50 dark:from-slate-800 dark:to-amber-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Clock className="w-6 h-6 text-white" />
+        <Card className="p-5 bg-gradient-to-br from-white to-amber-50/50 dark:from-slate-800 dark:to-amber-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-9 h-9 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg flex items-center justify-center">
+                  <Clock className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                  Pending
+                </h3>
               </div>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+                {initialStats.pendingCount}
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
+                Awaiting payment
+              </p>
             </div>
-            <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2">
-              Pending
-            </h3>
-            <p className="text-2xl font-bold text-slate-900 dark:text-white">
-              {initialStats.pendingCount}
-            </p>
-            <p className="text-xs text-slate-500 dark:text-slate-500 mt-2">
-              Awaiting payment
-            </p>
-          </Card>
+          </div>
+        </Card>
 
-        <Card className="p-6 bg-gradient-to-br from-white to-red-50/50 dark:from-slate-800 dark:to-red-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-rose-600 rounded-xl flex items-center justify-center shadow-lg">
-                <XCircle className="w-6 h-6 text-white" />
+        <Card className="p-5 bg-gradient-to-br from-white to-red-50/50 dark:from-slate-800 dark:to-red-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-9 h-9 bg-gradient-to-br from-red-500 to-rose-600 rounded-lg flex items-center justify-center">
+                  <XCircle className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                  Failed
+                </h3>
               </div>
-              <TrendingDown className="w-5 h-5 text-red-600 dark:text-red-400" />
+              <p className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+                {initialStats.failedCount}
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
+                Unsuccessful attempts
+              </p>
             </div>
-            <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2">
-              Failed
-            </h3>
-            <p className="text-2xl font-bold text-slate-900 dark:text-white">
-              {initialStats.failedCount}
-            </p>
-            <p className="text-xs text-slate-500 dark:text-slate-500 mt-2">
-              Unsuccessful attempts
-            </p>
-          </Card>
-        </div>
+            <TrendingDown className="w-4 h-4 text-red-500 mt-1" />
+          </div>
+        </Card>
+      </div>
 
         {/* Filters */}
         <Card className="mb-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-slate-200/50 dark:border-slate-700/50">

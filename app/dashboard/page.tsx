@@ -159,73 +159,93 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {/* Total Revenue */}
-          <Card className="group relative overflow-hidden bg-gradient-to-br from-white to-green-50/50 dark:from-slate-800 dark:to-green-900/10 p-6 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl hover:shadow-green-500/10 transition-all duration-300">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500" />
-            <div className="relative">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shadow-green-500/30">
-                  <DollarSign className="w-7 h-7 text-white" />
+          <Card className="p-5 bg-gradient-to-br from-white to-green-50/50 dark:from-slate-800 dark:to-green-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-9 h-9 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                    <DollarSign className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                    Total Revenue
+                  </h3>
                 </div>
-                <span className="text-xs text-green-600 dark:text-green-400 font-semibold bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full">+12.5%</span>
+                <p className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+                  R {stats.revenue.toFixed(2)}
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
+                  All time earnings
+                </p>
               </div>
-              <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2 uppercase tracking-wide">Total Revenue</h3>
-              <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-400 dark:to-emerald-400 bg-clip-text text-transparent">
-                R {stats.revenue.toFixed(2)}
-              </p>
-              <p className="text-xs text-slate-500 dark:text-slate-500 mt-2">All time earnings</p>
+              <TrendingUp className="w-4 h-4 text-green-500 mt-1" />
             </div>
           </Card>
 
           {/* Total Transactions */}
-          <Card className="group relative overflow-hidden bg-gradient-to-br from-white to-blue-50/50 dark:from-slate-800 dark:to-blue-900/10 p-6 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500" />
-            <div className="relative">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30">
-                  <Activity className="w-7 h-7 text-white" />
+          <Card className="p-5 bg-gradient-to-br from-white to-blue-50/50 dark:from-slate-800 dark:to-blue-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                    <Activity className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                    Total Transactions
+                  </h3>
                 </div>
-                <span className="text-xs text-blue-600 dark:text-blue-400 font-semibold bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded-full">All time</span>
+                <p className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+                  {stats.total}
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
+                  Lifetime count
+                </p>
               </div>
-              <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2 uppercase tracking-wide">Total Transactions</h3>
-              <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">{stats.total}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-500 mt-2">Lifetime count</p>
             </div>
           </Card>
 
           {/* Completed */}
-          <Card className="group relative overflow-hidden bg-gradient-to-br from-white to-emerald-50/50 dark:from-slate-800 dark:to-emerald-900/10 p-6 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500" />
-            <div className="relative">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
-                  <CheckCircle className="w-7 h-7 text-white" />
+          <Card className="p-5 bg-gradient-to-br from-white to-emerald-50/50 dark:from-slate-800 dark:to-emerald-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                    Completed
+                  </h3>
                 </div>
-                <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-100 dark:bg-emerald-900/30 px-2 py-1 rounded-full">Success</span>
+                <p className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+                  {stats.completed}
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
+                  {stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0}% success rate
+                </p>
               </div>
-              <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2 uppercase tracking-wide">Completed</h3>
-              <p className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent">{stats.completed}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-500 mt-2">{stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0}% success rate</p>
             </div>
           </Card>
 
           {/* Pending */}
-          <Card className="group relative overflow-hidden bg-gradient-to-br from-white to-amber-50/50 dark:from-slate-800 dark:to-amber-900/10 p-6 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-300">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500" />
-            <div className="relative">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-14 h-14 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/30">
-                  <Clock className="w-7 h-7 text-white" />
+          <Card className="p-5 bg-gradient-to-br from-white to-amber-50/50 dark:from-slate-800 dark:to-amber-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-9 h-9 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                    Pending
+                  </h3>
                 </div>
-                <span className="text-xs text-amber-600 dark:text-amber-400 font-semibold bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded-full flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
-                  Active
-                </span>
+                <p className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+                  {stats.pending}
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
+                  Awaiting payment
+                </p>
               </div>
-              <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2 uppercase tracking-wide">Pending</h3>
-              <p className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 dark:from-amber-400 dark:to-orange-400 bg-clip-text text-transparent">{stats.pending}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-500 mt-2">Awaiting payment</p>
             </div>
           </Card>
         </div>
