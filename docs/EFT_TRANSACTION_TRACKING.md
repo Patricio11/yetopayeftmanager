@@ -29,9 +29,7 @@ not_started  →  initiated  →  completed/failed/cancelled/aborted/expired
 **Request Body**:
 ```json
 {
-  "bankCode": "fnb",
-  "customerEmail": "user@example.com",
-  "customerName": "John Doe"
+  "bankCode": "fnb"
 }
 ```
 
@@ -227,7 +225,9 @@ ORDER BY conversion_rate DESC;
 }
 ```
 
-### On Completion
+**Note**: Customer name and email are NOT saved at this stage. They come from the EFT service response at completion.
+
+### On Completion (via /complete endpoint)
 ```json
 {
   "bank_selected_at": "2024-01-01T12:00:00.000Z",
@@ -243,6 +243,8 @@ ORDER BY conversion_rate DESC;
   "completion_message": "Payment completed successfully"
 }
 ```
+
+**Note**: The EFT service provides customer name and other details in the completion response, which are then saved to the database along with all metadata.
 
 ## Error Handling
 

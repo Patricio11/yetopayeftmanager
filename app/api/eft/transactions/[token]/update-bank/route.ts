@@ -7,8 +7,6 @@ import { z } from "zod";
 
 const updateBankSchema = z.object({
   bankCode: z.string().min(1, "Bank code is required"),
-  customerEmail: z.string().email().optional(),
-  customerName: z.string().optional(),
 });
 
 /**
@@ -86,8 +84,6 @@ export async function POST(
       .set({
         status: "initiated",
         eftBankId: bank.id,
-        customerEmail: validatedData.customerEmail || transaction.customerEmail,
-        customerName: validatedData.customerName || transaction.customerName,
         updatedAt: new Date(),
         metadata: {
           ...(transaction.metadata as any || {}),
