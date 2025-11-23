@@ -184,12 +184,52 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     return merchant.notify_url || '';
   };
 
-  // Final UI -> redirect
-  const finishAndRedirect = (uiStatus: 'completed' | 'failed', message?: string, raw?: ApiResponse) => {
+  // Final UI -> update transaction status in our DB, then redirect
+  const finishAndRedirect = async (uiStatus: 'completed' | 'failed', message?: string, raw?: ApiResponse) => {
     if (finalPollTimer.current) clearInterval(finalPollTimer.current);
     setTransactionResult({ status: uiStatus, message });
     setCurrentStep(uiStatus);
 
+    // Update transaction status in our database
+    try {
+      if (initialData?.token) {
+        console.log(`[EFT] Updating transaction status to: ${uiStatus}`);
+        
+        const updatePayload = {
+          status: uiStatus === 'completed' ? 'completed' : 'failed',
+          message: message || '',
+          gatewayResult: raw?.gatewayResult,
+          transactionStatus: raw?.transactionStatus || raw?.status,
+          destinationAccount: raw?.destinationAccount,
+          destinationBank: raw?.destinationBank,
+          customerBank: selectedBank?.code,
+          sessionId: sessionId || raw?.sessionId,
+          metadata: raw,
+        };
+
+        const updateResponse = await fetch(
+          `${FRONTEND_API_BASE_URL}/eft/transactions/${initialData.token}/complete`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatePayload),
+          }
+        );
+
+        const updateResult = await updateResponse.json();
+        
+        if (updateResult.success) {
+          console.log(`✅ Transaction status updated: ${updateResult.transaction?.status}`);
+        } else {
+          console.error(`⚠️ Failed to update transaction status: ${updateResult.message}`);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error updating transaction status:', error);
+      // Continue with redirect even if update fails
+    }
+
+    // Redirect to merchant URLs
     const redirectBase = pickRedirectUrl(uiStatus);
     if (!redirectBase) return;
 
@@ -206,8 +246,10 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
       destination_bank: raw?.destinationBank,
     });
 
-    // short delay to show UI then redirect
-    setTimeout(() => { window.location.href = redirectUrl; }, 144000); //Change this to 4000
+    // Short delay to show UI then redirect (4 seconds)
+    setTimeout(() => { 
+      window.location.href = redirectUrl; 
+    }, 4000);
   };
 
   // --- Init: load transaction metadata ---
@@ -357,7 +399,12 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
         const res = await executeStepApi(bankCode, 'final', {});
         const norm = normalizeTerminal(res);
         if (norm.terminal) {
-          finishAndRedirect(norm.uiStatus, norm.message, res);
+          // Clear interval immediately to prevent duplicate calls
+          if (finalPollTimer.current) {
+            clearInterval(finalPollTimer.current);
+            finalPollTimer.current = null;
+          }
+          await finishAndRedirect(norm.uiStatus, norm.message, res);
         }
       } catch {
         // ignore transient errors while waiting for approval
@@ -387,7 +434,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
         if (norm.terminal) {
           setIsLoading(false);
           submitGuard.current = false;
-          finishAndRedirect(norm.uiStatus, norm.message, result);
+          await finishAndRedirect(norm.uiStatus, norm.message, result);
           return;
         }
 
@@ -1012,6 +1059,12 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">{isSuccess ? 'Payment Successful' : 'Payment Failed'}</h2>
           <p className="text-gray-600">{transactionResult?.message || (isSuccess ? 'Your payment has been completed.' : 'Your payment could not be processed.')}</p>
+          <p className="text-sm text-gray-500 mt-4">
+            {isSuccess ? 'Redirecting you back to the merchant...' : 'You will be redirected shortly...'}
+          </p>
+        </div>
+        <div className="flex justify-center">
+          <div className="w-8 h-8 border-2 border-gray-300 border-t-green-600 rounded-full animate-spin"></div>
         </div>
       </div>
     );
