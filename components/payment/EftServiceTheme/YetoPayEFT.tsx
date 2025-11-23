@@ -479,8 +479,39 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   };
 
   // --- Bank selection handler ---
-  const handleBankSelect = (bank: Bank) => {
+  const handleBankSelect = async (bank: Bank) => {
     setSelectedBank(bank);
+    
+    // Update transaction status to "initiated" with selected bank
+    try {
+      if (initialData?.token) {
+        console.log(`[EFT] Updating transaction with selected bank: ${bank.name} (${bank.code})`);
+        
+        const updateResponse = await fetch(
+          `${FRONTEND_API_BASE_URL}/eft/transactions/${initialData.token}/update-bank`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              bankCode: bank.code,
+            }),
+          }
+        );
+
+        const updateResult = await updateResponse.json();
+        
+        if (updateResult.success) {
+          console.log(`✅ Transaction initiated with bank: ${updateResult.transaction?.bank?.name}`);
+        } else {
+          console.error(`⚠️ Failed to update transaction bank: ${updateResult.message}`);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error updating transaction bank:', error);
+      // Continue with payment flow even if update fails
+    }
+    
+    // Continue with EFT flow
     handleStepExecution(bank.code, 'load_bank', merchant);
   };
 
