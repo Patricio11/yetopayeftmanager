@@ -65,27 +65,30 @@ export function CountdownTimer({
   // Size configurations
   const sizeConfig = {
     sm: {
-      container: 'w-16 h-16',
-      text: 'text-sm',
+      container: 'w-20 h-20',
+      text: 'text-lg',
       icon: 'w-4 h-4',
       stroke: 4,
+      radius: 32,
     },
     md: {
-      container: 'w-24 h-24',
-      text: 'text-xl',
+      container: 'w-28 h-28',
+      text: 'text-2xl',
       icon: 'w-5 h-5',
       stroke: 6,
+      radius: 42,
     },
     lg: {
-      container: 'w-32 h-32',
-      text: 'text-3xl',
+      container: 'w-40 h-40',
+      text: 'text-5xl',
       icon: 'w-6 h-6',
-      stroke: 8,
+      stroke: 6,
+      radius: 52,
     },
   };
 
   const config = sizeConfig[size];
-  const radius = size === 'sm' ? 28 : size === 'md' ? 44 : 60;
+  const radius = config.radius;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
@@ -129,21 +132,21 @@ export function CountdownTimer({
 
           {/* Center content */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <Clock
-              className={`${config.icon} ${
-                isWarning
-                  ? 'text-amber-500 dark:text-amber-400'
-                  : 'text-green-600 dark:text-green-400'
-              } mb-1`}
-            />
             <span
-              className={`${config.text} font-bold ${
+              className={`${config.text} font-bold tabular-nums ${
                 isWarning
                   ? 'text-amber-600 dark:text-amber-400'
                   : 'text-slate-900 dark:text-white'
               }`}
             >
-              {formatTime(secondsLeft)}
+              {secondsLeft}
+            </span>
+            <span className={`text-xs font-medium ${
+              isWarning
+                ? 'text-amber-500 dark:text-amber-400'
+                : 'text-slate-500 dark:text-slate-400'
+            }`}>
+              seconds
             </span>
           </div>
         </div>

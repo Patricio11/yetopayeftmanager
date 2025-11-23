@@ -973,7 +973,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
       {/* Countdown Timer */}
       <div className="flex justify-center">
         <CountdownTimer
-          seconds={90}
+          seconds={89}
           size="lg"
           warningThreshold={30}
           onComplete={() => {
