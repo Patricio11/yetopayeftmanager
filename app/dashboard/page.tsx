@@ -1,7 +1,7 @@
 import { requireAuth } from "@/lib/auth-server";
 import { db } from "@/lib/db";
 import { eftTransactions } from "@/lib/db/schema";
-import { eq, desc, count, sum, and, gte } from "drizzle-orm";
+import { eq, desc, count, sum, and, gte, lte, sql } from "drizzle-orm";
 import { 
   CreditCard, TrendingUp, DollarSign, Clock, 
   Plus, ArrowUpRight, CheckCircle, XCircle, Zap, Activity 
@@ -10,6 +10,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { QuickPaymentLinkModal } from "@/components/dashboard/QuickPaymentLinkModal";
+import { DashboardCharts } from "@/components/dashboard/DashboardCharts";
+import { format, subDays } from "date-fns";
 
 export default async function DashboardPage() {
   const session = await requireAuth();
@@ -72,35 +74,92 @@ export default async function DashboardPage() {
     revenue: parseFloat(completedTransactions[0]?.total || "0"),
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-green-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900">
-      {/* Header */}
-      <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-6 py-5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shadow-green-500/30">
-                  <Zap className="w-6 h-6 text-white" />
-                </div>
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white dark:border-slate-900 animate-pulse" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">YETOPAYEFT</h1>
-                <p className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-2">
-                  <span className="w-2 h-2 bg-green-500 rounded-full" />
-                  Welcome back, {session.user.name}
-                </p>
-              </div>
-            </div>
-            <QuickPaymentLinkModal />
-          </div>
-        </div>
-      </header>
+  // Fetch chart data - Last 30 days
+  const last30Days = Array.from({ length: 30 }, (_, i) => {
+    const date = subDays(new Date(), 29 - i);
+    return format(date, "yyyy-MM-dd");
+  });
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+  const dailyStats = await Promise.all(
+    last30Days.map(async (date) => {
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const [dayStats] = await db
+        .select({
+          completed: sql<number>`COUNT(CASE WHEN ${eftTransactions.status} = 'completed' THEN 1 END)::int`,
+          pending: sql<number>`COUNT(CASE WHEN ${eftTransactions.status} = 'initiated' THEN 1 END)::int`,
+          failed: sql<number>`COUNT(CASE WHEN ${eftTransactions.status} IN ('failed', 'cancelled', 'aborted', 'expired') THEN 1 END)::int`,
+          revenue: sql<string>`COALESCE(SUM(CASE WHEN ${eftTransactions.status} = 'completed' THEN CAST(${eftTransactions.amount} AS NUMERIC) ELSE 0 END), 0)`,
+        })
+        .from(eftTransactions)
+        .where(
+          and(
+            eq(eftTransactions.merchantId, userId),
+            gte(eftTransactions.createdAt, startOfDay),
+            lte(eftTransactions.createdAt, endOfDay)
+          )
+        );
+
+      return {
+        date: format(new Date(date), "MMM dd"),
+        completed: dayStats?.completed || 0,
+        pending: dayStats?.pending || 0,
+        failed: dayStats?.failed || 0,
+        revenue: parseFloat(dayStats?.revenue || "0"),
+      };
+    })
+  );
+
+  // Calculate status distribution
+  const statusData = [
+    {
+      name: "Completed",
+      value: stats.completed,
+      color: "#10b981",
+    },
+    {
+      name: "Pending",
+      value: stats.pending,
+      color: "#f59e0b",
+    },
+    {
+      name: "Failed",
+      value: stats.total - stats.completed - stats.pending,
+      color: "#ef4444",
+    },
+  ].filter(item => item.value > 0);
+
+  const chartData = {
+    dailyData: dailyStats,
+    statusData,
+    monthlyRevenue: dailyStats.map(stat => ({
+      month: stat.date,
+      revenue: stat.revenue,
+    })),
+  };
+
+  return (
+    <main className="max-w-7xl mx-auto px-6 py-8">
+      {/* Welcome Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+          Welcome back, {session.user.name}
+        </h1>
+        <p className="text-slate-600 dark:text-slate-400 flex items-center gap-2">
+          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+          Your dashboard overview
+        </p>
+      </div>
+      {/* Quick Actions */}
+      <div className="mb-8 flex justify-end">
+        <QuickPaymentLinkModal />
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {/* Total Revenue */}
           <Card className="group relative overflow-hidden bg-gradient-to-br from-white to-green-50/50 dark:from-slate-800 dark:to-green-900/10 p-6 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl hover:shadow-green-500/10 transition-all duration-300">
             <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500" />
@@ -171,6 +230,11 @@ export default async function DashboardPage() {
           </Card>
         </div>
 
+        {/* Charts Section */}
+        <div className="mb-8">
+          <DashboardCharts data={chartData} />
+        </div>
+
         {/* Recent Transactions */}
         <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-slate-200/50 dark:border-slate-700/50 shadow-xl">
           <div className="p-6 border-b border-slate-200/50 dark:border-slate-700/50">
@@ -208,7 +272,7 @@ export default async function DashboardPage() {
               </div>
             ) : (
               recentTransactions.map((transaction) => (
-                <div key={transaction.id} className="p-6 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                <div key={transaction.id} className="p-6 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
@@ -260,6 +324,5 @@ export default async function DashboardPage() {
           </div>
         </Card>
       </main>
-    </div>
   );
 }
