@@ -9,9 +9,12 @@ export const eftBanks = pgTable("eft_banks", {
   color: text("color"), // Brand color for UI
   branchCode: text("branch_code"),
   enabled: boolean("enabled").default(true),
+  displayOrder: integer("display_order").default(0), // Order for display in payment page
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  displayOrderIdx: index("eft_banks_display_order_idx").on(table.displayOrder),
+}));
 
 // EFT Transactions
 export const eftTransactions = pgTable("eft_transactions", {

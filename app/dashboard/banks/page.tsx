@@ -13,7 +13,7 @@ export default async function BanksPage() {
     redirect("/dashboard");
   }
 
-  // Fetch all banks with transaction stats
+  // Fetch all banks with transaction stats, ordered by displayOrder
   const banks = await db
     .select({
       bank: eftBanks,
@@ -25,7 +25,7 @@ export default async function BanksPage() {
       `,
     })
     .from(eftBanks)
-    .orderBy(desc(eftBanks.createdAt));
+    .orderBy(eftBanks.displayOrder, desc(eftBanks.createdAt));
 
   return <BanksManagementClient initialBanks={banks} />;
 }

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { eftTransactions, eftBanks, eftBankAccounts, users } from "@/lib/db/schema";
 import { verifyPaymentToken } from "@/lib/security/payment-token";
-import { eq, and } from "drizzle-orm";
+import { eq, and, asc } from "drizzle-orm";
 
 /**
  * GET /api/eft/transactions/[token]/init
@@ -101,9 +101,10 @@ export async function GET(
       );
     }
 
-    // Fetch enabled EFT banks
+    // Fetch enabled EFT banks ordered by displayOrder
     const enabledBanks = await db.query.eftBanks.findMany({
       where: eq(eftBanks.enabled, true),
+      orderBy: [asc(eftBanks.displayOrder)],
     });
 
     // Map banks to frontend format

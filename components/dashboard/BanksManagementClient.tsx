@@ -31,6 +31,8 @@ import {
   XCircle,
   TrendingUp,
   AlertTriangle,
+  GripVertical,
+  Save,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -62,6 +64,8 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedBank, setSelectedBank] = useState<Bank | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [hasOrderChanged, setHasOrderChanged] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -233,6 +237,60 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
     setIsDeleteDialogOpen(true);
   };
 
+  // Drag and drop handlers
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+
+    const newBanks = [...banks];
+    const draggedBank = newBanks[draggedIndex];
+    newBanks.splice(draggedIndex, 1);
+    newBanks.splice(index, 0, draggedBank);
+
+    setBanks(newBanks);
+    setDraggedIndex(index);
+    setHasOrderChanged(true);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
+
+  const handleSaveOrder = async () => {
+    setIsLoading(true);
+    try {
+      const bankOrders = banks.map((bank, index) => ({
+        id: bank.bank.id,
+        displayOrder: index,
+      }));
+
+      const response = await fetch("/api/admin/banks/reorder", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bankOrders }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setHasOrderChanged(false);
+        alert("Bank order saved successfully!");
+        router.refresh();
+      } else {
+        alert(result.message || "Failed to save bank order");
+      }
+    } catch (error) {
+      console.error("Error saving bank order:", error);
+      alert("Failed to save bank order");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <main className="max-w-7xl mx-auto px-6 py-8">
       {/* Header */}
@@ -242,19 +300,31 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
             Bank Management
           </h1>
           <p className="text-slate-600 dark:text-slate-400">
-            Manage EFT payment banks and their settings
+            Manage EFT payment banks and their settings. Drag banks to reorder them.
           </p>
         </div>
-        <Button
-          onClick={() => {
-            resetForm();
-            setIsCreateDialogOpen(true);
-          }}
-          className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Bank
-        </Button>
+        <div className="flex items-center gap-3">
+          {hasOrderChanged && (
+            <Button
+              onClick={handleSaveOrder}
+              disabled={isLoading}
+              className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
+            >
+              <Save className="w-4 h-4 mr-2" />
+              Save Order
+            </Button>
+          )}
+          <Button
+            onClick={() => {
+              resetForm();
+              setIsCreateDialogOpen(true);
+            }}
+            className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Bank
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -333,6 +403,7 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
+                <TableHead className="w-[50px]"></TableHead>
                 <TableHead className="pl-0">Bank</TableHead>
                 <TableHead>Code</TableHead>
                 <TableHead>Branch Code</TableHead>
@@ -345,7 +416,7 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
             <TableBody>
               {banks.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-12 text-slate-500 dark:text-slate-400">
+                  <TableCell colSpan={8} className="text-center py-12 text-slate-500 dark:text-slate-400">
                     <div className="flex flex-col items-center gap-4">
                       <Building2 className="w-12 h-12 text-slate-300 dark:text-slate-600" />
                       <div>
@@ -356,7 +427,7 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
                   </TableCell>
                 </TableRow>
               ) : (
-                banks.map((bank) => {
+                banks.map((bank, index) => {
                   const successRate = bank.transactionCount > 0
                     ? Math.round((bank.completedCount / bank.transactionCount) * 100)
                     : 0;
@@ -364,8 +435,17 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
                   return (
                     <TableRow
                       key={bank.bank.id}
-                      className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                      draggable
+                      onDragStart={() => handleDragStart(index)}
+                      onDragOver={(e) => handleDragOver(e, index)}
+                      onDragEnd={handleDragEnd}
+                      className={`hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${
+                        draggedIndex === index ? "opacity-50" : ""
+                      }`}
                     >
+                      <TableCell className="pl-0 cursor-move">
+                        <GripVertical className="w-5 h-5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" />
+                      </TableCell>
                       <TableCell className="pl-0">
                         <div className="flex items-center gap-3">
                           <div
