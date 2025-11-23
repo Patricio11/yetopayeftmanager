@@ -653,7 +653,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   const renderStepIndicator = () => {
     const currentStepNum = stepNumbers[currentStep] || 1;
     return (
-      <div className="flex items-center justify-center mb-8">
+      <div className="flex items-center justify-center">
         {[1, 2, 3].map((step) => (
           <React.Fragment key={step}>
             <div
