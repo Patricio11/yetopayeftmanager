@@ -461,24 +461,22 @@ export function TransactionsClient({
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto px-6">
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead>Date</TableHead>
+                  <TableHead className="pl-0">Date</TableHead>
                   <TableHead>Reference</TableHead>
                   {isAdmin && <TableHead>Merchant</TableHead>}
-                  <TableHead>Customer</TableHead>
                   <TableHead>Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Description</TableHead>
+                  <TableHead className="pr-0">Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {sortedTransactions.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={isAdmin ? 7 : 6}
+                      colSpan={isAdmin ? 5 : 4}
                       className="text-center py-12 text-slate-500 dark:text-slate-400"
                     >
                       <div className="flex flex-col items-center gap-4">
@@ -496,9 +494,9 @@ export function TransactionsClient({
                       key={item.transaction.id}
                       className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer"
                     >
-                      <TableCell className="font-medium">
+                      <TableCell className="font-medium pl-0">
                         <div>
-                          <div className="text-sm">
+                          <div className="text-sm font-semibold text-slate-900 dark:text-white">
                             {format(new Date(item.transaction.createdAt), "MMM dd, yyyy")}
                           </div>
                           <div className="text-xs text-slate-500">
@@ -507,12 +505,14 @@ export function TransactionsClient({
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="font-mono text-sm">{item.transaction.reference}</div>
+                        <div className="font-mono text-sm text-slate-700 dark:text-slate-300">
+                          {item.transaction.reference}
+                        </div>
                       </TableCell>
                       {isAdmin && (
                         <TableCell>
                           <div>
-                            <div className="font-medium text-sm">
+                            <div className="font-medium text-sm text-slate-900 dark:text-white">
                               {item.merchant?.companyName || item.merchant?.name || "-"}
                             </div>
                             <div className="text-xs text-slate-500">{item.merchant?.email}</div>
@@ -520,21 +520,11 @@ export function TransactionsClient({
                         </TableCell>
                       )}
                       <TableCell>
-                        <div>
-                          <div className="text-sm">
-                            {item.transaction.customerName || "-"}
-                          </div>
-                          <div className="text-xs text-slate-500">
-                            {item.transaction.customerEmail || "-"}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="font-bold text-slate-900 dark:text-white">
+                        <div className="font-bold text-lg text-slate-900 dark:text-white">
                           R {parseFloat(item.transaction.amount).toFixed(2)}
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="pr-0">
                         <span
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(
                             item.transaction.status || "not_started"
@@ -543,11 +533,6 @@ export function TransactionsClient({
                           {getStatusIcon(item.transaction.status || "not_started")}
                           {item.transaction.status || "not_started"}
                         </span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm text-slate-600 dark:text-slate-400 max-w-xs truncate">
-                          {item.transaction.description || "-"}
-                        </div>
                       </TableCell>
                     </TableRow>
                   ))
