@@ -37,7 +37,7 @@ export async function requireAdmin() {
     };
   }
 
-  if (session.user.role !== 'admin') {
+  if ((session.user.role || 'merchant') !== 'admin') {
     return {
       authorized: false,
       response: NextResponse.json(

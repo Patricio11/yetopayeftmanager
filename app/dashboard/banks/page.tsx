@@ -9,7 +9,7 @@ export default async function BanksPage() {
   const session = await requireAuth();
 
   // Only admins can access this page
-  if (session.user.role !== "admin") {
+  if ((session.user.role || 'merchant') !== "admin") {
     redirect("/dashboard");
   }
 

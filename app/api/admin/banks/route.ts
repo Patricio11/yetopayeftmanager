@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     const session = await requireAuth();
 
     // Only admins can manage banks
-    if (session.user.role !== "admin") {
+    if ((session.user.role || 'merchant') !== "admin") {
       return NextResponse.json(
         { success: false, message: "Unauthorized - Admin access required" },
         { status: 403 }
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     const session = await requireAuth();
 
     // Only admins can manage banks
-    if (session.user.role !== "admin") {
+    if ((session.user.role || 'merchant') !== "admin") {
       return NextResponse.json(
         { success: false, message: "Unauthorized - Admin access required" },
         { status: 403 }

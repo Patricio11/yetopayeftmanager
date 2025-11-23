@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     const conditions = [];
 
     // Merchant sees only own transactions, admin sees all
-    if (auth.authorized && auth.session.user.role !== 'admin') {
+    if (auth.authorized && (auth.session.user.role || 'merchant') !== 'admin') {
       conditions.push(eq(eftTransactions.merchantId, auth.session.user.id));
     }
 

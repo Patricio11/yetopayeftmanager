@@ -10,7 +10,7 @@ export default async function TransactionsPage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const session = await requireAuth();
-  const isAdmin = session.user.role === "admin";
+  const isAdmin = (session.user.role || 'merchant') === "admin";
 
   // Parse search params - Next.js 15 requires awaiting searchParams
   const params = await searchParams;
