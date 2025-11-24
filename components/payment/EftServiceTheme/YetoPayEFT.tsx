@@ -1,7 +1,7 @@
 // YetoPayEFT.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Shield, Check, Eye, EyeOff, HelpCircle, X, ChevronRight,
+  Shield, Check, Eye, EyeOff, HelpCircle, X, ChevronRight, ChevronLeft,
   AlertTriangle, CheckCircle, RefreshCcw, Save, Trash2, Clock
 } from 'lucide-react';
 import TermsModal from './components/TermsModal';
@@ -900,18 +900,34 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
       if (selectedBank && sessionId) {
         await fetch(`${EFT_API_BASE_URL}/${selectedBank.code}/cancel?session_id=${sessionId}`, {
           method: 'POST',
-          headers: authHeader(),
-          body: JSON.stringify({ reason: 'user_cancelled' }),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authSecretBearerToken}`,
+          },
         });
       }
-    } catch {}
-    setTransactionResult({ status: 'failed', message: 'Payment cancelled by user.' });
-    setCurrentStep('failed');
+      setCancelConfirmOpen(true);
+    } catch (error) {
+      console.error('Cancel failed:', error);
+      clearTcTooltipTimer();
+    }
   };
 
-  // --- Tooltip helpers (animated) ---
+  const handleBackToBank = () => {
+    console.log('🔙 Going back to bank selection...');
+    // Reset to bank selection step
+    setSelectedBank(null);
+    setCurrentStep('init');
+    setApiResponse(null);
+    setFormData({});
+    setFormErrors({});
+    setAgreedToTerms(false);
+    setSavedCredentialsData(null);
+    setSavedCredentialId(null);
+  };
+
   const clearTcTooltipTimer = () => {
-    if (tcTooltipTimerRef.current) {
+    if (tcTooltipTimerRef.current !== null) {
       window.clearTimeout(tcTooltipTimerRef.current);
       tcTooltipTimerRef.current = null;
     }
@@ -1450,6 +1466,18 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
             </div>
             <div className="flex items-center space-x-4">
               <HelpCircle size={20} className="cursor-pointer hover:text-green-200 transition-colors" />
+              {/* Back button - visible on Step 2 (auth step) */}
+              {currentStep === 'auth' && (
+                <button
+                  onClick={handleBackToBank}
+                  className="flex items-center gap-1 px-3 py-1.5 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg transition-all duration-200"
+                  title="Change bank"
+                  aria-label="Go back to bank selection"
+                >
+                  <ChevronLeft size={18} />
+                  <span className="text-sm font-medium">Back</span>
+                </button>
+              )}
               <button
                 onClick={handleCancel}
                 className="cursor-pointer hover:text-green-200 transition-colors"
