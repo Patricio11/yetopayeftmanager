@@ -275,7 +275,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
           reference: initialData.transaction.reference,
         });
         setMerchant({
-          id: initialData.transaction.id, // Use transaction ID as merchant context
+          id: initialData.merchant.id, // Use actual merchant user ID for tokenization
           name: initialData.merchant.name,
           logo: initialData.merchant.logo,
           success_url: initialData.merchant.success_url,
