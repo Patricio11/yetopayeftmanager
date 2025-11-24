@@ -1,0 +1,277 @@
+/**
+ * Tokenization Metadata API
+ * 
+ * This API handles ONLY metadata storage (no credentials).
+ * Actual credentials are stored encrypted in browser localStorage.
+ * 
+ * This approach is:
+ * - PCI DSS friendly (no credentials on server)
+ * - User-controlled (browser storage)
+ * - Audit-friendly (metadata for compliance)
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { db } from '@/lib/db';
+import { customerBankTokens, tokenizationAuditLog } from '@/lib/db/schema';
+import { eq, and } from 'drizzle-orm';
+
+/**
+ * GET - Retrieve metadata for saved credentials
+ * Returns list of saved credential metadata (no actual credentials)
+ */
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const merchantId = searchParams.get('merchantId');
+    const customerEmail = searchParams.get('customerEmail');
+    const deviceFingerprint = searchParams.get('deviceFingerprint');
+
+    if (!merchantId || !customerEmail || !deviceFingerprint) {
+      return NextResponse.json(
+        { success: false, error: 'Missing required parameters' },
+        { status: 400 }
+      );
+    }
+
+    // Fetch metadata from database
+    const tokens = await db
+      .select()
+      .from(customerBankTokens)
+      .where(
+        and(
+          eq(customerBankTokens.merchantId, merchantId),
+          eq(customerBankTokens.customerEmail, customerEmail),
+          eq(customerBankTokens.deviceFingerprint, deviceFingerprint),
+          eq(customerBankTokens.isActive, true)
+        )
+      )
+      .orderBy(customerBankTokens.isDefault, customerBankTokens.lastUsedAt);
+
+    return NextResponse.json({
+      success: true,
+      tokens: tokens.map(token => ({
+        id: token.id,
+        bankCode: token.bankCode,
+        customerName: token.customerName,
+        accountNumber: token.accountNumber, // Last 4 digits only
+        accountType: token.accountType,
+        accountName: token.accountName,
+        isDefault: token.isDefault,
+        lastUsedAt: token.lastUsedAt,
+        usageCount: token.usageCount,
+        createdAt: token.createdAt,
+      })),
+    });
+  } catch (error) {
+    console.error('Error fetching token metadata:', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to fetch token metadata' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * POST - Save or update metadata for credentials
+ * Called after successful payment when user opts to save credentials
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const {
+      merchantId,
+      customerEmail,
+      customerName,
+      bankCode,
+      deviceFingerprint,
+      deviceInfo,
+      accountInfo, // { accountNumber, accountType, accountName }
+      isDefault,
+    } = body;
+
+    if (!merchantId || !customerEmail || !bankCode || !deviceFingerprint) {
+      return NextResponse.json(
+        { success: false, error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    const ipAddress = request.headers.get('x-forwarded-for') || 
+                     request.headers.get('x-real-ip') || 
+                     'unknown';
+
+    // Check if metadata already exists
+    const existing = await db
+      .select()
+      .from(customerBankTokens)
+      .where(
+        and(
+          eq(customerBankTokens.merchantId, merchantId),
+          eq(customerBankTokens.customerEmail, customerEmail),
+          eq(customerBankTokens.bankCode, bankCode),
+          eq(customerBankTokens.deviceFingerprint, deviceFingerprint)
+        )
+      )
+      .limit(1);
+
+    let tokenId: string;
+    let isNew = false;
+
+    if (existing.length > 0) {
+      // Update existing metadata
+      tokenId = existing[0].id;
+      await db
+        .update(customerBankTokens)
+        .set({
+          lastUsedAt: new Date(),
+          usageCount: (existing[0].usageCount || 0) + 1,
+          customerName: customerName || existing[0].customerName,
+          accountNumber: accountInfo?.accountNumber || existing[0].accountNumber,
+          accountType: accountInfo?.accountType || existing[0].accountType,
+          accountName: accountInfo?.accountName || existing[0].accountName,
+          isDefault: isDefault !== undefined ? isDefault : existing[0].isDefault,
+          updatedAt: new Date(),
+        })
+        .where(eq(customerBankTokens.id, tokenId));
+
+      // Log usage
+      await db.insert(tokenizationAuditLog).values({
+        tokenId,
+        merchantId,
+        customerEmail,
+        action: 'used',
+        ipAddress,
+        userAgent: request.headers.get('user-agent') || undefined,
+        deviceFingerprint,
+        metadata: { accountInfo },
+      });
+    } else {
+      // Create new metadata entry
+      isNew = true;
+      const [newToken] = await db
+        .insert(customerBankTokens)
+        .values({
+          merchantId,
+          customerEmail,
+          customerName,
+          bankCode,
+          deviceFingerprint,
+          deviceInfo,
+          ipAddress,
+          accountNumber: accountInfo?.accountNumber,
+          accountType: accountInfo?.accountType,
+          accountName: accountInfo?.accountName,
+          isDefault: isDefault || false,
+          lastUsedAt: new Date(),
+          usageCount: 1,
+          isActive: true,
+        })
+        .returning();
+
+      tokenId = newToken.id;
+
+      // Log creation
+      await db.insert(tokenizationAuditLog).values({
+        tokenId,
+        merchantId,
+        customerEmail,
+        action: 'created',
+        ipAddress,
+        userAgent: request.headers.get('user-agent') || undefined,
+        deviceFingerprint,
+        metadata: { accountInfo },
+      });
+    }
+
+    // If setting as default, unset other defaults
+    if (isDefault) {
+      await db
+        .update(customerBankTokens)
+        .set({ isDefault: false })
+        .where(
+          and(
+            eq(customerBankTokens.merchantId, merchantId),
+            eq(customerBankTokens.customerEmail, customerEmail),
+            eq(customerBankTokens.deviceFingerprint, deviceFingerprint),
+            eq(customerBankTokens.isActive, true)
+          )
+        );
+      
+      await db
+        .update(customerBankTokens)
+        .set({ isDefault: true })
+        .where(eq(customerBankTokens.id, tokenId));
+    }
+
+    return NextResponse.json({
+      success: true,
+      tokenId,
+      isNew,
+      message: isNew ? 'Metadata saved successfully' : 'Metadata updated successfully',
+    });
+  } catch (error) {
+    console.error('Error saving token metadata:', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to save token metadata' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * DELETE - Remove metadata (user deletes saved credentials)
+ */
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const tokenId = searchParams.get('tokenId');
+    const merchantId = searchParams.get('merchantId');
+    const customerEmail = searchParams.get('customerEmail');
+
+    if (!tokenId || !merchantId || !customerEmail) {
+      return NextResponse.json(
+        { success: false, error: 'Missing required parameters' },
+        { status: 400 }
+      );
+    }
+
+    const ipAddress = request.headers.get('x-forwarded-for') || 
+                     request.headers.get('x-real-ip') || 
+                     'unknown';
+    const deviceFingerprint = searchParams.get('deviceFingerprint') || 'unknown';
+
+    // Soft delete (set isActive to false)
+    await db
+      .update(customerBankTokens)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(
+        and(
+          eq(customerBankTokens.id, tokenId),
+          eq(customerBankTokens.merchantId, merchantId),
+          eq(customerBankTokens.customerEmail, customerEmail)
+        )
+      );
+
+    // Log deletion
+    await db.insert(tokenizationAuditLog).values({
+      tokenId,
+      merchantId,
+      customerEmail,
+      action: 'deleted',
+      ipAddress,
+      userAgent: request.headers.get('user-agent') || undefined,
+      deviceFingerprint,
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Metadata deleted successfully',
+    });
+  } catch (error) {
+    console.error('Error deleting token metadata:', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to delete token metadata' },
+      { status: 500 }
+    );
+  }
+}

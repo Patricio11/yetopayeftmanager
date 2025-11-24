@@ -16,6 +16,7 @@ A modern, secure, and fast EFT (Electronic Funds Transfer) payment management sy
 ### 💳 Payment Features
 - Instant EFT payments from all major South African banks
 - Secure payment page with 3-step flow
+- **🆕 Bank Credential Tokenization** - Save credentials for faster repeat payments
 - Real-time transaction tracking
 - Webhook notifications
 - Customer email & name capture
@@ -88,9 +89,10 @@ yetopayeft/
 
 ## 🗄️ Database Schema
 
-**17 Tables:**
+**19 Tables:**
 - `user`, `session`, `account`, `verification` (Better Auth)
-- `eft_banks`, `eft_transactions`, `payment_tokens` (NEW!)
+- `eft_banks`, `eft_transactions`, `payment_tokens`
+- `customer_bank_tokens`, `tokenization_audit_log` (🆕 Tokenization)
 - `eft_bank_accounts`, `eft_settings`
 - `merchant_team_members`, `api_keys`
 - `webhook_configurations`, `webhook_deliveries`
@@ -245,8 +247,9 @@ Response:
 
 ## 🔒 Security Features
 
-- ✅ 256-bit encryption
+- ✅ AES-256-GCM encryption (credential tokenization)
 - ✅ SHA-256 token hashing
+- ✅ Device fingerprinting
 - ✅ CSRF protection (Better Auth)
 - ✅ XSS prevention
 - ✅ SQL injection prevention (Drizzle ORM)

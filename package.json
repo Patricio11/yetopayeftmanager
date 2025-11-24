@@ -10,7 +10,8 @@
     "db:seed": "tsx lib/db/seed.ts",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
-    "db:test": "tsx test-db-connection.ts"
+    "db:test": "tsx test-db-connection.ts",
+    "generate:encryption-key": "node scripts/generate-encryption-key.js"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.1",
