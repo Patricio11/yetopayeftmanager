@@ -1202,7 +1202,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     const isAuth = currentStep === 'auth' || apiResponse.step === 'auth';
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 mt-6">
         <div className="flex items-start justify-between">
           <div className="text-left">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">{apiResponse.title}</h2>
@@ -1466,18 +1466,6 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
             </div>
             <div className="flex items-center space-x-4">
               <HelpCircle size={20} className="cursor-pointer hover:text-green-200 transition-colors" />
-              {/* Back button - visible on Step 2 (auth step) */}
-              {currentStep === 'auth' && (
-                <button
-                  onClick={handleBackToBank}
-                  className="flex items-center gap-1 px-3 py-1.5 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg transition-all duration-200"
-                  title="Change bank"
-                  aria-label="Go back to bank selection"
-                >
-                  <ChevronLeft size={18} />
-                  <span className="text-sm font-medium">Back</span>
-                </button>
-              )}
               <button
                 onClick={handleCancel}
                 className="cursor-pointer hover:text-green-200 transition-colors"
@@ -1526,7 +1514,20 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
           )}
 
           <div className="bg-white rounded-xl shadow-lg p-6 min-h-[200px] relative">
-            {/* Cancel badge (top-right of main box) */}
+            {/* Back button - left side */}
+            {currentStep === 'auth' && (
+              <div className="absolute top-0 left-0 mt-3 ml-3 z-20">
+                <button 
+                  onClick={handleBackToBank}
+                  className="bg-gray-50 text-gray-700 font-semibold px-3 py-1 rounded-full text-sm flex items-center gap-1 hover:bg-gray-100 transition"
+                  title="Change bank"
+                  aria-label="Go back to bank selection"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Back
+                </button>
+              </div>
+            )}
+            {/* Cancel button - right side */}
             <div className="absolute top-0 right-0 mt-3 mr-3 z-20">
               <button onClick={() => setCancelConfirmOpen(true)} className="bg-red-50 text-red-600 font-semibold px-3 py-1 rounded-full text-sm flex items-center gap-2 hover:bg-red-100 transition">
                 <X className="w-4 h-4" /> Cancel
