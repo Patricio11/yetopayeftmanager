@@ -12,9 +12,8 @@ import { eftBanks } from "./eft";
 export const customerBankTokens = pgTable('customer_bank_tokens', {
   id: uuid('id').primaryKey().defaultRandom(),
   
-  // Merchant & Customer Info
-  merchantId: uuid('merchant_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  customerName: varchar('customer_name', { length: 255 }).notNull(), // Primary identifier (not email)
+  // Merchant Info
+  merchantId: text('merchant_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   
   // Bank Info
   bankId: uuid('bank_id').references(() => eftBanks.id, { onDelete: 'set null' }),
@@ -44,10 +43,10 @@ export const customerBankTokens = pgTable('customer_bank_tokens', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => ({
-  merchantCustomerIdx: index('customer_tokens_merchant_customer_idx').on(table.merchantId, table.customerName),
+  merchantIdx: index('customer_tokens_merchant_idx').on(table.merchantId),
   bankCodeIdx: index('customer_tokens_bank_code_idx').on(table.bankCode),
   deviceFingerprintIdx: index('customer_tokens_device_fingerprint_idx').on(table.deviceFingerprint),
-  merchantCustomerBankIdx: uniqueIndex('customer_tokens_unique_idx').on(table.merchantId, table.customerName, table.bankCode, table.deviceFingerprint),
+  merchantBankDeviceIdx: uniqueIndex('customer_tokens_unique_idx').on(table.merchantId, table.bankCode, table.deviceFingerprint),
 }));
 
 /**
@@ -59,7 +58,6 @@ export const tokenizationAuditLog = pgTable("tokenization_audit_log", {
   
   tokenId: uuid("token_id").references(() => customerBankTokens.id, { onDelete: "cascade" }),
   merchantId: text("merchant_id").notNull(),
-  customerName: text("customer_name").notNull(),
   
   // Event details
   action: text("action", {

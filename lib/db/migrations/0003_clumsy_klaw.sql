@@ -1,0 +1,1 @@
+ALTER TABLE "customer_bank_tokens" ALTER COLUMN "merchant_id" SET DATA TYPE text;

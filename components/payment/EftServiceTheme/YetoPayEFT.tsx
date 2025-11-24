@@ -110,8 +110,6 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   const [selectedTokenId, setSelectedTokenId] = useState<string | null>(null);
   const [deviceFingerprint, setDeviceFingerprint] = useState<string>('');
   const [showSavedCredentials, setShowSavedCredentials] = useState(false);
-  const [customerEmail, setCustomerEmail] = useState<string>('');
-  const [customerName, setCustomerName] = useState<string>('');
   const [savedCredentialId, setSavedCredentialId] = useState<string | null>(null);
   const [isInAppStep, setIsInAppStep] = useState(false);
 
@@ -360,143 +358,22 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Initialize device fingerprint and load saved tokens
+  // Initialize device fingerprint
   useEffect(() => {
     const initTokenization = async () => {
       try {
         // Generate device fingerprint
         const fingerprint = await getDeviceFingerprint();
         setDeviceFingerprint(fingerprint);
-
-        // Load saved tokens if we have merchant and customer info
-        if (initialData?.merchant?.id && selectedBank) {
-          await loadSavedTokens(initialData.merchant.id, fingerprint);
-        }
       } catch (error) {
-        console.error('Failed to initialize tokenization:', error);
+        console.error('Failed to initialize device fingerprint:', error);
       }
     };
 
     initTokenization();
-  }, [selectedBank, initialData?.merchant?.id]);
+  }, []);
 
-  // --- Tokenization helpers ---
-  const loadSavedTokens = async (merchantId: string, fingerprint: string) => {
-    if (!customerEmail) return;
-
-    try {
-      const response = await fetch(
-        `${FRONTEND_API_BASE_URL}/tokenization?merchantId=${merchantId}&customerEmail=${encodeURIComponent(customerEmail)}&deviceFingerprint=${fingerprint}`
-      );
-      const data = await response.json();
-
-      if (data.success && data.tokens) {
-        setSavedTokens(data.tokens.filter((t: any) => t.bankCode === selectedBank?.code));
-        if (data.tokens.length > 0) {
-          setShowSavedCredentials(true);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to load saved tokens:', error);
-    }
-  };
-
-  const handleUseSavedCredentials = async (tokenId: string) => {
-    if (!initialData?.merchant?.id || !customerEmail || !deviceFingerprint) return;
-
-    try {
-      setIsLoading(true);
-      setSelectedTokenId(tokenId);
-
-      // Decrypt credentials
-      const response = await fetch(
-        `${FRONTEND_API_BASE_URL}/tokenization/${tokenId}/decrypt`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            merchantId: initialData.merchant.id,
-            customerEmail,
-            deviceFingerprint,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (data.success && data.credentials) {
-        // Auto-fill form with decrypted credentials
-        setFormData(data.credentials);
-        setShowSavedCredentials(false);
-        
-        // Automatically submit the form
-        setTimeout(() => {
-          handleFormSubmit();
-        }, 500);
-      } else {
-        setPageError(data.message || 'Failed to load saved credentials');
-      }
-    } catch (error: any) {
-      setPageError('Failed to use saved credentials');
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleDeleteToken = async (tokenId: string) => {
-    if (!initialData?.merchant?.id || !customerEmail) return;
-
-    try {
-      const response = await fetch(
-        `${FRONTEND_API_BASE_URL}/tokenization?tokenId=${tokenId}&merchantId=${initialData.merchant.id}&customerEmail=${encodeURIComponent(customerEmail)}`,
-        { method: 'DELETE' }
-      );
-
-      const data = await response.json();
-
-      if (data.success) {
-        // Reload tokens
-        await loadSavedTokens(initialData.merchant.id, deviceFingerprint);
-      }
-    } catch (error) {
-      console.error('Failed to delete token:', error);
-    }
-  };
-
-  const saveCredentialsToToken = async (credentials: Record<string, any>) => {
-    if (!saveCredentials || !initialData?.merchant?.id || !customerEmail || !selectedBank || !deviceFingerprint) {
-      return;
-    }
-
-    try {
-      const deviceInfo = collectDeviceInfo();
-
-      const response = await fetch(`${FRONTEND_API_BASE_URL}/tokenization`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          merchantId: initialData.merchant.id,
-          customerEmail,
-          customerName,
-          bankCode: selectedBank.code,
-          credentials,
-          deviceFingerprint,
-          deviceInfo,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        console.log('✅ Credentials saved for future use');
-      } else {
-        console.warn('⚠️ Failed to save credentials:', data.message);
-      }
-    } catch (error) {
-      console.error('❌ Error saving credentials:', error);
-    }
-  };
+  // --- Tokenization helpers (V1 functions removed - now using V2 browser-based storage) ---
 
   // --- Validation & form helpers ---
   const validateInput = (input: ApiInput, value: any) => {
@@ -528,14 +405,6 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   const handleInputChange = (name: string, value: any) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (formErrors[name]) setFormErrors((prev) => ({ ...prev, [name]: null }));
-    
-    // Capture customer email/name for tokenization
-    if (name === 'email' || name === 'customer_email') {
-      setCustomerEmail(value);
-    }
-    if (name === 'name' || name === 'customer_name') {
-      setCustomerName(value);
-    }
   };
 
   // --- Network: call EFT API endpoints for bank/step ---
@@ -586,6 +455,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     let currentExecutionStep: string | undefined = initialStep;
     let stepData = data;
     let previousStep = currentStep; // Track previous step to detect auth completion
+    let authCredentials: Record<string, any> = {}; // Store auth credentials for saving
 
     try {
       while (currentExecutionStep) {
@@ -609,23 +479,40 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
           return;
         }
 
+        // Store auth credentials before they get cleared
+        if (currentExecutionStep === 'auth' && stepData && Object.keys(stepData).length > 0) {
+          authCredentials = { ...stepData };
+          console.log('[DEBUG] Stored auth credentials:', Object.keys(authCredentials));
+        }
+
         // Check if we just completed auth step successfully
         const stepToDisplay = result.step || result.next_step;
+        const stepLower = (stepToDisplay || '').toLowerCase();
         const isAuthCompleted = previousStep === 'auth' && 
-                               stepToDisplay && 
-                               stepToDisplay.toLowerCase() !== 'auth' &&
+                               stepLower === 'setup' &&
                                (result.ok === true || result.ok === undefined);
-
+        
         // Save credentials after successful auth if user opted in
-        if (isAuthCompleted && saveCredentials && customerName && stepData && selectedBank) {
+        console.log('[DEBUG] Auth check:', {
+          isAuthCompleted,
+          saveCredentials,
+          hasAuthCredentials: Object.keys(authCredentials).length > 0,
+          hasSelectedBank: !!selectedBank,
+          previousStep,
+          stepLower,
+          username: authCredentials.username
+        });
+        
+        if (isAuthCompleted && saveCredentials && authCredentials && Object.keys(authCredentials).length > 0 && selectedBank) {
           try {
             console.log('💾 Saving credentials after successful auth...');
+            console.log('💾 Auth credentials:', Object.keys(authCredentials));
+            
             const saveResult = await saveCredentialsToBrowser(
               merchant.id || '',
-              customerName,
               bankCode,
               selectedBank.name,
-              stepData
+              authCredentials
             );
             console.log('✅ Credentials saved to browser:', saveResult);
             setSavedCredentialId(saveResult.credentialId);
@@ -636,7 +523,6 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 merchantId: merchant.id,
-                customerName: customerName,
                 bankCode: bankCode,
                 deviceFingerprint: deviceFingerprint,
                 deviceInfo: collectDeviceInfo(),
@@ -827,16 +713,8 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
 
     if (hasErrors) { setFormErrors(newErrors); return; }
 
-    // Save credentials if tokenization is enabled (on auth step)
-    if (isAuth && saveCredentials) {
-      // Extract only credential fields (exclude email/name)
-      const credentialFields = { ...formData };
-      delete credentialFields.email;
-      delete credentialFields.name;
-      
-      // Save asynchronously (don't block form submission)
-      saveCredentialsToToken(credentialFields);
-    }
+    // NOTE: Credentials are saved AFTER successful auth in handleStepExecution (V2 hybrid approach)
+    // No need to save here - we save after auth step completes successfully
 
     // Determine the next step: use current step if we're submitting a form with inputs
     const nextStep = apiResponse.next_step || currentStep || '';
@@ -880,16 +758,16 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   };
 
   const handleDeleteSavedCredentials = async () => {
-    if (!savedCredentialId || !merchant.id || !customerName || !selectedBank) return;
+    if (!savedCredentialId || !merchant.id || !selectedBank) return;
     
     try {
       console.log('🗑️ Deleting saved credentials...');
       
       // Delete from browser
-      await deleteCredentialFromBrowser(merchant.id, customerName, selectedBank.code);
+      await deleteCredentialFromBrowser(merchant.id, selectedBank.code);
       
       // Delete metadata from database
-      await fetch(`/api/tokenization/metadata?tokenId=${savedCredentialId}&merchantId=${merchant.id}&customerName=${customerName}`, {
+      await fetch(`/api/tokenization/metadata?tokenId=${savedCredentialId}&merchantId=${merchant.id}`, {
         method: 'DELETE',
       });
       
@@ -1200,74 +1078,13 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
 
         {pageError && <p className="text-red-500 text-sm text-center bg-red-50 p-3 rounded-lg">{pageError}</p>}
 
-        {/* Saved Credentials Section */}
-        {isAuth && showSavedCredentials && savedTokens.length > 0 && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                <Clock size={16} className="text-green-600" />
-                Use Saved Credentials
-              </h3>
-              <button
-                type="button"
-                onClick={() => setShowSavedCredentials(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X size={16} />
-              </button>
-            </div>
-            <div className="space-y-2">
-              {savedTokens.map((token) => (
-                <div
-                  key={token.id}
-                  className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg hover:border-green-400 transition-all"
-                >
-                  <div className="flex-1">
-                    <div className="text-sm font-medium text-gray-900">
-                      {token.customerName || 'Saved Credentials'}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      Last used: {token.lastUsedAt ? new Date(token.lastUsedAt).toLocaleDateString() : 'Never'}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleUseSavedCredentials(token.id)}
-                      disabled={isLoading}
-                      className="px-3 py-1.5 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors disabled:opacity-50"
-                    >
-                      Use
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteToken(token.id)}
-                      className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                      title="Delete saved credentials"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowSavedCredentials(false)}
-              className="mt-3 text-sm text-gray-600 hover:text-gray-900 underline"
-            >
-              Enter credentials manually
-            </button>
-          </div>
-        )}
-
         {apiResponse.type === 'input' && apiResponse.inputs && (
           <form onSubmit={handleFormSubmit} noValidate>
             <div className="space-y-4">
               {apiResponse.inputs.map((input) => (input.type === 'submit' || input.type === 'tc' ? null : renderInput(input)))}
 
               {/* Tokenization Checkbox - only on auth step */}
-              {isAuth && !showSavedCredentials && (
+              {isAuth && (
                 <div className="pt-2">
                   <CheckboxCard
                     name="save_credentials"
@@ -1408,6 +1225,13 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
 
   const renderTransactionResult = () => {
     const isSuccess = transactionResult?.status === 'completed';
+    console.log('[DEBUG] Rendering transaction result:', {
+      isSuccess,
+      savedCredentialId,
+      saveCredentials,
+      selectedBank: selectedBank?.name
+    });
+    
     return (
       <div className="text-center space-y-6">
         <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto ${isSuccess ? 'bg-green-100' : 'bg-red-100'}`}>

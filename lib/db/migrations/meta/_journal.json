@@ -15,6 +15,20 @@
       "when": 1763940186182,
       "tag": "0001_boring_peter_quill",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1763989973174,
+      "tag": "0002_nice_scarlet_spider",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1763990194488,
+      "tag": "0003_clumsy_klaw",
+      "breakpoints": true
     }
   ]
 }

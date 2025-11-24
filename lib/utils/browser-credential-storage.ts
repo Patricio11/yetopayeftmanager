@@ -19,7 +19,6 @@ import { getDeviceFingerprint } from './device-fingerprint';
 interface StoredCredential {
   id: string;
   merchantId: string;
-  customerName: string;
   bankCode: string;
   bankName: string;
   credentials: Record<string, any>;
@@ -37,7 +36,6 @@ interface StoredCredential {
 interface CredentialMetadata {
   id: string;
   merchantId: string;
-  customerName: string;
   bankCode: string;
   deviceFingerprint: string;
   isDefault: boolean;
@@ -53,8 +51,8 @@ const STORAGE_VERSION = 'v1';
 /**
  * Generate storage key for credentials
  */
-function getStorageKey(merchantId: string, customerName: string, bankCode: string): string {
-  return `${STORAGE_KEY_PREFIX}${STORAGE_VERSION}_${merchantId}_${customerName}_${bankCode}`;
+function getStorageKey(merchantId: string, bankCode: string): string {
+  return `${STORAGE_KEY_PREFIX}${STORAGE_VERSION}_${merchantId}_${bankCode}`;
 }
 
 /**
@@ -151,14 +149,13 @@ async function decryptForBrowser(encryptedData: string, password: string): Promi
 }
 
 /**
- * Generate encryption password from device fingerprint + merchant + customer
+ * Generate encryption password from device fingerprint + merchant
  */
 async function getEncryptionPassword(
-  merchantId: string,
-  customerName: string
+  merchantId: string
 ): Promise<string> {
   const fingerprint = await getDeviceFingerprint();
-  return `${fingerprint}_${merchantId}_${customerName}`;
+  return `${fingerprint}_${merchantId}`;
 }
 
 /**
@@ -166,7 +163,6 @@ async function getEncryptionPassword(
  */
 export async function saveCredentialsToBrowser(
   merchantId: string,
-  customerName: string,
   bankCode: string,
   bankName: string,
   credentials: Record<string, any>,
@@ -177,13 +173,13 @@ export async function saveCredentialsToBrowser(
   }
 ): Promise<{ success: boolean; credentialId: string }> {
   try {
-    const storageKey = getStorageKey(merchantId, customerName, bankCode);
-    const password = await getEncryptionPassword(merchantId, customerName);
+    const storageKey = getStorageKey(merchantId, bankCode);
+    const password = await getEncryptionPassword(merchantId);
     
     // Check if credential already exists
     let existingCred: StoredCredential | null = null;
     try {
-      existingCred = await getCredentialFromBrowser(merchantId, customerName, bankCode);
+      existingCred = await getCredentialFromBrowser(merchantId, bankCode);
     } catch (e) {
       // Doesn't exist, that's fine
     }
@@ -194,7 +190,6 @@ export async function saveCredentialsToBrowser(
     const credentialData: StoredCredential = {
       id: credentialId,
       merchantId,
-      customerName,
       bankCode,
       bankName,
       credentials,
@@ -223,42 +218,33 @@ export async function saveCredentialsToBrowser(
  */
 export async function getCredentialFromBrowser(
   merchantId: string,
-  customerName: string,
   bankCode: string
-): Promise<StoredCredential | null> {
-  try {
-    const storageKey = getStorageKey(merchantId, customerName, bankCode);
-    const encrypted = localStorage.getItem(storageKey);
-    
-    if (!encrypted) {
-      return null;
-    }
-    
-    const password = await getEncryptionPassword(merchantId, customerName);
-    const decrypted = await decryptForBrowser(encrypted, password);
-    
-    return decrypted;
-  } catch (error) {
-    console.error('❌ Failed to get credentials from browser:', error);
-    return null;
+): Promise<StoredCredential> {
+  const storageKey = getStorageKey(merchantId, bankCode);
+  const encrypted = localStorage.getItem(storageKey);
+  
+  if (!encrypted) {
+    throw new Error('Credential not found');
   }
+  
+  const password = await getEncryptionPassword(merchantId);
+  return await decryptForBrowser(encrypted, password);
 }
 
 /**
- * Get all saved credentials for a merchant + customer
+ * Get all saved credentials for a merchant
  */
-export async function getAllCredentialsForCustomer(
-  merchantId: string,
-  customerName: string
+export async function getAllCredentialsForMerchant(
+  merchantId: string
 ): Promise<StoredCredential[]> {
   const credentials: StoredCredential[] = [];
-  const prefix = `${STORAGE_KEY_PREFIX}${STORAGE_VERSION}_${merchantId}_${customerName}_`;
+  const prefix = `${STORAGE_KEY_PREFIX}${STORAGE_VERSION}_${merchantId}_`;
   
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (key && key.startsWith(prefix)) {
       const bankCode = key.replace(prefix, '');
-      const cred = await getCredentialFromBrowser(merchantId, customerName, bankCode);
+      const cred = await getCredentialFromBrowser(merchantId, bankCode);
       if (cred) {
         credentials.push(cred);
       }
@@ -278,110 +264,25 @@ export async function getAllCredentialsForCustomer(
  */
 export async function deleteCredentialFromBrowser(
   merchantId: string,
-  customerName: string,
   bankCode: string
-): Promise<boolean> {
-  try {
-    const storageKey = getStorageKey(merchantId, customerName, bankCode);
-    localStorage.removeItem(storageKey);
-    console.log('✅ Credentials deleted from browser storage');
-    return true;
-  } catch (error) {
-    console.error('❌ Failed to delete credentials from browser:', error);
-    return false;
-  }
+): Promise<void> {
+  const storageKey = getStorageKey(merchantId, bankCode);
+  localStorage.removeItem(storageKey);
+  console.log('✅ Credential deleted from browser storage');
 }
 
 /**
- * Set a credential as default
- */
-export async function setDefaultCredential(
-  merchantId: string,
-  customerName: string,
-  bankCode: string
-): Promise<boolean> {
-  try {
-    // First, unset all other defaults
-    const allCreds = await getAllCredentialsForCustomer(merchantId, customerName);
-    for (const cred of allCreds) {
-      if (cred.bankCode !== bankCode && cred.isDefault) {
-        const storageKey = getStorageKey(merchantId, customerName, cred.bankCode);
-        const password = await getEncryptionPassword(merchantId, customerName);
-        cred.isDefault = false;
-        const encrypted = await encryptForBrowser(cred, password);
-        localStorage.setItem(storageKey, encrypted);
-      }
-    }
-    
-    // Now set the target as default
-    const cred = await getCredentialFromBrowser(merchantId, customerName, bankCode);
-    if (!cred) return false;
-    
-    cred.isDefault = true;
-    const storageKey = getStorageKey(merchantId, customerName, bankCode);
-    const password = await getEncryptionPassword(merchantId, customerName);
-    const encrypted = await encryptForBrowser(cred, password);
-    localStorage.setItem(storageKey, encrypted);
-    
-    console.log('✅ Credential set as default');
-    return true;
-  } catch (error) {
-    console.error('❌ Failed to set default credential:', error);
-    return false;
-  }
-}
-
-/**
- * Get default credential for a customer
- */
-export async function getDefaultCredential(
-  merchantId: string,
-  customerName: string
-): Promise<StoredCredential | null> {
-  const allCreds = await getAllCredentialsForCustomer(merchantId, customerName);
-  return allCreds.find(c => c.isDefault) || null;
-}
-
-/**
- * Extract metadata (non-sensitive) for database storage
- */
-export async function extractMetadata(
-  merchantId: string,
-  customerName: string,
-  bankCode: string
-): Promise<CredentialMetadata | null> {
-  const cred = await getCredentialFromBrowser(merchantId, customerName, bankCode);
-  if (!cred) return null;
-  
-  const fingerprint = await getDeviceFingerprint();
-  
-  return {
-    id: cred.id,
-    merchantId: cred.merchantId,
-    customerName: cred.customerName,
-    bankCode: cred.bankCode,
-    deviceFingerprint: fingerprint,
-    isDefault: cred.isDefault,
-    hasAccountInfo: !!cred.accountInfo,
-    createdAt: cred.createdAt,
-    lastUsedAt: cred.lastUsedAt,
-    usageCount: cred.usageCount,
-  };
-}
-
-/**
- * Clear all credentials for a customer (useful for logout/privacy)
+ * Clear all credentials for a merchant (useful for logout/privacy)
  */
 export async function clearAllCredentials(
-  merchantId: string,
-  customerName: string
+  merchantId: string
 ): Promise<number> {
-  const allCreds = await getAllCredentialsForCustomer(merchantId, customerName);
+  const allCreds = await getAllCredentialsForMerchant(merchantId);
   let cleared = 0;
   
   for (const cred of allCreds) {
-    const success = await deleteCredentialFromBrowser(merchantId, customerName, cred.bankCode);
-    if (success) cleared++;
+    await deleteCredentialFromBrowser(merchantId, cred.bankCode);
+    cleared++;
   }
   
   return cleared;
