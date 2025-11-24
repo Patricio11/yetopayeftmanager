@@ -998,6 +998,9 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     const name = input.html_options?.name || '';
     const value = formData[name] ?? input.html_options?.value ?? (input.type === 'checkbox' ? false : '');
     const error = formErrors[name || ''];
+    
+    // Check if this field is auto-filled from saved credentials
+    const isAutoFilled = savedCredentialsData && savedCredentialsData[name] && typeof value === 'string' && value.includes('*');
 
     switch (input.type) {
       case 'text':
@@ -1012,10 +1015,21 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
                 value={value}
                 onChange={(e) => handleInputChange(name, e.target.value)}
                 placeholder={input.html_options?.placeholder}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 ${
-                  error ? 'border-red-500' : 'border-gray-300'
-                } ${input.type === 'password' ? 'pr-12' : ''}`}
+                disabled={isAutoFilled}
+                className={`w-full py-3 border rounded-lg transition-all duration-200 ${
+                  isAutoFilled 
+                    ? 'bg-green-50 border-green-300 text-green-900 cursor-not-allowed font-mono pl-10 pr-4'
+                    : `px-4 focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                        error ? 'border-red-500' : 'border-gray-300'
+                      }`
+                } ${input.type === 'password' && !isAutoFilled ? 'pr-12' : ''}`}
+                title={isAutoFilled ? 'Saved credentials (auto-filled)' : ''}
               />
+              {isAutoFilled && (
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                  <CheckCircle size={18} className="text-green-600" />
+                </div>
+              )}
               {input.type === 'password' && (
                 <button
                   type="button"
@@ -1214,19 +1228,6 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
                     }
                     subtitle="Your credentials will be securely encrypted and stored on this device"
                   />
-                </div>
-              )}
-              
-              {/* Show message if credentials already saved */}
-              {isAuth && savedCredentialId && (
-                <div className="pt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <div className="flex items-center gap-2 text-sm text-green-800">
-                    <CheckCircle size={16} className="text-green-600" />
-                    <span className="font-medium">Credentials already saved for this bank</span>
-                  </div>
-                  <p className="text-xs text-green-700 mt-1 ml-6">
-                    Your credentials are securely stored on this device
-                  </p>
                 </div>
               )}
 
