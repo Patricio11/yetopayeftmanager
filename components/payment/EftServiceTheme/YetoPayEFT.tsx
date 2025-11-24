@@ -7,6 +7,7 @@ import {
 import TermsModal from './components/TermsModal';
 import { CountdownTimer } from '@/components/payment/CountdownTimer';
 import { getDeviceFingerprint, collectDeviceInfo, getDeviceDescription } from '@/lib/utils/device-fingerprint';
+import { saveCredentialsToBrowser, deleteCredentialFromBrowser } from '@/lib/utils/browser-credential-storage';
 
 const EFT_API_BASE_URL = process.env.NEXT_PUBLIC_EFT_SERVICE_URL || 'http://localhost:8080/v1/eft';
 const FRONTEND_API_BASE_URL = '/api';
@@ -111,6 +112,8 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   const [showSavedCredentials, setShowSavedCredentials] = useState(false);
   const [customerEmail, setCustomerEmail] = useState<string>('');
   const [customerName, setCustomerName] = useState<string>('');
+  const [savedCredentialId, setSavedCredentialId] = useState<string | null>(null);
+  const [isInAppStep, setIsInAppStep] = useState(false);
 
   // Tooltip state & refs
   const [tcTooltipVisible, setTcTooltipVisible] = useState(false);
@@ -582,6 +585,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
 
     let currentExecutionStep: string | undefined = initialStep;
     let stepData = data;
+    let previousStep = currentStep; // Track previous step to detect auth completion
 
     try {
       while (currentExecutionStep) {
@@ -605,8 +609,50 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
           return;
         }
 
-        // If the backend returns inputs (a form) or final (waiting for in-app approval) -> render UI and return control to user
+        // Check if we just completed auth step successfully
         const stepToDisplay = result.step || result.next_step;
+        const isAuthCompleted = previousStep === 'auth' && 
+                               stepToDisplay && 
+                               stepToDisplay.toLowerCase() !== 'auth' &&
+                               (result.ok === true || result.ok === undefined);
+
+        // Save credentials after successful auth if user opted in
+        if (isAuthCompleted && saveCredentials && customerName && stepData && selectedBank) {
+          try {
+            console.log('💾 Saving credentials after successful auth...');
+            const saveResult = await saveCredentialsToBrowser(
+              merchant.id || '',
+              customerName,
+              bankCode,
+              selectedBank.name,
+              stepData
+            );
+            console.log('✅ Credentials saved to browser:', saveResult);
+            setSavedCredentialId(saveResult.credentialId);
+            
+            // Save metadata to database
+            const metadataResponse = await fetch('/api/tokenization/metadata', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                merchantId: merchant.id,
+                customerName: customerName,
+                bankCode: bankCode,
+                deviceFingerprint: deviceFingerprint,
+                deviceInfo: collectDeviceInfo(),
+                isDefault: savedTokens.length === 0, // First token is default
+              }),
+            });
+            
+            const metadataResult = await metadataResponse.json();
+            console.log('✅ Metadata saved to database:', metadataResult);
+          } catch (error) {
+            console.error('❌ Failed to save credentials:', error);
+            // Don't block the payment flow if save fails
+          }
+        }
+
+        // If the backend returns inputs (a form) or final (waiting for in-app approval) -> render UI and return control to user
         if (result.inputs || stepToDisplay === 'final') {
           setApiResponse(result);
           setCurrentStep(stepToDisplay || (result.inputs ? 'auth' : 'final'));
@@ -616,7 +662,10 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
             setAgreedToTerms(false);
           }
           if (stepToDisplay === 'final') {
+            setIsInAppStep(true);
             startFinalPolling(bankCode);
+          } else {
+            setIsInAppStep(false);
           }
           submitGuard.current = false;
           return;
@@ -624,6 +673,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
 
         // Otherwise the backend is telling us to continue to next step
         setProcessingMessage(result.message || 'Processing your payment...');
+        previousStep = currentExecutionStep; // Update previous step
         currentExecutionStep = result.next_step || result.step;
         stepData = {};
       }
@@ -826,6 +876,28 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
       setPageError(e.message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDeleteSavedCredentials = async () => {
+    if (!savedCredentialId || !merchant.id || !customerName || !selectedBank) return;
+    
+    try {
+      console.log('🗑️ Deleting saved credentials...');
+      
+      // Delete from browser
+      await deleteCredentialFromBrowser(merchant.id, customerName, selectedBank.code);
+      
+      // Delete metadata from database
+      await fetch(`/api/tokenization/metadata?tokenId=${savedCredentialId}&merchantId=${merchant.id}&customerName=${customerName}`, {
+        method: 'DELETE',
+      });
+      
+      console.log('✅ Credentials deleted successfully');
+      setSavedCredentialId(null);
+      setSaveCredentials(false);
+    } catch (error) {
+      console.error('❌ Failed to delete credentials:', error);
     }
   };
 
@@ -1112,7 +1184,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
             <h2 className="text-2xl font-bold text-gray-900 mb-2">{apiResponse.title}</h2>
             <div className="text-gray-600" dangerouslySetInnerHTML={{ __html: apiResponse.message || '' }} />
           </div>
-          {currentStep === 'final' && (
+          {currentStep === 'final' && isInAppStep && (
             <button
               type="button"
               onClick={handleResendInApp}
@@ -1313,17 +1385,19 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
         />
       </div>
 
-      {/* Action Button */}
-      <div className="flex items-center justify-center space-x-3">
-        <button
-          onClick={handleResendInApp}
-          disabled={isLoading}
-          className="inline-flex items-center px-4 py-2.5 rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <RefreshCcw className="w-4 h-4 mr-2" />
-          Resend approval
-        </button>
-      </div>
+      {/* Action Button - Only show if in inApp step */}
+      {isInAppStep && (
+        <div className="flex items-center justify-center space-x-3">
+          <button
+            onClick={handleResendInApp}
+            disabled={isLoading}
+            className="inline-flex items-center px-4 py-2.5 rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <RefreshCcw className="w-4 h-4 mr-2" />
+            Resend approval
+          </button>
+        </div>
+      )}
 
       {/* Helper text */}
       <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -1342,6 +1416,24 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">{isSuccess ? 'Payment Successful' : 'Payment Failed'}</h2>
           <p className="text-gray-600">{transactionResult?.message || (isSuccess ? 'Your payment has been completed.' : 'Your payment could not be processed.')}</p>
+          
+          {/* Show saved credentials info and delete option */}
+          {savedCredentialId && (
+            <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-center justify-center gap-2 text-blue-700 mb-2">
+                <Save className="w-4 h-4" />
+                <span className="text-sm font-medium">Credentials saved for future payments</span>
+              </div>
+              <button
+                onClick={handleDeleteSavedCredentials}
+                className="mt-2 inline-flex items-center gap-2 text-sm text-red-600 hover:text-red-700 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete saved credentials
+              </button>
+            </div>
+          )}
+          
           <p className="text-sm text-gray-500 mt-4">
             {isSuccess ? 'Redirecting you back to the merchant...' : 'You will be redirected shortly...'}
           </p>
