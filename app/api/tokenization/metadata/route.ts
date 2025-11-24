@@ -23,10 +23,10 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const merchantId = searchParams.get('merchantId');
-    const customerEmail = searchParams.get('customerEmail');
+    const customerName = searchParams.get('customerName');
     const deviceFingerprint = searchParams.get('deviceFingerprint');
 
-    if (!merchantId || !customerEmail || !deviceFingerprint) {
+    if (!merchantId || !customerName || !deviceFingerprint) {
       return NextResponse.json(
         { success: false, error: 'Missing required parameters' },
         { status: 400 }
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
       .where(
         and(
           eq(customerBankTokens.merchantId, merchantId),
-          eq(customerBankTokens.customerEmail, customerEmail),
+          eq(customerBankTokens.customerName, customerName),
           eq(customerBankTokens.deviceFingerprint, deviceFingerprint),
           eq(customerBankTokens.isActive, true)
         )
@@ -80,7 +80,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const {
       merchantId,
-      customerEmail,
       customerName,
       bankCode,
       deviceFingerprint,
@@ -89,7 +88,7 @@ export async function POST(request: NextRequest) {
       isDefault,
     } = body;
 
-    if (!merchantId || !customerEmail || !bankCode || !deviceFingerprint) {
+    if (!merchantId || !customerName || !bankCode || !deviceFingerprint) {
       return NextResponse.json(
         { success: false, error: 'Missing required fields' },
         { status: 400 }
@@ -107,7 +106,7 @@ export async function POST(request: NextRequest) {
       .where(
         and(
           eq(customerBankTokens.merchantId, merchantId),
-          eq(customerBankTokens.customerEmail, customerEmail),
+          eq(customerBankTokens.customerName, customerName),
           eq(customerBankTokens.bankCode, bankCode),
           eq(customerBankTokens.deviceFingerprint, deviceFingerprint)
         )
@@ -138,7 +137,7 @@ export async function POST(request: NextRequest) {
       await db.insert(tokenizationAuditLog).values({
         tokenId,
         merchantId,
-        customerEmail,
+        customerName,
         action: 'used',
         ipAddress,
         userAgent: request.headers.get('user-agent') || undefined,
@@ -152,7 +151,6 @@ export async function POST(request: NextRequest) {
         .insert(customerBankTokens)
         .values({
           merchantId,
-          customerEmail,
           customerName,
           bankCode,
           deviceFingerprint,
@@ -174,7 +172,7 @@ export async function POST(request: NextRequest) {
       await db.insert(tokenizationAuditLog).values({
         tokenId,
         merchantId,
-        customerEmail,
+        customerName,
         action: 'created',
         ipAddress,
         userAgent: request.headers.get('user-agent') || undefined,
@@ -191,7 +189,7 @@ export async function POST(request: NextRequest) {
         .where(
           and(
             eq(customerBankTokens.merchantId, merchantId),
-            eq(customerBankTokens.customerEmail, customerEmail),
+            eq(customerBankTokens.customerName, customerName),
             eq(customerBankTokens.deviceFingerprint, deviceFingerprint),
             eq(customerBankTokens.isActive, true)
           )
@@ -226,9 +224,9 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const tokenId = searchParams.get('tokenId');
     const merchantId = searchParams.get('merchantId');
-    const customerEmail = searchParams.get('customerEmail');
+    const customerName = searchParams.get('customerName');
 
-    if (!tokenId || !merchantId || !customerEmail) {
+    if (!tokenId || !merchantId || !customerName) {
       return NextResponse.json(
         { success: false, error: 'Missing required parameters' },
         { status: 400 }
@@ -248,7 +246,7 @@ export async function DELETE(request: NextRequest) {
         and(
           eq(customerBankTokens.id, tokenId),
           eq(customerBankTokens.merchantId, merchantId),
-          eq(customerBankTokens.customerEmail, customerEmail)
+          eq(customerBankTokens.customerName, customerName)
         )
       );
 
@@ -256,7 +254,7 @@ export async function DELETE(request: NextRequest) {
     await db.insert(tokenizationAuditLog).values({
       tokenId,
       merchantId,
-      customerEmail,
+      customerName,
       action: 'deleted',
       ipAddress,
       userAgent: request.headers.get('user-agent') || undefined,
