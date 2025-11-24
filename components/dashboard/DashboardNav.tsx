@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Home, Receipt, Settings, LogOut, Zap, Building2 } from "lucide-react";
+import { Home, Receipt, Settings, LogOut, Zap, Building2, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface DashboardNavProps {
@@ -24,6 +24,11 @@ export function DashboardNav({ userRole }: DashboardNavProps) {
       title: "Transactions",
       href: "/dashboard/transactions",
       icon: Receipt,
+    },
+    {
+      title: "Tokens",
+      href: "/dashboard/tokens",
+      icon: CreditCard,
     },
     ...(isAdmin ? [{
       title: "Banks",
