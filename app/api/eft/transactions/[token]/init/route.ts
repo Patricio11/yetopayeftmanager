@@ -131,7 +131,7 @@ export async function GET(
           cancelledUrl: transaction.cancelledUrl,
         },
         merchant: {
-          id: merchant.id,
+          id: merchant.id || merchantId, // Fallback to merchantId from token if merchant.id is undefined
           name: merchant.companyName || merchant.name,
           logo: merchant.companyLogoUrl,
           email: merchant.email,

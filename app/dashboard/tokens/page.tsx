@@ -15,7 +15,6 @@ import {
 
 interface Token {
   id: string;
-  customerName: string;
   bankCode: string;
   bankName: string;
   bankColor: string;
@@ -103,9 +102,9 @@ export default function TokensPage() {
   };
 
   const filteredTokens = tokens.filter(token =>
-    token.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     token.bankName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    token.accountNumber?.includes(searchTerm)
+    token.accountNumber?.includes(searchTerm) ||
+    token.deviceFingerprint.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -244,10 +243,10 @@ export default function TokensPage() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
                           <div className="text-sm font-medium text-gray-900">
-                            {token.customerName}
+                            Device: {token.deviceFingerprint.substring(0, 16)}...
                           </div>
-                          <div className="text-xs text-gray-500 font-mono">
-                            {token.deviceFingerprint.substring(0, 12)}...
+                          <div className="text-xs text-gray-500">
+                            {token.accountName || 'No account name'}
                           </div>
                         </div>
                       </td>

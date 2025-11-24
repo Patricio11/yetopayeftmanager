@@ -37,7 +37,6 @@ export async function GET(request: NextRequest) {
     const tokens = await db
       .select({
         id: customerBankTokens.id,
-        customerName: customerBankTokens.customerName,
         bankCode: customerBankTokens.bankCode,
         bankName: eftBanks.bankName,
         bankColor: eftBanks.color,
@@ -78,7 +77,7 @@ export async function GET(request: NextRequest) {
     const stats = await db
       .select({
         totalTokens: sql<number>`count(*)`,
-        totalCustomers: sql<number>`count(distinct ${customerBankTokens.customerName})`,
+        totalCustomers: sql<number>`count(distinct ${customerBankTokens.deviceFingerprint})`, // Count unique devices instead
         totalUsage: sql<number>`sum(${customerBankTokens.usageCount})`,
         defaultTokens: sql<number>`sum(case when ${customerBankTokens.isDefault} then 1 else 0 end)`,
       })
@@ -166,7 +165,6 @@ export async function DELETE(request: NextRequest) {
     await db.insert(tokenizationAuditLog).values({
       tokenId,
       merchantId,
-      customerName: token.customerName,
       action: 'deleted',
       ipAddress: request.headers.get('x-forwarded-for') || 
                  request.headers.get('x-real-ip') || 
