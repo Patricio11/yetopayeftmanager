@@ -14,10 +14,8 @@ const TOAST_LIMIT = 3
 const TOAST_REMOVE_DELAY = 5000
 
 type ToasterToast = Toast & {
-  id: string
-  title?: React.ReactNode
-  description?: React.ReactNode
-  action?: ToastActionElement
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 const actionTypes = {
@@ -138,14 +136,6 @@ function dispatch(action: Action) {
   listeners.forEach((listener) => {
     listener(memoryState)
   })
-}
-
-interface Toast {
-  id: string
-  title?: React.ReactNode
-  description?: React.ReactNode
-  action?: ToastActionElement
-  variant?: "default" | "destructive"
 }
 
 function toast({ ...props }: Omit<ToasterToast, "id">) {
