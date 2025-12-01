@@ -30,6 +30,7 @@ export default function ApiDocsPage() {
   const { toast } = useToast();
   const [selectedLanguage, setSelectedLanguage] = useState<"node" | "python" | "php" | "curl">("node");
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [activeHeroButton, setActiveHeroButton] = useState<string | null>(null);
 
   const handleCopy = (code: string, label: string) => {
     navigator.clipboard.writeText(code);
@@ -40,6 +41,37 @@ export default function ApiDocsPage() {
       title: "Copied!",
       description: `${label} copied to clipboard.`,
     });
+  };
+
+  const scrollToSection = (sectionId: string, buttonId: string) => {
+    setActiveHeroButton(buttonId);
+    setTimeout(() => setActiveHeroButton(null), 2000);
+    
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const offset = 100; // Account for sticky header
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth"
+      });
+    }
+  };
+
+  const navigateToApiKeys = () => {
+    setActiveHeroButton("api-keys");
+    setTimeout(() => setActiveHeroButton(null), 2000);
+    
+    toast({
+      title: "Redirecting...",
+      description: "Taking you to API Keys settings.",
+    });
+    
+    setTimeout(() => {
+      window.location.href = "/dashboard/settings?tab=api-keys";
+    }, 500);
   };
 
   return (
@@ -58,15 +90,38 @@ export default function ApiDocsPage() {
               Everything you need to integrate YETOPAYEFT payment system into your application
             </p>
             <div className="flex flex-wrap gap-3">
-              <Button className="bg-white text-green-600 hover:bg-green-50">
+              <Button 
+                onClick={() => scrollToSection("quick-start", "quick-start")}
+                className={`transition-all ${
+                  activeHeroButton === "quick-start"
+                    ? "bg-white text-green-600 scale-105 shadow-lg"
+                    : "bg-white text-green-600 hover:bg-green-50"
+                }`}
+              >
                 <Zap className="w-4 h-4 mr-2" />
                 Quick Start
               </Button>
-              <Button variant="outline" className="border-white text-white hover:bg-white/10">
+              <Button 
+                onClick={navigateToApiKeys}
+                variant="outline" 
+                className={`border-white text-white transition-all ${
+                  activeHeroButton === "api-keys"
+                    ? "bg-white/20 scale-105 shadow-lg"
+                    : "hover:bg-white/10"
+                }`}
+              >
                 <Key className="w-4 h-4 mr-2" />
                 Get API Keys
               </Button>
-              <Button variant="outline" className="border-white text-white hover:bg-white/10">
+              <Button 
+                onClick={() => scrollToSection("endpoints", "examples")}
+                variant="outline" 
+                className={`border-white text-white transition-all ${
+                  activeHeroButton === "examples"
+                    ? "bg-white/20 scale-105 shadow-lg"
+                    : "hover:bg-white/10"
+                }`}
+              >
                 <Code className="w-4 h-4 mr-2" />
                 View Examples
               </Button>
@@ -151,7 +206,14 @@ function ApiSidebar() {
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
+      const offset = 100; // Account for sticky header
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth"
+      });
     }
   };
 
