@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -26,26 +26,34 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-export default function SettingsPage() {
+function SettingsContent() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
-  const tabParam = searchParams.get("tab");
-  const [activeTab, setActiveTab] = useState(tabParam || "profile");
+  const [activeTab, setActiveTab] = useState("profile");
+  const [isClient, setIsClient] = useState(false);
 
-  // Update tab when URL parameter changes
+  // Ensure we're on the client side
   useEffect(() => {
-    if (tabParam) {
-      setActiveTab(tabParam);
-      
-      // Show toast notification
-      if (tabParam === "api-keys") {
-        toast({
-          title: "API Keys",
-          description: "Create and manage your API keys here.",
-        });
+    setIsClient(true);
+  }, []);
+
+  // Update tab when URL parameter changes (only on client)
+  useEffect(() => {
+    if (isClient) {
+      const tabParam = searchParams.get("tab");
+      if (tabParam) {
+        setActiveTab(tabParam);
+        
+        // Show toast notification
+        if (tabParam === "api-keys") {
+          toast({
+            title: "API Keys",
+            description: "Create and manage your API keys here.",
+          });
+        }
       }
     }
-  }, [tabParam, toast]);
+  }, [isClient, searchParams, toast]);
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">
@@ -751,5 +759,20 @@ function NotificationSettings() {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+export default function SettingsPage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto py-8 px-4 max-w-6xl">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
+          <p className="text-gray-600">Loading settings...</p>
+        </div>
+      </div>
+    }>
+      <SettingsContent />
+    </Suspense>
   );
 }
