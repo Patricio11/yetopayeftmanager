@@ -4,7 +4,7 @@
 
 ### **👨‍💼 ADMIN USER**
 ```
-Email:    admin@yetopayeft.com
+Email:    admineft@yetopayeft.com
 Password: Admin@123456
 Role:     admin
 Company:  YETOPAYEFT Admin
@@ -35,7 +35,7 @@ Company:  YETOPAYEFT Admin
 
 ### **👤 MERCHANT 1 - Acme Corporation**
 ```
-Email:    merchant@yetopayeft.com
+Email:    merchanteft@yetopayeft.com
 Password: Merchant@123
 Role:     merchant
 Company:  Acme Corporation
@@ -57,7 +57,7 @@ Company:  Acme Corporation
 
 ### **👤 MERCHANT 2 - Tech Store SA**
 ```
-Email:    sarah@techstore.com
+Email:    saraheft@techstore.com
 Password: Sarah@123456
 Role:     merchant
 Company:  Tech Store SA
@@ -189,9 +189,9 @@ All test passwords meet these requirements:
 
 | User Type | Email | Password | Company | Bank |
 |-----------|-------|----------|---------|------|
-| Admin | admin@yetopayeft.com | Admin@123456 | YETOPAYEFT Admin | - |
-| Merchant | merchant@yetopayeft.com | Merchant@123 | Acme Corporation | FNB |
-| Merchant | sarah@techstore.com | Sarah@123456 | Tech Store SA | Standard Bank |
+| Admin | admineft@yetopayeft.com | Admin@123456 | YETOPAYEFT Admin | FNB |
+| Merchant | merchanteft@yetopayeft.com | Merchant@123 | Acme Corporation | FNB |
+| Merchant | saraheft@techstore.com | Sarah@123456 | Tech Store SA | Standard Bank |
 
 ---
 

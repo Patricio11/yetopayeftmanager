@@ -191,44 +191,49 @@ export default function ProfileButton() {
 
 ## 📚 API Documentation
 
-### Create Payment Link
-```typescript
-POST /api/payment-links
+**Complete API Reference**: See [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md)
 
-Body:
+### Quick Examples
+
+#### Create Payment Link
+```bash
+POST /api/payment-links
+Content-Type: application/json
+
 {
   "amount": 100.00,
   "reference": "Invoice #12345",
   "customerEmail": "customer@example.com",
-  "customerName": "John Doe",
+  "notifyUrl": "https://your-domain.com/webhooks/payment",
   "expiresInHours": 24
 }
+```
 
-Response:
+#### List Transactions
+```bash
+GET /api/merchant/transactions?status=completed&limit=50
+```
+
+#### Webhook Payload
+```json
 {
-  "success": true,
-  "data": {
-    "transactionId": "uuid",
-    "paymentUrl": "https://app.com/pay/token",
-    "reference": "Invoice #12345",
-    "amount": 100.00,
-    "expiresAt": "2024-11-17T12:00:00Z",
-    "status": "not_started"
-  }
+  "transaction_id": "uuid",
+  "reference": "Invoice #12345",
+  "amount": 100.00,
+  "status": "completed",
+  "timestamp": "2024-12-01T15:00:00Z"
 }
 ```
 
-### List Payment Links
-```typescript
-GET /api/payment-links?limit=50&offset=0
+**For complete documentation including:**
+- Authentication flow
+- All endpoints with examples
+- Webhook integration guide
+- Security best practices
+- Code examples (Node.js, Python, PHP)
+- Testing guide
 
-Response:
-{
-  "success": true,
-  "data": [...transactions],
-  "pagination": { "limit": 50, "offset": 0 }
-}
-```
+👉 **See [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md)**
 
 ## 🎨 Design System
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth-server";
+import { authenticateApiRequest, requirePermission } from "@/lib/auth/api-middleware";
 import { db } from "@/lib/db";
 import { eftTransactions, paymentTokens } from "@/lib/db/schema";
 import { generatePaymentToken } from "@/lib/security/payment-token";
@@ -23,17 +24,50 @@ const createPaymentLinkSchema = z.object({
 /**
  * POST /api/payment-links
  * Create a new EFT payment link with secure token
+ * 
+ * Supports two authentication methods:
+ * 1. Session-based (for dashboard UI)
+ * 2. API key-based (for server-to-server integration)
  */
 export async function POST(request: NextRequest) {
   try {
-    // Check authentication
-    const session = await getSession();
+    let merchantId: string;
     
-    if (!session) {
-      return NextResponse.json(
-        { error: "Unauthorized", message: "Please sign in to create payment links" },
-        { status: 401 }
+    // Try API key authentication first
+    const authHeader = request.headers.get('authorization');
+    
+    if (authHeader && authHeader.startsWith('Bearer yp_')) {
+      // API key authentication
+      const apiAuth = await authenticateApiRequest(request);
+      
+      if (!apiAuth.authenticated) {
+        return apiAuth.response!;
+      }
+      
+      // Check permission
+      const permCheck = requirePermission(
+        apiAuth.permissions!,
+        'payment_links.create'
       );
+      
+      if (!permCheck.authorized) {
+        return permCheck.response!;
+      }
+      
+      merchantId = apiAuth.merchantId!;
+      
+    } else {
+      // Session-based authentication (dashboard)
+      const session = await getSession();
+      
+      if (!session) {
+        return NextResponse.json(
+          { error: "Unauthorized", message: "Please sign in to create payment links" },
+          { status: 401 }
+        );
+      }
+      
+      merchantId = session.user.id;
     }
 
     // Parse and validate request body
@@ -44,7 +78,7 @@ export async function POST(request: NextRequest) {
     const [transaction] = await db
       .insert(eftTransactions)
       .values({
-        merchantId: session.user.id,
+        merchantId,
         amount: validatedData.amount.toString(),
         reference: validatedData.reference,
         description: validatedData.description,
@@ -64,7 +98,7 @@ export async function POST(request: NextRequest) {
     const expiresInHours = validatedData.expiresInHours || 24;
     const token = await generatePaymentToken({
       transactionId: transaction.id,
-      merchantId: session.user.id,
+      merchantId,
       amount: validatedData.amount,
       expiresInHours,
     });
@@ -77,7 +111,7 @@ export async function POST(request: NextRequest) {
     const expiresAt = new Date(Date.now() + expiresInHours * 60 * 60 * 1000);
 
     // Log creation (optional - for audit trail)
-    console.log(`✅ Payment link created: ${transaction.id} by merchant ${session.user.id}`);
+    console.log(`✅ Payment link created: ${transaction.id} by merchant ${merchantId}`);
 
     return NextResponse.json({
       success: true,
