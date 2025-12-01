@@ -35,6 +35,11 @@ export function DashboardNav({ userRole }: DashboardNavProps) {
       href: "/dashboard/banks",
       icon: Building2,
     }] : []),
+    {
+      title: "Settings",
+      href: "/dashboard/settings",
+      icon: Settings,
+    },
   ];
 
   return (
