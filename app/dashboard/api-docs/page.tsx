@@ -22,15 +22,21 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Webhook
+  Webhook,
+  Layers,
+  Package
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { IntegrationFlows } from "./components/IntegrationFlows";
+import { WebhooksSection as WebhooksSectionComponent } from "./components/WebhooksSection";
+import { CodeBlock as CodeBlockComponent } from "./components/CodeBlock";
 
 export default function ApiDocsPage() {
   const { toast } = useToast();
   const [selectedLanguage, setSelectedLanguage] = useState<"node" | "python" | "php" | "curl">("node");
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [activeHeroButton, setActiveHeroButton] = useState<string | null>(null);
+  const [integrationFlow, setIntegrationFlow] = useState<"sdk" | "direct">("sdk");
 
   const handleCopy = (code: string, label: string) => {
     navigator.clipboard.writeText(code);
@@ -91,11 +97,23 @@ export default function ApiDocsPage() {
             </p>
             <div className="flex flex-wrap gap-3">
               <Button 
-                onClick={() => scrollToSection("quick-start", "quick-start")}
+                onClick={() => scrollToSection("integration-flows", "integration-flows")}
                 className={`transition-all ${
-                  activeHeroButton === "quick-start"
+                  activeHeroButton === "integration-flows"
                     ? "bg-white text-green-600 scale-105 shadow-lg"
                     : "bg-white text-green-600 hover:bg-green-50"
+                }`}
+              >
+                <Layers className="w-4 h-4 mr-2" />
+                Integration Flows
+              </Button>
+              <Button 
+                onClick={() => scrollToSection("quick-start", "quick-start")}
+                variant="outline" 
+                className={`border-white text-white transition-all ${
+                  activeHeroButton === "quick-start"
+                    ? "bg-white/20 scale-105 shadow-lg"
+                    : "hover:bg-white/10"
                 }`}
               >
                 <Zap className="w-4 h-4 mr-2" />
@@ -114,16 +132,26 @@ export default function ApiDocsPage() {
                 Get API Keys
               </Button>
               <Button 
-                onClick={() => scrollToSection("endpoints", "examples")}
+                onClick={() => {
+                  setActiveHeroButton("webhooks");
+                  setTimeout(() => setActiveHeroButton(null), 2000);
+                  toast({
+                    title: "Redirecting...",
+                    description: "Taking you to Webhook settings.",
+                  });
+                  setTimeout(() => {
+                    window.location.href = "/dashboard/settings?tab=webhooks";
+                  }, 500);
+                }}
                 variant="outline" 
                 className={`border-white text-white transition-all ${
-                  activeHeroButton === "examples"
+                  activeHeroButton === "webhooks"
                     ? "bg-white/20 scale-105 shadow-lg"
                     : "hover:bg-white/10"
                 }`}
               >
-                <Code className="w-4 h-4 mr-2" />
-                View Examples
+                <Webhook className="w-4 h-4 mr-2" />
+                Setup Webhooks
               </Button>
             </div>
           </div>
@@ -139,6 +167,14 @@ export default function ApiDocsPage() {
 
           {/* Main Content */}
           <div className="lg:col-span-3 space-y-8">
+            {/* Integration Flows */}
+            <section id="integration-flows">
+              <IntegrationFlows 
+                selectedFlow={integrationFlow}
+                onFlowChange={setIntegrationFlow}
+              />
+            </section>
+
             {/* Quick Start */}
             <section id="quick-start">
               <QuickStartSection 
@@ -169,7 +205,7 @@ export default function ApiDocsPage() {
 
             {/* Webhooks */}
             <section id="webhooks">
-              <WebhooksSection 
+              <WebhooksSectionComponent 
                 selectedLanguage={selectedLanguage}
                 onCopy={handleCopy}
                 copiedCode={copiedCode}
@@ -195,6 +231,7 @@ export default function ApiDocsPage() {
 // Sidebar Component
 function ApiSidebar() {
   const sections = [
+    { id: "integration-flows", label: "Integration Flows", icon: Layers },
     { id: "quick-start", label: "Quick Start", icon: Zap },
     { id: "authentication", label: "Authentication", icon: Key },
     { id: "endpoints", label: "API Endpoints", icon: Globe },
@@ -531,58 +568,7 @@ function EndpointDetail({ method, path, title, description, language, onCopy, co
   );
 }
 
-// Webhooks Section
-function WebhooksSection({ selectedLanguage, onCopy, copiedCode }: any) {
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-            <Webhook className="w-5 h-5 text-orange-600" />
-          </div>
-          <div>
-            <CardTitle>Webhooks</CardTitle>
-            <CardDescription>Receive real-time notifications about payment events</CardDescription>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Webhook Events */}
-        <div>
-          <h3 className="font-semibold mb-3">Available Events</h3>
-          <div className="space-y-2">
-            <EventBadge event="payment.completed" color="green" />
-            <EventBadge event="payment.failed" color="red" />
-            <EventBadge event="payment.pending" color="yellow" />
-            <EventBadge event="payment.cancelled" color="gray" />
-          </div>
-        </div>
-
-        {/* Webhook Payload */}
-        <div>
-          <h3 className="font-semibold mb-3">Webhook Payload</h3>
-          <CodeBlock
-            language="json"
-            code={getWebhookPayload()}
-            onCopy={() => onCopy(getWebhookPayload(), "Webhook payload")}
-            copied={copiedCode === "Webhook payload"}
-          />
-        </div>
-
-        {/* Verification */}
-        <div>
-          <h3 className="font-semibold mb-3">Verify Webhook Signature</h3>
-          <CodeBlock
-            language={selectedLanguage}
-            code={getWebhookVerification(selectedLanguage)}
-            onCopy={() => onCopy(getWebhookVerification(selectedLanguage), "Webhook verification")}
-            copied={copiedCode === "Webhook verification"}
-          />
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
+// Old WebhooksSection removed - now using WebhooksSectionComponent from components folder
 
 // Errors Section
 function ErrorsSection() {
@@ -716,24 +702,9 @@ function LanguageSelector({ selected, onChange }: any) {
   );
 }
 
+// Use CodeBlock component from components folder
 function CodeBlock({ language, code, onCopy, copied }: any) {
-  return (
-    <div className="relative">
-      <div className="absolute top-3 right-3 z-10">
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={onCopy}
-          className="bg-gray-800/50 hover:bg-gray-800/70 text-white"
-        >
-          {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-        </Button>
-      </div>
-      <pre className="bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto">
-        <code className="text-sm">{code}</code>
-      </pre>
-    </div>
-  );
+  return <CodeBlockComponent language={language} code={code} onCopy={onCopy} copied={copied} />;
 }
 
 function EventBadge({ event, color }: any) {

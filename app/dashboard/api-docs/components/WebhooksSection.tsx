@@ -1,0 +1,454 @@
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Webhook, Shield, CheckCircle, AlertCircle } from "lucide-react";
+import { CodeBlock } from "./CodeBlock";
+
+interface WebhooksSectionProps {
+  selectedLanguage: "node" | "python" | "php" | "curl";
+  onCopy: (code: string, label: string) => void;
+  copiedCode: string | null;
+}
+
+export function WebhooksSection({ selectedLanguage, onCopy, copiedCode }: WebhooksSectionProps) {
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+            <Webhook className="w-5 h-5 text-purple-600" />
+          </div>
+          <div>
+            <CardTitle>Webhooks</CardTitle>
+            <CardDescription>Receive real-time notifications about payment events</CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-8">
+        {/* What are Webhooks */}
+        <div>
+          <h3 className="font-semibold text-lg mb-3">What are Webhooks?</h3>
+          <p className="text-gray-600 mb-4">
+            Webhooks allow you to receive real-time HTTP notifications when events happen in your account. 
+            Instead of polling for status updates, we'll send you secure POST requests to your endpoint.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+              <CheckCircle className="w-5 h-5 text-green-600 mb-2" />
+              <p className="text-sm font-medium text-green-900">Real-time Updates</p>
+              <p className="text-xs text-green-700">Instant notifications</p>
+            </div>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <Shield className="w-5 h-5 text-blue-600 mb-2" />
+              <p className="text-sm font-medium text-blue-900">Secure HMAC</p>
+              <p className="text-xs text-blue-700">SHA-256 signatures</p>
+            </div>
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+              <AlertCircle className="w-5 h-5 text-purple-600 mb-2" />
+              <p className="text-sm font-medium text-purple-900">Auto Retry</p>
+              <p className="text-xs text-purple-700">Up to 3 attempts</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Setup Instructions */}
+        <div>
+          <h3 className="font-semibold text-lg mb-3">Setting Up Webhooks</h3>
+          <div className="space-y-3">
+            <div className="flex gap-3">
+              <div className="w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
+                1
+              </div>
+              <div>
+                <p className="font-medium">Navigate to Settings → Webhooks</p>
+                <p className="text-sm text-gray-600">Access the webhook management interface</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <div className="w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
+                2
+              </div>
+              <div>
+                <p className="font-medium">Click "Add Webhook"</p>
+                <p className="text-sm text-gray-600">Enter your HTTPS endpoint URL</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <div className="w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
+                3
+              </div>
+              <div>
+                <p className="font-medium">Select events to subscribe</p>
+                <p className="text-sm text-gray-600">Choose which events you want to receive</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <div className="w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
+                4
+              </div>
+              <div>
+                <p className="font-medium">Save the webhook secret</p>
+                <p className="text-sm text-red-600 font-medium">⚠️ Secret is shown only once! Save it securely.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Available Events */}
+        <div>
+          <h3 className="font-semibold text-lg mb-3">Available Events</h3>
+          <div className="border rounded-lg overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="text-left p-3 font-semibold">Event</th>
+                  <th className="text-left p-3 font-semibold">Description</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                <tr>
+                  <td className="p-3"><code className="text-green-600">payment.completed</code></td>
+                  <td className="p-3">Payment successfully completed</td>
+                </tr>
+                <tr>
+                  <td className="p-3"><code className="text-red-600">payment.failed</code></td>
+                  <td className="p-3">Payment failed</td>
+                </tr>
+                <tr>
+                  <td className="p-3"><code className="text-gray-600">payment.cancelled</code></td>
+                  <td className="p-3">Payment cancelled by customer</td>
+                </tr>
+                <tr>
+                  <td className="p-3"><code className="text-yellow-600">payment.pending</code></td>
+                  <td className="p-3">Payment pending verification</td>
+                </tr>
+                <tr>
+                  <td className="p-3"><code className="text-blue-600">transaction.created</code></td>
+                  <td className="p-3">New transaction created</td>
+                </tr>
+                <tr>
+                  <td className="p-3"><code className="text-blue-600">transaction.updated</code></td>
+                  <td className="p-3">Transaction updated</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Webhook Payload */}
+        <div>
+          <h3 className="font-semibold text-lg mb-3">Webhook Payload Structure</h3>
+          <CodeBlock
+            language="json"
+            code={getWebhookPayload()}
+            onCopy={() => onCopy(getWebhookPayload(), "Webhook payload")}
+            copied={copiedCode === "Webhook payload"}
+          />
+        </div>
+
+        {/* Webhook Headers */}
+        <div>
+          <h3 className="font-semibold text-lg mb-3">Webhook Headers</h3>
+          <div className="bg-gray-50 rounded-lg p-4 space-y-2 font-mono text-sm">
+            <div className="flex items-start gap-2">
+              <span className="text-blue-600 font-semibold">X-Webhook-Signature:</span>
+              <span className="text-gray-700">HMAC-SHA256 signature</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="text-blue-600 font-semibold">X-Webhook-Timestamp:</span>
+              <span className="text-gray-700">Unix timestamp</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="text-blue-600 font-semibold">X-Webhook-ID:</span>
+              <span className="text-gray-700">Unique event ID</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="text-blue-600 font-semibold">X-Webhook-Event:</span>
+              <span className="text-gray-700">Event type</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Signature Verification */}
+        <div>
+          <h3 className="font-semibold text-lg mb-3">Verifying Webhook Signatures</h3>
+          <p className="text-gray-600 mb-4">
+            Always verify webhook signatures to ensure the request came from YETOPAYEFT.
+          </p>
+          
+          {/* SDK Method */}
+          <div className="mb-4">
+            <h4 className="font-medium mb-2 flex items-center gap-2">
+              <Badge className="bg-green-600">Recommended</Badge>
+              Using SDK
+            </h4>
+            <CodeBlock
+              language="typescript"
+              code={getSDKVerification()}
+              onCopy={() => onCopy(getSDKVerification(), "SDK verification")}
+              copied={copiedCode === "SDK verification"}
+            />
+          </div>
+
+          {/* Manual Verification */}
+          <div>
+            <h4 className="font-medium mb-2">Without SDK ({selectedLanguage})</h4>
+            <CodeBlock
+              language={selectedLanguage}
+              code={getWebhookVerification(selectedLanguage)}
+              onCopy={() => onCopy(getWebhookVerification(selectedLanguage), "Webhook verification")}
+              copied={copiedCode === "Webhook verification"}
+            />
+          </div>
+        </div>
+
+        {/* Handling Events */}
+        <div>
+          <h3 className="font-semibold text-lg mb-3">Handling Webhook Events</h3>
+          <CodeBlock
+            language="typescript"
+            code={getWebhookHandler()}
+            onCopy={() => onCopy(getWebhookHandler(), "Webhook handler")}
+            copied={copiedCode === "Webhook handler"}
+          />
+        </div>
+
+        {/* Best Practices */}
+        <div>
+          <h3 className="font-semibold text-lg mb-3">Best Practices</h3>
+          <div className="space-y-2">
+            <div className="flex items-start gap-2">
+              <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium">Always verify signatures</p>
+                <p className="text-sm text-gray-600">Never trust unsigned webhooks</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium">Return 200 OK quickly</p>
+                <p className="text-sm text-gray-600">Process async, don't block the response</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium">Use HTTPS only</p>
+                <p className="text-sm text-gray-600">Never use HTTP endpoints</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium">Implement idempotency</p>
+                <p className="text-sm text-gray-600">Check event IDs to prevent duplicates</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium">Handle retries gracefully</p>
+                <p className="text-sm text-gray-600">Same event may arrive multiple times</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Retry Policy */}
+        <div>
+          <h3 className="font-semibold text-lg mb-3">Retry Policy</h3>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <ul className="space-y-2 text-sm text-blue-900">
+              <li>• <strong>Max retries:</strong> 3 attempts</li>
+              <li>• <strong>Backoff:</strong> Exponential (1min, 2min, 4min)</li>
+              <li>• <strong>Retry on:</strong> Network errors and 5xx responses</li>
+              <li>• <strong>No retry on:</strong> 401, 403, 404 responses</li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Testing */}
+        <div>
+          <h3 className="font-semibold text-lg mb-3">Testing Webhooks</h3>
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <ol className="space-y-2 text-sm text-gray-700">
+              <li>1. Go to Settings → Webhooks</li>
+              <li>2. Find your webhook configuration</li>
+              <li>3. Click the "Test" button</li>
+              <li>4. Check your endpoint receives the test payload</li>
+              <li>5. Verify signature validation works</li>
+            </ol>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Helper functions
+function getWebhookPayload() {
+  return `{
+  "id": "evt_abc123xyz789",
+  "type": "payment.completed",
+  "data": {
+    "id": "txn_def456uvw012",
+    "reference": "ORDER-12345",
+    "amount": 100.50,
+    "status": "completed",
+    "customerEmail": "customer@example.com",
+    "customerName": "John Doe",
+    "bankName": "FNB",
+    "proofOfPaymentUrl": "https://yetopayeft.com/proofs/abc123.pdf",
+    "metadata": {
+      "orderId": "12345"
+    },
+    "createdAt": "2024-12-02T10:00:00Z",
+    "completedAt": "2024-12-02T10:05:00Z"
+  },
+  "timestamp": "2024-12-02T10:05:00Z",
+  "merchantId": "mch_ghi789jkl345"
+}`;
+}
+
+function getSDKVerification() {
+  return `import { YetoPayEFTClient } from '@yetopayeft/sdk';
+
+const client = new YetoPayEFTClient({ apiKey: 'your-key' });
+
+app.post('/webhooks/payment', (req, res) => {
+  const signature = req.headers['x-webhook-signature'];
+  const payload = JSON.stringify(req.body);
+  const secret = process.env.WEBHOOK_SECRET;
+
+  const isValid = client.verifyWebhookSignature(payload, signature, secret);
+
+  if (!isValid) {
+    return res.status(401).send('Invalid signature');
+  }
+
+  // Process webhook...
+  const event = req.body;
+  console.log('Event:', event.type);
+  
+  res.status(200).send('OK');
+});`;
+}
+
+function getWebhookVerification(lang: string) {
+  const codes = {
+    node: `const crypto = require('crypto');
+
+function verifySignature(payload, signature, secret) {
+  const expectedSignature = crypto
+    .createHmac('sha256', secret)
+    .update(payload)
+    .digest('hex');
+    
+  return crypto.timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(expectedSignature)
+  );
+}
+
+app.post('/webhooks/payment', (req, res) => {
+  const signature = req.headers['x-webhook-signature'];
+  const payload = JSON.stringify(req.body);
+  
+  if (!verifySignature(payload, signature, process.env.WEBHOOK_SECRET)) {
+    return res.status(401).send('Invalid signature');
+  }
+  
+  // Process webhook...
+  res.status(200).send('OK');
+});`,
+    python: `import hmac
+import hashlib
+
+def verify_signature(payload, signature, secret):
+    expected_signature = hmac.new(
+        secret.encode(),
+        payload.encode(),
+        hashlib.sha256
+    ).hexdigest()
+    
+    return hmac.compare_digest(signature, expected_signature)
+
+@app.route('/webhooks/payment', methods=['POST'])
+def webhook():
+    signature = request.headers.get('X-Webhook-Signature')
+    payload = request.get_data(as_text=True)
+    
+    if not verify_signature(payload, signature, WEBHOOK_SECRET):
+        return 'Invalid signature', 401
+    
+    # Process webhook...
+    event = request.get_json()
+    print(f'Event: {event["type"]}')
+    
+    return 'OK', 200`,
+    php: `<?php
+function verifySignature($payload, $signature, $secret) {
+    $expectedSignature = hash_hmac('sha256', $payload, $secret);
+    return hash_equals($signature, $expectedSignature);
+}
+
+$signature = $_SERVER['HTTP_X_WEBHOOK_SIGNATURE'];
+$payload = file_get_contents('php://input');
+
+if (!verifySignature($payload, $signature, WEBHOOK_SECRET)) {
+    http_response_code(401);
+    exit('Invalid signature');
+}
+
+// Process webhook...
+$event = json_decode($payload, true);
+error_log('Event: ' . $event['type']);
+
+http_response_code(200);
+echo 'OK';
+?>`,
+    curl: `# cURL is for testing, not for webhook endpoints
+# Use one of the server-side languages above`
+  };
+
+  return codes[lang as keyof typeof codes] || codes.node;
+}
+
+function getWebhookHandler() {
+  return `app.post('/webhooks/payment', (req, res) => {
+  // 1. Verify signature
+  const signature = req.headers['x-webhook-signature'];
+  const payload = JSON.stringify(req.body);
+  
+  if (!verifySignature(payload, signature, process.env.WEBHOOK_SECRET)) {
+    return res.status(401).send('Invalid signature');
+  }
+  
+  // 2. Get event data
+  const event = req.body;
+  
+  // 3. Handle different event types
+  switch (event.type) {
+    case 'payment.completed':
+      // Update order status
+      // Send confirmation email
+      // Fulfill order
+      handlePaymentCompleted(event.data);
+      break;
+      
+    case 'payment.failed':
+      // Update order status
+      // Send notification
+      handlePaymentFailed(event.data);
+      break;
+      
+    case 'payment.cancelled':
+      // Update order status
+      handlePaymentCancelled(event.data);
+      break;
+  }
+  
+  // 4. Always return 200 OK quickly
+  res.status(200).send('OK');
+});`;
+}
