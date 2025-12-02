@@ -57,7 +57,7 @@ app.post('/api/payments/create', async (req, res) => {
       paymentUrl: payment.paymentUrl,
       tokenId: payment.id,
     });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof YetoPayEFTError) {
       res.status(error.statusCode || 500).json({
         error: error.message,
@@ -84,7 +84,7 @@ app.get('/api/payments/:tokenId', async (req, res) => {
       success: true,
       payment: token,
     });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof YetoPayEFTError) {
       res.status(error.statusCode || 500).json({
         error: error.message,
@@ -115,7 +115,7 @@ app.get('/api/transactions', async (req, res) => {
       success: true,
       ...result,
     });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof YetoPayEFTError) {
       res.status(error.statusCode || 500).json({
         error: error.message,
@@ -170,7 +170,7 @@ app.post('/api/webhooks/payment', (req, res) => {
     }
 
     res.status(200).json({ received: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Webhook error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }

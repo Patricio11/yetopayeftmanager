@@ -41,7 +41,7 @@ async function basicExample() {
     });
 
     console.log(`Found ${transactions.pagination.total} transactions`);
-    transactions.transactions.forEach(tx => {
+    transactions.transactions.forEach((tx: any) => {
       console.log(`- ${tx.reference}: R${tx.amount} (${tx.status})`);
     });
 
@@ -49,11 +49,11 @@ async function basicExample() {
     console.log('\nFetching available banks...');
     const banks = await client.getBanks();
     console.log(`Available banks: ${banks.length}`);
-    banks.forEach(bank => {
+    banks.forEach((bank: any) => {
       console.log(`- ${bank.name} (${bank.code})`);
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error:', error.message);
   }
 }

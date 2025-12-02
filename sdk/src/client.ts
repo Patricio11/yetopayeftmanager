@@ -46,7 +46,7 @@ export class YetoPayEFTClient {
 
     // Add request interceptor for debugging
     if (this.config.debug) {
-      this.client.interceptors.request.use((config) => {
+      this.client.interceptors.request.use((config: any) => {
         console.log('[YetoPayEFT SDK] Request:', {
           method: config.method,
           url: config.url,
@@ -58,7 +58,7 @@ export class YetoPayEFTClient {
 
     // Add response interceptor for error handling
     this.client.interceptors.response.use(
-      (response) => {
+      (response: any) => {
         if (this.config.debug) {
           console.log('[YetoPayEFT SDK] Response:', response.data);
         }
