@@ -154,7 +154,7 @@ export default async function DashboardPage() {
         </p>
       </div>
       {/* Quick Actions */}
-      <div className="mb-8 flex justify-end">
+      <div className="mb-8 flex justify-end gap-3">
         <QuickPaymentLinkModal />
       </div>
 
