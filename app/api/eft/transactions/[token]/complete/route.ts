@@ -4,6 +4,7 @@ import { eftTransactions } from "@/lib/db/schema";
 import { verifyPaymentToken } from "@/lib/security/payment-token";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import { dispatchWebhookEvent } from "@/lib/webhooks/dispatcher";
 
 const completeSchema = z.object({
   status: z.enum(["completed", "failed", "aborted", "cancelled", "expired"]),
@@ -105,7 +106,65 @@ export async function POST(
 
     console.log(`✅ Transaction updated via frontend: ${transactionId} -> ${validatedData.status}`);
 
-    // Forward to merchant's notify URL if configured
+    // Dispatch webhook events based on status
+    try {
+      const webhookEventData = {
+        id: updatedTransaction.id,
+        reference: updatedTransaction.reference,
+        amount: parseFloat(updatedTransaction.amount),
+        status: updatedTransaction.status,
+        customerEmail: updatedTransaction.customerEmail || undefined,
+        customerName: updatedTransaction.customerName || undefined,
+        bankName: validatedData.customerBank,
+        metadata: updatedTransaction.metadata,
+        createdAt: updatedTransaction.createdAt?.toISOString(),
+        completedAt: updatedTransaction.completedAt?.toISOString(),
+        message: validatedData.message,
+        gatewayResult: validatedData.gatewayResult,
+      };
+
+      // Dispatch appropriate webhook event based on status
+      if (validatedData.status === "completed") {
+        await dispatchWebhookEvent(
+          transaction.merchantId,
+          "payment.completed",
+          webhookEventData
+        );
+        console.log(`📤 Webhook dispatched: payment.completed for ${transactionId}`);
+      } else if (validatedData.status === "failed") {
+        await dispatchWebhookEvent(
+          transaction.merchantId,
+          "payment.failed",
+          webhookEventData
+        );
+        console.log(`📤 Webhook dispatched: payment.failed for ${transactionId}`);
+      } else if (validatedData.status === "cancelled" || validatedData.status === "aborted") {
+        // Both 'cancelled' (user cancelled) and 'aborted' (system/timeout) trigger payment.cancelled
+        await dispatchWebhookEvent(
+          transaction.merchantId,
+          "payment.cancelled",
+          webhookEventData
+        );
+        console.log(`📤 Webhook dispatched: payment.cancelled for ${transactionId} (status: ${validatedData.status})`);
+      } else if (validatedData.status === "expired") {
+        // Payment link expired before completion
+        await dispatchWebhookEvent(
+          transaction.merchantId,
+          "payment.failed",
+          {
+            ...webhookEventData,
+            message: "Payment link expired",
+            reason: "expired"
+          }
+        );
+        console.log(`📤 Webhook dispatched: payment.failed for ${transactionId} (expired)`);
+      }
+    } catch (error) {
+      console.error("❌ Error dispatching webhook event:", error);
+      // Don't fail the request if webhook dispatch fails
+    }
+
+    // Forward to merchant's notify URL if configured (legacy support)
     if (transaction.notifyUrl) {
       try {
         const merchantWebhookPayload = {
@@ -129,7 +188,7 @@ export async function POST(
           console.error(`❌ Error forwarding to merchant webhook: ${error.message}`);
         });
 
-        console.log(`📤 Merchant webhook queued: ${transaction.notifyUrl}`);
+        console.log(`📤 Legacy merchant webhook queued: ${transaction.notifyUrl}`);
       } catch (error) {
         console.error("❌ Error preparing merchant webhook:", error);
       }

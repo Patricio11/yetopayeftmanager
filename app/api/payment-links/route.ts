@@ -6,6 +6,7 @@ import { eftTransactions, paymentTokens } from "@/lib/db/schema";
 import { generatePaymentToken } from "@/lib/security/payment-token";
 import { eq, desc, and, gte } from "drizzle-orm";
 import { z } from "zod";
+import { dispatchWebhookEvent } from "@/lib/webhooks/dispatcher";
 
 const createPaymentLinkSchema = z.object({
   amount: z.number().positive().min(1, "Amount must be at least 1"),
@@ -112,6 +113,31 @@ export async function POST(request: NextRequest) {
 
     // Log creation (optional - for audit trail)
     console.log(`✅ Payment link created: ${transaction.id} by merchant ${merchantId}`);
+
+    // Dispatch transaction.created webhook event
+    try {
+      await dispatchWebhookEvent(
+        merchantId,
+        "transaction.created",
+        {
+          id: transaction.id,
+          reference: transaction.reference,
+          amount: parseFloat(transaction.amount),
+          status: transaction.status,
+          customerEmail: transaction.customerEmail || undefined,
+          customerName: transaction.customerName || undefined,
+          description: transaction.description || undefined,
+          paymentUrl,
+          expiresAt: expiresAt.toISOString(),
+          metadata: transaction.metadata,
+          createdAt: transaction.createdAt.toISOString(),
+        }
+      );
+      console.log(`📤 Webhook dispatched: transaction.created for ${transaction.id}`);
+    } catch (error) {
+      console.error("❌ Error dispatching transaction.created webhook:", error);
+      // Don't fail the request if webhook dispatch fails
+    }
 
     return NextResponse.json({
       success: true,

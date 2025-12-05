@@ -4,6 +4,7 @@ import { eftTransactions, eftBanks } from "@/lib/db/schema";
 import { verifyPaymentToken } from "@/lib/security/payment-token";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import { dispatchWebhookEvent } from "@/lib/webhooks/dispatcher";
 
 const updateBankSchema = z.object({
   bankCode: z.string().min(1, "Bank code is required"),
@@ -96,6 +97,31 @@ export async function POST(
       .returning();
 
     console.log(`✅ Transaction initiated: ${transactionId} -> Bank: ${bank.bankName} (${validatedData.bankCode})`);
+
+    // Dispatch transaction.updated webhook event
+    try {
+      await dispatchWebhookEvent(
+        transaction.merchantId,
+        "transaction.updated",
+        {
+          id: updatedTransaction.id,
+          reference: updatedTransaction.reference,
+          amount: parseFloat(updatedTransaction.amount),
+          status: updatedTransaction.status,
+          customerEmail: updatedTransaction.customerEmail || undefined,
+          customerName: updatedTransaction.customerName || undefined,
+          bankName: bank.bankName,
+          bankCode: validatedData.bankCode,
+          metadata: updatedTransaction.metadata,
+          createdAt: updatedTransaction.createdAt?.toISOString(),
+          updatedAt: updatedTransaction.updatedAt?.toISOString(),
+        }
+      );
+      console.log(`📤 Webhook dispatched: transaction.updated for ${transactionId}`);
+    } catch (error) {
+      console.error("❌ Error dispatching transaction.updated webhook:", error);
+      // Don't fail the request if webhook dispatch fails
+    }
 
     return NextResponse.json({
       success: true,
