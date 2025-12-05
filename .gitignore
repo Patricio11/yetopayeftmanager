@@ -36,6 +36,20 @@ yarn-error.log*
 # vercel
 .vercel
 
+# Exclude SDK folder from Vercel deployment
+sdk/
+sdk/**/*
+
+# Exclude test files
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+
+# Exclude development files
+.vscode/
+.idea/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
