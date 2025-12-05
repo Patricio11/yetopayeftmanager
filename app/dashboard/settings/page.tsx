@@ -791,9 +791,10 @@ function WebhookSettings() {
   const [isActive, setIsActive] = useState(true);
 
   const availableEvents = [
+    { value: '*', label: '⭐ All Events (Wildcard)', description: 'Subscribe to all current and future events - recommended for simplicity', highlight: true },
     { value: 'payment.completed', label: 'Payment Completed', description: 'When a payment is successfully completed' },
     { value: 'payment.failed', label: 'Payment Failed', description: 'When a payment fails' },
-    { value: 'payment.cancelled', label: 'Payment Cancelled', description: 'When a payment is cancelled' },
+    { value: 'payment.cancelled', label: 'Payment Cancelled', description: 'When a payment is cancelled by user or system' },
     { value: 'payment.pending', label: 'Payment Pending', description: 'When a payment is pending verification' },
     { value: 'transaction.created', label: 'Transaction Created', description: 'When a new transaction is created' },
     { value: 'transaction.updated', label: 'Transaction Updated', description: 'When a transaction is updated' },
@@ -1124,22 +1125,41 @@ function WebhookSettings() {
               <Label>Events to Subscribe</Label>
               <div className="space-y-2">
                 {availableEvents.map((event) => (
-                  <div key={event.value} className="flex items-start gap-3 p-3 border rounded-lg">
+                  <div 
+                    key={event.value} 
+                    className={`flex items-start gap-3 p-3 border rounded-lg ${
+                      event.highlight ? 'bg-blue-50 border-blue-300 dark:bg-blue-900/20 dark:border-blue-700' : ''
+                    }`}
+                  >
                     <input
                       type="checkbox"
                       checked={selectedEvents.includes(event.value)}
                       onChange={(e) => {
                         if (e.target.checked) {
-                          setSelectedEvents([...selectedEvents, event.value]);
+                          // If wildcard is selected, clear other selections
+                          if (event.value === '*') {
+                            setSelectedEvents(['*']);
+                          } else {
+                            // If selecting specific event, remove wildcard
+                            const newEvents = selectedEvents.filter(ev => ev !== '*');
+                            setSelectedEvents([...newEvents, event.value]);
+                          }
                         } else {
                           setSelectedEvents(selectedEvents.filter(ev => ev !== event.value));
                         }
                       }}
                       className="mt-1"
                     />
-                    <div>
-                      <p className="font-medium text-sm">{event.label}</p>
-                      <p className="text-xs text-gray-600">{event.description}</p>
+                    <div className="flex-1">
+                      <p className={`font-medium text-sm ${event.highlight ? 'text-blue-700 dark:text-blue-300' : ''}`}>
+                        {event.label}
+                      </p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">{event.description}</p>
+                      {event.highlight && (
+                        <p className="text-xs text-blue-600 dark:text-blue-400 mt-1 font-medium">
+                          💡 Recommended: Automatically receive all events without managing individual subscriptions
+                        </p>
+                      )}
                     </div>
                   </div>
                 ))}

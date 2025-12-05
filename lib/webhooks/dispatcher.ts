@@ -153,14 +153,20 @@ export async function dispatchWebhookEvent(
       );
 
     // Filter webhooks that are subscribed to this event
-    const subscribedWebhooks = webhooks.filter(webhook => 
-      (webhook.events as string[]).includes(eventType)
-    );
+    // Support wildcard subscription: '*' or 'payment.all' subscribes to all events
+    const subscribedWebhooks = webhooks.filter(webhook => {
+      const events = webhook.events as string[];
+      return events.includes(eventType) || 
+             events.includes('*') || 
+             events.includes('payment.all');
+    });
 
     if (subscribedWebhooks.length === 0) {
       console.log(`No webhooks subscribed to ${eventType} for merchant ${merchantId}`);
       return;
     }
+
+    console.log(`📤 Dispatching ${eventType} to ${subscribedWebhooks.length} webhook(s) for merchant ${merchantId}`);
 
     // Create event payload
     const payload: WebhookEventPayload = {

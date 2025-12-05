@@ -78,7 +78,7 @@ export function WebhooksSection({ selectedLanguage, onCopy, copiedCode }: Webhoo
               </div>
               <div>
                 <p className="font-medium">Select events to subscribe</p>
-                <p className="text-sm text-gray-600">Choose which events you want to receive</p>
+                <p className="text-sm text-gray-600">Choose ⭐ <strong>All Events (*)</strong> for simplicity, or select specific events</p>
               </div>
             </div>
             <div className="flex gap-3">
@@ -96,6 +96,30 @@ export function WebhooksSection({ selectedLanguage, onCopy, copiedCode }: Webhoo
         {/* Available Events */}
         <div>
           <h3 className="font-semibold text-lg mb-3">Available Events</h3>
+          
+          {/* Wildcard Option */}
+          <div className="mb-4 p-4 bg-blue-50 border-2 border-blue-300 rounded-lg">
+            <div className="flex items-start gap-3">
+              <div className="text-2xl">⭐</div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-blue-900 mb-1">Wildcard Subscription (Recommended)</h4>
+                <p className="text-sm text-blue-800 mb-2">
+                  Subscribe to <strong>ALL events</strong> (current and future) with a single wildcard: <code className="bg-blue-100 px-2 py-1 rounded">*</code>
+                </p>
+                <div className="text-xs text-blue-700 space-y-1">
+                  <p>✅ <strong>Simple:</strong> One subscription for everything</p>
+                  <p>✅ <strong>Future-proof:</strong> Automatically includes new events</p>
+                  <p>✅ <strong>No maintenance:</strong> Never update subscriptions</p>
+                </div>
+                <div className="mt-3 bg-blue-100 rounded p-2 font-mono text-xs">
+                  <span className="text-gray-600">// Subscribe to all events</span><br/>
+                  <span className="text-blue-600">"events"</span>: [<span className="text-green-600">"*"</span>]
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Individual Events Table */}
           <div className="border rounded-lg overflow-hidden">
             <table className="w-full text-sm">
               <thead className="bg-gray-50">
@@ -105,17 +129,21 @@ export function WebhooksSection({ selectedLanguage, onCopy, copiedCode }: Webhoo
                 </tr>
               </thead>
               <tbody className="divide-y">
+                <tr className="bg-blue-50">
+                  <td className="p-3"><code className="text-blue-700 font-bold">*</code></td>
+                  <td className="p-3"><strong>All Events (Wildcard)</strong> - Receive all current and future events</td>
+                </tr>
                 <tr>
                   <td className="p-3"><code className="text-green-600">payment.completed</code></td>
                   <td className="p-3">Payment successfully completed</td>
                 </tr>
                 <tr>
                   <td className="p-3"><code className="text-red-600">payment.failed</code></td>
-                  <td className="p-3">Payment failed</td>
+                  <td className="p-3">Payment failed or expired</td>
                 </tr>
                 <tr>
                   <td className="p-3"><code className="text-gray-600">payment.cancelled</code></td>
-                  <td className="p-3">Payment cancelled by customer</td>
+                  <td className="p-3">Payment cancelled by customer or system</td>
                 </tr>
                 <tr>
                   <td className="p-3"><code className="text-yellow-600">payment.pending</code></td>
@@ -123,11 +151,11 @@ export function WebhooksSection({ selectedLanguage, onCopy, copiedCode }: Webhoo
                 </tr>
                 <tr>
                   <td className="p-3"><code className="text-blue-600">transaction.created</code></td>
-                  <td className="p-3">New transaction created</td>
+                  <td className="p-3">New transaction/payment link created</td>
                 </tr>
                 <tr>
                   <td className="p-3"><code className="text-blue-600">transaction.updated</code></td>
-                  <td className="p-3">Transaction updated</td>
+                  <td className="p-3">Transaction updated (e.g., bank selected)</td>
                 </tr>
               </tbody>
             </table>
@@ -216,6 +244,13 @@ export function WebhooksSection({ selectedLanguage, onCopy, copiedCode }: Webhoo
         <div>
           <h3 className="font-semibold text-lg mb-3">Best Practices</h3>
           <div className="space-y-2">
+            <div className="flex items-start gap-2">
+              <div className="text-xl flex-shrink-0">⭐</div>
+              <div>
+                <p className="font-medium text-blue-700">Use wildcard subscription (*)</p>
+                <p className="text-sm text-gray-600">Subscribe to all events for simplicity and future-proofing</p>
+              </div>
+            </div>
             <div className="flex items-start gap-2">
               <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
               <div>
