@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Home, Receipt, Settings, LogOut, Zap, Building2, CreditCard, Book } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { signOut } from "@/lib/auth-client";
 
 interface DashboardNavProps {
   userRole: string;
@@ -12,7 +13,19 @@ interface DashboardNavProps {
 
 export function DashboardNav({ userRole }: DashboardNavProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const isAdmin = userRole === "admin";
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      router.push("/auth/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Fallback: redirect anyway
+      router.push("/auth/login");
+    }
+  };
 
   const navItems = [
     {
@@ -89,16 +102,14 @@ export function DashboardNav({ userRole }: DashboardNavProps) {
             })}
             
             <div className="ml-4 pl-4 border-l border-slate-200 dark:border-slate-700">
-              <form action="/api/auth/sign-out" method="POST">
-                <Button
-                  type="submit"
-                  variant="ghost"
-                  className="gap-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Logout
-                </Button>
-              </form>
+              <Button
+                onClick={handleLogout}
+                variant="ghost"
+                className="gap-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </Button>
             </div>
           </nav>
         </div>
