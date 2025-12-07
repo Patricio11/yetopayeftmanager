@@ -2,16 +2,38 @@ import { auth } from "./auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+// Extended session type with custom fields
+export type ExtendedSession = {
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    image?: string | null;
+    emailVerified: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+    role?: string;
+  };
+  session: {
+    id: string;
+    userId: string;
+    expiresAt: Date;
+    token: string;
+    ipAddress?: string;
+    userAgent?: string;
+  };
+};
+
 /**
  * Get current session from server components
  * Better Auth handles authentication internally
  */
-export async function getSession() {
+export async function getSession(): Promise<ExtendedSession | null> {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
-    return session;
+    return session as ExtendedSession | null;
   } catch (error) {
     return null;
   }
@@ -33,11 +55,10 @@ export async function requireAuth() {
 /**
  * Require specific role - redirect if user doesn't have required role
  */
-export async function requireRole(role: "admin" | "merchant") {
+export async function requireRole(role: "admin" | "merchant"): Promise<ExtendedSession> {
   const session = await requireAuth();
   
-  // Type assertion for custom user fields
-  const userRole = (session.user as any).role;
+  const userRole = session.user.role || "merchant";
   
   if (userRole !== role) {
     redirect("/unauthorized");
@@ -54,8 +75,7 @@ export async function hasPermission(permission: string): Promise<boolean> {
   
   if (!session) return false;
   
-  // Type assertion for custom user fields
-  const userRole = (session.user as any).role;
+  const userRole = session.user.role || "merchant";
   
   // Admin has all permissions
   if (userRole === "admin") return true;

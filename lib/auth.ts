@@ -21,9 +21,6 @@ export const auth = betterAuth({
     expiresIn: 60 * 15, // 15 minutes
     updateAge: 60 * 5, // Update every 5 minutes
   },
-  advanced: {
-    generateId: () => crypto.randomUUID(),
-  },
   user: {
     additionalFields: {
       role: {
