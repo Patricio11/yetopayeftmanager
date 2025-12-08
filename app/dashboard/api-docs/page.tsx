@@ -95,7 +95,7 @@ export default function ApiDocsPage() {
             <p className="text-xl text-green-50 mb-6">
               Everything you need to integrate YETOPAYEFT payment system into your application
             </p>
-            <div className="flex flex-wrap gap-3">
+            {/* <div className="flex flex-wrap gap-3">
               <Button 
                 onClick={() => scrollToSection("integration-flows", "integration-flows")}
                 className={`transition-all ${
@@ -153,7 +153,7 @@ export default function ApiDocsPage() {
                 <Webhook className="w-4 h-4 mr-2" />
                 Setup Webhooks
               </Button>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
