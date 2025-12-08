@@ -230,6 +230,8 @@ export default function ApiDocsPage() {
 
 // Sidebar Component
 function ApiSidebar() {
+  const [activeSection, setActiveSection] = useState("integration-flows");
+
   const sections = [
     { id: "integration-flows", label: "Integration Flows", icon: Layers },
     { id: "quick-start", label: "Quick Start", icon: Zap },
@@ -241,6 +243,7 @@ function ApiSidebar() {
   ];
 
   const scrollToSection = (id: string) => {
+    setActiveSection(id);
     const element = document.getElementById(id);
     if (element) {
       const offset = 100; // Account for sticky header
@@ -255,21 +258,50 @@ function ApiSidebar() {
   };
 
   return (
-    <Card className="sticky top-24">
-      <CardHeader>
-        <CardTitle className="text-lg">Navigation</CardTitle>
+    <Card className="sticky top-24 border-2 border-gray-100 dark:border-gray-800 shadow-lg">
+      <CardHeader className="border-b border-gray-100 dark:border-gray-800">
+        <CardTitle className="text-lg flex items-center gap-2">
+          <Book className="w-5 h-5 text-green-600" />
+          Navigation
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-1">
+      <CardContent className="space-y-1 p-3">
         {sections.map((section) => {
           const Icon = section.icon;
+          const isActive = activeSection === section.id;
           return (
             <button
               key={section.id}
               onClick={() => scrollToSection(section.id)}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors text-left group"
+              className={`
+                w-full flex items-center gap-3 px-3 py-2.5 rounded-lg 
+                transition-all duration-200 text-left group
+                ${
+                  isActive
+                    ? "bg-green-50 dark:bg-green-900/20 border-l-4 border-green-600 shadow-sm"
+                    : "hover:bg-gray-50 dark:hover:bg-gray-800 border-l-4 border-transparent"
+                }
+              `}
             >
-              <Icon className="w-4 h-4 text-gray-500 group-hover:text-green-600" />
-              <span className="text-sm text-gray-700 group-hover:text-gray-900">{section.label}</span>
+              <Icon 
+                className={`w-4 h-4 transition-colors ${
+                  isActive 
+                    ? "text-green-600 dark:text-green-400" 
+                    : "text-gray-500 dark:text-gray-400 group-hover:text-green-600 dark:group-hover:text-green-400"
+                }`} 
+              />
+              <span 
+                className={`text-sm font-medium transition-colors ${
+                  isActive 
+                    ? "text-green-700 dark:text-green-300" 
+                    : "text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100"
+                }`}
+              >
+                {section.label}
+              </span>
+              {isActive && (
+                <ChevronRight className="w-4 h-4 ml-auto text-green-600 dark:text-green-400" />
+              )}
             </button>
           );
         })}
@@ -677,25 +709,34 @@ function StepCard({ number, title, description }: any) {
 
 function LanguageSelector({ selected, onChange }: any) {
   const languages = [
-    { id: "node", label: "Node.js" },
-    { id: "python", label: "Python" },
-    { id: "php", label: "PHP" },
-    { id: "curl", label: "cURL" },
+    { id: "node", label: "Node.js", icon: "📦" },
+    { id: "python", label: "Python", icon: "🐍" },
+    { id: "php", label: "PHP", icon: "🐘" },
+    { id: "curl", label: "cURL", icon: "⚡" },
   ];
 
   return (
-    <div className="flex gap-2">
+    <div className="inline-flex gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg">
       {languages.map((lang) => (
         <button
           key={lang.id}
           onClick={() => onChange(lang.id)}
-          className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-            selected === lang.id
-              ? "bg-green-600 text-white"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-          }`}
+          className={`
+            relative px-4 py-2 rounded-md text-sm font-medium 
+            transition-all duration-200 ease-in-out
+            flex items-center gap-2
+            ${
+              selected === lang.id
+                ? "bg-white dark:bg-gray-700 text-green-600 dark:text-green-400 shadow-md scale-105 z-10"
+                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+            }
+          `}
         >
-          {lang.label}
+          <span className="text-base">{lang.icon}</span>
+          <span>{lang.label}</span>
+          {selected === lang.id && (
+            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-1.5 h-1.5 bg-green-600 dark:bg-green-400 rounded-full" />
+          )}
         </button>
       ))}
     </div>
