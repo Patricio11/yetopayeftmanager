@@ -29,7 +29,8 @@ export async function POST(request: NextRequest) {
     // Generate API key
     const apiKeyData = await generateApiKey(
       auth.session.user.id,
-      name
+      name,
+      expiresInDays
     );
     
     return NextResponse.json({

@@ -14,7 +14,7 @@ import { eq, and } from 'drizzle-orm';
  * Generate a new API key pair
  * Returns both the key (show once) and secret (show once)
  */
-export async function generateApiKey(merchantId: string, name: string) {
+export async function generateApiKey(merchantId: string, name: string, expiresInDays?: number) {
   // Generate API key (public identifier)
   const keyId = crypto.randomBytes(16).toString('hex');
   const environment = process.env.NODE_ENV === 'production' ? 'live' : 'test';
@@ -35,6 +35,11 @@ export async function generateApiKey(merchantId: string, name: string) {
     .update(apiSecret)
     .digest('hex');
   
+  // Calculate expiration date if provided
+  const expiresAt = expiresInDays
+    ? new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000)
+    : undefined;
+
   // Store in database (including secretHash for HMAC verification)
   const [record] = await db.insert(apiKeys).values({
     merchantId,
@@ -44,6 +49,7 @@ export async function generateApiKey(merchantId: string, name: string) {
     keyPrefix: `${apiKey.substring(0, 15)}...`, // For display only
     permissions: ['payment_links.create', 'payment_links.read', 'transactions.read'],
     isActive: true,
+    expiresAt,
     createdAt: new Date(),
     updatedAt: new Date(),
   }).returning();

@@ -7,6 +7,17 @@ import { z } from "zod";
 import crypto from "crypto";
 import { dispatchWebhookEvent } from "@/lib/webhooks/dispatcher";
 
+function generateMerchantSignature(payload: any): string {
+  const secret = process.env.MERCHANT_WEBHOOK_SECRET || process.env.EFT_WEBHOOK_SECRET || '';
+  if (!secret) {
+    console.warn("⚠️ No MERCHANT_WEBHOOK_SECRET or EFT_WEBHOOK_SECRET configured for legacy notifyUrl signing");
+  }
+  return crypto
+    .createHmac('sha256', secret)
+    .update(JSON.stringify(payload))
+    .digest('hex');
+}
+
 const completeSchema = z.object({
   status: z.enum(["pending", "completed", "failed", "aborted", "cancelled", "expired"]),
   message: z.string().optional(),
@@ -251,6 +262,7 @@ export async function POST(
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'X-YETOPAYEFT-Signature': generateMerchantSignature(merchantWebhookPayload),
           },
           body: JSON.stringify(merchantWebhookPayload),
         }).catch((error) => {

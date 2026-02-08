@@ -38,9 +38,11 @@ pnpm add @yetopayeft/sdk
 
 ## Quick Start
 
-### 1. Get Your API Key
+### 1. Get Your API Credentials
 
-Get your API key from the [YETOPAYEFT Dashboard](https://yetopayeft.com/dashboard/settings?tab=api-keys).
+Get your API key, API secret, and Merchant ID from the [YETOPAYEFT Dashboard](https://yetopayeft.com/dashboard/settings?tab=api-keys).
+
+> **Important:** The API secret is only shown once when you create the key. Store it securely.
 
 ### 2. Initialize the Client
 
@@ -48,7 +50,9 @@ Get your API key from the [YETOPAYEFT Dashboard](https://yetopayeft.com/dashboar
 import { YetoPayEFTClient } from '@yetopayeft/sdk';
 
 const client = new YetoPayEFTClient({
-  apiKey: 'your-api-key-here',
+  apiKey: process.env.YETOPAY_API_KEY!,      // e.g. yp_live_abc123...
+  apiSecret: process.env.YETOPAY_API_SECRET!, // Shown once on key creation
+  merchantId: process.env.YETOPAY_MERCHANT_ID!, // Your merchant UUID
 });
 ```
 
@@ -93,14 +97,14 @@ const payment = await client.createPaymentToken({
 window.location.href = payment.paymentUrl;
 ```
 
-### Get Payment Token Status
+### Get Payment Status
 
 ```typescript
-const token = await client.getPaymentToken('token-id');
+const transaction = await client.getPaymentStatus('transaction-id');
 
-console.log('Status:', token.status);
-console.log('Amount:', token.amount);
-console.log('Expires:', token.expiresAt);
+console.log('Status:', transaction.status);
+console.log('Amount:', transaction.amount);
+console.log('Reference:', transaction.reference);
 ```
 
 ### List Transactions
@@ -142,15 +146,6 @@ banks.forEach(bank => {
 });
 ```
 
-### Revoke Payment Token
-
-```typescript
-const success = await client.revokePaymentToken('token-id');
-
-if (success) {
-  console.log('Token revoked successfully');
-}
-```
 
 ---
 
@@ -163,11 +158,15 @@ import { YetoPayEFTClient } from '@yetopayeft/sdk';
 
 // In your webhook endpoint
 app.post('/webhooks/payment', (req, res) => {
-  const signature = req.headers['x-webhook-signature'];
+  const signature = req.headers['x-yetopayeft-signature'];
   const payload = JSON.stringify(req.body);
   const secret = 'your-webhook-secret';
 
-  const client = new YetoPayEFTClient({ apiKey: 'your-api-key' });
+  const client = new YetoPayEFTClient({
+    apiKey: process.env.YETOPAY_API_KEY!,
+    apiSecret: process.env.YETOPAY_API_SECRET!,
+    merchantId: process.env.YETOPAY_MERCHANT_ID!,
+  });
   
   const isValid = client.verifyWebhookSignature(
     payload,
@@ -209,8 +208,14 @@ app.post('/webhooks/payment', (req, res) => {
 
 ```typescript
 const client = new YetoPayEFTClient({
-  // Required: Your API key
+  // Required: Your API key (e.g. yp_live_abc123...)
   apiKey: 'your-api-key',
+  
+  // Required: Your API secret (shown once on key creation)
+  apiSecret: 'your-api-secret',
+  
+  // Required: Your Merchant ID (UUID from dashboard)
+  merchantId: 'your-merchant-id',
   
   // Optional: Custom base URL (defaults to production)
   baseUrl: 'https://yetopayeft.com',
@@ -310,11 +315,8 @@ new YetoPayEFTClient(config: YetoPayEFTConfig)
 - **`createPaymentToken(request: CreatePaymentTokenRequest): Promise<PaymentToken>`**  
   Create a new payment token
 
-- **`getPaymentToken(tokenId: string): Promise<PaymentToken>`**  
-  Get payment token details
-
-- **`revokePaymentToken(tokenId: string): Promise<boolean>`**  
-  Revoke a payment token
+- **`getPaymentStatus(transactionId: string): Promise<Transaction>`**  
+  Get payment status by transaction ID
 
 ##### Transactions
 
@@ -353,7 +355,11 @@ import express from 'express';
 import { YetoPayEFTClient } from '@yetopayeft/sdk';
 
 const app = express();
-const client = new YetoPayEFTClient({ apiKey: process.env.YETOPAY_API_KEY });
+const client = new YetoPayEFTClient({
+  apiKey: process.env.YETOPAY_API_KEY!,
+  apiSecret: process.env.YETOPAY_API_SECRET!,
+  merchantId: process.env.YETOPAY_MERCHANT_ID!,
+});
 
 app.post('/create-payment', async (req, res) => {
   try {
@@ -386,6 +392,8 @@ import { YetoPayEFTClient } from '@yetopayeft/sdk';
 
 const client = new YetoPayEFTClient({
   apiKey: process.env.YETOPAY_API_KEY!,
+  apiSecret: process.env.YETOPAY_API_SECRET!,
+  merchantId: process.env.YETOPAY_MERCHANT_ID!,
 });
 
 export default async function handler(
@@ -463,6 +471,8 @@ Test your integration with the SDK:
 ```typescript
 const client = new YetoPayEFTClient({
   apiKey: 'your-api-key',
+  apiSecret: 'your-api-secret',
+  merchantId: 'your-merchant-id',
   debug: true, // Enable debug logging
 });
 

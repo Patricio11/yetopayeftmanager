@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import crypto from "crypto";
 import { checkRateLimit, getClientIdentifier } from "@/lib/security/rate-limit";
+import { dispatchWebhookEvent } from "@/lib/webhooks/dispatcher";
 
 const webhookSchema = z.object({
   transaction_id: z.string().uuid(),
@@ -94,7 +95,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if transaction is already in final state
-    if (["completed", "failed"].includes(transaction.status || "")) {
+    if (["completed", "failed", "aborted", "cancelled", "expired"].includes(transaction.status || "")) {
       console.log(`⚠️ Transaction already in final state: ${transaction.status}`);
       return NextResponse.json({
         success: true,
@@ -121,6 +122,33 @@ export async function POST(request: NextRequest) {
       .returning();
 
     console.log(`✅ Transaction updated: ${validatedData.transaction_id} -> ${validatedData.status}`);
+
+    // Dispatch to merchant's configured webhook endpoints
+    try {
+      const webhookEventData = {
+        id: updatedTransaction.id,
+        reference: updatedTransaction.reference,
+        amount: parseFloat(updatedTransaction.amount),
+        status: updatedTransaction.status,
+        customerEmail: updatedTransaction.customerEmail || undefined,
+        customerName: updatedTransaction.customerName || undefined,
+        bankName: validatedData.customer_bank,
+        metadata: updatedTransaction.metadata,
+        createdAt: updatedTransaction.createdAt?.toISOString(),
+        completedAt: updatedTransaction.completedAt?.toISOString(),
+      };
+
+      if (validatedData.status === "completed") {
+        await dispatchWebhookEvent(transaction.merchantId, "payment.completed", webhookEventData);
+      } else if (validatedData.status === "failed") {
+        await dispatchWebhookEvent(transaction.merchantId, "payment.failed", webhookEventData);
+      } else if (validatedData.status === "cancelled" || validatedData.status === "aborted") {
+        await dispatchWebhookEvent(transaction.merchantId, "payment.cancelled", webhookEventData);
+      }
+      console.log(`📤 Webhook dispatched: payment.${validatedData.status} for ${validatedData.transaction_id}`);
+    } catch (error) {
+      console.error("❌ Error dispatching webhook event:", error);
+    }
 
     // Forward webhook to merchant's notify URL (if configured)
     if (transaction.notifyUrl) {
@@ -150,7 +178,6 @@ export async function POST(request: NextRequest) {
         }
       } catch (webhookError) {
         console.error("❌ Error forwarding webhook to merchant:", webhookError);
-        // Don't fail the main webhook - log and continue
       }
     }
 
@@ -189,7 +216,10 @@ export async function POST(request: NextRequest) {
  * Generate HMAC signature for merchant webhook
  */
 function generateMerchantSignature(payload: any): string {
-  const secret = process.env.MERCHANT_WEBHOOK_SECRET || process.env.PAYMENT_TOKEN_SECRET || 'default-secret';
+  const secret = process.env.MERCHANT_WEBHOOK_SECRET || process.env.EFT_WEBHOOK_SECRET || '';
+  if (!secret) {
+    console.warn("⚠️ No MERCHANT_WEBHOOK_SECRET or EFT_WEBHOOK_SECRET configured for legacy notifyUrl signing");
+  }
   return crypto
     .createHmac('sha256', secret)
     .update(JSON.stringify(payload))

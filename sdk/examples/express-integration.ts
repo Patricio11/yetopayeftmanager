@@ -12,6 +12,8 @@ app.use(express.json());
 // Initialize SDK client
 const client = new YetoPayEFTClient({
   apiKey: process.env.YETOPAY_API_KEY || '',
+  apiSecret: process.env.YETOPAY_API_SECRET || '',
+  merchantId: process.env.YETOPAY_MERCHANT_ID || '',
 });
 
 // Store for demo purposes (use database in production)
@@ -74,15 +76,15 @@ app.post('/api/payments/create', async (req, res) => {
 /**
  * Get payment status endpoint
  */
-app.get('/api/payments/:tokenId', async (req, res) => {
+app.get('/api/payments/:transactionId', async (req, res) => {
   try {
-    const { tokenId } = req.params;
+    const { transactionId } = req.params;
 
-    const token = await client.getPaymentToken(tokenId);
+    const transaction = await client.getPaymentStatus(transactionId);
 
     res.json({
       success: true,
-      payment: token,
+      payment: transaction,
     });
   } catch (error: any) {
     if (error instanceof YetoPayEFTError) {
@@ -135,7 +137,7 @@ app.get('/api/transactions', async (req, res) => {
 app.post('/api/webhooks/payment', (req, res) => {
   try {
     // Get signature from header
-    const signature = req.headers['x-webhook-signature'] as string;
+    const signature = req.headers['x-yetopayeft-signature'] as string;
     const payload = JSON.stringify(req.body);
     const secret = process.env.WEBHOOK_SECRET || '';
 

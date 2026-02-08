@@ -8,7 +8,9 @@ import { YetoPayEFTClient } from '@yetopayeft/sdk';
 async function basicExample() {
   // Initialize client
   const client = new YetoPayEFTClient({
-    apiKey: 'your-api-key-here',
+    apiKey: 'yp_live_your-api-key-here',
+    apiSecret: 'your-api-secret-here',
+    merchantId: 'your-merchant-id-here',
     debug: true, // Enable debug logging
   });
 
@@ -20,7 +22,6 @@ async function basicExample() {
       reference: 'ORDER-12345',
       customerEmail: 'customer@example.com',
       customerName: 'John Doe',
-      customerPhone: '+27123456789',
     });
 
     console.log('Payment created successfully!');
@@ -28,10 +29,10 @@ async function basicExample() {
     console.log('Token ID:', payment.id);
     console.log('Expires at:', payment.expiresAt);
 
-    // 2. Get payment token status
+    // 2. Get payment status
     console.log('\nChecking payment status...');
-    const tokenStatus = await client.getPaymentToken(payment.id);
-    console.log('Token status:', tokenStatus.status);
+    const status = await client.getPaymentStatus(payment.id);
+    console.log('Payment status:', status.status);
 
     // 3. List recent transactions
     console.log('\nFetching recent transactions...');

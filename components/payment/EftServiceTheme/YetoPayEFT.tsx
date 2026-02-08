@@ -16,10 +16,12 @@ const FRONTEND_API_BASE_URL = '/api';
 type Bank = { code: string; name: string; color?: string };
 type ApiInputOption = { value: string; text: string };
 type ApiInput = {
-  type: 'text' | 'password' | 'select' | 'checkbox' | 'hidden' | 'tc' | 'submit';
+  type: 'text' | 'password' | 'select' | 'checkbox' | 'hidden' | 'tc' | 'submit' | 'captcha' | 'input-group';
   label?: string;
-  html_options?: { name?: string; placeholder?: string; value?: string; class?: string; id?: string };
+  data_uri?: string;
+  html_options?: { name?: string; placeholder?: string; value?: string; class?: string; id?: string; maxlength?: number; tabindex?: number; autofocus?: boolean; disabled?: string };
   options?: ApiInputOption[];
+  inputs?: ApiInput[];
   validation?: { rule: 'required' | 'minLength' | 'pattern'; value?: number | string; message?: string }[];
 };
 type ApiResponse = {
@@ -915,6 +917,18 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
 
     (apiResponse.inputs || []).forEach((input) => {
       if (input.type === 'submit' || input.type === 'tc') return;
+      // Validate nested inputs in input-group (e.g. passphrase fields)
+      if (input.type === 'input-group' && input.inputs) {
+        input.inputs.forEach((child) => {
+          if (child.html_options?.disabled === 'disabled') return;
+          const childName = child.html_options?.name;
+          if (!childName) return;
+          const childVal = formData[childName];
+          const childErrs = validateInput(child, childVal);
+          if (childErrs.length) { newErrors[childName] = childErrs[0]; hasErrors = true; }
+        });
+        return;
+      }
       const name = input.html_options?.name;
       if (!name) return;
       const val = formData[name];
@@ -1207,6 +1221,92 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
               title={input.label || name}
               subtitle={name === 'instant_eft' ? 'Process instantly (bank fees may apply)' : undefined}
             />
+          </div>
+        );
+
+      case 'captcha':
+        return (
+          <div key={name} className="mb-4">
+            {input.data_uri && (
+              <div className="mb-3 flex justify-center">
+                <img
+                  src={input.data_uri}
+                  alt="Security captcha"
+                  className="border border-gray-300 rounded-lg shadow-sm max-w-full h-auto"
+                  style={{ maxHeight: '80px' }}
+                />
+              </div>
+            )}
+            {input.label && <label className="block text-sm font-medium text-gray-700 mb-2">{input.label}</label>}
+            <input
+              type="text"
+              name={name}
+              value={value}
+              onChange={(e) => handleInputChange(name, e.target.value)}
+              placeholder={input.html_options?.placeholder || 'Enter the code shown above'}
+              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 ${
+                error ? 'border-red-500' : 'border-gray-300'
+              }`}
+              autoComplete="off"
+            />
+            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+          </div>
+        );
+
+      case 'input-group':
+        return (
+          <div key={name || 'input-group'} className="mb-4">
+            {input.label && (
+              <p className="text-sm text-gray-700 mb-3">
+                Make sure your SurePhrase™ is correct and only enter the missing characters of your password in the{' '}
+                <span className="text-rose-700 font-medium">coloured</span> blocks
+              </p>
+            )}
+            <div className="flex gap-1.5 flex-wrap justify-start">
+              {(input.inputs || []).map((child) => {
+                const childName = child.html_options?.name || '';
+                const childValue = formData[childName] ?? (child.html_options?.disabled === 'disabled' ? child.html_options?.value : '') ?? '';
+                const isDisabled = child.html_options?.disabled === 'disabled';
+                const isRequired = child.type === 'password';
+                const childError = formErrors[childName];
+                return (
+                  <div key={childName} className="relative">
+                    <input
+                      type={isRequired ? 'password' : 'text'}
+                      name={childName}
+                      value={childValue}
+                      onChange={(e) => {
+                        if (!isDisabled) {
+                          const val = e.target.value;
+                          handleInputChange(childName, val);
+                          if (val.length === 1 && child.html_options?.maxlength === 1) {
+                            // Find next required (non-disabled) input
+                            let sibling = e.target.parentElement?.nextElementSibling;
+                            while (sibling) {
+                              const inp = sibling.querySelector('input:not([disabled])') as HTMLInputElement | null;
+                              if (inp) { inp.focus(); break; }
+                              sibling = sibling.nextElementSibling;
+                            }
+                          }
+                        }
+                      }}
+                      maxLength={child.html_options?.maxlength || 1}
+                      tabIndex={child.html_options?.tabindex || undefined}
+                      autoFocus={child.html_options?.autofocus || false}
+                      disabled={isDisabled}
+                      className={`w-10 h-10 text-center text-sm font-medium border-2 rounded transition-all duration-150 ${
+                        isDisabled
+                          ? 'bg-gray-100 border-gray-300 text-gray-500 cursor-default'
+                          : `bg-white border-rose-700 text-gray-900 focus:ring-2 focus:ring-rose-300 focus:border-rose-800 ${
+                              childError ? 'border-red-500 bg-red-50' : ''
+                            }`
+                      }`}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+            {error && <p className="text-red-500 text-sm mt-2 text-center">{error}</p>}
           </div>
         );
 

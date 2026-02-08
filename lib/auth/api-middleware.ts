@@ -95,7 +95,8 @@ export async function authenticateApiRequest(
     const apiKey = authHeader.substring(7); // Remove 'Bearer '
     
     // 4. Get request body for signature verification
-    const requestBody = await request.text();
+    // Clone body text so downstream handlers can still call request.json()
+    const requestBody = await request.clone().text();
     
     // 5. Verify API key and signature
     const verification = await verifyApiKey(

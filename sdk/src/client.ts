@@ -3,7 +3,8 @@
  * Main client for interacting with the YETOPAYEFT API
  */
 
-import axios, { AxiosInstance, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
+import crypto from 'crypto';
 import {
   YetoPayEFTConfig,
   CreatePaymentTokenRequest,
@@ -21,14 +22,22 @@ export class YetoPayEFTClient {
   private config: Required<YetoPayEFTConfig>;
 
   constructor(config: YetoPayEFTConfig) {
-    // Validate API key
+    // Validate required fields
     if (!config.apiKey) {
       throw new Error('API key is required');
+    }
+    if (!config.apiSecret) {
+      throw new Error('API secret is required');
+    }
+    if (!config.merchantId) {
+      throw new Error('Merchant ID is required');
     }
 
     // Set defaults
     this.config = {
       apiKey: config.apiKey,
+      apiSecret: config.apiSecret,
+      merchantId: config.merchantId,
       baseUrl: config.baseUrl || 'https://yetopayeft.com',
       timeout: config.timeout || 30000,
       debug: config.debug || false,
@@ -40,21 +49,33 @@ export class YetoPayEFTClient {
       timeout: this.config.timeout,
       headers: {
         'Content-Type': 'application/json',
-        'X-API-Key': this.config.apiKey,
       },
     });
 
-    // Add request interceptor for debugging
-    if (this.config.debug) {
-      this.client.interceptors.request.use((config: any) => {
+    // Add request interceptor for HMAC signing
+    this.client.interceptors.request.use((reqConfig: InternalAxiosRequestConfig) => {
+      const timestamp = Math.floor(Date.now() / 1000).toString();
+      const body = reqConfig.data ? JSON.stringify(reqConfig.data) : '';
+
+      // HMAC signature: SHA256(secretHash, merchantId + timestamp + body)
+      const secretHash = crypto.createHash('sha256').update(this.config.apiSecret).digest('hex');
+      const payload = `${this.config.merchantId}${timestamp}${body}`;
+      const signature = `sha256=${crypto.createHmac('sha256', secretHash).update(payload).digest('hex')}`;
+
+      reqConfig.headers.set('Authorization', `Bearer ${this.config.apiKey}`);
+      reqConfig.headers.set('X-Merchant-ID', this.config.merchantId);
+      reqConfig.headers.set('X-Timestamp', timestamp);
+      reqConfig.headers.set('X-Signature', signature);
+
+      if (this.config.debug) {
         console.log('[YetoPayEFT SDK] Request:', {
-          method: config.method,
-          url: config.url,
-          data: config.data,
+          method: reqConfig.method,
+          url: reqConfig.url,
+          data: reqConfig.data,
         });
-        return config;
-      });
-    }
+      }
+      return reqConfig;
+    });
 
     // Add response interceptor for error handling
     this.client.interceptors.response.use(
@@ -121,18 +142,17 @@ export class YetoPayEFTClient {
     }
 
     const response = await this.client.post<ApiResponse<PaymentToken>>(
-      '/payment-tokens',
+      '/payment-links',
       {
         amount: request.amount,
         reference: request.reference,
         customerEmail: request.customerEmail,
         customerName: request.customerName,
-        customerPhone: request.customerPhone,
         metadata: request.metadata,
         successUrl: request.successUrl,
-        cancelUrl: request.cancelUrl,
-        webhookUrl: request.webhookUrl,
-        expiryMinutes: request.expiryMinutes || 60,
+        failureUrl: request.cancelUrl,
+        notifyUrl: request.webhookUrl,
+        expiresInHours: request.expiryMinutes ? Math.ceil(request.expiryMinutes / 60) : 24,
       }
     );
 
@@ -148,29 +168,13 @@ export class YetoPayEFTClient {
    * @param tokenId Token ID
    * @returns Payment token details
    */
-  async getPaymentToken(tokenId: string): Promise<PaymentToken> {
-    const response = await this.client.get<ApiResponse<PaymentToken>>(
-      `/payment-tokens/${tokenId}`
-    );
-
-    if (!response.data.success || !response.data.data) {
-      throw new Error(response.data.message || 'Failed to get payment token');
-    }
-
-    return response.data.data;
-  }
-
   /**
-   * Revoke a payment token
-   * @param tokenId Token ID to revoke
-   * @returns Success status
+   * Get payment link status by checking the transaction
+   * @param transactionId Transaction ID returned from createPaymentToken
+   * @returns Transaction details including current status
    */
-  async revokePaymentToken(tokenId: string): Promise<boolean> {
-    const response = await this.client.delete<ApiResponse>(
-      `/payment-tokens/${tokenId}`
-    );
-
-    return response.data.success;
+  async getPaymentStatus(transactionId: string): Promise<Transaction> {
+    return this.getTransaction(transactionId);
   }
 
   // ============================================================================
@@ -183,15 +187,20 @@ export class YetoPayEFTClient {
    * @returns Transaction details
    */
   async getTransaction(transactionId: string): Promise<Transaction> {
-    const response = await this.client.get<ApiResponse<Transaction>>(
-      `/transactions/${transactionId}`
+    const response = await this.client.get<ApiResponse>(
+      `/payment-links?status=all`
     );
 
     if (!response.data.success || !response.data.data) {
-      throw new Error(response.data.message || 'Failed to get transaction');
+      throw new Error(response.data.message || 'Failed to get transactions');
     }
 
-    return response.data.data;
+    // Find the specific transaction
+    const txn = response.data.data.find((t: any) => t.id === transactionId);
+    if (!txn) {
+      throw new Error('Transaction not found');
+    }
+    return txn;
   }
 
   /**
@@ -204,22 +213,23 @@ export class YetoPayEFTClient {
   ): Promise<ListTransactionsResponse> {
     const params = new URLSearchParams();
 
-    if (request.page) params.append('page', request.page.toString());
     if (request.limit) params.append('limit', request.limit.toString());
+    if (request.page && request.limit) params.append('offset', ((request.page - 1) * request.limit).toString());
     if (request.status) params.append('status', request.status);
-    if (request.startDate) params.append('startDate', request.startDate);
-    if (request.endDate) params.append('endDate', request.endDate);
-    if (request.search) params.append('search', request.search);
+    if (request.startDate) params.append('from', request.startDate);
 
-    const response = await this.client.get<ApiResponse<ListTransactionsResponse>>(
-      `/transactions?${params.toString()}`
+    const response = await this.client.get<ApiResponse>(
+      `/payment-links?${params.toString()}`
     );
 
     if (!response.data.success || !response.data.data) {
       throw new Error(response.data.message || 'Failed to list transactions');
     }
 
-    return response.data.data;
+    return {
+      transactions: response.data.data,
+      pagination: response.data.pagination || { page: 1, limit: 50, total: response.data.data.length, totalPages: 1 },
+    };
   }
 
   // ============================================================================
@@ -231,13 +241,17 @@ export class YetoPayEFTClient {
    * @returns Array of banks
    */
   async getBanks(): Promise<Bank[]> {
-    const response = await this.client.get<ApiResponse<Bank[]>>('/banks');
-
-    if (!response.data.success || !response.data.data) {
-      throw new Error(response.data.message || 'Failed to get banks');
+    // Banks are returned during payment initialization, not via a separate endpoint
+    // This method is kept for API compatibility but may not have a dedicated route
+    try {
+      const response = await this.client.get<ApiResponse<Bank[]>>('/admin/banks');
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || 'Failed to get banks');
+      }
+      return response.data.data;
+    } catch {
+      throw new Error('Banks endpoint not available. Banks are provided during payment flow initialization.');
     }
-
-    return response.data.data;
   }
 
   // ============================================================================
@@ -256,18 +270,19 @@ export class YetoPayEFTClient {
     signature: string,
     secret: string
   ): boolean {
-    // Import crypto for Node.js
-    const crypto = require('crypto');
-
     const expectedSignature = crypto
       .createHmac('sha256', secret)
       .update(payload)
       .digest('hex');
 
-    return crypto.timingSafeEqual(
-      Buffer.from(signature),
-      Buffer.from(expectedSignature)
-    );
+    try {
+      return crypto.timingSafeEqual(
+        Buffer.from(signature),
+        Buffer.from(expectedSignature)
+      );
+    } catch {
+      return false;
+    }
   }
 
   // ============================================================================
@@ -289,7 +304,7 @@ export class YetoPayEFTClient {
    */
   async testConnection(): Promise<boolean> {
     try {
-      const response = await this.client.get<ApiResponse>('/health');
+      const response = await this.client.get<ApiResponse>('/payment-links?limit=1');
       return response.data.success;
     } catch (error) {
       return false;

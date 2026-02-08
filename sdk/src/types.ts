@@ -8,8 +8,12 @@
 // ============================================================================
 
 export interface YetoPayEFTConfig {
-  /** Your API key from the dashboard */
+  /** Your API key from the dashboard (e.g. yp_live_abc123...) */
   apiKey: string;
+  /** Your API secret from the dashboard (shown once on key creation) */
+  apiSecret: string;
+  /** Your Merchant ID (UUID from the dashboard) */
+  merchantId: string;
   /** API base URL (defaults to production) */
   baseUrl?: string;
   /** Request timeout in milliseconds (default: 30000) */

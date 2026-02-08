@@ -81,6 +81,28 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = createPaymentLinkSchema.parse(body);
 
+    // Check for duplicate reference within this merchant's transactions
+    const existingRef = await db
+      .select({ id: eftTransactions.id })
+      .from(eftTransactions)
+      .where(
+        and(
+          eq(eftTransactions.merchantId, merchantId),
+          eq(eftTransactions.reference, validatedData.reference)
+        )
+      )
+      .limit(1);
+
+    if (existingRef.length > 0) {
+      return NextResponse.json(
+        {
+          error: "Duplicate reference",
+          message: `A payment link with reference "${validatedData.reference}" already exists. Please use a unique reference.`,
+        },
+        { status: 409 }
+      );
+    }
+
     // Create transaction record
     const [transaction] = await db
       .insert(eftTransactions)
@@ -231,10 +253,12 @@ export async function GET(request: NextRequest) {
       orderBy: [desc(eftTransactions.createdAt)],
     });
 
-    // Get total count for pagination
-    const totalCount = await db.query.eftTransactions.findMany({
-      where: eq(eftTransactions.merchantId, session.user.id),
-    });
+    // Get total count for pagination (efficient COUNT query)
+    const countResult = await db
+      .select({ count: eftTransactions.id })
+      .from(eftTransactions)
+      .where(eq(eftTransactions.merchantId, session.user.id));
+    const total = countResult.length;
 
     return NextResponse.json({
       success: true,
@@ -245,8 +269,8 @@ export async function GET(request: NextRequest) {
       pagination: {
         limit,
         offset,
-        total: totalCount.length,
-        hasMore: offset + limit < totalCount.length,
+        total,
+        hasMore: offset + limit < total,
       },
     });
   } catch (error: any) {

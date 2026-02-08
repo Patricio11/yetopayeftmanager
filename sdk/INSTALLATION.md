@@ -96,6 +96,8 @@ import { YetoPayEFTClient } from '@yetopayeft/sdk';
 
 const client = new YetoPayEFTClient({
   apiKey: 'your-test-api-key',
+  apiSecret: 'your-test-api-secret',
+  merchantId: 'your-merchant-id',
   debug: true,
 });
 
@@ -221,7 +223,9 @@ And use it:
 import { YetoPayEFTClient } from '@yetopayeft/sdk';
 
 const client = new YetoPayEFTClient({
-  apiKey: process.env.YETOPAY_API_KEY,
+  apiKey: process.env.YETOPAY_API_KEY!,
+  apiSecret: process.env.YETOPAY_API_SECRET!,
+  merchantId: process.env.YETOPAY_MERCHANT_ID!,
 });
 
 const payment = await client.createPaymentToken({
@@ -350,7 +354,7 @@ Before publishing, ensure:
 Your SDK is now ready to use and publish!
 
 **Installation**: `npm install @yetopayeft/sdk`  
-**Usage**: Import and use with API key  
+**Usage**: Import and use with API key, secret, and merchant ID  
 **Support**: Full TypeScript support with IntelliSense  
 
 Happy coding! 🚀
