@@ -1,14 +1,93 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Home, Receipt, Settings, LogOut, Zap, Building2, CreditCard, Book, Users, Store, BarChart3, FileText } from "lucide-react";
+import {
+  Home, Receipt, Settings, LogOut, Zap, Building2, CreditCard, Book,
+  Users, Store, BarChart3, FileText, ChevronDown, ShieldCheck, MoreHorizontal,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/lib/auth-client";
 
 interface DashboardNavProps {
   userRole: string;
+}
+
+interface NavItem {
+  title: string;
+  href: string;
+  icon: any;
+}
+
+interface NavGroup {
+  label: string;
+  icon: any;
+  items: NavItem[];
+}
+
+function NavDropdown({ group, pathname }: { group: NavGroup; pathname: string }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const hasActive = group.items.some(
+    (item) => pathname === item.href || pathname.startsWith(item.href)
+  );
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const Icon = group.icon;
+
+  return (
+    <div className="relative" ref={ref}>
+      <Button
+        variant="ghost"
+        onClick={() => setOpen(!open)}
+        className={cn(
+          "gap-1.5 cursor-pointer transition-all",
+          hasActive
+            ? "bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400"
+            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+        )}
+      >
+        <Icon className="w-4 h-4" />
+        {group.label}
+        <ChevronDown className={cn("w-3.5 h-3.5 transition-transform", open && "rotate-180")} />
+      </Button>
+
+      {open && (
+        <div className="absolute top-full right-0 mt-1 w-52 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+          {group.items.map((item) => {
+            const ItemIcon = item.icon;
+            const isActive = pathname === item.href || pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 px-3.5 py-2.5 text-sm transition-colors",
+                  isActive
+                    ? "bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 font-medium"
+                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white"
+                )}
+              >
+                <ItemIcon className="w-4 h-4" />
+                {item.title}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function DashboardNav({ userRole }: DashboardNavProps) {
@@ -22,65 +101,39 @@ export function DashboardNav({ userRole }: DashboardNavProps) {
       router.push("/auth/login");
     } catch (error) {
       console.error("Logout error:", error);
-      // Fallback: redirect anyway
       router.push("/auth/login");
     }
   };
 
-  const navItems = [
-    {
-      title: "Dashboard",
-      href: "/dashboard",
-      icon: Home,
-    },
-    {
-      title: "Transactions",
-      href: "/dashboard/transactions",
-      icon: Receipt,
-    },
-    {
-      title: "Tokens",
-      href: "/dashboard/tokens",
-      icon: CreditCard,
-    },
-    ...(isAdmin ? [
-      {
-        title: "Merchants",
-        href: "/dashboard/admin/merchants",
-        icon: Store,
-      },
-      {
-        title: "Users",
-        href: "/dashboard/admin/users",
-        icon: Users,
-      },
-      {
-        title: "Banks",
-        href: "/dashboard/banks",
-        icon: Building2,
-      },
-      {
-        title: "Recon",
-        href: "/dashboard/admin/recon",
-        icon: BarChart3,
-      },
-    ] : []),
-    {
-      title: "Invoices",
-      href: "/dashboard/invoices",
-      icon: FileText,
-    },
-    {
-      title: "API Docs",
-      href: "/dashboard/api-docs",
-      icon: Book,
-    },
-    {
-      title: "Settings",
-      href: "/dashboard/settings",
-      icon: Settings,
-    },
+  // Top-level items (always visible)
+  const mainItems: NavItem[] = [
+    { title: "Dashboard", href: "/dashboard", icon: Home },
+    { title: "Transactions", href: "/dashboard/transactions", icon: Receipt },
+    { title: "Invoices", href: "/dashboard/invoices", icon: FileText },
   ];
+
+  // Admin dropdown group
+  const adminGroup: NavGroup = {
+    label: "Admin",
+    icon: ShieldCheck,
+    items: [
+      { title: "Merchants", href: "/dashboard/admin/merchants", icon: Store },
+      { title: "Users", href: "/dashboard/admin/users", icon: Users },
+      { title: "Banks", href: "/dashboard/banks", icon: Building2 },
+      { title: "Recon", href: "/dashboard/admin/recon", icon: BarChart3 },
+    ],
+  };
+
+  // More dropdown group (Tokens, API Docs, Settings)
+  const moreGroup: NavGroup = {
+    label: "More",
+    icon: MoreHorizontal,
+    items: [
+      { title: "Tokens", href: "/dashboard/tokens", icon: CreditCard },
+      { title: "API Docs", href: "/dashboard/api-docs", icon: Book },
+      { title: "Settings", href: "/dashboard/settings", icon: Settings },
+    ],
+  };
 
   return (
     <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-50">
@@ -100,11 +153,11 @@ export function DashboardNav({ userRole }: DashboardNavProps) {
           </Link>
 
           {/* Navigation */}
-          <nav className="flex items-center gap-2">
-            {navItems.map((item) => {
+          <nav className="flex items-center gap-1">
+            {/* Main items */}
+            {mainItems.map((item) => {
               const Icon = item.icon;
-              const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
-              
+              const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
               return (
                 <Link key={item.href} href={item.href}>
                   <Button
@@ -122,8 +175,15 @@ export function DashboardNav({ userRole }: DashboardNavProps) {
                 </Link>
               );
             })}
-            
-            <div className="ml-4 pl-4 border-l border-slate-200 dark:border-slate-700">
+
+            {/* Admin dropdown (admin only) */}
+            {isAdmin && <NavDropdown group={adminGroup} pathname={pathname} />}
+
+            {/* More dropdown */}
+            <NavDropdown group={moreGroup} pathname={pathname} />
+
+            {/* Logout */}
+            <div className="ml-3 pl-3 border-l border-slate-200 dark:border-slate-700">
               <Button
                 onClick={handleLogout}
                 variant="ghost"
