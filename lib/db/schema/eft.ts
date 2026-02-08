@@ -36,7 +36,7 @@ export const eftTransactions = pgTable("eft_transactions", {
   
   // Status
   status: text("status", { 
-    enum: ["not_started", "initiated", "completed", "failed", "aborted", "cancelled", "expired"] 
+    enum: ["not_started", "initiated", "pending", "completed", "failed", "aborted", "cancelled", "expired"] 
   }).default("not_started"),
   
   // Customer info (optional)

@@ -125,6 +125,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
 
   const submitGuard = useRef(false);
   const finalPollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const sseRef = useRef<EventSource | null>(null);
 
 
   const stepNumbers: Record<string, number> = {
@@ -204,6 +205,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   // Final UI -> update transaction status in our DB, then redirect
   const finishAndRedirect = async (uiStatus: 'completed' | 'failed', message?: string, raw?: ApiResponse) => {
     if (finalPollTimer.current) clearInterval(finalPollTimer.current);
+    if (sseRef.current) { sseRef.current.close(); sseRef.current = null; }
     setTransactionResult({ status: uiStatus, message });
     setCurrentStep(uiStatus);
 
@@ -212,7 +214,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
       if (initialData?.token) {
         console.log(`[EFT] Updating transaction status to: ${uiStatus}`);
         
-        const updatePayload = {
+        const updatePayload: Record<string, any> = {
           status: uiStatus === 'completed' ? 'completed' : 'failed',
           message: message || '',
           gatewayResult: raw?.gatewayResult,
@@ -223,6 +225,11 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
           sessionId: sessionId || raw?.sessionId,
           metadata: raw,
         };
+
+        // Pass through the EFT service HMAC signature for completed payments
+        if (uiStatus === 'completed' && (raw as any)?.eftSignature) {
+          updatePayload.eftSignature = (raw as any).eftSignature;
+        }
 
         const updateResponse = await fetch(
           `${FRONTEND_API_BASE_URL}/eft/transactions/${initialData.token}/complete`,
@@ -267,6 +274,29 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     setTimeout(() => { 
       window.location.href = redirectUrl; 
     }, 4000);
+  };
+
+  // --- Update intermediate transaction status (non-blocking) ---
+  const updateTransactionStatus = async (status: string, message?: string) => {
+    try {
+      if (!initialData?.token) return;
+      console.log(`[EFT] Updating transaction status to: ${status}`);
+      await fetch(
+        `${FRONTEND_API_BASE_URL}/eft/transactions/${initialData.token}/complete`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            status,
+            message: message || '',
+            customerBank: selectedBank?.code,
+            sessionId,
+          }),
+        }
+      );
+    } catch (err) {
+      console.warn(`[EFT] Failed to update status to ${status}:`, err);
+    }
   };
 
   // --- Init: load transaction metadata ---
@@ -360,7 +390,10 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     const sid = loadSessionFromStorage();
     if (sid) setSessionId(sid);
     fetchInitialData();
-    return () => { if (finalPollTimer.current) clearInterval(finalPollTimer.current); };
+    return () => {
+      if (finalPollTimer.current) clearInterval(finalPollTimer.current);
+      if (sseRef.current) { sseRef.current.close(); sseRef.current = null; }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -501,15 +534,93 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     return result;
   };
 
-  // --- Polling for final state (in-app approval) ---
-  const startFinalPolling = (bankCode: string) => {
+  // --- SSE connection for real-time payment status (replaces polling) ---
+  const connectSSE = (bankCode: string) => {
+    // Clean up any existing SSE or poll
+    if (sseRef.current) { sseRef.current.close(); sseRef.current = null; }
+    if (finalPollTimer.current) { clearInterval(finalPollTimer.current); finalPollTimer.current = null; }
+
+    const sseUrl = `${EFT_API_BASE_URL}/${bankCode}/events?session_id=${sessionId}&token=${encodeURIComponent(authSecretBearerToken)}`;
+    console.log('[SSE] Connecting to:', sseUrl);
+
+    const es = new EventSource(sseUrl);
+    sseRef.current = es;
+
+    es.addEventListener('connected', (e) => {
+      console.log('[SSE] Connected:', e.data);
+    });
+
+    es.addEventListener('payment_success', async (e) => {
+      console.log('[SSE] Payment success:', e.data);
+      es.close();
+      sseRef.current = null;
+      try {
+        const res: ApiResponse = JSON.parse(e.data);
+        const norm = normalizeTerminal(res);
+        if (norm.terminal) {
+          await finishAndRedirect(norm.uiStatus, norm.message, res);
+        } else {
+          await finishAndRedirect('completed', res.message || 'Payment completed successfully', res);
+        }
+      } catch {
+        await finishAndRedirect('completed', 'Payment completed successfully');
+      }
+    });
+
+    es.addEventListener('payment_failed', async (e) => {
+      console.log('[SSE] Payment failed:', e.data);
+      es.close();
+      sseRef.current = null;
+      try {
+        const res: ApiResponse = JSON.parse(e.data);
+        const norm = normalizeTerminal(res);
+        if (norm.terminal) {
+          await finishAndRedirect(norm.uiStatus, norm.message, res);
+        } else {
+          await finishAndRedirect('failed', res.message || 'Payment failed', res);
+        }
+      } catch {
+        await finishAndRedirect('failed', 'Payment failed');
+      }
+    });
+
+    es.addEventListener('step_update', (e) => {
+      console.log('[SSE] Step update:', e.data);
+      try {
+        const res: ApiResponse = JSON.parse(e.data);
+        // Show the step update to the user (e.g. "resend auth", OTP form)
+        if (res.inputs) {
+          setApiResponse(res);
+          setCurrentStep(res.step || 'auth');
+          setIsLoading(false);
+        }
+      } catch {
+        // Ignore parse errors
+      }
+    });
+
+    es.addEventListener('heartbeat', () => {
+      // Keep-alive, no action needed
+    });
+
+    es.onerror = (err) => {
+      console.warn('[SSE] Connection error, falling back to polling:', err);
+      es.close();
+      sseRef.current = null;
+      // Fallback: use polling if SSE fails (e.g. browser/proxy doesn't support SSE)
+      startFinalPollingFallback(bankCode);
+    };
+  };
+
+  // --- Fallback polling (only used if SSE connection fails) ---
+  const startFinalPollingFallback = (bankCode: string) => {
     if (finalPollTimer.current) clearInterval(finalPollTimer.current);
+    console.log('[EFT] SSE unavailable, falling back to polling');
     finalPollTimer.current = setInterval(async () => {
       try {
         const res = await executeStepApi(bankCode, 'final', {});
         const norm = normalizeTerminal(res);
         if (norm.terminal) {
-          // Clear interval immediately to prevent duplicate calls
           if (finalPollTimer.current) {
             clearInterval(finalPollTimer.current);
             finalPollTimer.current = null;
@@ -536,6 +647,11 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     let stepData = data;
     let previousStep = currentStep; // Track previous step to detect auth completion
     let authCredentials: Record<string, any> = {}; // Store auth credentials for saving
+
+    // Update transaction to "pending" when user submits auth credentials
+    if (initialStep === 'auth') {
+      updateTransactionStatus('pending', 'Customer authenticating with bank');
+    }
 
     try {
       while (currentExecutionStep) {
@@ -652,7 +768,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
           }
           if (stepToDisplay === 'final') {
             setIsInAppStep(true);
-            startFinalPolling(bankCode);
+            connectSSE(bankCode);
           } else {
             setIsInAppStep(false);
           }

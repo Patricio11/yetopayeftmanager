@@ -8,7 +8,7 @@ import crypto from "crypto";
 import { dispatchWebhookEvent } from "@/lib/webhooks/dispatcher";
 
 const completeSchema = z.object({
-  status: z.enum(["completed", "failed", "aborted", "cancelled", "expired"]),
+  status: z.enum(["pending", "completed", "failed", "aborted", "cancelled", "expired"]),
   message: z.string().optional(),
   gatewayResult: z.string().optional(),
   transactionStatus: z.string().optional(),
