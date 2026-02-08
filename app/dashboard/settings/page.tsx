@@ -143,17 +143,49 @@ function SettingsContent() {
 function ProfileSettings() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+
+  useEffect(() => {
+    fetch("/api/merchant/settings")
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setName(data.data.profile.fullName || data.data.profile.name || "");
+          setEmail(data.data.profile.email || "");
+          setPhone(data.data.profile.phone || "");
+        }
+      })
+      .catch(() => {})
+      .finally(() => setFetching(false));
+  }, []);
 
   const handleSave = async () => {
     setLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setLoading(false);
-    toast({
-      title: "Profile updated",
-      description: "Your profile has been updated successfully.",
-    });
+    try {
+      const res = await fetch("/api/merchant/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, fullName: name, phone }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast({ title: "Profile updated", description: "Your profile has been updated successfully." });
+      } else {
+        toast({ title: "Error", description: data.error || "Failed to update profile", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to update profile", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (fetching) {
+    return <Card><CardContent className="py-8 text-center text-gray-500">Loading profile...</CardContent></Card>;
+  }
 
   return (
     <Card>
@@ -165,24 +197,21 @@ function ProfileSettings() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="name">Full Name</Label>
-            <Input id="name" placeholder="John Merchant" defaultValue="John Merchant" />
+            <Input id="name" placeholder="John Merchant" value={name} onChange={e => setName(e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email Address</Label>
-            <Input id="email" type="email" placeholder="merchant@example.com" defaultValue="merchanteft@yetopayeft.com" />
+            <Input id="email" type="email" value={email} disabled className="bg-gray-50" />
+            <p className="text-xs text-gray-500">Email cannot be changed here</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="phone">Phone Number</Label>
-            <Input id="phone" type="tel" placeholder="+27 12 345 6789" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="timezone">Timezone</Label>
-            <Input id="timezone" defaultValue="Africa/Johannesburg" />
+            <Input id="phone" type="tel" placeholder="+27 12 345 6789" value={phone} onChange={e => setPhone(e.target.value)} />
           </div>
         </div>
 
         <div className="flex justify-end gap-3">
-          <Button variant="outline">Cancel</Button>
+          <Button variant="outline" onClick={() => window.location.reload()}>Cancel</Button>
           <Button onClick={handleSave} disabled={loading}>
             {loading ? "Saving..." : "Save Changes"}
           </Button>
@@ -197,16 +226,48 @@ function SecuritySettings() {
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const handlePasswordReset = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast({ title: "Error", description: "All password fields are required", variant: "destructive" });
+      return;
+    }
+    if (newPassword.length < 8) {
+      toast({ title: "Error", description: "New password must be at least 8 characters", variant: "destructive" });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast({ title: "Error", description: "New passwords do not match", variant: "destructive" });
+      return;
+    }
+
     setLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setLoading(false);
-    toast({
-      title: "Password updated",
-      description: "Your password has been changed successfully.",
-    });
+    try {
+      const res = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast({ title: "Password updated", description: "Your password has been changed successfully." });
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      } else {
+        toast({ title: "Error", description: data.message || "Failed to update password", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to update password", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -224,7 +285,9 @@ function SecuritySettings() {
               <Input 
                 id="current-password" 
                 type={showPassword ? "text" : "password"} 
-                placeholder="Enter current password" 
+                placeholder="Enter current password"
+                value={currentPassword}
+                onChange={e => setCurrentPassword(e.target.value)}
               />
               <button
                 type="button"
@@ -241,7 +304,9 @@ function SecuritySettings() {
             <Input 
               id="new-password" 
               type={showPassword ? "text" : "password"} 
-              placeholder="Enter new password" 
+              placeholder="Enter new password"
+              value={newPassword}
+              onChange={e => setNewPassword(e.target.value)}
             />
           </div>
 
@@ -250,7 +315,9 @@ function SecuritySettings() {
             <Input 
               id="confirm-password" 
               type={showPassword ? "text" : "password"} 
-              placeholder="Confirm new password" 
+              placeholder="Confirm new password"
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
             />
           </div>
 
@@ -327,24 +394,24 @@ function SecuritySettings() {
 function ApiKeysSettings() {
   const { toast } = useToast();
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [apiKeys, setApiKeys] = useState([
-    {
-      id: "1",
-      name: "Production Server",
-      keyPrefix: "yp_live_abc123...",
-      created: "2024-11-15",
-      lastUsed: "2 hours ago",
-      status: "active"
-    },
-    {
-      id: "2",
-      name: "Development Server",
-      keyPrefix: "yp_test_xyz789...",
-      created: "2024-11-20",
-      lastUsed: "Never",
-      status: "active"
+  const [apiKeys, setApiKeys] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchApiKeys = async () => {
+    try {
+      const res = await fetch("/api/merchant/api-keys");
+      const data = await res.json();
+      if (data.success) {
+        setApiKeys(data.data || []);
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to load API keys", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
     }
-  ]);
+  };
+
+  useEffect(() => { fetchApiKeys(); }, []);
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -354,13 +421,20 @@ function ApiKeysSettings() {
     });
   };
 
-  const handleRevoke = (id: string) => {
-    setApiKeys(apiKeys.filter(key => key.id !== id));
-    toast({
-      title: "API key revoked",
-      description: "The API key has been revoked successfully.",
-      variant: "destructive",
-    });
+  const handleRevoke = async (id: string) => {
+    if (!confirm("Are you sure you want to revoke this API key? This cannot be undone.")) return;
+    try {
+      const res = await fetch(`/api/merchant/api-keys/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        setApiKeys(apiKeys.filter(key => key.id !== id));
+        toast({ title: "API key revoked", description: "The API key has been revoked successfully." });
+      } else {
+        toast({ title: "Error", description: data.message || "Failed to revoke key", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to revoke API key", variant: "destructive" });
+    }
   };
 
   return (
@@ -449,7 +523,7 @@ function ApiKeysSettings() {
 
       {/* Create API Key Modal */}
       {showCreateModal && (
-        <CreateApiKeyModal onClose={() => setShowCreateModal(false)} />
+        <CreateApiKeyModal onClose={() => { setShowCreateModal(false); fetchApiKeys(); }} />
       )}
 
       {/* Documentation Link */}
@@ -480,12 +554,13 @@ function CreateApiKeyModal({ onClose }: { onClose: () => void }) {
   const { toast } = useToast();
   const [step, setStep] = useState<"form" | "success">("form");
   const [keyName, setKeyName] = useState("");
+  const [creating, setCreating] = useState(false);
   const [generatedKey, setGeneratedKey] = useState({
-    apiKey: "yp_live_abc123def456ghi789jkl012mno345pqr678stu901vwx234yz",
-    apiSecret: "base64url-secret-string-here-keep-this-secure-never-share"
+    apiKey: "",
+    apiSecret: ""
   });
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!keyName.trim()) {
       toast({
         title: "Error",
@@ -494,7 +569,28 @@ function CreateApiKeyModal({ onClose }: { onClose: () => void }) {
       });
       return;
     }
-    setStep("success");
+    setCreating(true);
+    try {
+      const res = await fetch("/api/merchant/api-keys", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: keyName }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setGeneratedKey({
+          apiKey: data.data.apiKey,
+          apiSecret: data.data.apiSecret,
+        });
+        setStep("success");
+      } else {
+        toast({ title: "Error", description: data.message || "Failed to create API key", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to create API key", variant: "destructive" });
+    } finally {
+      setCreating(false);
+    }
   };
 
   const handleCopy = (text: string, label: string) => {
@@ -620,6 +716,68 @@ function CreateApiKeyModal({ onClose }: { onClose: () => void }) {
 // Company Settings Component
 function CompanySettings() {
   const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+  const [companyName, setCompanyName] = useState("");
+  const [registrationNumber, setRegistrationNumber] = useState("");
+  const [vatNumber, setVatNumber] = useState("");
+  const [website, setWebsite] = useState("");
+  const [street, setStreet] = useState("");
+  const [city, setCity] = useState("");
+  const [province, setProvince] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+
+  useEffect(() => {
+    fetch("/api/merchant/settings")
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          const c = data.data.company;
+          setCompanyName(c.companyName || "");
+          setRegistrationNumber(c.registrationNumber || "");
+          setVatNumber(c.vatNumber || "");
+          setWebsite(c.website || "");
+          const addr = c.address || {};
+          setStreet(addr.street || "");
+          setCity(addr.city || "");
+          setProvince(addr.state || "");
+          setPostalCode(addr.postal_code || "");
+        }
+      })
+      .catch(() => {})
+      .finally(() => setFetching(false));
+  }, []);
+
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/merchant/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          companyName,
+          registrationNumber,
+          vatNumber,
+          website: website || undefined,
+          address: { street, city, state: province, postal_code: postalCode, country: "South Africa" },
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast({ title: "Company updated", description: "Your company details have been saved." });
+      } else {
+        toast({ title: "Error", description: data.error || "Failed to update", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to update company details", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (fetching) {
+    return <Card><CardContent className="py-8 text-center text-gray-500">Loading company details...</CardContent></Card>;
+  }
 
   return (
     <Card>
@@ -631,45 +789,47 @@ function CompanySettings() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="company-name">Company Name</Label>
-            <Input id="company-name" defaultValue="Acme Corporation" />
+            <Input id="company-name" value={companyName} onChange={e => setCompanyName(e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="registration">Registration Number</Label>
-            <Input id="registration" placeholder="2024/123456/07" />
+            <Input id="registration" placeholder="2024/123456/07" value={registrationNumber} onChange={e => setRegistrationNumber(e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="vat">VAT Number</Label>
-            <Input id="vat" placeholder="4123456789" />
+            <Input id="vat" placeholder="4123456789" value={vatNumber} onChange={e => setVatNumber(e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="website">Website</Label>
-            <Input id="website" type="url" placeholder="https://example.com" />
+            <Input id="website" type="url" placeholder="https://example.com" value={website} onChange={e => setWebsite(e.target.value)} />
           </div>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="address">Business Address</Label>
-          <Input id="address" placeholder="123 Main Street" />
+          <Input id="address" placeholder="123 Main Street" value={street} onChange={e => setStreet(e.target.value)} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="space-y-2">
             <Label htmlFor="city">City</Label>
-            <Input id="city" placeholder="Johannesburg" />
+            <Input id="city" placeholder="Johannesburg" value={city} onChange={e => setCity(e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="province">Province</Label>
-            <Input id="province" placeholder="Gauteng" />
+            <Input id="province" placeholder="Gauteng" value={province} onChange={e => setProvince(e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="postal">Postal Code</Label>
-            <Input id="postal" placeholder="2000" />
+            <Input id="postal" placeholder="2000" value={postalCode} onChange={e => setPostalCode(e.target.value)} />
           </div>
         </div>
 
         <div className="flex justify-end gap-3">
-          <Button variant="outline">Cancel</Button>
-          <Button>Save Changes</Button>
+          <Button variant="outline" onClick={() => window.location.reload()}>Cancel</Button>
+          <Button onClick={handleSave} disabled={loading}>
+            {loading ? "Saving..." : "Save Changes"}
+          </Button>
         </div>
       </CardContent>
     </Card>
@@ -678,6 +838,65 @@ function CompanySettings() {
 
 // Banking Settings Component
 function BankingSettings() {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+  const [bankName, setBankName] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
+  const [accountType, setAccountType] = useState("");
+  const [branchCode, setBranchCode] = useState("");
+  const [accountHolder, setAccountHolder] = useState("");
+
+  useEffect(() => {
+    fetch("/api/merchant/settings")
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          const b = data.data.banking.bankAccount || {};
+          setBankName(b.bank_name || "");
+          setAccountNumber(b.account_number || "");
+          setAccountType(b.account_type || "cheque");
+          setBranchCode(b.branch_code || "");
+          setAccountHolder(b.account_holder || "");
+        }
+      })
+      .catch(() => {})
+      .finally(() => setFetching(false));
+  }, []);
+
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/merchant/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bankAccount: {
+            bank_name: bankName,
+            account_number: accountNumber,
+            account_type: accountType || "cheque",
+            branch_code: branchCode,
+            account_holder: accountHolder,
+          },
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast({ title: "Banking updated", description: "Your bank account details have been saved." });
+      } else {
+        toast({ title: "Error", description: data.error || "Failed to update", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to update bank details", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (fetching) {
+    return <Card><CardContent className="py-8 text-center text-gray-500">Loading bank details...</CardContent></Card>;
+  }
+
   return (
     <div className="space-y-6">
       <Card>
@@ -688,34 +907,49 @@ function BankingSettings() {
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
+              <Label htmlFor="account-holder">Account Holder Name</Label>
+              <Input id="account-holder" placeholder="John Merchant" value={accountHolder} onChange={e => setAccountHolder(e.target.value)} />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="bank">Bank Name</Label>
-              <Input id="bank" defaultValue="FNB (First National Bank)" />
+              <Input id="bank" placeholder="FNB (First National Bank)" value={bankName} onChange={e => setBankName(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="account-number">Account Number</Label>
-              <Input id="account-number" defaultValue="62123456789" />
+              <Input id="account-number" placeholder="62123456789" value={accountNumber} onChange={e => setAccountNumber(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="account-type">Account Type</Label>
-              <Input id="account-type" defaultValue="Cheque" />
+              <select
+                id="account-type"
+                value={accountType}
+                onChange={e => setAccountType(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <option value="cheque">Cheque</option>
+                <option value="savings">Savings</option>
+                <option value="transmission">Transmission</option>
+              </select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="branch-code">Branch Code</Label>
-              <Input id="branch-code" defaultValue="250655" />
+              <Input id="branch-code" placeholder="250655" value={branchCode} onChange={e => setBranchCode(e.target.value)} />
             </div>
           </div>
 
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex gap-3">
-            <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-green-900">
-              <p className="font-medium">Account Verified</p>
-              <p className="text-green-800">Your bank account has been verified and is active.</p>
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex gap-3">
+            <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-yellow-900">
+              <p className="font-medium">Important</p>
+              <p className="text-yellow-800">This bank account will be used for EFT payments. Customers will pay into this account via the EFT payment flow.</p>
             </div>
           </div>
 
           <div className="flex justify-end gap-3">
-            <Button variant="outline">Cancel</Button>
-            <Button>Update Account</Button>
+            <Button variant="outline" onClick={() => window.location.reload()}>Cancel</Button>
+            <Button onClick={handleSave} disabled={loading}>
+              {loading ? "Saving..." : "Update Account"}
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -725,6 +959,58 @@ function BankingSettings() {
 
 // Notification Settings Component
 function NotificationSettings() {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+  const [prefs, setPrefs] = useState({
+    payment_completed: true,
+    payment_failed: true,
+    weekly_summary: false,
+    security_alerts: true,
+  });
+
+  useEffect(() => {
+    fetch("/api/merchant/settings")
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          const np = data.data.notifications.notificationPreferences || {};
+          setPrefs(p => ({ ...p, ...np }));
+        }
+      })
+      .catch(() => {})
+      .finally(() => setFetching(false));
+  }, []);
+
+  const togglePref = (key: keyof typeof prefs) => {
+    setPrefs(p => ({ ...p, [key]: !p[key] }));
+  };
+
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/merchant/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notificationPreferences: prefs }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast({ title: "Preferences saved", description: "Your notification preferences have been updated." });
+      } else {
+        toast({ title: "Error", description: data.error || "Failed to save", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to save preferences", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (fetching) {
+    return <Card><CardContent className="py-8 text-center text-gray-500">Loading preferences...</CardContent></Card>;
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -738,7 +1024,7 @@ function NotificationSettings() {
               <p className="font-medium">Payment Notifications</p>
               <p className="text-sm text-gray-600">Receive notifications when payments are completed</p>
             </div>
-            <input type="checkbox" defaultChecked className="w-4 h-4" />
+            <input type="checkbox" checked={prefs.payment_completed} onChange={() => togglePref("payment_completed")} className="w-4 h-4" />
           </div>
 
           <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -746,7 +1032,7 @@ function NotificationSettings() {
               <p className="font-medium">Failed Payment Alerts</p>
               <p className="text-sm text-gray-600">Get notified when payments fail</p>
             </div>
-            <input type="checkbox" defaultChecked className="w-4 h-4" />
+            <input type="checkbox" checked={prefs.payment_failed} onChange={() => togglePref("payment_failed")} className="w-4 h-4" />
           </div>
 
           <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -754,7 +1040,7 @@ function NotificationSettings() {
               <p className="font-medium">Weekly Summary</p>
               <p className="text-sm text-gray-600">Receive weekly transaction summaries</p>
             </div>
-            <input type="checkbox" className="w-4 h-4" />
+            <input type="checkbox" checked={prefs.weekly_summary} onChange={() => togglePref("weekly_summary")} className="w-4 h-4" />
           </div>
 
           <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -762,13 +1048,15 @@ function NotificationSettings() {
               <p className="font-medium">Security Alerts</p>
               <p className="text-sm text-gray-600">Important security notifications</p>
             </div>
-            <input type="checkbox" defaultChecked className="w-4 h-4" />
+            <input type="checkbox" checked={prefs.security_alerts} onChange={() => togglePref("security_alerts")} className="w-4 h-4" />
           </div>
         </div>
 
         <div className="flex justify-end gap-3">
-          <Button variant="outline">Cancel</Button>
-          <Button>Save Preferences</Button>
+          <Button variant="outline" onClick={() => window.location.reload()}>Cancel</Button>
+          <Button onClick={handleSave} disabled={loading}>
+            {loading ? "Saving..." : "Save Preferences"}
+          </Button>
         </div>
       </CardContent>
     </Card>
@@ -784,6 +1072,11 @@ function WebhookSettings() {
   const [selectedWebhook, setSelectedWebhook] = useState<any>(null);
   const [showDeliveries, setShowDeliveries] = useState(false);
   const [deliveries, setDeliveries] = useState<any[]>([]);
+
+  // Secret modal state
+  const [secretModalOpen, setSecretModalOpen] = useState(false);
+  const [secretModalValue, setSecretModalValue] = useState("");
+  const [secretCopied, setSecretCopied] = useState(false);
 
   // Form state
   const [url, setUrl] = useState("");
@@ -849,8 +1142,10 @@ function WebhookSettings() {
           description: "Webhook created successfully. Save your secret key!",
         });
         
-        // Show secret in alert
-        alert(`Webhook Secret (save this!):\n\n${data.data.webhook.secret}\n\nYou won't be able to see this again!`);
+        // Show secret in secure modal with copy button
+        setSecretModalValue(data.data.webhook.secret);
+        setSecretCopied(false);
+        setSecretModalOpen(true);
         
         setShowCreateModal(false);
         setUrl("");
@@ -953,7 +1248,9 @@ function WebhookSettings() {
       const data = await response.json();
 
       if (data.success) {
-        alert(`New Webhook Secret (save this!):\n\n${data.data.secret}\n\nYou won't be able to see this again!`);
+        setSecretModalValue(data.data.secret);
+        setSecretCopied(false);
+        setSecretModalOpen(true);
         toast({
           title: "Success",
           description: "Secret regenerated successfully",
@@ -1188,6 +1485,66 @@ function WebhookSettings() {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* Webhook Secret Modal */}
+      {secretModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-amber-600" />
+                Webhook Secret
+              </CardTitle>
+              <CardDescription>
+                Copy and store this secret securely. It will not be shown again.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Secret Key</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={secretModalValue}
+                    readOnly
+                    className="font-mono text-sm"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      navigator.clipboard.writeText(secretModalValue);
+                      setSecretCopied(true);
+                      toast({
+                        title: "Copied!",
+                        description: "Webhook secret copied to clipboard.",
+                      });
+                    }}
+                  >
+                    {secretCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex gap-3">
+                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-red-900">
+                  <p className="font-medium mb-1">Save this secret now</p>
+                  <p className="text-red-800">
+                    This is the only time you will see this secret. Store it in a secure
+                    location like a password manager or environment variables.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <Button onClick={() => setSecretModalOpen(false)}>
+                  Done
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* Deliveries Modal */}

@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, jsonb, boolean, index } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, timestamp, jsonb, boolean, integer, index } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
 // Merchant Team Members
@@ -35,6 +35,7 @@ export const apiKeys = pgTable("api_keys", {
   // Key details
   name: text("name").notNull(),
   key: text("key").notNull().unique(), // Hashed
+  secretHash: text("secret_hash"), // SHA-256 hash of API secret, used as HMAC key for signature verification
   keyPrefix: text("key_prefix").notNull(), // First 8 chars for display (e.g., "yp_live_")
   
   // Permissions
@@ -97,12 +98,12 @@ export const webhookDeliveries = pgTable("webhook_deliveries", {
   
   // Response
   response: jsonb("response"),
-  statusCode: jsonb("status_code").$type<number>(),
+  statusCode: integer("status_code"),
   success: boolean("success"),
   errorMessage: text("error_message"),
   
   // Retry tracking
-  attemptNumber: jsonb("attempt_number").$type<number>().default(1),
+  attemptNumber: integer("attempt_number").default(1),
   nextRetryAt: timestamp("next_retry_at"),
   
   // Timestamps

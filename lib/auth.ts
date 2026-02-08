@@ -15,7 +15,21 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false, // Disabled for development
+    requireEmailVerification: true,
+    sendResetPassword: async ({ user, url }) => {
+      // In production, send a real email using a service like Resend, SendGrid, etc.
+      // For now, log the reset URL to the console for development.
+      console.log(`🔑 Password reset link for ${user.email}: ${url}`);
+    },
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      // In production, send a real email using a service like Resend, SendGrid, etc.
+      // For now, log the verification URL to the console for development.
+      console.log(`📧 Email verification link for ${user.email}: ${url}`);
+    },
   },
   session: {
     expiresIn: 60 * 15, // 15 minutes

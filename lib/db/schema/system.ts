@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, jsonb, index } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, timestamp, jsonb, boolean, index } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
 // System Logs
@@ -69,7 +69,7 @@ export const notifications = pgTable("notifications", {
   message: text("message").notNull(),
   
   // Status
-  isRead: jsonb("is_read").$type<boolean>().default(false),
+  isRead: boolean("is_read").default(false),
   readAt: timestamp("read_at"),
   
   // Metadata
@@ -89,7 +89,7 @@ export const userServices = pgTable("user_services", {
   
   // Service details
   serviceName: text("service_name").notNull(), // 'YETOPAYEFT', 'PAYMENT_LINKS', 'CALLPAYEFT', etc.
-  isEnabled: jsonb("is_enabled").$type<boolean>().default(false),
+  isEnabled: boolean("is_enabled").default(false),
   
   // Configuration
   configuration: jsonb("configuration").default({}),

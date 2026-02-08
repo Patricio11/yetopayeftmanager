@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/authorization';
 import { db } from '@/lib/db';
-import { users } from '@/lib/db/schema';
+import { users, verifications } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
+import crypto from 'crypto';
 
 const createMerchantSchema = z.object({
   email: z.string().email(),
@@ -52,25 +53,49 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = createMerchantSchema.parse(body);
 
+    const merchantId = crypto.randomUUID();
+
     const [merchant] = await db
       .insert(users)
       .values({
-        id: crypto.randomUUID(),
+        id: merchantId,
         email: validatedData.email,
         name: validatedData.name,
         role: 'merchant',
         companyName: validatedData.companyName,
         companyLogoUrl: validatedData.companyLogoUrl,
         emailVerified: false,
+        isActive: false, // Inactive until they accept the invitation
         createdAt: new Date(),
         updatedAt: new Date(),
       })
       .returning();
 
+    // Generate a secure invitation token (48 bytes = 64 chars hex)
+    const invitationToken = crypto.randomBytes(48).toString('hex');
+    const invitationExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
+    await db.insert(verifications).values({
+      id: crypto.randomUUID(),
+      identifier: validatedData.email,
+      value: invitationToken,
+      expiresAt: invitationExpiry,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const invitationLink = `${appUrl}/auth/accept-invitation?token=${invitationToken}&email=${encodeURIComponent(validatedData.email)}`;
+
     return NextResponse.json({
       success: true,
-      message: 'Merchant created successfully',
+      message: 'Merchant created successfully. Send the invitation link to the merchant.',
       data: merchant,
+      invitation: {
+        link: invitationLink,
+        expiresAt: invitationExpiry.toISOString(),
+        note: 'Send this link to the merchant so they can set up their password and activate their account.',
+      },
     }, { status: 201 });
   } catch (error: any) {
     console.error('Error creating merchant:', error);

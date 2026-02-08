@@ -26,6 +26,7 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [showVerifyNotice, setShowVerifyNotice] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,18 +94,28 @@ export default function RegisterPage() {
         return;
       }
 
-      // Show success message
+      // Save extra merchant fields (phone, companyName) that Better Auth doesn't handle
+      try {
+        await fetch('/api/merchant/settings', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fullName: formData.fullName,
+            phone: formData.phone,
+            companyName: formData.companyName,
+          }),
+        });
+      } catch {
+        // Non-critical — user can update these later in settings
+        console.warn('Failed to save extra registration fields');
+      }
+
+      // Show verification notice
       setNotification({ 
-        message: 'Account created successfully! Redirecting...', 
+        message: 'Account created! Please check your email to verify your account.', 
         type: 'success' 
       });
-
-      // Wait a moment for the notification
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Redirect to dashboard (user is auto-logged in)
-      router.push('/dashboard');
-      router.refresh();
+      setShowVerifyNotice(true);
     } catch (error: any) {
       console.error('Registration error:', error);
       setErrors({
@@ -146,7 +157,31 @@ export default function RegisterPage() {
           </Link>
         </div>
 
+        {/* Email Verification Notice */}
+        {showVerifyNotice && (
+          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-white/20 dark:border-slate-700/50 p-8 shadow-2xl text-center">
+            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Mail className="w-8 h-8 text-green-600" />
+            </div>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Verify Your Email</h1>
+            <p className="text-slate-600 dark:text-slate-400 mb-2">
+              We&apos;ve sent a verification link to <strong>{formData.email}</strong>
+            </p>
+            <p className="text-sm text-slate-500 dark:text-slate-500 mb-6">
+              Click the link in your email to activate your account. Check your spam folder if you don&apos;t see it.
+            </p>
+            <div className="space-y-3">
+              <Link href="/auth/login">
+                <Button className="w-full bg-gradient-to-r from-green-600 to-slate-600 text-white">
+                  Go to Sign In
+                </Button>
+              </Link>
+            </div>
+          </Card>
+        )}
+
         {/* Register Card */}
+        {!showVerifyNotice && (
         <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-white/20 dark:border-slate-700/50 p-8 shadow-2xl">
           {/* Header */}
           <div className="text-center mb-8">
@@ -410,6 +445,7 @@ export default function RegisterPage() {
             </p>
           </div>
         </Card>
+        )}
 
         {/* Footer */}
         <p className="mt-8 text-center text-sm text-slate-600 dark:text-slate-400">

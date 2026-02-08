@@ -4,6 +4,7 @@ import { eftTransactions } from "@/lib/db/schema";
 import { verifyPaymentToken } from "@/lib/security/payment-token";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import crypto from "crypto";
 import { dispatchWebhookEvent } from "@/lib/webhooks/dispatcher";
 
 const completeSchema = z.object({
@@ -15,13 +16,53 @@ const completeSchema = z.object({
   destinationBank: z.string().optional(),
   customerBank: z.string().optional(),
   sessionId: z.string().optional(),
+  eftSignature: z.string().optional(), // Required when status is "completed" — signed by EFT service
   metadata: z.record(z.string(), z.any()).optional(),
 });
 
 /**
+ * Verify the EFT service signature that proves the payment was genuinely completed.
+ * The EFT service signs: HMAC-SHA256(secret, transactionId + amount + reference + "completed")
+ * and returns this signature to the frontend on redirect.
+ */
+function verifyEftServiceSignature(
+  signature: string,
+  transactionId: string,
+  amount: string,
+  reference: string
+): boolean {
+  const secret = process.env.EFT_WEBHOOK_SECRET;
+  if (!secret) {
+    console.error("❌ EFT_WEBHOOK_SECRET not configured — cannot verify EFT signature");
+    return false;
+  }
+
+  const payload = `${transactionId}${amount}${reference}completed`;
+  const expected = crypto
+    .createHmac("sha256", secret)
+    .update(payload)
+    .digest("hex");
+
+  // Constant-time comparison
+  try {
+    return crypto.timingSafeEqual(
+      Buffer.from(signature),
+      Buffer.from(expected)
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
  * POST /api/eft/transactions/[token]/complete
- * Update transaction status when payment completes
- * Called by frontend when EFT service returns final status
+ * Update transaction status when payment flow ends.
+ *
+ * - "completed": REQUIRES a valid eftSignature from the EFT service.
+ *   The EFT service signs the result on redirect so the frontend can
+ *   relay it here. Without a valid signature, "completed" is rejected.
+ * - "failed"/"aborted"/"cancelled"/"expired": Allowed directly from
+ *   frontend (user cancelled, timed out, etc.).
  */
 export async function POST(
   request: NextRequest,
@@ -79,6 +120,34 @@ export async function POST(
           amount: transaction.amount,
         },
       });
+    }
+
+    // "completed" requires a valid EFT service signature to prevent forgery
+    if (validatedData.status === "completed") {
+      if (!validatedData.eftSignature) {
+        console.error(`❌ Missing eftSignature for completed status on ${transactionId}`);
+        return NextResponse.json(
+          { success: false, message: "EFT service signature is required to mark payment as completed" },
+          { status: 403 }
+        );
+      }
+
+      const signatureValid = verifyEftServiceSignature(
+        validatedData.eftSignature,
+        transactionId,
+        transaction.amount,
+        transaction.reference
+      );
+
+      if (!signatureValid) {
+        console.error(`❌ Invalid eftSignature for completed status on ${transactionId}`);
+        return NextResponse.json(
+          { success: false, message: "Invalid EFT service signature" },
+          { status: 403 }
+        );
+      }
+
+      console.log(`✅ EFT signature verified for completion: ${transactionId}`);
     }
 
     // Update transaction status

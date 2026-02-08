@@ -5,6 +5,17 @@ import { verifyPaymentToken } from "@/lib/security/payment-token";
 import { eq, and, asc } from "drizzle-orm";
 
 /**
+ * Mask a bank account number, showing only the last 4 digits.
+ * e.g. "62123456789" → "•••••••6789"
+ */
+function maskAccountNumber(accountNumber: string): string {
+  if (!accountNumber || accountNumber.length <= 4) return accountNumber;
+  const last4 = accountNumber.slice(-4);
+  const masked = '•'.repeat(accountNumber.length - 4);
+  return `${masked}${last4}`;
+}
+
+/**
  * GET /api/eft/transactions/[token]/init
  * Initialize EFT transaction - Returns all data needed for payment page
  * This endpoint verifies the token and returns merchant + bank details
@@ -137,7 +148,7 @@ export async function GET(
           email: merchant.email,
           // Bank account details for payment
           bankAccount: {
-            accountNumber: primaryBankAccount.accountNumber,
+            accountNumber: maskAccountNumber(primaryBankAccount.accountNumber),
             accountName: primaryBankAccount.accountHolderName,
             branchCode: primaryBankAccount.branchCode,
             bankCode: primaryBankAccount.bankCode,

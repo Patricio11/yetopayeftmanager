@@ -4,6 +4,7 @@ import { authenticateApiRequest, requirePermission } from "@/lib/auth/api-middle
 import { db } from "@/lib/db";
 import { eftTransactions, paymentTokens } from "@/lib/db/schema";
 import { generatePaymentToken } from "@/lib/security/payment-token";
+import { checkRateLimit, getClientIdentifier } from "@/lib/security/rate-limit";
 import { eq, desc, and, gte } from "drizzle-orm";
 import { z } from "zod";
 import { dispatchWebhookEvent } from "@/lib/webhooks/dispatcher";
@@ -31,6 +32,11 @@ const createPaymentLinkSchema = z.object({
  * 2. API key-based (for server-to-server integration)
  */
 export async function POST(request: NextRequest) {
+  // Rate limit check
+  const clientId = getClientIdentifier(request);
+  const rateLimitResponse = checkRateLimit(`payment-links:${clientId}`);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     let merchantId: string;
     

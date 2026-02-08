@@ -1,0 +1,189 @@
+import { NextRequest, NextResponse } from "next/server";
+import { requireMerchant } from "@/lib/auth/authorization";
+import { db } from "@/lib/db";
+import { users } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
+import { z } from "zod";
+
+const updateSettingsSchema = z.object({
+  // Profile fields
+  name: z.string().min(1).max(255).optional(),
+  fullName: z.string().max(255).optional(),
+  phone: z.string().max(20).optional(),
+
+  // Company fields
+  companyName: z.string().max(255).optional(),
+  address: z.object({
+    street: z.string().max(255).optional(),
+    city: z.string().max(100).optional(),
+    state: z.string().max(100).optional(),
+    postal_code: z.string().max(20).optional(),
+    country: z.string().max(100).optional(),
+  }).optional(),
+
+  // Company metadata
+  registrationNumber: z.string().max(50).optional(),
+  vatNumber: z.string().max(50).optional(),
+  website: z.string().url().max(255).optional().or(z.literal("")),
+
+  // Banking fields
+  bankAccount: z.object({
+    account_holder: z.string().max(255).optional(),
+    account_number: z.string().max(30).optional(),
+    account_type: z.enum(["savings", "cheque", "transmission", "bond", "investment"]).optional(),
+    bank_name: z.string().max(100).optional(),
+    branch_code: z.string().max(20).optional(),
+  }).optional(),
+
+  // Notification preferences
+  notificationPreferences: z.object({
+    payment_completed: z.boolean().optional(),
+    payment_failed: z.boolean().optional(),
+    weekly_summary: z.boolean().optional(),
+    security_alerts: z.boolean().optional(),
+  }).optional(),
+}).strict();
+
+/**
+ * GET /api/merchant/settings
+ * Fetch current merchant settings (profile, company, banking, notifications)
+ */
+export async function GET(request: NextRequest) {
+  const auth = await requireMerchant();
+  if (!auth.authorized) return auth.response;
+
+  try {
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, auth.session.user.id),
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        profile: {
+          name: user.name,
+          fullName: user.fullName,
+          email: user.email,
+          phone: user.phone,
+          avatarUrl: user.avatarUrl,
+        },
+        company: {
+          companyName: user.companyName,
+          address: user.address || {},
+          registrationNumber: (user.metadata as any)?.registrationNumber || "",
+          vatNumber: (user.metadata as any)?.vatNumber || "",
+          website: (user.metadata as any)?.website || "",
+        },
+        banking: {
+          bankAccount: user.bankAccount || {},
+        },
+        notifications: {
+          notificationPreferences: user.notificationPreferences || {
+            payment_completed: true,
+            payment_failed: true,
+            weekly_summary: false,
+            security_alerts: true,
+          },
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching merchant settings:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to fetch settings" },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * PATCH /api/merchant/settings
+ * Update merchant settings (profile, company, banking, notifications)
+ */
+export async function PATCH(request: NextRequest) {
+  const auth = await requireMerchant();
+  if (!auth.authorized) return auth.response;
+
+  try {
+    const body = await request.json();
+    const validated = updateSettingsSchema.parse(body);
+
+    // Build the update object from only provided fields
+    const updateData: Record<string, any> = {
+      updatedAt: new Date(),
+      updatedBy: auth.session.user.id,
+    };
+
+    // Profile fields
+    if (validated.name !== undefined) updateData.name = validated.name;
+    if (validated.fullName !== undefined) updateData.fullName = validated.fullName;
+    if (validated.phone !== undefined) updateData.phone = validated.phone;
+
+    // Company fields
+    if (validated.companyName !== undefined) updateData.companyName = validated.companyName;
+    if (validated.address !== undefined) updateData.address = validated.address;
+
+    // Banking fields
+    if (validated.bankAccount !== undefined) updateData.bankAccount = validated.bankAccount;
+
+    // Notification preferences
+    if (validated.notificationPreferences !== undefined) {
+      updateData.notificationPreferences = validated.notificationPreferences;
+    }
+
+    // Company metadata (registrationNumber, vatNumber, website stored in metadata JSONB)
+    if (validated.registrationNumber !== undefined || validated.vatNumber !== undefined || validated.website !== undefined) {
+      const currentUser = await db.query.users.findFirst({
+        where: eq(users.id, auth.session.user.id),
+      });
+      const currentMetadata = (currentUser?.metadata as any) || {};
+      updateData.metadata = {
+        ...currentMetadata,
+        ...(validated.registrationNumber !== undefined && { registrationNumber: validated.registrationNumber }),
+        ...(validated.vatNumber !== undefined && { vatNumber: validated.vatNumber }),
+        ...(validated.website !== undefined && { website: validated.website }),
+      };
+    }
+
+    const [updated] = await db
+      .update(users)
+      .set(updateData)
+      .where(eq(users.id, auth.session.user.id))
+      .returning();
+
+    return NextResponse.json({
+      success: true,
+      message: "Settings updated successfully",
+      data: {
+        name: updated.name,
+        fullName: updated.fullName,
+        phone: updated.phone,
+        companyName: updated.companyName,
+        address: updated.address,
+        bankAccount: updated.bankAccount,
+        notificationPreferences: updated.notificationPreferences,
+      },
+    });
+  } catch (error: any) {
+    console.error("Error updating merchant settings:", error);
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { success: false, error: "Validation error", details: error.issues },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, error: "Failed to update settings" },
+      { status: 500 }
+    );
+  }
+}

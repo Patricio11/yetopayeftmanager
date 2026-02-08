@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth-server";
 import { db } from "@/lib/db";
-import { eftBanks } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eftBanks, eftTransactions } from "@/lib/db/schema";
+import { eq, desc, sql } from "drizzle-orm";
 import { z } from "zod";
 
 const createBankSchema = z.object({
@@ -29,26 +29,32 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch all banks
+    // Fetch all banks with transaction stats in a single query
     const banks = await db
       .select()
       .from(eftBanks)
       .orderBy(desc(eftBanks.createdAt));
 
-    // Get transaction counts for each bank
-    const banksWithStats = await Promise.all(
-      banks.map(async (bank) => {
-        const transactionCount = await db.query.eftTransactions.findMany({
-          where: (transactions, { eq }) => eq(transactions.eftBankId, bank.id),
-        });
-
-        return {
-          ...bank,
-          transactionCount: transactionCount.length,
-          completedCount: transactionCount.filter(t => t.status === "completed").length,
-        };
+    // Single aggregation query for all bank stats (fixes N+1)
+    const bankStats = await db
+      .select({
+        eftBankId: eftTransactions.eftBankId,
+        transactionCount: sql<number>`COUNT(*)::int`,
+        completedCount: sql<number>`COUNT(CASE WHEN ${eftTransactions.status} = 'completed' THEN 1 END)::int`,
       })
+      .from(eftTransactions)
+      .groupBy(eftTransactions.eftBankId);
+
+    // Build a lookup map
+    const statsMap = new Map(
+      bankStats.map(s => [s.eftBankId, { transactionCount: s.transactionCount, completedCount: s.completedCount }])
     );
+
+    const banksWithStats = banks.map(bank => ({
+      ...bank,
+      transactionCount: statsMap.get(bank.id)?.transactionCount || 0,
+      completedCount: statsMap.get(bank.id)?.completedCount || 0,
+    }));
 
     return NextResponse.json({
       success: true,

@@ -74,44 +74,48 @@ export default async function DashboardPage() {
     revenue: parseFloat(completedTransactions[0]?.total || "0"),
   };
 
-  // Fetch chart data - Last 30 days
+  // Fetch chart data - Last 30 days in a SINGLE aggregation query (fixes N+1)
   const last30Days = Array.from({ length: 30 }, (_, i) => {
     const date = subDays(new Date(), 29 - i);
     return format(date, "yyyy-MM-dd");
   });
 
-  const dailyStats = await Promise.all(
-    last30Days.map(async (date) => {
-      const startOfDay = new Date(date);
-      startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = new Date(date);
-      endOfDay.setHours(23, 59, 59, 999);
+  const startDate = new Date(last30Days[0]);
+  startDate.setHours(0, 0, 0, 0);
+  const endDate = new Date(last30Days[last30Days.length - 1]);
+  endDate.setHours(23, 59, 59, 999);
 
-      const [dayStats] = await db
-        .select({
-          completed: sql<number>`COUNT(CASE WHEN ${eftTransactions.status} = 'completed' THEN 1 END)::int`,
-          pending: sql<number>`COUNT(CASE WHEN ${eftTransactions.status} = 'initiated' THEN 1 END)::int`,
-          failed: sql<number>`COUNT(CASE WHEN ${eftTransactions.status} IN ('failed', 'cancelled', 'aborted', 'expired') THEN 1 END)::int`,
-          revenue: sql<string>`COALESCE(SUM(CASE WHEN ${eftTransactions.status} = 'completed' THEN CAST(${eftTransactions.amount} AS NUMERIC) ELSE 0 END), 0)`,
-        })
-        .from(eftTransactions)
-        .where(
-          and(
-            eq(eftTransactions.merchantId, userId),
-            gte(eftTransactions.createdAt, startOfDay),
-            lte(eftTransactions.createdAt, endOfDay)
-          )
-        );
-
-      return {
-        date: format(new Date(date), "MMM dd"),
-        completed: dayStats?.completed || 0,
-        pending: dayStats?.pending || 0,
-        failed: dayStats?.failed || 0,
-        revenue: parseFloat(dayStats?.revenue || "0"),
-      };
+  const dailyAggregation = await db
+    .select({
+      day: sql<string>`TO_CHAR(${eftTransactions.createdAt}, 'YYYY-MM-DD')`,
+      completed: sql<number>`COUNT(CASE WHEN ${eftTransactions.status} = 'completed' THEN 1 END)::int`,
+      pending: sql<number>`COUNT(CASE WHEN ${eftTransactions.status} = 'initiated' THEN 1 END)::int`,
+      failed: sql<number>`COUNT(CASE WHEN ${eftTransactions.status} IN ('failed', 'cancelled', 'aborted', 'expired') THEN 1 END)::int`,
+      revenue: sql<string>`COALESCE(SUM(CASE WHEN ${eftTransactions.status} = 'completed' THEN CAST(${eftTransactions.amount} AS NUMERIC) ELSE 0 END), 0)`,
     })
-  );
+    .from(eftTransactions)
+    .where(
+      and(
+        eq(eftTransactions.merchantId, userId),
+        gte(eftTransactions.createdAt, startDate),
+        lte(eftTransactions.createdAt, endDate)
+      )
+    )
+    .groupBy(sql`TO_CHAR(${eftTransactions.createdAt}, 'YYYY-MM-DD')`);
+
+  // Build lookup map from aggregation results
+  const dailyMap = new Map(dailyAggregation.map(d => [d.day, d]));
+
+  const dailyStats = last30Days.map(date => {
+    const dayData = dailyMap.get(date);
+    return {
+      date: format(new Date(date), "MMM dd"),
+      completed: dayData?.completed || 0,
+      pending: dayData?.pending || 0,
+      failed: dayData?.failed || 0,
+      revenue: parseFloat(dayData?.revenue || "0"),
+    };
+  });
 
   // Calculate status distribution
   const statusData = [

@@ -4,6 +4,7 @@ import { eftTransactions } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import crypto from "crypto";
+import { checkRateLimit, getClientIdentifier } from "@/lib/security/rate-limit";
 
 const webhookSchema = z.object({
   transaction_id: z.string().uuid(),
@@ -22,6 +23,11 @@ const webhookSchema = z.object({
  * This endpoint receives payment status updates from the EFT Service
  */
 export async function POST(request: NextRequest) {
+  // Rate limit: 30 requests per minute for webhooks
+  const clientId = getClientIdentifier(request);
+  const rateLimitResponse = checkRateLimit(`eft-webhook:${clientId}`, 30);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     // Parse request body
     const body = await request.json();
@@ -35,25 +41,43 @@ export async function POST(request: NextRequest) {
     // Validate webhook data
     const validatedData = webhookSchema.parse(body);
 
-    // Verify webhook signature (if configured)
+    // Verify webhook signature — MANDATORY (fail closed)
     const webhookSecret = process.env.EFT_WEBHOOK_SECRET;
-    if (webhookSecret && validatedData.signature) {
-      const expectedSignature = crypto
-        .createHmac('sha256', webhookSecret)
-        .update(JSON.stringify({
-          transaction_id: validatedData.transaction_id,
-          status: validatedData.status,
-          timestamp: validatedData.timestamp,
-        }))
-        .digest('hex');
+    if (!webhookSecret) {
+      console.error("❌ EFT_WEBHOOK_SECRET is not configured — rejecting webhook");
+      return NextResponse.json(
+        { error: "Webhook verification not configured" },
+        { status: 500 }
+      );
+    }
 
-      if (expectedSignature !== validatedData.signature) {
-        console.error("❌ Invalid webhook signature");
-        return NextResponse.json(
-          { error: "Invalid signature" },
-          { status: 401 }
-        );
-      }
+    if (!validatedData.signature) {
+      console.error("❌ Missing webhook signature");
+      return NextResponse.json(
+        { error: "Missing signature" },
+        { status: 401 }
+      );
+    }
+
+    const signaturePayload = JSON.stringify({
+      transaction_id: validatedData.transaction_id,
+      status: validatedData.status,
+      timestamp: validatedData.timestamp,
+    });
+    const expectedSignature = crypto
+      .createHmac('sha256', webhookSecret)
+      .update(signaturePayload)
+      .digest('hex');
+
+    // Constant-time comparison to prevent timing attacks
+    const sigBuffer = Buffer.from(validatedData.signature);
+    const expectedBuffer = Buffer.from(expectedSignature);
+    if (sigBuffer.length !== expectedBuffer.length || !crypto.timingSafeEqual(sigBuffer, expectedBuffer)) {
+      console.error("❌ Invalid webhook signature");
+      return NextResponse.json(
+        { error: "Invalid signature" },
+        { status: 401 }
+      );
     }
 
     // Fetch transaction

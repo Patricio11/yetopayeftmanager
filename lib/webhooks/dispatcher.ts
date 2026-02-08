@@ -133,6 +133,45 @@ function calculateNextRetry(attemptNumber: number, backoffMultiplier: number): D
 }
 
 /**
+ * Schedule retries with exponential backoff (in-process).
+ * For production at scale, replace with a job queue (BullMQ, etc.).
+ */
+function scheduleRetries(
+  url: string,
+  payload: WebhookEventPayload,
+  secret: string,
+  webhookConfigId: string,
+  maxRetries: number,
+  backoffMultiplier: number
+): void {
+  const attemptRetry = async (attemptNumber: number) => {
+    if (attemptNumber > maxRetries) {
+      console.log(`⛔ Max retries (${maxRetries}) reached for webhook ${webhookConfigId}`);
+      return;
+    }
+
+    const delay = calculateNextRetry(attemptNumber, backoffMultiplier).getTime() - Date.now();
+    console.log(`🔄 Scheduling webhook retry #${attemptNumber} in ${Math.round(delay / 1000)}s for ${webhookConfigId}`);
+
+    setTimeout(async () => {
+      try {
+        const result = await sendWebhook(url, payload, secret, webhookConfigId, attemptNumber + 1);
+        if (result.success) {
+          console.log(`✅ Webhook retry #${attemptNumber} succeeded for ${webhookConfigId}`);
+        } else {
+          attemptRetry(attemptNumber + 1);
+        }
+      } catch (error) {
+        console.error(`❌ Webhook retry #${attemptNumber} error:`, error);
+        attemptRetry(attemptNumber + 1);
+      }
+    }, delay);
+  };
+
+  attemptRetry(1);
+}
+
+/**
  * Dispatch webhook event to all subscribed merchants
  */
 export async function dispatchWebhookEvent(
@@ -187,14 +226,18 @@ export async function dispatchWebhookEvent(
         1
       );
 
-      // Schedule retry if failed
+      // Schedule retries if failed (in-process with exponential backoff)
       if (!result.success) {
         const retryPolicy = webhook.retryPolicy as { maxRetries: number; backoffMultiplier: number };
         if (retryPolicy.maxRetries > 0) {
-          const nextRetryAt = calculateNextRetry(1, retryPolicy.backoffMultiplier);
-          console.log(`Webhook delivery failed, scheduling retry at ${nextRetryAt}`);
-          // Note: In production, you'd use a job queue (Bull, BullMQ, etc.) for retries
-          // For now, we just log it
+          scheduleRetries(
+            webhook.url,
+            payload,
+            webhook.secret,
+            webhook.id,
+            retryPolicy.maxRetries,
+            retryPolicy.backoffMultiplier
+          );
         }
       }
     });

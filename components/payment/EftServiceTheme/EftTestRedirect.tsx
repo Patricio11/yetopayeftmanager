@@ -25,7 +25,8 @@ const EftTestRedirect: React.FC = () => {
           });
 
           // Redirect to backend endpoint which will create EFT payment link and redirect
-          window.location.href = `http://localhost:3001/api/v1/eft-test-payment?${params.toString()}`;
+          const baseUrl = process.env.NEXT_PUBLIC_EFT_SERVICE_URL || 'http://localhost:3001';
+          window.location.href = `${baseUrl}/api/v1/eft-test-payment?${params.toString()}`;
         } else {
           setError('Invalid test parameters. Use ?test=true&service=yetopayeft');
           setLoading(false);

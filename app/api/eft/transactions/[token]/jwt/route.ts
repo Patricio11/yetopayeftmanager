@@ -79,12 +79,11 @@ export async function POST(
       );
     }
 
-    // Check if private key is configured
-    const privateKeyPath = process.env.EFT_JWT_PRIVATE_KEY_PATH;
+    // Private key MUST be provided via environment variable only (no filesystem fallback)
     const privateKeyContent = process.env.EFT_JWT_PRIVATE_KEY;
 
-    if (!privateKeyPath && !privateKeyContent) {
-      console.error("❌ EFT JWT private key not configured");
+    if (!privateKeyContent) {
+      console.error("❌ EFT_JWT_PRIVATE_KEY environment variable is not configured");
       return NextResponse.json(
         { 
           success: false,
@@ -94,15 +93,7 @@ export async function POST(
       );
     }
 
-    // Load private key
-    let privateKey: string;
-    
-    if (privateKeyContent) {
-      privateKey = privateKeyContent.replace(/\\n/g, '\n');
-    } else {
-      const fs = await import('fs');
-      privateKey = fs.readFileSync(privateKeyPath!, 'utf8');
-    }
+    const privateKey = privateKeyContent.replace(/\\n/g, '\n');
 
     // Prepare JWT payload with merchant bank account details
     const payload = {

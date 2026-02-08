@@ -14,6 +14,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { customerBankTokens, tokenizationAuditLog } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { verifyPaymentToken } from '@/lib/security/payment-token';
 
 /**
  * GET - Retrieve metadata for saved credentials
@@ -24,11 +25,30 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const merchantId = searchParams.get('merchantId');
     const deviceFingerprint = searchParams.get('deviceFingerprint');
+    const paymentToken = searchParams.get('paymentToken');
 
     if (!merchantId || !deviceFingerprint) {
       return NextResponse.json(
         { success: false, error: 'Missing required parameters' },
         { status: 400 }
+      );
+    }
+
+    // Verify payment token for authentication
+    if (!paymentToken) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+    const ipAddress = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    const userAgent = request.headers.get('user-agent') || 'unknown';
+    try {
+      await verifyPaymentToken(paymentToken, ipAddress, userAgent);
+    } catch {
+      return NextResponse.json(
+        { success: false, error: 'Invalid or expired payment token' },
+        { status: 401 }
       );
     }
 
@@ -82,6 +102,7 @@ export async function POST(request: NextRequest) {
       deviceInfo,
       accountInfo, // { accountNumber, accountType, accountName }
       isDefault,
+      paymentToken,
     } = body;
 
     if (!merchantId || !bankCode || !deviceFingerprint) {
@@ -91,9 +112,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Verify payment token for authentication
+    if (!paymentToken) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
     const ipAddress = request.headers.get('x-forwarded-for') || 
                      request.headers.get('x-real-ip') || 
                      'unknown';
+    const userAgent = request.headers.get('user-agent') || 'unknown';
+    try {
+      await verifyPaymentToken(paymentToken, ipAddress, userAgent);
+    } catch {
+      return NextResponse.json(
+        { success: false, error: 'Invalid or expired payment token' },
+        { status: 401 }
+      );
+    }
 
     // Check if metadata already exists
     const existing = await db
@@ -214,6 +251,7 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const tokenId = searchParams.get('tokenId');
     const merchantId = searchParams.get('merchantId');
+    const paymentToken = searchParams.get('paymentToken');
 
     if (!tokenId || !merchantId) {
       return NextResponse.json(
@@ -222,9 +260,26 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    // Verify payment token for authentication
+    if (!paymentToken) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
     const ipAddress = request.headers.get('x-forwarded-for') || 
                      request.headers.get('x-real-ip') || 
                      'unknown';
+    const userAgent = request.headers.get('user-agent') || 'unknown';
+    try {
+      await verifyPaymentToken(paymentToken, ipAddress, userAgent);
+    } catch {
+      return NextResponse.json(
+        { success: false, error: 'Invalid or expired payment token' },
+        { status: 401 }
+      );
+    }
+
     const deviceFingerprint = searchParams.get('deviceFingerprint') || 'unknown';
 
     // Soft delete (set isActive to false)

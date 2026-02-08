@@ -35,11 +35,12 @@ export async function generateApiKey(merchantId: string, name: string) {
     .update(apiSecret)
     .digest('hex');
   
-  // Store in database
+  // Store in database (including secretHash for HMAC verification)
   const [record] = await db.insert(apiKeys).values({
     merchantId,
     name,
     key: keyHash,
+    secretHash,
     keyPrefix: `${apiKey.substring(0, 15)}...`, // For display only
     permissions: ['payment_links.create', 'payment_links.read', 'transactions.read'],
     isActive: true,
@@ -116,13 +117,32 @@ export async function verifyApiKey(
       return { valid: false, error: 'API key expired' };
     }
     
-    // 5. Verify HMAC signature
-    // Note: We need to retrieve the secret hash and compare
-    // For now, we'll validate the signature format
-    // In production, you'd store the secret hash and verify against it
-    
+    // 5. Verify HMAC signature using stored secret hash
     if (!signature || !signature.startsWith('sha256=')) {
       return { valid: false, error: 'Invalid signature format' };
+    }
+
+    // Use the stored secretHash (SHA-256 of apiSecret) as the HMAC key.
+    // Merchants must also use SHA-256(apiSecret) as their HMAC key when signing requests.
+    const storedSecretHash = keyRecord.secretHash as string;
+    if (!storedSecretHash) {
+      return { valid: false, error: 'API key missing secret configuration' };
+    }
+
+    const payload = `${merchantId}${timestamp}${requestBody}`;
+    const expectedSignature = `sha256=${crypto.createHmac('sha256', storedSecretHash).update(payload).digest('hex')}`;
+
+    // Constant-time comparison to prevent timing attacks
+    try {
+      const isValid = crypto.timingSafeEqual(
+        Buffer.from(signature),
+        Buffer.from(expectedSignature)
+      );
+      if (!isValid) {
+        return { valid: false, error: 'Invalid signature' };
+      }
+    } catch {
+      return { valid: false, error: 'Invalid signature' };
     }
     
     // 6. Update usage tracking
