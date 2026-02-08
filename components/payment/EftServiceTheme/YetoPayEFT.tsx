@@ -980,7 +980,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     const selectedValue = formData.account;
 
     if (accountInput && selectedValue) {
-      const selectedOption = accountInput.options?.find((opt) => opt.value === selectedValue);
+      const selectedOption = Array.isArray(accountInput.options) ? accountInput.options.find((opt) => opt.value === selectedValue) : undefined;
       // When on the 'select' step, we should call the 'select' endpoint with the chosen account
       // The backend will then return the next step (payment/otp-payment)
       const nextStep = apiResponse.next_step || 'select';
@@ -1203,7 +1203,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
                 error ? 'border-red-500' : 'border-gray-300'
               }`}
             >
-              {(input.options || []).map((option) => (
+              {(Array.isArray(input.options) ? input.options : []).map((option) => (
                 <option key={option.value} value={option.value}>{option.text}</option>
               ))}
             </select>
@@ -1495,7 +1495,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
           <p className="text-gray-600">{apiResponse.message}</p>
         </div>
         <div className="space-y-3">
-          {(accountInput?.options || []).map((option) => {
+          {(Array.isArray(accountInput?.options) ? accountInput.options : []).map((option) => {
             if (option.value === '-1') return null;
             const isSelected = selectedValue === option.value;
             return (
