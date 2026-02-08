@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Home, Receipt, Settings, LogOut, Zap, Building2, CreditCard, Book } from "lucide-react";
+import { Home, Receipt, Settings, LogOut, Zap, Building2, CreditCard, Book, Users, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/lib/auth-client";
 
@@ -43,11 +43,23 @@ export function DashboardNav({ userRole }: DashboardNavProps) {
       href: "/dashboard/tokens",
       icon: CreditCard,
     },
-    ...(isAdmin ? [{
-      title: "Banks",
-      href: "/dashboard/banks",
-      icon: Building2,
-    }] : []),
+    ...(isAdmin ? [
+      {
+        title: "Merchants",
+        href: "/dashboard/admin/merchants",
+        icon: Store,
+      },
+      {
+        title: "Users",
+        href: "/dashboard/admin/users",
+        icon: Users,
+      },
+      {
+        title: "Banks",
+        href: "/dashboard/banks",
+        icon: Building2,
+      },
+    ] : []),
     {
       title: "API Docs",
       href: "/dashboard/api-docs",
@@ -81,7 +93,7 @@ export function DashboardNav({ userRole }: DashboardNavProps) {
           <nav className="flex items-center gap-2">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = pathname === item.href;
+              const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
               
               return (
                 <Link key={item.href} href={item.href}>

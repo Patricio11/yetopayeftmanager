@@ -10,7 +10,7 @@ export async function requireAuth() {
   
   if (!session) {
     return {
-      authorized: false,
+      authorized: false as const,
       response: NextResponse.json(
         { error: 'Unauthorized', message: 'Please sign in to access this resource' },
         { status: 401 }
@@ -19,7 +19,7 @@ export async function requireAuth() {
   }
 
   return {
-    authorized: true,
+    authorized: true as const,
     session,
   };
 }
@@ -29,7 +29,7 @@ export async function requireAdmin() {
   
   if (!session) {
     return {
-      authorized: false,
+      authorized: false as const,
       response: NextResponse.json(
         { error: 'Unauthorized', message: 'Please sign in to access this resource' },
         { status: 401 }
@@ -39,7 +39,7 @@ export async function requireAdmin() {
 
   if ((session.user.role || 'merchant') !== 'admin') {
     return {
-      authorized: false,
+      authorized: false as const,
       response: NextResponse.json(
         { error: 'Forbidden', message: 'Admin access required' },
         { status: 403 }
@@ -48,7 +48,7 @@ export async function requireAdmin() {
   }
 
   return {
-    authorized: true,
+    authorized: true as const,
     session,
   };
 }
