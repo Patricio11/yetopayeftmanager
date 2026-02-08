@@ -41,6 +41,7 @@ type ApiResponse = {
   categoryIndex?: number;
   destinationAccount?: string;
   destinationBank?: string;
+  countdown?: number;
 };
 
 type Merchant = {
@@ -1435,55 +1436,60 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     );
   };
 
-  const renderFinalStep = () => (
-    <div className="text-center space-y-8">
-      {/* Icon */}
-      <div className="w-20 h-20 bg-gradient-to-r from-green-600 to-slate-600 rounded-full flex items-center justify-center mx-auto relative">
-        <div className="absolute inset-0 border-2 border-green-300 rounded-full animate-ping"></div>
-        <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
-          <Shield className="w-8 h-8 text-green-600" />
+  const renderFinalStep = () => {
+    const countdownSeconds = apiResponse?.countdown || 90;
+    const approvalTitle = apiResponse?.title || 'Awaiting Approval';
+    const approvalMessage = apiResponse?.message || 'Please approve the request in your banking app. This page will update automatically.';
+
+    return (
+      <div className="text-center space-y-8">
+        {/* Icon */}
+        <div className="w-20 h-20 bg-gradient-to-r from-green-600 to-slate-600 rounded-full flex items-center justify-center mx-auto relative">
+          <div className="absolute inset-0 border-2 border-green-300 rounded-full animate-ping"></div>
+          <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
+            <Shield className="w-8 h-8 text-green-600" />
+          </div>
         </div>
-      </div>
 
-      {/* Title & Description */}
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Awaiting Approval</h2>
-        <p className="text-gray-600 dark:text-gray-400">Please approve the transaction in your banking app. This page will update automatically.</p>
-      </div>
-
-      {/* Countdown Timer */}
-      <div className="flex justify-center">
-        <CountdownTimer
-          seconds={89}
-          size="lg"
-          warningThreshold={30}
-          onComplete={() => {
-            console.log('Countdown completed - transaction may have timed out');
-            // Optionally trigger a status check or show timeout message
-          }}
-        />
-      </div>
-
-      {/* Action Button - Only show if in inApp step */}
-      {isInAppStep && (
-        <div className="flex items-center justify-center space-x-3">
-          <button
-            onClick={handleResendInApp}
-            disabled={isLoading}
-            className="inline-flex items-center px-4 py-2.5 rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <RefreshCcw className="w-4 h-4 mr-2" />
-            Resend approval
-          </button>
+        {/* Title & Description */}
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{approvalTitle}</h2>
+          <div className="text-gray-600 dark:text-gray-400" dangerouslySetInnerHTML={{ __html: approvalMessage }} />
         </div>
-      )}
 
-      {/* Helper text */}
-      <p className="text-sm text-gray-500 dark:text-gray-400">
-        Having trouble? Check your banking app for the approval request.
-      </p>
-    </div>
-  );
+        {/* Countdown Timer */}
+        <div className="flex justify-center">
+          <CountdownTimer
+            seconds={countdownSeconds}
+            size="lg"
+            warningThreshold={Math.min(30, Math.floor(countdownSeconds / 3))}
+            onComplete={() => {
+              console.log('Countdown completed - transaction may have timed out');
+            }}
+          />
+        </div>
+
+        {/* Action Button - Only show if in inApp step */}
+        {isInAppStep && (
+          <div className="flex items-center justify-center space-x-3">
+            <button
+              onClick={handleResendInApp}
+              disabled={isLoading}
+              className="inline-flex items-center px-4 py-2.5 rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <RefreshCcw className="w-4 h-4 mr-2" />
+              Resend approval
+            </button>
+          </div>
+        )}
+
+        {/* Helper text */}
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          This page will update automatically once approved.
+        </p>
+      </div>
+    );
+  };
 
   const renderTransactionResult = () => {
     const isSuccess = transactionResult?.status === 'completed';
