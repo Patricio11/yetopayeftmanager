@@ -669,12 +669,11 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
           return;
         }
 
-        // If ok: false, stop the loop and show error
+        // If ok: false, treat as terminal failure and redirect to merchant
         if (result.ok === false) {
-          setPageError(result.message || 'An error occurred');
-          setCurrentStep('error');
           setIsLoading(false);
           submitGuard.current = false;
+          await finishAndRedirect('failed', result.message || 'An error occurred', result);
           return;
         }
 
@@ -786,8 +785,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
         stepData = {};
       }
     } catch (error: any) {
-      setPageError(error.message || 'Unexpected error');
-      setCurrentStep('error');
+      await finishAndRedirect('failed', error.message || 'Unexpected error');
     } finally {
       setIsLoading(false);
       submitGuard.current = false;
@@ -1100,19 +1098,26 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     </div>
   );
 
-  const renderPageError = () => (
-    <div className="flex flex-col items-center justify-center text-center p-8 bg-red-50 border border-red-200 rounded-lg">
-      <AlertTriangle className="w-12 h-12 text-red-500 mb-4" />
-      <h3 className="text-lg font-semibold text-red-800 mb-2">An Error Occurred</h3>
-      <p className="text-red-700">{pageError}</p>
-      <button
-        onClick={() => window.location.reload()}
-        className="mt-6 bg-red-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-red-700 transition-all duration-200"
-      >
-        Retry
-      </button>
-    </div>
-  );
+  const renderPageError = () => {
+    const redirectUrl = merchant.fail_url || merchant.notify_url;
+    return (
+      <div className="flex flex-col items-center justify-center text-center p-8 bg-red-50 border border-red-200 rounded-lg">
+        <AlertTriangle className="w-12 h-12 text-red-500 mb-4" />
+        <h3 className="text-lg font-semibold text-red-800 mb-2">An Error Occurred</h3>
+        <p className="text-red-700">{pageError}</p>
+        {redirectUrl ? (
+          <p className="text-sm text-gray-500 mt-4">You will be redirected shortly...</p>
+        ) : (
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-6 bg-red-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-red-700 transition-all duration-200"
+          >
+            Retry
+          </button>
+        )}
+      </div>
+    );
+  };
 
   const renderStepIndicator = () => {
     const currentStepNum = stepNumbers[currentStep] || 1;
@@ -1626,9 +1631,20 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
             </div>
           )}
           
-          <p className="text-sm text-gray-500 mt-4">
-            {isSuccess ? 'Redirecting you back to the merchant...' : 'You will be redirected shortly...'}
-          </p>
+          {pickRedirectUrl(isSuccess ? 'completed' : 'failed') ? (
+            <div className="mt-4">
+              <p className="text-sm text-gray-500">
+                {isSuccess ? 'Redirecting you back to the merchant...' : 'You will be redirected shortly...'}
+              </p>
+              <div className="flex justify-center mt-2">
+                <div className="w-6 h-6 border-2 border-gray-300 border-t-green-600 rounded-full animate-spin"></div>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500 mt-4">
+              This payment link is no longer active. You may close this window.
+            </p>
+          )}
         </div>
         {/* <div className="flex justify-center">
           <div className="w-8 h-8 border-2 border-gray-300 border-t-green-600 rounded-full animate-spin"></div>

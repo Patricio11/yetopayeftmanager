@@ -59,26 +59,24 @@ export async function GET(
       );
     }
 
-    // Check transaction status
-    if (transaction.status === "completed") {
+    // Check transaction status - block all terminal states
+    const terminalStatuses: Record<string, { message: string; status: string }> = {
+      completed: { message: "This payment has already been completed", status: "completed" },
+      failed: { message: "This payment has failed. Please request a new payment link.", status: "failed" },
+      aborted: { message: "This payment was aborted. Please request a new payment link.", status: "failed" },
+      cancelled: { message: "This payment has been cancelled.", status: "failed" },
+      expired: { message: "This payment link has expired. Please request a new one.", status: "failed" },
+    };
+
+    const terminalInfo = terminalStatuses[transaction.status || ""];
+    if (terminalInfo) {
       return NextResponse.json(
         { 
           success: false, 
-          message: "This payment has already been completed",
-          status: "completed"
+          message: terminalInfo.message,
+          status: terminalInfo.status,
         },
         { status: 410 } // Gone
-      );
-    }
-
-    if (transaction.status === "failed") {
-      return NextResponse.json(
-        { 
-          success: false, 
-          message: "This payment has failed. Please request a new payment link.",
-          status: "failed"
-        },
-        { status: 410 }
       );
     }
 
