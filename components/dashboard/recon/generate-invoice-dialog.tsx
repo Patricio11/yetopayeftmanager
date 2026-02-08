@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Calendar, Building2, FileText, AlertCircle } from "lucide-react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { Calendar, Building2, FileText, AlertCircle, Search, ChevronDown, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +25,65 @@ export function GenerateInvoiceDialog({ merchants, onClose, onGenerated }: Gener
   const { toast } = useToast();
   const [generating, setGenerating] = useState(false);
   const [merchantId, setMerchantId] = useState("");
+  const [merchantSearch, setMerchantSearch] = useState("");
+  const [merchantDropdownOpen, setMerchantDropdownOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const filteredMerchants = useMemo(() => {
+    if (!merchantSearch.trim()) return merchants;
+    const q = merchantSearch.toLowerCase();
+    return merchants.filter(
+      (m) =>
+        (m.companyName || "").toLowerCase().includes(q) ||
+        m.name.toLowerCase().includes(q) ||
+        m.email.toLowerCase().includes(q)
+    );
+  }, [merchants, merchantSearch]);
+
+  const selectedMerchant = merchants.find((m) => m.id === merchantId);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setMerchantDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (merchantDropdownOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [merchantDropdownOpen]);
+
+  useEffect(() => {
+    setHighlightedIndex(-1);
+  }, [merchantSearch]);
+
+  const handleMerchantKeyDown = (e: React.KeyboardEvent) => {
+    if (!merchantDropdownOpen) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightedIndex((i) => Math.min(i + 1, filteredMerchants.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightedIndex((i) => Math.max(i - 1, 0));
+    } else if (e.key === "Enter" && highlightedIndex >= 0) {
+      e.preventDefault();
+      const m = filteredMerchants[highlightedIndex];
+      if (m) {
+        setMerchantId(m.id);
+        setMerchantSearch("");
+        setMerchantDropdownOpen(false);
+      }
+    } else if (e.key === "Escape") {
+      setMerchantDropdownOpen(false);
+    }
+  };
   const [notes, setNotes] = useState("");
   const [dueDate, setDueDate] = useState("");
 
@@ -91,25 +150,111 @@ export function GenerateInvoiceDialog({ merchants, onClose, onGenerated }: Gener
           </div>
         </CardHeader>
         <CardContent className="space-y-5">
-          {/* Merchant Select */}
+          {/* Merchant Search Select */}
           <div className="space-y-2">
-            <Label htmlFor="merchant" className="flex items-center gap-2">
+            <Label className="flex items-center gap-2">
               <Building2 className="w-4 h-4 text-slate-400" />
               Merchant
             </Label>
-            <select
-              id="merchant"
-              value={merchantId}
-              onChange={(e) => setMerchantId(e.target.value)}
-              className="w-full h-10 px-3 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            >
-              <option value="">Select a merchant...</option>
-              {merchants.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.companyName || m.name} ({m.email})
-                </option>
-              ))}
-            </select>
+            <div className="relative" ref={dropdownRef} onKeyDown={handleMerchantKeyDown}>
+              {/* Trigger */}
+              <button
+                type="button"
+                onClick={() => setMerchantDropdownOpen(!merchantDropdownOpen)}
+                className={`w-full h-10 px-3 rounded-md border text-sm text-left flex items-center justify-between transition-all ${
+                  merchantDropdownOpen
+                    ? "border-green-500 ring-2 ring-green-500/20"
+                    : "border-slate-200 hover:border-slate-300"
+                } bg-white dark:bg-slate-800 dark:border-slate-700`}
+              >
+                {selectedMerchant ? (
+                  <span className="truncate text-slate-900 dark:text-white">
+                    {selectedMerchant.companyName || selectedMerchant.name}{" "}
+                    <span className="text-slate-400">({selectedMerchant.email})</span>
+                  </span>
+                ) : (
+                  <span className="text-slate-400">Search or select a merchant...</span>
+                )}
+                <div className="flex items-center gap-1 flex-shrink-0 ml-2">
+                  {selectedMerchant && (
+                    <span
+                      role="button"
+                      onClick={(e) => { e.stopPropagation(); setMerchantId(""); }}
+                      className="p-0.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700"
+                    >
+                      <X className="w-3.5 h-3.5 text-slate-400" />
+                    </span>
+                  )}
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${merchantDropdownOpen ? "rotate-180" : ""}`} />
+                </div>
+              </button>
+
+              {/* Dropdown */}
+              {merchantDropdownOpen && (
+                <div className="absolute z-50 mt-1 w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl overflow-hidden">
+                  {/* Search input */}
+                  <div className="p-2 border-b border-slate-100 dark:border-slate-700">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input
+                        ref={searchInputRef}
+                        type="text"
+                        value={merchantSearch}
+                        onChange={(e) => setMerchantSearch(e.target.value)}
+                        placeholder="Search by name or email..."
+                        className="w-full h-9 pl-8 pr-3 text-sm rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Results */}
+                  <div className="max-h-52 overflow-y-auto">
+                    {filteredMerchants.length === 0 ? (
+                      <div className="px-3 py-6 text-center text-sm text-slate-400">
+                        No merchants found
+                      </div>
+                    ) : (
+                      filteredMerchants.map((m, idx) => (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => {
+                            setMerchantId(m.id);
+                            setMerchantSearch("");
+                            setMerchantDropdownOpen(false);
+                          }}
+                          className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors ${
+                            idx === highlightedIndex
+                              ? "bg-green-50 dark:bg-green-900/20"
+                              : "hover:bg-slate-50 dark:hover:bg-slate-700/50"
+                          } ${m.id === merchantId ? "bg-green-50/50 dark:bg-green-900/10" : ""}`}
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                            {(m.companyName || m.name || "?")[0].toUpperCase()}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
+                              {m.companyName || m.name}
+                            </p>
+                            <p className="text-xs text-slate-500 truncate">{m.email}</p>
+                          </div>
+                          {m.id === merchantId && (
+                            <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
+                          )}
+                        </button>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Count */}
+                  {merchants.length > 5 && (
+                    <div className="px-3 py-1.5 border-t border-slate-100 dark:border-slate-700 text-xs text-slate-400">
+                      {filteredMerchants.length} of {merchants.length} merchants
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Billing Period */}
