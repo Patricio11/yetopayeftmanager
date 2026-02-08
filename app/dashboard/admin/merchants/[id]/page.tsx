@@ -6,7 +6,8 @@ import Link from 'next/link';
 import {
   ArrowLeft, Building2, Mail, Phone, MapPin, CreditCard, Users, Activity,
   CheckCircle, XCircle, Clock, Shield, Key, Globe, Edit, Save, X,
-  ChevronRight, Copy, RefreshCw, AlertCircle, Landmark, Eye, EyeOff
+  ChevronRight, Copy, RefreshCw, AlertCircle, Landmark, Eye, EyeOff,
+  Percent, DollarSign, Receipt
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,7 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 
-type Tab = 'overview' | 'transactions' | 'team' | 'banking' | 'settings';
+type Tab = 'overview' | 'transactions' | 'team' | 'banking' | 'billing' | 'settings';
 
 export default function MerchantDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -63,6 +64,7 @@ export default function MerchantDetailPage() {
     { key: 'transactions', label: 'Transactions', icon: Activity },
     { key: 'team', label: 'Team', icon: Users },
     { key: 'banking', label: 'Banking', icon: Landmark },
+    { key: 'billing', label: 'Billing', icon: Receipt },
     { key: 'settings', label: 'Settings', icon: Shield },
   ];
 
@@ -138,6 +140,7 @@ export default function MerchantDetailPage() {
       {activeTab === 'transactions' && <TransactionsTab merchantId={id} />}
       {activeTab === 'team' && <TeamTab merchantId={id} />}
       {activeTab === 'banking' && <BankingTab merchantId={id} />}
+      {activeTab === 'billing' && <BillingTab merchantId={id} />}
       {activeTab === 'settings' && <SettingsTab merchant={merchant} onUpdate={fetchMerchant} />}
     </div>
   );
@@ -415,6 +418,265 @@ function BankingTab({ merchantId }: { merchantId: string }) {
         </div>
       )}
     </Card>
+  );
+}
+
+function BillingTab({ merchantId }: { merchantId: string }) {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [merchantFee, setMerchantFee] = useState<any>(null);
+  const [systemFees, setSystemFees] = useState<any>(null);
+
+  // Form state
+  const [feeType, setFeeType] = useState<'fixed' | 'percentage'>('fixed');
+  const [useCustomFixed, setUseCustomFixed] = useState(false);
+  const [useCustomPercentage, setUseCustomPercentage] = useState(false);
+  const [customFixedValue, setCustomFixedValue] = useState('');
+  const [customPercentageValue, setCustomPercentageValue] = useState('');
+  const [useCustomVat, setUseCustomVat] = useState(false);
+  const [vatEnabled, setVatEnabled] = useState(true);
+  const [vatRate, setVatRate] = useState('15.00');
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      try {
+        const [mfRes, sfRes] = await Promise.all([
+          fetch(`/api/admin/recon/merchant-fees/${merchantId}`),
+          fetch('/api/admin/recon/fees'),
+        ]);
+        const [mfData, sfData] = await Promise.all([mfRes.json(), sfRes.json()]);
+        if (sfData.success) setSystemFees(sfData.data);
+        if (mfData.success && mfData.data) {
+          const mf = mfData.data;
+          setMerchantFee(mf);
+          setFeeType(mf.feeType || 'fixed');
+          setUseCustomFixed(mf.fixedFeeValue != null);
+          setUseCustomPercentage(mf.percentageFeeValue != null);
+          setCustomFixedValue(mf.fixedFeeValue || '');
+          setCustomPercentageValue(mf.percentageFeeValue || '');
+          setUseCustomVat(mf.vatEnabled !== null);
+          if (mf.vatEnabled !== null) setVatEnabled(mf.vatEnabled);
+          if (mf.vatRate !== null) setVatRate(mf.vatRate);
+        }
+      } catch { /* ignore */ } finally { setLoading(false); }
+    })();
+  }, [merchantId]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/admin/recon/merchant-fees/${merchantId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          feeType,
+          fixedFeeValue: useCustomFixed ? customFixedValue : null,
+          percentageFeeValue: useCustomPercentage ? customPercentageValue : null,
+          vatEnabled: useCustomVat ? vatEnabled : null,
+          vatRate: useCustomVat ? vatRate : null,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast({ title: 'Saved', description: 'Merchant billing settings updated' });
+        setMerchantFee(data.data);
+      } else {
+        toast({ title: 'Error', description: data.message, variant: 'destructive' });
+      }
+    } catch {
+      toast({ title: 'Error', description: 'Failed to save', variant: 'destructive' });
+    } finally { setSaving(false); }
+  };
+
+  const handleReset = async () => {
+    if (!confirm('Remove custom billing config? System defaults will apply.')) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/admin/recon/merchant-fees/${merchantId}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        toast({ title: 'Reset', description: 'Merchant billing reset to system defaults' });
+        setMerchantFee(null);
+        setFeeType('fixed');
+        setUseCustomFixed(false);
+        setUseCustomPercentage(false);
+        setCustomFixedValue('');
+        setCustomPercentageValue('');
+        setUseCustomVat(false);
+      }
+    } catch {
+      toast({ title: 'Error', description: 'Failed to reset', variant: 'destructive' });
+    } finally { setSaving(false); }
+  };
+
+  if (loading) return <div className="p-12 text-center text-slate-500">Loading billing settings...</div>;
+
+  const sysFixed = systemFees?.fixedFeeValue || '5.00';
+  const sysPercentage = systemFees?.percentageFeeValue || '2.50';
+  const sysVatEnabled = systemFees?.vatEnabled ?? true;
+  const sysVatRate = systemFees?.vatRate || '15.00';
+
+  return (
+    <div className="grid md:grid-cols-2 gap-6">
+      {/* Fee Type Assignment */}
+      <Card className="p-6 bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
+          <Receipt className="w-5 h-5 text-green-600" />
+          Fee Type
+        </h3>
+        <p className="text-sm text-slate-500 mb-4">Choose which fee model this merchant uses for EFT billing</p>
+
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <button
+            onClick={() => setFeeType('fixed')}
+            className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+              feeType === 'fixed'
+                ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
+            }`}
+          >
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+              feeType === 'fixed' ? 'bg-green-100 dark:bg-green-900/40' : 'bg-slate-100 dark:bg-slate-700'
+            }`}>
+              <DollarSign className={`w-5 h-5 ${feeType === 'fixed' ? 'text-green-600' : 'text-slate-400'}`} />
+            </div>
+            <span className={`text-sm font-semibold ${feeType === 'fixed' ? 'text-green-700 dark:text-green-400' : 'text-slate-600 dark:text-slate-400'}`}>
+              Fixed
+            </span>
+            <span className="text-xs text-slate-500">R{useCustomFixed ? customFixedValue : sysFixed} / txn</span>
+          </button>
+
+          <button
+            onClick={() => setFeeType('percentage')}
+            className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+              feeType === 'percentage'
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
+            }`}
+          >
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+              feeType === 'percentage' ? 'bg-blue-100 dark:bg-blue-900/40' : 'bg-slate-100 dark:bg-slate-700'
+            }`}>
+              <Percent className={`w-5 h-5 ${feeType === 'percentage' ? 'text-blue-600' : 'text-slate-400'}`} />
+            </div>
+            <span className={`text-sm font-semibold ${feeType === 'percentage' ? 'text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400'}`}>
+              Percentage
+            </span>
+            <span className="text-xs text-slate-500">{useCustomPercentage ? customPercentageValue : sysPercentage}% per txn</span>
+          </button>
+        </div>
+
+        {/* System defaults info */}
+        <div className="bg-slate-50 dark:bg-slate-900/30 rounded-lg p-3 text-xs text-slate-500 space-y-1">
+          <p className="font-semibold text-slate-600 dark:text-slate-400">System Defaults</p>
+          <p>Fixed: R{sysFixed} per transaction</p>
+          <p>Percentage: {sysPercentage}% per transaction</p>
+          <p>VAT: {sysVatEnabled ? `${sysVatRate}%` : 'Disabled'}</p>
+        </div>
+      </Card>
+
+      {/* Custom Fee Overrides */}
+      <Card className="p-6 bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
+          <Edit className="w-5 h-5 text-purple-600" />
+          Custom Overrides
+        </h3>
+        <p className="text-sm text-slate-500 mb-4">Leave unchecked to use system defaults</p>
+
+        <div className="space-y-5">
+          {/* Custom Fixed Fee */}
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={useCustomFixed} onChange={(e) => setUseCustomFixed(e.target.checked)}
+                className="w-4 h-4 rounded border-slate-300 text-green-600 focus:ring-green-500" />
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Custom Fixed Fee</span>
+            </label>
+            {useCustomFixed && (
+              <div className="relative ml-6">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">R</span>
+                <Input type="number" step="0.01" min="0" value={customFixedValue}
+                  onChange={(e) => setCustomFixedValue(e.target.value)} className="pl-8" placeholder={sysFixed} />
+              </div>
+            )}
+          </div>
+
+          {/* Custom Percentage Fee */}
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={useCustomPercentage} onChange={(e) => setUseCustomPercentage(e.target.checked)}
+                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Custom Percentage Fee</span>
+            </label>
+            {useCustomPercentage && (
+              <div className="relative ml-6">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">%</span>
+                <Input type="number" step="0.01" min="0" max="100" value={customPercentageValue}
+                  onChange={(e) => setCustomPercentageValue(e.target.value)} className="pl-8" placeholder={sysPercentage} />
+              </div>
+            )}
+          </div>
+
+          {/* Custom VAT */}
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={useCustomVat} onChange={(e) => setUseCustomVat(e.target.checked)}
+                className="w-4 h-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500" />
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Custom VAT Settings</span>
+            </label>
+            {useCustomVat && (
+              <div className="ml-6 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-600 dark:text-slate-400">VAT Enabled</span>
+                  <button onClick={() => setVatEnabled(!vatEnabled)}
+                    className={`relative w-11 h-6 rounded-full transition-colors ${vatEnabled ? 'bg-green-500' : 'bg-slate-300'}`}>
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${vatEnabled ? 'translate-x-5' : ''}`} />
+                  </button>
+                </div>
+                {vatEnabled && (
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">%</span>
+                    <Input type="number" step="0.01" min="0" max="100" value={vatRate}
+                      onChange={(e) => setVatRate(e.target.value)} className="pl-8" placeholder={sysVatRate} />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-3 mt-6">
+          <Button onClick={handleSave} disabled={saving}
+            className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white gap-2">
+            <Save className="w-4 h-4" />{saving ? 'Saving...' : 'Save Billing Config'}
+          </Button>
+          {merchantFee && (
+            <Button variant="outline" onClick={handleReset} disabled={saving}
+              className="text-red-600 border-red-200 hover:bg-red-50">
+              Reset
+            </Button>
+          )}
+        </div>
+
+        {/* Current effective config summary */}
+        <div className="mt-4 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800 rounded-lg p-3">
+          <p className="text-xs font-semibold text-green-700 dark:text-green-400 mb-1">Effective Config for this Merchant</p>
+          <p className="text-xs text-green-800 dark:text-green-300">
+            Fee: {feeType === 'fixed'
+              ? `R${useCustomFixed ? customFixedValue || sysFixed : sysFixed} per transaction (fixed)`
+              : `${useCustomPercentage ? customPercentageValue || sysPercentage : sysPercentage}% per transaction (percentage)`
+            }
+            {' · '}
+            VAT: {(useCustomVat ? vatEnabled : sysVatEnabled)
+              ? `${useCustomVat ? vatRate : sysVatRate}%`
+              : 'Disabled'
+            }
+          </p>
+        </div>
+      </Card>
+    </div>
   );
 }
 

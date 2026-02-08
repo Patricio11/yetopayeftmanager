@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Home, Receipt, Settings, LogOut, Zap, Building2, CreditCard, Book, Users, Store } from "lucide-react";
+import { Home, Receipt, Settings, LogOut, Zap, Building2, CreditCard, Book, Users, Store, BarChart3, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/lib/auth-client";
 
@@ -59,7 +59,17 @@ export function DashboardNav({ userRole }: DashboardNavProps) {
         href: "/dashboard/banks",
         icon: Building2,
       },
+      {
+        title: "Recon",
+        href: "/dashboard/admin/recon",
+        icon: BarChart3,
+      },
     ] : []),
+    {
+      title: "Invoices",
+      href: "/dashboard/invoices",
+      icon: FileText,
+    },
     {
       title: "API Docs",
       href: "/dashboard/api-docs",
