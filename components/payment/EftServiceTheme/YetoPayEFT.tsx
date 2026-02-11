@@ -591,10 +591,25 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
       console.log('[SSE] Step update:', e.data);
       try {
         const res: ApiResponse = JSON.parse(e.data);
-        // Show the step update to the user (e.g. "resend auth", OTP form)
         if (res.inputs) {
+          // Form inputs (account selection, OTP, etc.) — render the form
           setApiResponse(res);
           setCurrentStep(res.step || 'auth');
+          setIsLoading(false);
+        } else if (res.step === 'final' && res.countdown) {
+          // Payment submitted — show new countdown for payment confirmation
+          setApiResponse(res);
+          setCurrentStep('final');
+          setIsInAppStep(true);
+          setIsLoading(false);
+          // Reconnect SSE so the server invokes finalStep (approveItPending is now false)
+          setTimeout(() => connectSSE(bankCode), 100);
+        } else if (res.step === 'processing') {
+          // Intermediate processing update (e.g. "auth approved, setting up payment...")
+          const plainMsg = (res.message || '').replace(/<[^>]*>/g, '') || 'Processing your payment...';
+          setProcessingMessage(plainMsg);
+          setCurrentStep('processing');
+          setIsInAppStep(false);
           setIsLoading(false);
         }
       } catch {
