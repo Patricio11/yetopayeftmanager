@@ -56,7 +56,6 @@ export const users = pgTable("user", {
   
   // EFT Settings (default URLs for payment transactions)
   eftSettings: jsonb("eft_settings").$type<{
-    webhookUrl?: string;
     notifyUrl?: string;
     successUrl?: string;
     failureUrl?: string;

@@ -1077,7 +1077,6 @@ function EftUrlSettings() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
-  const [webhookUrl, setWebhookUrl] = useState("");
   const [notifyUrl, setNotifyUrl] = useState("");
   const [successUrl, setSuccessUrl] = useState("");
   const [failureUrl, setFailureUrl] = useState("");
@@ -1089,7 +1088,6 @@ function EftUrlSettings() {
       .then(data => {
         if (data.success && data.data.eftSettings) {
           const eft = data.data.eftSettings;
-          setWebhookUrl(eft.webhookUrl || "");
           setNotifyUrl(eft.notifyUrl || "");
           setSuccessUrl(eft.successUrl || "");
           setFailureUrl(eft.failureUrl || "");
@@ -1107,7 +1105,7 @@ function EftUrlSettings() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          eftSettings: { webhookUrl, notifyUrl, successUrl, failureUrl, cancelledUrl },
+          eftSettings: { notifyUrl, successUrl, failureUrl, cancelledUrl },
         }),
       });
       const data = await res.json();
@@ -1128,15 +1126,6 @@ function EftUrlSettings() {
   }
 
   const urlFields = [
-    {
-      id: "webhookUrl",
-      label: "Webhook URL",
-      value: webhookUrl,
-      setter: setWebhookUrl,
-      placeholder: "https://your-domain.com/webhooks/eft",
-      description: "Receives POST notifications for all payment events (completed, failed, cancelled). This is the primary callback URL.",
-      color: "text-blue-600",
-    },
     {
       id: "notifyUrl",
       label: "Notify URL",
@@ -1210,9 +1199,10 @@ function EftUrlSettings() {
               <p className="font-medium mb-1">How these URLs work</p>
               <p className="text-blue-800">
                 When creating a payment link via the API, you can pass these URLs per-transaction. If not provided,
-                these default URLs will be used. The <strong>Webhook URL</strong> and <strong>Notify URL</strong> receive
+                these default URLs will be used. The <strong>Notify URL</strong> receives
                 server-to-server POST callbacks. The <strong>Success</strong>, <strong>Failure</strong>, and <strong>Cancelled</strong> URLs
                 are where the customer&apos;s browser is redirected after the payment flow.
+                For event-based webhooks, use the <strong>Webhooks</strong> tab instead.
               </p>
             </div>
           </div>

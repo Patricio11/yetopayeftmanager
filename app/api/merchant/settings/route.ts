@@ -45,7 +45,6 @@ const updateSettingsSchema = z.object({
 
   // EFT Settings (default URLs)
   eftSettings: z.object({
-    webhookUrl: z.string().url().max(500).optional().or(z.literal("")),
     notifyUrl: z.string().url().max(500).optional().or(z.literal("")),
     successUrl: z.string().url().max(500).optional().or(z.literal("")),
     failureUrl: z.string().url().max(500).optional().or(z.literal("")),
@@ -102,7 +101,6 @@ export async function GET(request: NextRequest) {
           },
         },
         eftSettings: user.eftSettings || {
-          webhookUrl: "",
           notifyUrl: "",
           successUrl: "",
           failureUrl: "",
