@@ -7,7 +7,7 @@ import {
   ArrowLeft, Building2, Mail, Phone, MapPin, CreditCard, Users, Activity,
   CheckCircle, XCircle, Clock, Shield, Key, Globe, Edit, Save, X,
   ChevronRight, Copy, RefreshCw, AlertCircle, Landmark, Eye, EyeOff,
-  Percent, DollarSign, Receipt
+  Percent, DollarSign, Receipt, BarChart3
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -429,11 +429,13 @@ function BillingTab({ merchantId }: { merchantId: string }) {
   const [systemFees, setSystemFees] = useState<any>(null);
 
   // Form state
-  const [feeType, setFeeType] = useState<'fixed' | 'percentage'>('fixed');
+  const [feeType, setFeeType] = useState<'fixed' | 'percentage' | 'volume'>('fixed');
   const [useCustomFixed, setUseCustomFixed] = useState(false);
   const [useCustomPercentage, setUseCustomPercentage] = useState(false);
+  const [useCustomVolume, setUseCustomVolume] = useState(false);
   const [customFixedValue, setCustomFixedValue] = useState('');
   const [customPercentageValue, setCustomPercentageValue] = useState('');
+  const [customVolumeValue, setCustomVolumeValue] = useState('');
   const [useCustomVat, setUseCustomVat] = useState(false);
   const [vatEnabled, setVatEnabled] = useState(true);
   const [vatRate, setVatRate] = useState('15.00');
@@ -454,8 +456,10 @@ function BillingTab({ merchantId }: { merchantId: string }) {
           setFeeType(mf.feeType || 'fixed');
           setUseCustomFixed(mf.fixedFeeValue != null);
           setUseCustomPercentage(mf.percentageFeeValue != null);
+          setUseCustomVolume(mf.volumeFeeValue != null);
           setCustomFixedValue(mf.fixedFeeValue || '');
           setCustomPercentageValue(mf.percentageFeeValue || '');
+          setCustomVolumeValue(mf.volumeFeeValue || '');
           setUseCustomVat(mf.vatEnabled !== null);
           if (mf.vatEnabled !== null) setVatEnabled(mf.vatEnabled);
           if (mf.vatRate !== null) setVatRate(mf.vatRate);
@@ -474,6 +478,7 @@ function BillingTab({ merchantId }: { merchantId: string }) {
           feeType,
           fixedFeeValue: useCustomFixed ? customFixedValue : null,
           percentageFeeValue: useCustomPercentage ? customPercentageValue : null,
+          volumeFeeValue: useCustomVolume ? customVolumeValue : null,
           vatEnabled: useCustomVat ? vatEnabled : null,
           vatRate: useCustomVat ? vatRate : null,
         }),
@@ -502,8 +507,10 @@ function BillingTab({ merchantId }: { merchantId: string }) {
         setFeeType('fixed');
         setUseCustomFixed(false);
         setUseCustomPercentage(false);
+        setUseCustomVolume(false);
         setCustomFixedValue('');
         setCustomPercentageValue('');
+        setCustomVolumeValue('');
         setUseCustomVat(false);
       }
     } catch {
@@ -515,6 +522,7 @@ function BillingTab({ merchantId }: { merchantId: string }) {
 
   const sysFixed = systemFees?.fixedFeeValue || '5.00';
   const sysPercentage = systemFees?.percentageFeeValue || '2.50';
+  const sysVolume = systemFees?.volumeFeeValue || '0.0500';
   const sysVatEnabled = systemFees?.vatEnabled ?? true;
   const sysVatRate = systemFees?.vatRate || '15.00';
 
@@ -528,7 +536,7 @@ function BillingTab({ merchantId }: { merchantId: string }) {
         </h3>
         <p className="text-sm text-slate-500 mb-4">Choose which fee model this merchant uses for EFT billing</p>
 
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="grid grid-cols-3 gap-3 mb-6">
           <button
             onClick={() => setFeeType('fixed')}
             className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
@@ -566,6 +574,25 @@ function BillingTab({ merchantId }: { merchantId: string }) {
             </span>
             <span className="text-xs text-slate-500">{useCustomPercentage ? customPercentageValue : sysPercentage}% per txn</span>
           </button>
+
+          <button
+            onClick={() => setFeeType('volume')}
+            className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+              feeType === 'volume'
+                ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20'
+                : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
+            }`}
+          >
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+              feeType === 'volume' ? 'bg-amber-100 dark:bg-amber-900/40' : 'bg-slate-100 dark:bg-slate-700'
+            }`}>
+              <BarChart3 className={`w-5 h-5 ${feeType === 'volume' ? 'text-amber-600' : 'text-slate-400'}`} />
+            </div>
+            <span className={`text-sm font-semibold ${feeType === 'volume' ? 'text-amber-700 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400'}`}>
+              Volume
+            </span>
+            <span className="text-xs text-slate-500">{useCustomVolume ? customVolumeValue : sysVolume}% of vol</span>
+          </button>
         </div>
 
         {/* System defaults info */}
@@ -573,6 +600,7 @@ function BillingTab({ merchantId }: { merchantId: string }) {
           <p className="font-semibold text-slate-600 dark:text-slate-400">System Defaults</p>
           <p>Fixed: R{sysFixed} per transaction</p>
           <p>Percentage: {sysPercentage}% per transaction</p>
+          <p>Volume: {sysVolume}% of total volume</p>
           <p>VAT: {sysVatEnabled ? `${sysVatRate}%` : 'Disabled'}</p>
         </div>
       </Card>
@@ -614,6 +642,23 @@ function BillingTab({ merchantId }: { merchantId: string }) {
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">%</span>
                 <Input type="number" step="0.01" min="0" max="100" value={customPercentageValue}
                   onChange={(e) => setCustomPercentageValue(e.target.value)} className="pl-8" placeholder={sysPercentage} />
+              </div>
+            )}
+          </div>
+
+          {/* Custom Volume Fee */}
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={useCustomVolume} onChange={(e) => setUseCustomVolume(e.target.checked)}
+                className="w-4 h-4 rounded border-slate-300 text-amber-600 focus:ring-amber-500" />
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Custom Volume Fee</span>
+            </label>
+            {useCustomVolume && (
+              <div className="relative ml-6">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">%</span>
+                <Input type="number" step="0.0001" min="0" max="100" value={customVolumeValue}
+                  onChange={(e) => setCustomVolumeValue(e.target.value)} className="pl-8" placeholder={sysVolume} />
+                <p className="text-xs text-slate-500 mt-1">Percentage of total transaction volume for the billing period</p>
               </div>
             )}
           </div>
@@ -666,7 +711,9 @@ function BillingTab({ merchantId }: { merchantId: string }) {
           <p className="text-xs text-green-800 dark:text-green-300">
             Fee: {feeType === 'fixed'
               ? `R${useCustomFixed ? customFixedValue || sysFixed : sysFixed} per transaction (fixed)`
-              : `${useCustomPercentage ? customPercentageValue || sysPercentage : sysPercentage}% per transaction (percentage)`
+              : feeType === 'percentage'
+                ? `${useCustomPercentage ? customPercentageValue || sysPercentage : sysPercentage}% per transaction (percentage)`
+                : `${useCustomVolume ? customVolumeValue || sysVolume : sysVolume}% of total volume (volume)`
             }
             {' · '}
             VAT: {(useCustomVat ? vatEnabled : sysVatEnabled)

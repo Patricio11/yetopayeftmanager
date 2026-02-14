@@ -147,8 +147,11 @@ export async function POST(request: NextRequest) {
     let feeValue: string;
     if (feeType === "fixed") {
       feeValue = (merchantFee?.isActive && merchantFee?.fixedFeeValue) || sys.fixedFeeValue;
-    } else {
+    } else if (feeType === "percentage") {
       feeValue = (merchantFee?.isActive && merchantFee?.percentageFeeValue) || sys.percentageFeeValue;
+    } else {
+      // volume: percentage of total transaction volume
+      feeValue = (merchantFee?.isActive && merchantFee?.volumeFeeValue) || sys.volumeFeeValue || "0.0500";
     }
 
     // VAT: merchant override > system default
@@ -169,7 +172,10 @@ export async function POST(request: NextRequest) {
     let subtotal: number;
     if (feeConfig.feeType === "fixed") {
       subtotal = txnCount * feeVal;
+    } else if (feeConfig.feeType === "percentage") {
+      subtotal = txnVolume * (feeVal / 100);
     } else {
+      // volume: percentage of total transaction volume
       subtotal = txnVolume * (feeVal / 100);
     }
 
@@ -208,17 +214,31 @@ export async function POST(request: NextRequest) {
     }).returning();
 
     // 6. Create line item(s)
-    const feeDescription = feeConfig.feeType === "fixed"
-      ? `EFT Transaction Fees (R${feeVal.toFixed(2)} per transaction)`
-      : `EFT Transaction Fees (${feeVal}% of transaction volume)`;
+    let feeDescription: string;
+    let lineQuantity: number;
+    let lineUnitAmount: string;
+
+    if (feeConfig.feeType === "fixed") {
+      feeDescription = `EFT Transaction Fees (R${feeVal.toFixed(2)} per transaction)`;
+      lineQuantity = txnCount;
+      lineUnitAmount = feeVal.toFixed(4);
+    } else if (feeConfig.feeType === "percentage") {
+      feeDescription = `EFT Transaction Fees (${feeVal}% of transaction volume)`;
+      lineQuantity = 1;
+      lineUnitAmount = txnVolume.toFixed(4);
+    } else {
+      feeDescription = `EFT Volume-Based Fee (${feeVal}% of R${txnVolume.toFixed(2)} total volume, ${txnCount} transactions)`;
+      lineQuantity = 1;
+      lineUnitAmount = txnVolume.toFixed(4);
+    }
 
     const periodLabel = `${startDate.toLocaleDateString("en-ZA", { month: "long", year: "numeric" })}`;
 
     await db.insert(eftInvoiceItems).values({
       invoiceId: invoice.id,
       description: `${feeDescription} — ${periodLabel}`,
-      quantity: feeConfig.feeType === "fixed" ? txnCount : 1,
-      unitAmount: feeConfig.feeType === "fixed" ? feeVal.toFixed(4) : txnVolume.toFixed(4),
+      quantity: lineQuantity,
+      unitAmount: lineUnitAmount,
       totalAmount: subtotal.toFixed(2),
     });
 

@@ -9,12 +9,13 @@ export const eftMerchantFees = pgTable("eft_merchant_fees", {
   id: uuid("id").defaultRandom().primaryKey(),
   merchantId: text("merchant_id").notNull().references(() => users.id, { onDelete: "cascade" }).unique(),
 
-  // Which fee type this merchant uses: "fixed" or "percentage"
-  feeType: text("fee_type", { enum: ["fixed", "percentage"] }).notNull().default("fixed"),
+  // Which fee type this merchant uses: "fixed", "percentage", or "volume"
+  feeType: text("fee_type", { enum: ["fixed", "percentage", "volume"] }).notNull().default("fixed"),
 
   // Optional custom fee values (null = use system default)
   fixedFeeValue: numeric("fixed_fee_value", { precision: 10, scale: 4 }),
   percentageFeeValue: numeric("percentage_fee_value", { precision: 10, scale: 4 }),
+  volumeFeeValue: numeric("volume_fee_value", { precision: 10, scale: 4 }), // Percentage of total transaction volume
 
   // VAT override (null = use system default)
   vatEnabled: boolean("vat_enabled"),
@@ -51,7 +52,7 @@ export const eftInvoices = pgTable("eft_invoices", {
   transactionVolume: numeric("transaction_volume", { precision: 14, scale: 2 }).default("0"),
 
   // Fee snapshot (captured at generation time)
-  feeType: text("fee_type", { enum: ["fixed", "percentage"] }).notNull(),
+  feeType: text("fee_type", { enum: ["fixed", "percentage", "volume"] }).notNull(),
   feeValue: numeric("fee_value", { precision: 10, scale: 4 }).notNull(),
   vatRate: numeric("vat_rate", { precision: 5, scale: 2 }).default("15.00"),
   vatEnabled: boolean("vat_enabled").default(true),
@@ -109,6 +110,7 @@ export const eftSystemFees = pgTable("eft_system_fees", {
   // Both fee values are always set at system level
   fixedFeeValue: numeric("fixed_fee_value", { precision: 10, scale: 4 }).notNull().default("5.00"),
   percentageFeeValue: numeric("percentage_fee_value", { precision: 10, scale: 4 }).notNull().default("2.50"),
+  volumeFeeValue: numeric("volume_fee_value", { precision: 10, scale: 4 }).notNull().default("0.0500"), // Default volume fee percentage
 
   // VAT defaults
   vatEnabled: boolean("vat_enabled").default(true),

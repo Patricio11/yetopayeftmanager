@@ -52,6 +52,7 @@ interface Merchant {
 interface SystemFees {
   fixedFeeValue: string;
   percentageFeeValue: string;
+  volumeFeeValue: string;
   vatEnabled: boolean;
   vatRate: string;
 }

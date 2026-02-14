@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Percent, DollarSign, AlertCircle } from "lucide-react";
+import { Percent, DollarSign, AlertCircle, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 interface SystemFees {
   fixedFeeValue: string;
   percentageFeeValue: string;
+  volumeFeeValue: string;
   vatEnabled: boolean;
   vatRate: string;
 }
@@ -26,6 +27,7 @@ export function FeeSettingsDialog({ currentFees, onClose, onSaved }: FeeSettings
   const [saving, setSaving] = useState(false);
   const [fixedFeeValue, setFixedFeeValue] = useState(currentFees?.fixedFeeValue || "5.00");
   const [percentageFeeValue, setPercentageFeeValue] = useState(currentFees?.percentageFeeValue || "2.50");
+  const [volumeFeeValue, setVolumeFeeValue] = useState(currentFees?.volumeFeeValue || "0.0500");
   const [vatEnabled, setVatEnabled] = useState(currentFees?.vatEnabled ?? true);
   const [vatRate, setVatRate] = useState(currentFees?.vatRate || "15.00");
 
@@ -35,7 +37,7 @@ export function FeeSettingsDialog({ currentFees, onClose, onSaved }: FeeSettings
       const res = await fetch("/api/admin/recon/fees", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fixedFeeValue, percentageFeeValue, vatEnabled, vatRate }),
+        body: JSON.stringify({ fixedFeeValue, percentageFeeValue, volumeFeeValue, vatEnabled, vatRate }),
       });
       const data = await res.json();
       if (data.success) {
@@ -109,6 +111,28 @@ export function FeeSettingsDialog({ currentFees, onClose, onSaved }: FeeSettings
             <p className="text-xs text-slate-500">Percentage of each transaction amount charged as fee</p>
           </div>
 
+          {/* Volume Fee */}
+          <div className="space-y-2">
+            <Label htmlFor="volumeFee" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-amber-600" />
+              Volume Fee (%)
+            </Label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">%</span>
+              <Input
+                id="volumeFee"
+                type="number"
+                step="0.0001"
+                min="0"
+                max="100"
+                value={volumeFeeValue}
+                onChange={(e) => setVolumeFeeValue(e.target.value)}
+                className="pl-8"
+              />
+            </div>
+            <p className="text-xs text-slate-500">Percentage of total transaction volume for the billing period (e.g. 0.050%)</p>
+          </div>
+
           {/* VAT Toggle */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -147,7 +171,7 @@ export function FeeSettingsDialog({ currentFees, onClose, onSaved }: FeeSettings
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex gap-3">
             <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
             <p className="text-xs text-amber-800">
-              Set both rates here. On each merchant&apos;s profile, you assign whether they use the <strong>fixed</strong> or <strong>percentage</strong> fee.
+              Set all three rates here. On each merchant&apos;s profile, you assign whether they use the <strong>fixed</strong>, <strong>percentage</strong>, or <strong>volume</strong> fee.
               Merchants can also have custom fee values that override these defaults.
             </p>
           </div>

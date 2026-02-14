@@ -40,7 +40,7 @@ export async function PUT(
 
     const { merchantId } = await params;
     const body = await request.json();
-    const { feeType, fixedFeeValue, percentageFeeValue, vatEnabled, vatRate } = body;
+    const { feeType, fixedFeeValue, percentageFeeValue, volumeFeeValue, vatEnabled, vatRate } = body;
 
     // Check if exists
     const existing = await db.query.eftMerchantFees.findFirst({
@@ -53,6 +53,7 @@ export async function PUT(
           feeType: feeType || existing.feeType,
           fixedFeeValue: fixedFeeValue !== undefined ? (fixedFeeValue === null ? null : String(fixedFeeValue)) : existing.fixedFeeValue,
           percentageFeeValue: percentageFeeValue !== undefined ? (percentageFeeValue === null ? null : String(percentageFeeValue)) : existing.percentageFeeValue,
+          volumeFeeValue: volumeFeeValue !== undefined ? (volumeFeeValue === null ? null : String(volumeFeeValue)) : existing.volumeFeeValue,
           vatEnabled: vatEnabled !== undefined ? vatEnabled : existing.vatEnabled,
           vatRate: vatRate !== undefined ? (vatRate === null ? null : String(vatRate)) : existing.vatRate,
           updatedAt: new Date(),
@@ -68,6 +69,7 @@ export async function PUT(
       feeType: feeType || "fixed",
       fixedFeeValue: fixedFeeValue != null ? String(fixedFeeValue) : null,
       percentageFeeValue: percentageFeeValue != null ? String(percentageFeeValue) : null,
+      volumeFeeValue: volumeFeeValue != null ? String(volumeFeeValue) : null,
       vatEnabled: vatEnabled ?? null,
       vatRate: vatRate != null ? String(vatRate) : null,
     }).returning();

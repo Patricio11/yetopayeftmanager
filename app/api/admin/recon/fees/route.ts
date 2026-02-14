@@ -15,6 +15,7 @@ export async function GET() {
     const defaults = rows[0] || {
       fixedFeeValue: "5.00",
       percentageFeeValue: "2.50",
+      volumeFeeValue: "0.0500",
       vatEnabled: true,
       vatRate: "15.00",
     };
@@ -35,7 +36,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { fixedFeeValue, percentageFeeValue, vatEnabled, vatRate } = body;
+    const { fixedFeeValue, percentageFeeValue, volumeFeeValue, vatEnabled, vatRate } = body;
 
     const rows = await db.select().from(eftSystemFees).limit(1);
 
@@ -44,6 +45,7 @@ export async function PATCH(request: NextRequest) {
       const [created] = await db.insert(eftSystemFees).values({
         fixedFeeValue: String(fixedFeeValue ?? "5.00"),
         percentageFeeValue: String(percentageFeeValue ?? "2.50"),
+        volumeFeeValue: String(volumeFeeValue ?? "0.0500"),
         vatEnabled: vatEnabled ?? true,
         vatRate: String(vatRate ?? "15.00"),
         updatedBy: session.user.id,
@@ -56,6 +58,7 @@ export async function PATCH(request: NextRequest) {
       .set({
         ...(fixedFeeValue !== undefined && { fixedFeeValue: String(fixedFeeValue) }),
         ...(percentageFeeValue !== undefined && { percentageFeeValue: String(percentageFeeValue) }),
+        ...(volumeFeeValue !== undefined && { volumeFeeValue: String(volumeFeeValue) }),
         ...(vatEnabled !== undefined && { vatEnabled }),
         ...(vatRate !== undefined && { vatRate: String(vatRate) }),
         updatedAt: new Date(),
