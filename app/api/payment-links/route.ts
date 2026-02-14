@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth-server";
 import { authenticateApiRequest, requirePermission } from "@/lib/auth/api-middleware";
 import { db } from "@/lib/db";
-import { eftTransactions, paymentTokens } from "@/lib/db/schema";
+import { eftTransactions, paymentTokens, users } from "@/lib/db/schema";
 import { generatePaymentToken } from "@/lib/security/payment-token";
 import { checkRateLimit, getClientIdentifier } from "@/lib/security/rate-limit";
 import { eq, desc, and, gte } from "drizzle-orm";
@@ -103,7 +103,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create transaction record
+    // Fetch merchant's default EFT URLs as fallbacks
+    const merchant = await db.query.users.findFirst({
+      where: eq(users.id, merchantId),
+      columns: { eftSettings: true },
+    });
+    const eftDefaults = (merchant?.eftSettings as any) || {};
+
+    // Create transaction record (per-transaction URLs override merchant defaults)
     const [transaction] = await db
       .insert(eftTransactions)
       .values({
@@ -113,10 +120,10 @@ export async function POST(request: NextRequest) {
         description: validatedData.description,
         customerEmail: validatedData.customerEmail,
         customerName: validatedData.customerName,
-        notifyUrl: validatedData.notifyUrl,
-        successUrl: validatedData.successUrl,
-        failureUrl: validatedData.failureUrl,
-        cancelledUrl: validatedData.cancelledUrl,
+        notifyUrl: validatedData.notifyUrl || eftDefaults.notifyUrl || null,
+        successUrl: validatedData.successUrl || eftDefaults.successUrl || null,
+        failureUrl: validatedData.failureUrl || eftDefaults.failureUrl || null,
+        cancelledUrl: validatedData.cancelledUrl || eftDefaults.cancelledUrl || null,
         status: "not_started",
         createdAt: new Date(),
         metadata: validatedData.metadata || {},

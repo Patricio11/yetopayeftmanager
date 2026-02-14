@@ -42,6 +42,15 @@ const updateSettingsSchema = z.object({
     weekly_summary: z.boolean().optional(),
     security_alerts: z.boolean().optional(),
   }).optional(),
+
+  // EFT Settings (default URLs)
+  eftSettings: z.object({
+    webhookUrl: z.string().url().max(500).optional().or(z.literal("")),
+    notifyUrl: z.string().url().max(500).optional().or(z.literal("")),
+    successUrl: z.string().url().max(500).optional().or(z.literal("")),
+    failureUrl: z.string().url().max(500).optional().or(z.literal("")),
+    cancelledUrl: z.string().url().max(500).optional().or(z.literal("")),
+  }).optional(),
 }).strict();
 
 /**
@@ -92,6 +101,13 @@ export async function GET(request: NextRequest) {
             security_alerts: true,
           },
         },
+        eftSettings: user.eftSettings || {
+          webhookUrl: "",
+          notifyUrl: "",
+          successUrl: "",
+          failureUrl: "",
+          cancelledUrl: "",
+        },
       },
     });
   } catch (error) {
@@ -136,6 +152,21 @@ export async function PATCH(request: NextRequest) {
     // Notification preferences
     if (validated.notificationPreferences !== undefined) {
       updateData.notificationPreferences = validated.notificationPreferences;
+    }
+
+    // EFT Settings
+    if (validated.eftSettings !== undefined) {
+      const currentUser = await db.query.users.findFirst({
+        where: eq(users.id, auth.session.user.id),
+        columns: { eftSettings: true },
+      });
+      const currentEft = (currentUser?.eftSettings as any) || {};
+      updateData.eftSettings = {
+        ...currentEft,
+        ...Object.fromEntries(
+          Object.entries(validated.eftSettings).filter(([_, v]) => v !== undefined)
+        ),
+      };
     }
 
     // Company metadata (registrationNumber, vatNumber, website stored in metadata JSONB)

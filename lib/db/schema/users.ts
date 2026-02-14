@@ -54,6 +54,15 @@ export const users = pgTable("user", {
   lockedUntil: timestamp("locked_until"),
   lastPasswordChange: timestamp("last_password_change"),
   
+  // EFT Settings (default URLs for payment transactions)
+  eftSettings: jsonb("eft_settings").$type<{
+    webhookUrl?: string;
+    notifyUrl?: string;
+    successUrl?: string;
+    failureUrl?: string;
+    cancelledUrl?: string;
+  }>().default({}),
+
   // Metadata
   metadata: jsonb("metadata").default({}),
   notificationPreferences: jsonb("notification_preferences").default({}),
