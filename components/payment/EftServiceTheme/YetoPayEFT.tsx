@@ -101,7 +101,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   const [showPassword, setShowPassword] = useState<Record<string, boolean>>({});
   const [formErrors, setFormErrors] = useState<Record<string, string | null>>({});
   const [pageError, setPageError] = useState<string | null>(null);
-  const [transactionResult, setTransactionResult] = useState<{ status: 'completed' | 'failed'; message?: string } | null>(null);
+  const [transactionResult, setTransactionResult] = useState<{ status: 'completed' | 'failed' | 'cancelled'; message?: string } | null>(null);
 
   // T&C modal + agreement state
   const [showTerms, setShowTerms] = useState(false);
@@ -199,14 +199,14 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     }
   };
 
-  const pickRedirectUrl = (uiStatus: 'completed' | 'failed') => {
+  const pickRedirectUrl = (uiStatus: 'completed' | 'failed' | 'cancelled') => {
     if (uiStatus === 'completed' && merchant.success_url) return merchant.success_url;
-    if (uiStatus === 'failed' && merchant.fail_url) return merchant.fail_url;
+    if ((uiStatus === 'failed' || uiStatus === 'cancelled') && merchant.fail_url) return merchant.fail_url;
     return merchant.notify_url || '';
   };
 
   // Final UI -> update transaction status in our DB, then redirect
-  const finishAndRedirect = async (uiStatus: 'completed' | 'failed', message?: string, raw?: ApiResponse) => {
+  const finishAndRedirect = async (uiStatus: 'completed' | 'failed' | 'cancelled', message?: string, raw?: ApiResponse) => {
     if (finalPollTimer.current) clearInterval(finalPollTimer.current);
     if (sseRef.current) { sseRef.current.close(); sseRef.current = null; }
     setTransactionResult({ status: uiStatus, message });
@@ -218,7 +218,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
         console.log(`[EFT] Updating transaction status to: ${uiStatus}`);
         
         const updatePayload: Record<string, any> = {
-          status: uiStatus === 'completed' ? 'completed' : 'failed',
+          status: uiStatus === 'completed' ? 'completed' : uiStatus === 'cancelled' ? 'cancelled' : 'failed',
           message: message || '',
           gatewayResult: raw?.gatewayResult,
           transactionStatus: raw?.transactionStatus || raw?.status,
@@ -265,7 +265,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
       amount: raw?.amount || paymentDetails.amount,
       reference: paymentDetails.reference,
       bank: selectedBank?.code,
-      status: uiStatus === 'completed' ? 'success' : 'failed',
+      status: uiStatus === 'completed' ? 'success' : uiStatus === 'cancelled' ? 'cancelled' : 'failed',
       message: message || '',
       gateway_result: raw?.gatewayResult,
       transaction_status: raw?.transactionStatus || raw?.status,
@@ -868,9 +868,10 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
       //   body: JSON.stringify(payload),
       // });
 
-      // cancel the transaction
-      //To do, maybe can send a request to the backend to cancel the transaction and the backend will call the cancel endpoint of the eft service
-      const response = await fetch(`${EFT_API_BASE_URL}/v1/eft/${transactionIdToSend}/cancel`, {
+      // cancel the transaction via EFT service
+      const bankCode = selectedBank?.code || '';
+      const sid = sessionId || transactionIdToSend;
+      const response = await fetch(`${EFT_API_BASE_URL}/${bankCode}/cancel?session_id=${sid}`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(authSecretBearerToken ? { Authorization: `Bearer ${authSecretBearerToken}` } : {}) },
       });
@@ -882,17 +883,17 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
         throw new Error(err?.error || "Failed to cancel transaction");
       }
 
-      // on success redirect user to merchant fail url if present
+      // Show cancelled UI, update DB, and redirect to merchant
       setCancelLoading(false);
       setCancelConfirmOpen(false);
-      const redirect = merchant.fail_url || merchant.notify_url || "/";
-      window.location.href = redirect;
+      await finishAndRedirect('cancelled', 'Transaction cancelled by user');
 
     } catch (err: any) {
       setCancelLoading(false);
       console.error("Cancel failed:", err?.message || err);
-      setPageError(err?.message || "Cancel failed");
+      // Even if backend cancel fails, still mark as cancelled in our DB and redirect
       setCancelConfirmOpen(false);
+      await finishAndRedirect('cancelled', 'Transaction cancelled by user');
     }
   };
 
@@ -994,9 +995,9 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
 
     if (accountInput && selectedValue) {
       const selectedOption = Array.isArray(accountInput.options) ? accountInput.options.find((opt) => opt.value === selectedValue) : undefined;
-      // When on the 'select' step, we should call the 'select' endpoint with the chosen account
-      // The backend will then return the next step (payment/otp-payment)
-      const nextStep = apiResponse.next_step || 'select';
+      // Always call the 'select' endpoint to process the chosen account on the bank page
+      // The backend select() will set session state and return the next step (payment/otp-payment)
+      const nextStep = apiResponse.step || 'select';
       if (selectedOption) {
         const payload = { account: { value: selectedOption.value, text: selectedOption.text } };
         handleStepExecution(selectedBank.code, nextStep, payload);
@@ -1040,21 +1041,8 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   };
 
   const handleCancel = async () => {
-    try {
-      if (selectedBank && sessionId) {
-        await fetch(`${EFT_API_BASE_URL}/${selectedBank.code}/cancel?session_id=${sessionId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authSecretBearerToken}`,
-          },
-        });
-      }
-      setCancelConfirmOpen(true);
-    } catch (error) {
-      console.error('Cancel failed:', error);
-      clearTcTooltipTimer();
-    }
+    // Just show confirm dialog — actual cancel happens in handleCancelConfirm
+    setCancelConfirmOpen(true);
   };
 
   const handleBackToBank = () => {
@@ -1613,21 +1601,38 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
 
   const renderTransactionResult = () => {
     const isSuccess = transactionResult?.status === 'completed';
+    const isCancelled = transactionResult?.status === 'cancelled';
     console.log('[DEBUG] Rendering transaction result:', {
       isSuccess,
+      isCancelled,
       savedCredentialId,
       saveCredentials,
       selectedBank: selectedBank?.name
     });
+
+    // Determine icon, colors, and text based on status
+    const bgColor = isSuccess ? 'bg-green-100' : isCancelled ? 'bg-amber-100' : 'bg-red-100';
+    const icon = isSuccess
+      ? <CheckCircle className="w-12 h-12 text-green-600" />
+      : isCancelled
+        ? <X className="w-12 h-12 text-amber-600" />
+        : <AlertTriangle className="w-12 h-12 text-red-600" />;
+    const title = isSuccess ? 'Payment Successful' : isCancelled ? 'Transaction Cancelled' : 'Payment Failed';
+    const defaultMsg = isSuccess
+      ? 'Your payment has been completed.'
+      : isCancelled
+        ? 'You have cancelled this transaction.'
+        : 'Your payment could not be processed.';
+    const resultStatus: 'completed' | 'failed' | 'cancelled' = isSuccess ? 'completed' : isCancelled ? 'cancelled' : 'failed';
     
     return (
       <div className="text-center space-y-6">
-        <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto ${isSuccess ? 'bg-green-100' : 'bg-red-100'}`}>
-          {isSuccess ? <CheckCircle className="w-12 h-12 text-green-600" /> : <AlertTriangle className="w-12 h-12 text-red-600" />}
+        <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto ${bgColor}`}>
+          {icon}
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">{isSuccess ? 'Payment Successful' : 'Payment Failed'}</h2>
-          <p className="text-gray-600">{transactionResult?.message || (isSuccess ? 'Your payment has been completed.' : 'Your payment could not be processed.')}</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{title}</h2>
+          <p className="text-gray-600">{transactionResult?.message || defaultMsg}</p>
           
           {/* Show saved credentials info and delete option */}
           {savedCredentialId && (
@@ -1646,7 +1651,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
             </div>
           )}
           
-          {pickRedirectUrl(isSuccess ? 'completed' : 'failed') ? (
+          {pickRedirectUrl(resultStatus) ? (
             <div className="mt-4">
               <p className="text-sm text-gray-500">
                 {isSuccess ? 'Redirecting you back to the merchant...' : 'You will be redirected shortly...'}
@@ -1701,7 +1706,8 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
       case 'select': return renderAccountSelection();
       case 'final': return renderFinalStep();
       case 'completed':
-      case 'failed': return renderTransactionResult();
+      case 'failed':
+      case 'cancelled': return renderTransactionResult();
       default: return renderDynamicForm();
     }
   };
