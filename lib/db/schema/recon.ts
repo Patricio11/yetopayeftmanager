@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, numeric, timestamp, boolean, jsonb, integer, index } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, numeric, timestamp, boolean, jsonb, integer, index, uniqueIndex } from "drizzle-orm/pg-core";
 import { users } from "./users";
 import { eftTransactions } from "./eft";
 
@@ -82,6 +82,7 @@ export const eftInvoices = pgTable("eft_invoices", {
   statusIdx: index("eft_invoices_status_idx").on(table.status),
   periodIdx: index("eft_invoices_period_idx").on(table.periodStart, table.periodEnd),
   invoiceNumberIdx: index("eft_invoices_number_idx").on(table.invoiceNumber),
+  merchantPeriodUniq: uniqueIndex("eft_invoices_merchant_period_uniq").on(table.merchantId, table.periodStart, table.periodEnd),
 }));
 
 // ─── Invoice Line Items ─────────────────────────────────────────────────────

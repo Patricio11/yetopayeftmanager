@@ -96,6 +96,29 @@ export async function POST(request: NextRequest) {
     const startDate = new Date(periodStart);
     const endDate = new Date(periodEnd);
 
+    // Check for existing invoice for this merchant + period (idempotency guard)
+    const [existingInvoice] = await db
+      .select({ id: eftInvoices.id, invoiceNumber: eftInvoices.invoiceNumber, status: eftInvoices.status })
+      .from(eftInvoices)
+      .where(
+        and(
+          eq(eftInvoices.merchantId, merchantId),
+          eq(eftInvoices.periodStart, startDate),
+          eq(eftInvoices.periodEnd, endDate)
+        )
+      );
+
+    if (existingInvoice) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: `An invoice already exists for this merchant and period (${existingInvoice.invoiceNumber}, status: ${existingInvoice.status})`,
+          existingInvoiceId: existingInvoice.id,
+        },
+        { status: 409 }
+      );
+    }
+
     // 1. Fetch completed transactions for this merchant in the period
     const transactions = await db
       .select({
@@ -253,6 +276,15 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error("Error generating invoice:", error);
+
+    // Handle unique constraint violation (concurrent duplicate request)
+    if (error?.code === "23505" || error?.message?.includes("unique constraint")) {
+      return NextResponse.json(
+        { success: false, message: "An invoice already exists for this merchant and period" },
+        { status: 409 }
+      );
+    }
+
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }
