@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/auth/authorization";
 import { db } from "@/lib/db";
 import { eftMerchantFees } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { writeAuditLog } from "@/lib/audit";
 
 // GET /api/admin/recon/merchant-fees/[merchantId] — get merchant-specific fee config
 export async function GET(
@@ -56,6 +57,7 @@ export async function PUT(
         })
         .where(eq(eftMerchantFees.merchantId, merchantId))
         .returning();
+      writeAuditLog({ userId: auth.session.user.id, action: "update", resource: "merchant_fees", resourceId: merchantId, changes: { before: { feeType: existing.feeType, fixedFeeValue: existing.fixedFeeValue, percentageFeeValue: existing.percentageFeeValue, volumeFeeValue: existing.volumeFeeValue, vatEnabled: existing.vatEnabled, vatRate: existing.vatRate }, after: { feeType, fixedFeeValue, percentageFeeValue, volumeFeeValue, vatEnabled, vatRate } }, request });
       return NextResponse.json({ success: true, data: updated });
     }
 
@@ -70,6 +72,7 @@ export async function PUT(
       vatRate: vatRate != null ? String(vatRate) : null,
     }).returning();
 
+    writeAuditLog({ userId: auth.session.user.id, action: "create", resource: "merchant_fees", resourceId: merchantId, changes: { after: { feeType, fixedFeeValue, percentageFeeValue, volumeFeeValue, vatEnabled, vatRate } }, request });
     return NextResponse.json({ success: true, data: created });
   } catch (error: any) {
     console.error("Error updating merchant fees:", error);
@@ -89,6 +92,7 @@ export async function DELETE(
     const { merchantId } = await params;
     await db.delete(eftMerchantFees).where(eq(eftMerchantFees.merchantId, merchantId));
 
+    writeAuditLog({ userId: auth.session.user.id, action: "delete", resource: "merchant_fees", resourceId: merchantId, request: _request });
     return NextResponse.json({ success: true, message: "Custom fee removed, system defaults will apply" });
   } catch (error: any) {
     console.error("Error deleting merchant fees:", error);

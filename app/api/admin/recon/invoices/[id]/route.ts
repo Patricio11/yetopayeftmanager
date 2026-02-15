@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/auth/authorization";
 import { db } from "@/lib/db";
 import { eftInvoices, eftInvoiceItems, users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { writeAuditLog } from "@/lib/audit";
 
 // GET /api/admin/recon/invoices/[id] — get invoice detail with items
 export async function GET(
@@ -84,6 +85,7 @@ export async function PATCH(
       return NextResponse.json({ success: false, message: "Invoice not found" }, { status: 404 });
     }
 
+    writeAuditLog({ userId: auth.session.user.id, action: "update", resource: "invoice", resourceId: id, changes: { after: { status, notes, dueDate } }, request });
     return NextResponse.json({ success: true, data: updated });
   } catch (error: any) {
     console.error("Error updating invoice:", error);
@@ -120,6 +122,7 @@ export async function DELETE(
     // Items cascade-delete
     await db.delete(eftInvoices).where(eq(eftInvoices.id, id));
 
+    writeAuditLog({ userId: auth.session.user.id, action: "delete", resource: "invoice", resourceId: id, changes: { before: { invoiceNumber: invoice.invoiceNumber, merchantId: invoice.merchantId, status: invoice.status } }, request: _request });
     return NextResponse.json({ success: true, message: "Invoice deleted" });
   } catch (error: any) {
     console.error("Error deleting invoice:", error);

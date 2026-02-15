@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/auth/authorization";
 import { db } from "@/lib/db";
 import { eftInvoices, eftInvoiceItems, eftMerchantFees, eftSystemFees, eftTransactions, users } from "@/lib/db/schema";
 import { eq, and, gte, lte, sql, desc, count } from "drizzle-orm";
+import { writeAuditLog } from "@/lib/audit";
 
 // GET /api/admin/recon/invoices — list all invoices (admin only)
 export async function GET(request: NextRequest) {
@@ -260,6 +261,8 @@ export async function POST(request: NextRequest) {
       unitAmount: lineUnitAmount,
       totalAmount: subtotal.toFixed(2),
     });
+
+    writeAuditLog({ userId: auth.session.user.id, action: "create", resource: "invoice", resourceId: invoice.id, changes: { after: { invoiceNumber, merchantId, periodStart, periodEnd, totalAmount: totalAmount.toFixed(2), feeType: feeConfig.feeType, transactionCount: txnCount } }, request });
 
     // Fetch merchant info for response
     const merchant = await db.query.users.findFirst({

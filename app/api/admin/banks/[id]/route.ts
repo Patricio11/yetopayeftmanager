@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { eftBanks } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import { writeAuditLog } from "@/lib/audit";
 
 const updateBankSchema = z.object({
   bankName: z.string().min(1, "Bank name is required").optional(),
@@ -116,7 +117,7 @@ export async function PATCH(
       .where(eq(eftBanks.id, id))
       .returning();
 
-    console.log(`✅ Bank updated: ${updatedBank.bankName} (${updatedBank.code})`);
+    writeAuditLog({ userId: auth.session.user.id, action: "update", resource: "bank", resourceId: id, changes: { before: { bankName: existingBank.bankName, code: existingBank.code, enabled: existingBank.enabled, color: existingBank.color, branchCode: existingBank.branchCode }, after: validatedData }, request });
 
     return NextResponse.json({
       success: true,
@@ -188,7 +189,7 @@ export async function DELETE(
     // Delete bank
     await db.delete(eftBanks).where(eq(eftBanks.id, id));
 
-    console.log(`✅ Bank deleted: ${existingBank.bankName} (${existingBank.code})`);
+    writeAuditLog({ userId: auth.session.user.id, action: "delete", resource: "bank", resourceId: id, changes: { before: { bankName: existingBank.bankName, code: existingBank.code } }, request });
 
     return NextResponse.json({
       success: true,

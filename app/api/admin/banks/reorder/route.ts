@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { eftBanks } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import { writeAuditLog } from "@/lib/audit";
 
 const reorderSchema = z.object({
   bankOrders: z.array(
@@ -40,7 +41,7 @@ export async function PATCH(request: NextRequest) {
 
     await Promise.all(updatePromises);
 
-    console.log(`✅ Bank order updated: ${validatedData.bankOrders.length} banks reordered`);
+    writeAuditLog({ userId: auth.session.user.id, action: "update", resource: "bank_order", changes: { after: { bankOrders: validatedData.bankOrders } }, request });
 
     return NextResponse.json({
       success: true,

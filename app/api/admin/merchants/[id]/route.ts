@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { users, eftTransactions, eftBankAccounts, apiKeys, webhookConfigurations, merchantTeamMembers } from '@/lib/db/schema';
 import { eq, and, count, sum, sql } from 'drizzle-orm';
 import { z } from 'zod';
+import { writeAuditLog } from '@/lib/audit';
 
 /**
  * GET /api/admin/merchants/[id]
@@ -157,6 +158,8 @@ export async function PATCH(
       .where(eq(users.id, id))
       .returning();
 
+    writeAuditLog({ userId: auth.session.user.id, action: "update", resource: "merchant", resourceId: id, changes: { before: { name: merchant.name, email: merchant.email, isActive: merchant.isActive, kycStatus: merchant.kycStatus, role: merchant.role }, after: updates }, request });
+
     return NextResponse.json({
       success: true,
       message: 'Merchant updated successfully',
@@ -214,6 +217,8 @@ export async function DELETE(
         updatedAt: new Date(),
       })
       .where(eq(users.id, id));
+
+    writeAuditLog({ userId: auth.session.user.id, action: "delete", resource: "merchant", resourceId: id, changes: { before: { name: merchant.name, email: merchant.email, companyName: merchant.companyName } }, request });
 
     return NextResponse.json({
       success: true,

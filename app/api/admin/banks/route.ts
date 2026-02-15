@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { eftBanks, eftTransactions } from "@/lib/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { z } from "zod";
+import { writeAuditLog } from "@/lib/audit";
 
 const createBankSchema = z.object({
   bankName: z.string().min(1, "Bank name is required"),
@@ -101,7 +102,7 @@ export async function POST(request: NextRequest) {
       })
       .returning();
 
-    console.log(`✅ Bank created: ${newBank.bankName} (${newBank.code})`);
+    writeAuditLog({ userId: auth.session.user.id, action: "create", resource: "bank", resourceId: newBank.id, changes: { after: { bankName: newBank.bankName, code: newBank.code, enabled: newBank.enabled } }, request });
 
     return NextResponse.json({
       success: true,

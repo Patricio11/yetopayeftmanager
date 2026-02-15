@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/authorization";
 import { db } from "@/lib/db";
 import { eftSystemFees } from "@/lib/db/schema";
+import { writeAuditLog } from "@/lib/audit";
 
 // GET /api/admin/recon/fees — get system default fee settings
 export async function GET() {
@@ -46,10 +47,12 @@ export async function PATCH(request: NextRequest) {
         vatRate: String(vatRate ?? "15.00"),
         updatedBy: auth.session.user.id,
       }).returning();
+      writeAuditLog({ userId: auth.session.user.id, action: "create", resource: "system_fees", resourceId: created.id, changes: { after: { fixedFeeValue, percentageFeeValue, volumeFeeValue, vatEnabled, vatRate } }, request });
       return NextResponse.json({ success: true, data: created });
     }
 
     // Update existing
+    const before = rows[0];
     const [updated] = await db.update(eftSystemFees)
       .set({
         ...(fixedFeeValue !== undefined && { fixedFeeValue: String(fixedFeeValue) }),
@@ -61,6 +64,8 @@ export async function PATCH(request: NextRequest) {
         updatedBy: auth.session.user.id,
       })
       .returning();
+
+    writeAuditLog({ userId: auth.session.user.id, action: "update", resource: "system_fees", resourceId: updated.id, changes: { before: { fixedFeeValue: before.fixedFeeValue, percentageFeeValue: before.percentageFeeValue, volumeFeeValue: before.volumeFeeValue, vatEnabled: before.vatEnabled, vatRate: before.vatRate }, after: { fixedFeeValue, percentageFeeValue, volumeFeeValue, vatEnabled, vatRate } }, request });
 
     return NextResponse.json({ success: true, data: updated });
   } catch (error: any) {
