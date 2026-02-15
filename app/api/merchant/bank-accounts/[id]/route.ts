@@ -69,20 +69,25 @@ export async function PATCH(
     if (validated.accountName !== undefined) updates.accountName = validated.accountName;
     if (validated.accountType !== undefined) updates.accountType = validated.accountType;
 
-    // Handle primary flag
     if (validated.isPrimary === true) {
-      await db
-        .update(eftBankAccounts)
-        .set({ isPrimary: false, updatedAt: new Date() })
-        .where(eq(eftBankAccounts.merchantId, merchantId));
       updates.isPrimary = true;
     }
 
-    const [updated] = await db
-      .update(eftBankAccounts)
-      .set(updates)
-      .where(eq(eftBankAccounts.id, id))
-      .returning();
+    // Use transaction to atomically unset primary + update account
+    const [updated] = await db.transaction(async (tx) => {
+      if (validated.isPrimary === true) {
+        await tx
+          .update(eftBankAccounts)
+          .set({ isPrimary: false, updatedAt: new Date() })
+          .where(eq(eftBankAccounts.merchantId, merchantId));
+      }
+
+      return tx
+        .update(eftBankAccounts)
+        .set(updates)
+        .where(eq(eftBankAccounts.id, id))
+        .returning();
+    });
 
     return NextResponse.json({
       success: true,

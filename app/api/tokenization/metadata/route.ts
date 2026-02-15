@@ -210,23 +210,25 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // If setting as default, unset other defaults
+    // If setting as default, unset other defaults (in a transaction to prevent race conditions)
     if (isDefault) {
-      await db
-        .update(customerBankTokens)
-        .set({ isDefault: false })
-        .where(
-          and(
-            eq(customerBankTokens.merchantId, merchantId),
-            eq(customerBankTokens.deviceFingerprint, deviceFingerprint),
-            eq(customerBankTokens.isActive, true)
-          )
-        );
-      
-      await db
-        .update(customerBankTokens)
-        .set({ isDefault: true })
-        .where(eq(customerBankTokens.id, tokenId));
+      await db.transaction(async (tx) => {
+        await tx
+          .update(customerBankTokens)
+          .set({ isDefault: false })
+          .where(
+            and(
+              eq(customerBankTokens.merchantId, merchantId),
+              eq(customerBankTokens.deviceFingerprint, deviceFingerprint),
+              eq(customerBankTokens.isActive, true)
+            )
+          );
+
+        await tx
+          .update(customerBankTokens)
+          .set({ isDefault: true })
+          .where(eq(customerBankTokens.id, tokenId));
+      });
     }
 
     return NextResponse.json({
