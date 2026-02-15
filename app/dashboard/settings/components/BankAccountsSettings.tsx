@@ -117,7 +117,7 @@ export function BankAccountsSettings() {
     setSaving(true);
     try {
       const payload = {
-        eftBanksId: selectedBankId,
+        eftBanksId: selectedBankId || undefined,
         accountHolderName,
         accountNumber,
         accountName: accountName || undefined,

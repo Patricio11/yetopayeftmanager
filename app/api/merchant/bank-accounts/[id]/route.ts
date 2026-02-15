@@ -6,10 +6,10 @@ import { eq, and } from "drizzle-orm";
 import { z } from "zod";
 
 const updateBankAccountSchema = z.object({
-  eftBanksId: z.string().uuid().optional(),
+  eftBanksId: z.string().uuid().optional().or(z.literal("").transform(() => undefined)),
   accountNumber: z.string().min(1).optional(),
   accountHolderName: z.string().min(1).optional(),
-  accountName: z.string().optional(),
+  accountName: z.string().optional().nullable(),
   accountType: z.enum(["savings", "cheque", "transmission", "bond", "investment"]).optional(),
   isPrimary: z.boolean().optional(),
 });
@@ -73,21 +73,19 @@ export async function PATCH(
       updates.isPrimary = true;
     }
 
-    // Use transaction to atomically unset primary + update account
-    const [updated] = await db.transaction(async (tx) => {
-      if (validated.isPrimary === true) {
-        await tx
-          .update(eftBankAccounts)
-          .set({ isPrimary: false, updatedAt: new Date() })
-          .where(eq(eftBankAccounts.merchantId, merchantId));
-      }
-
-      return tx
+    // Unset primary on other accounts first, then update this account
+    if (validated.isPrimary === true) {
+      await db
         .update(eftBankAccounts)
-        .set(updates)
-        .where(eq(eftBankAccounts.id, id))
-        .returning();
-    });
+        .set({ isPrimary: false, updatedAt: new Date() })
+        .where(eq(eftBankAccounts.merchantId, merchantId));
+    }
+
+    const [updated] = await db
+      .update(eftBankAccounts)
+      .set(updates)
+      .where(eq(eftBankAccounts.id, id))
+      .returning();
 
     return NextResponse.json({
       success: true,
@@ -95,7 +93,7 @@ export async function PATCH(
       data: { account: updated },
     });
   } catch (error: any) {
-    console.error("Error updating bank account:", error);
+    console.error("❌ Error updating bank account:", error?.message || error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -105,7 +103,7 @@ export async function PATCH(
     }
 
     return NextResponse.json(
-      { success: false, message: "Failed to update bank account" },
+      { success: false, message: error?.message || "Failed to update bank account" },
       { status: 500 }
     );
   }

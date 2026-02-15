@@ -91,31 +91,29 @@ export async function POST(request: NextRequest) {
     const isFirstAccount = existing.length === 0;
     const shouldBePrimary = isFirstAccount || validated.isPrimary;
 
-    // Use transaction to atomically unset primary + create account
-    const [newAccount] = await db.transaction(async (tx) => {
-      if (shouldBePrimary && !isFirstAccount) {
-        await tx
-          .update(eftBankAccounts)
-          .set({ isPrimary: false, updatedAt: new Date() })
-          .where(eq(eftBankAccounts.merchantId, merchantId));
-      }
+    // Unset primary on other accounts first, then create new account
+    if (shouldBePrimary && !isFirstAccount) {
+      await db
+        .update(eftBankAccounts)
+        .set({ isPrimary: false, updatedAt: new Date() })
+        .where(eq(eftBankAccounts.merchantId, merchantId));
+    }
 
-      return tx
-        .insert(eftBankAccounts)
-        .values({
-          merchantId,
-          eftBanksId: validated.eftBanksId,
-          accountNumber: validated.accountNumber,
-          accountHolderName: validated.accountHolderName,
-          accountName: validated.accountName,
-          accountType: validated.accountType,
-          branchCode: bank.branchCode,
-          bankCode: bank.code,
-          isPrimary: shouldBePrimary,
-          isVerified: false,
-        })
-        .returning();
-    });
+    const [newAccount] = await db
+      .insert(eftBankAccounts)
+      .values({
+        merchantId,
+        eftBanksId: validated.eftBanksId,
+        accountNumber: validated.accountNumber,
+        accountHolderName: validated.accountHolderName,
+        accountName: validated.accountName,
+        accountType: validated.accountType,
+        branchCode: bank.branchCode,
+        bankCode: bank.code,
+        isPrimary: shouldBePrimary,
+        isVerified: false,
+      })
+      .returning();
 
     return NextResponse.json({
       success: true,

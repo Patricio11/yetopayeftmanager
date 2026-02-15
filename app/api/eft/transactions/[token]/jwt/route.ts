@@ -113,7 +113,7 @@ export async function POST(
       merchant_account_type: primaryBankAccount.accountType,
       merchant_reference: transaction.reference,
       merchant_name: merchant.companyName || merchant.name,
-      merchant_bank: primaryBankAccount.bankCode,
+      merchant_bank: primaryBankAccount.bankCode?.toLowerCase(),
       notify_url: transaction.notifyUrl || '',
     };
 
