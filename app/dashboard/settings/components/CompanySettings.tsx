@@ -69,7 +69,33 @@ export function CompanySettings() {
   };
 
   if (fetching) {
-    return <Card><CardContent className="py-8 text-center text-gray-500">Loading company details...</CardContent></Card>;
+    return (
+      <Card>
+        <CardHeader>
+          <div className="h-5 w-48 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+          <div className="h-4 w-72 bg-slate-200 dark:bg-slate-700 animate-pulse rounded mt-2" />
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="space-y-2">
+                <div className="h-4 w-24 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+                <div className="h-10 w-full bg-slate-200 dark:bg-slate-700 animate-pulse rounded-md" />
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="space-y-2">
+                <div className="h-4 w-20 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+                <div className="h-10 w-full bg-slate-200 dark:bg-slate-700 animate-pulse rounded-md" />
+              </div>
+            ))}
+          </div>
+          <div className="h-10 w-32 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-md" />
+        </CardContent>
+      </Card>
+    );
   }
 
   return (

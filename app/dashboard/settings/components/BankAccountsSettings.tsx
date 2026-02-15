@@ -200,7 +200,36 @@ export function BankAccountsSettings() {
   };
 
   if (isLoading) {
-    return <Card><CardContent className="py-8 text-center text-gray-500">Loading bank accounts...</CardContent></Card>;
+    return (
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <div className="h-5 w-32 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+              <div className="h-4 w-64 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+            </div>
+            <div className="h-9 w-28 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-md" />
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {[...Array(2)].map((_, i) => (
+            <div key={i} className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-lg" />
+                <div className="space-y-2">
+                  <div className="h-4 w-32 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+                  <div className="h-3 w-24 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-6 w-16 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-full" />
+                <div className="h-8 w-8 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    );
   }
 
   return (

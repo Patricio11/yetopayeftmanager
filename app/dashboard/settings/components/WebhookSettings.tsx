@@ -172,8 +172,32 @@ export function WebhookSettings() {
   if (isLoading) {
     return (
       <Card>
-        <CardContent className="py-8">
-          <div className="text-center text-gray-600">Loading webhooks...</div>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <div className="h-5 w-40 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+              <div className="h-4 w-64 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+            </div>
+            <div className="h-9 w-32 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-md" />
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {[...Array(2)].map((_, i) => (
+            <div key={i} className="p-4 border rounded-lg space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-6 w-6 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+                  <div className="h-4 w-48 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+                </div>
+                <div className="h-6 w-16 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-full" />
+              </div>
+              <div className="flex gap-2">
+                {[...Array(3)].map((_, j) => (
+                  <div key={j} className="h-5 w-24 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-full" />
+                ))}
+              </div>
+            </div>
+          ))}
         </CardContent>
       </Card>
     );

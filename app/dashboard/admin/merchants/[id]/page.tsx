@@ -259,7 +259,21 @@ function TransactionsTab({ merchantId }: { merchantId: string }) {
       </div>
 
       {loading ? (
-        <div className="p-12 text-center text-slate-500">Loading transactions...</div>
+        <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="flex items-center gap-4 px-4 py-3 animate-pulse">
+              <div className="h-4 w-24 bg-slate-200 dark:bg-slate-700 rounded" />
+              <div className="flex-1 space-y-1">
+                <div className="h-4 w-28 bg-slate-200 dark:bg-slate-700 rounded" />
+                <div className="h-3 w-36 bg-slate-200 dark:bg-slate-700 rounded" />
+              </div>
+              <div className="h-4 w-20 bg-slate-200 dark:bg-slate-700 rounded" />
+              <div className="h-5 w-16 bg-slate-200 dark:bg-slate-700 rounded-full" />
+              <div className="h-4 w-16 bg-slate-200 dark:bg-slate-700 rounded" />
+              <div className="h-4 w-28 bg-slate-200 dark:bg-slate-700 rounded" />
+            </div>
+          ))}
+        </div>
       ) : transactions.length === 0 ? (
         <div className="p-12 text-center text-slate-500">No transactions found</div>
       ) : (
@@ -336,7 +350,23 @@ function TeamTab({ merchantId }: { merchantId: string }) {
         <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2"><Users className="w-5 h-5 text-green-600" />Team Members</h3>
       </div>
       {loading ? (
-        <div className="p-12 text-center text-slate-500">Loading team...</div>
+        <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="flex items-center justify-between p-4 animate-pulse">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                <div className="space-y-2">
+                  <div className="h-4 w-28 bg-slate-200 dark:bg-slate-700 rounded" />
+                  <div className="h-3 w-40 bg-slate-200 dark:bg-slate-700 rounded" />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-5 w-14 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                <div className="h-5 w-14 bg-slate-200 dark:bg-slate-700 rounded-full" />
+              </div>
+            </div>
+          ))}
+        </div>
       ) : members.length === 0 ? (
         <div className="p-12 text-center text-slate-500">No team members found</div>
       ) : (
@@ -386,7 +416,33 @@ function BankingTab({ merchantId }: { merchantId: string }) {
         <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2"><Landmark className="w-5 h-5 text-green-600" />Bank Accounts</h3>
       </div>
       {loading ? (
-        <div className="p-12 text-center text-slate-500">Loading bank accounts...</div>
+        <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
+          {[...Array(2)].map((_, i) => (
+            <div key={i} className="p-4 animate-pulse">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-xl" />
+                  <div className="space-y-2">
+                    <div className="h-4 w-28 bg-slate-200 dark:bg-slate-700 rounded" />
+                    <div className="h-3 w-36 bg-slate-200 dark:bg-slate-700 rounded" />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <div className="h-5 w-16 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                  <div className="h-5 w-16 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                </div>
+              </div>
+              <div className="grid grid-cols-4 gap-4 pl-13">
+                {[...Array(4)].map((_, j) => (
+                  <div key={j} className="space-y-1">
+                    <div className="h-3 w-16 bg-slate-200 dark:bg-slate-700 rounded" />
+                    <div className="h-4 w-20 bg-slate-200 dark:bg-slate-700 rounded" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       ) : accounts.length === 0 ? (
         <div className="p-12 text-center text-slate-500">No bank accounts found</div>
       ) : (
@@ -521,7 +577,35 @@ function BillingTab({ merchantId }: { merchantId: string }) {
     } finally { setSaving(false); }
   };
 
-  if (loading) return <div className="p-12 text-center text-slate-500">Loading billing settings...</div>;
+  if (loading) return (
+    <div className="grid md:grid-cols-2 gap-6 animate-pulse">
+      <Card className="p-6 bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50">
+        <div className="h-5 w-24 bg-slate-200 dark:bg-slate-700 rounded mb-2" />
+        <div className="h-4 w-56 bg-slate-200 dark:bg-slate-700 rounded mb-4" />
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="h-20 bg-slate-200 dark:bg-slate-700 rounded-xl" />
+          ))}
+        </div>
+        <div className="space-y-3">
+          <div className="h-4 w-32 bg-slate-200 dark:bg-slate-700 rounded" />
+          <div className="h-10 w-full bg-slate-200 dark:bg-slate-700 rounded-md" />
+        </div>
+      </Card>
+      <Card className="p-6 bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50">
+        <div className="h-5 w-20 bg-slate-200 dark:bg-slate-700 rounded mb-2" />
+        <div className="h-4 w-48 bg-slate-200 dark:bg-slate-700 rounded mb-4" />
+        <div className="space-y-3">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
+              <div className="h-4 w-24 bg-slate-200 dark:bg-slate-700 rounded" />
+              <div className="h-4 w-4 bg-slate-200 dark:bg-slate-700 rounded" />
+            </div>
+          ))}
+        </div>
+      </Card>
+    </div>
+  );
 
   const sysFixed = systemFees?.fixedFeeValue || '5.00';
   const sysPercentage = systemFees?.percentageFeeValue || '2.50';

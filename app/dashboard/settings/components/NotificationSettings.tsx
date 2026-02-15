@@ -55,7 +55,26 @@ export function NotificationSettings() {
   };
 
   if (fetching) {
-    return <Card><CardContent className="py-8 text-center text-gray-500">Loading preferences...</CardContent></Card>;
+    return (
+      <Card>
+        <CardHeader>
+          <div className="h-5 w-44 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+          <div className="h-4 w-56 bg-slate-200 dark:bg-slate-700 animate-pulse rounded mt-2" />
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="space-y-2">
+                <div className="h-4 w-36 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+                <div className="h-3 w-56 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+              </div>
+              <div className="h-4 w-4 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+            </div>
+          ))}
+          <div className="h-10 w-40 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-md mt-2" />
+        </CardContent>
+      </Card>
+    );
   }
 
   return (

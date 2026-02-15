@@ -128,8 +128,27 @@ export default function SettingsPage() {
     <Suspense fallback={
       <div className="container mx-auto py-8 px-4 max-w-6xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
-          <p className="text-gray-600">Loading settings...</p>
+          <div className="h-8 w-32 bg-slate-200 dark:bg-slate-700 animate-pulse rounded mb-3" />
+          <div className="h-4 w-64 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+        </div>
+        <div className="flex gap-2 mb-6">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="h-10 w-24 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-md" />
+          ))}
+        </div>
+        <div className="border rounded-lg p-6 space-y-6">
+          <div className="space-y-2">
+            <div className="h-5 w-40 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+            <div className="h-4 w-64 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="space-y-2">
+                <div className="h-4 w-20 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+                <div className="h-10 w-full bg-slate-200 dark:bg-slate-700 animate-pulse rounded-md" />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     }>

@@ -200,9 +200,21 @@ export default function TokensPage() {
         {/* Tokens Table */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           {loading && tokens.length === 0 ? (
-            <div className="p-12 text-center">
-              <div className="w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-gray-600">Loading tokens...</p>
+            <div className="p-6 space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="p-4 border border-slate-200 dark:border-slate-700 rounded-lg animate-pulse">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-lg" />
+                      <div className="space-y-2">
+                        <div className="h-4 w-32 bg-slate-200 dark:bg-slate-700 rounded" />
+                        <div className="h-3 w-48 bg-slate-200 dark:bg-slate-700 rounded" />
+                      </div>
+                    </div>
+                    <div className="h-8 w-20 bg-slate-200 dark:bg-slate-700 rounded" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : filteredTokens.length === 0 ? (
             <div className="p-12 text-center">

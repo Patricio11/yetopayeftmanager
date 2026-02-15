@@ -250,10 +250,20 @@ export default function ReconPage() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
-                <tr><td colSpan={8} className="px-6 py-16 text-center">
-                  <RefreshCw className="w-6 h-6 animate-spin text-slate-400 mx-auto mb-2" />
-                  <p className="text-slate-500">Loading invoices...</p>
-                </td></tr>
+                <>
+                  {[...Array(5)].map((_, i) => (
+                    <tr key={i} className="animate-pulse">
+                      <td className="px-6 py-4"><div className="h-4 w-24 bg-slate-200 dark:bg-slate-700 rounded" /></td>
+                      <td className="px-6 py-4"><div className="h-4 w-32 bg-slate-200 dark:bg-slate-700 rounded" /></td>
+                      <td className="px-6 py-4"><div className="h-4 w-20 bg-slate-200 dark:bg-slate-700 rounded" /></td>
+                      <td className="px-6 py-4"><div className="h-4 w-16 bg-slate-200 dark:bg-slate-700 rounded" /></td>
+                      <td className="px-6 py-4"><div className="h-4 w-20 bg-slate-200 dark:bg-slate-700 rounded" /></td>
+                      <td className="px-6 py-4"><div className="h-6 w-20 bg-slate-200 dark:bg-slate-700 rounded-full" /></td>
+                      <td className="px-6 py-4"><div className="h-4 w-24 bg-slate-200 dark:bg-slate-700 rounded" /></td>
+                      <td className="px-6 py-4"><div className="h-8 w-16 bg-slate-200 dark:bg-slate-700 rounded" /></td>
+                    </tr>
+                  ))}
+                </>
               ) : filtered.length === 0 ? (
                 <tr><td colSpan={8} className="px-6 py-16 text-center">
                   <Receipt className="w-12 h-12 text-slate-300 mx-auto mb-3" />

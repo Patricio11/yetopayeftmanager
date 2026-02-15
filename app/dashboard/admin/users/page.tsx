@@ -125,7 +125,18 @@ export default function AdminUsersPage() {
       {/* User List */}
       <Card className="bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50 overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-slate-500">Loading users...</div>
+          <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="p-4 flex items-center gap-4 animate-pulse">
+                <div className="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-36 bg-slate-200 dark:bg-slate-700 rounded" />
+                  <div className="h-3 w-48 bg-slate-200 dark:bg-slate-700 rounded" />
+                </div>
+                <div className="h-6 w-20 bg-slate-200 dark:bg-slate-700 rounded-full" />
+              </div>
+            ))}
+          </div>
         ) : users.length === 0 ? (
           <div className="p-12 text-center text-slate-500">No users found</div>
         ) : (
