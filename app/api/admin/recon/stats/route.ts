@@ -1,15 +1,13 @@
 import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/auth/authorization";
 import { db } from "@/lib/db";
 import { eftInvoices, eftTransactions } from "@/lib/db/schema";
-import { getSession } from "@/lib/auth-server";
 import { eq, sql, and, gte, count } from "drizzle-orm";
 
 export async function GET() {
   try {
-    const session = await getSession();
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.authorized) return auth.response;
 
     // Total invoices by status
     const statusCounts = await db

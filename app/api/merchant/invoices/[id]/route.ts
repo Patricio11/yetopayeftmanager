@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireMerchant } from "@/lib/auth/authorization";
 import { db } from "@/lib/db";
 import { eftInvoices, eftInvoiceItems } from "@/lib/db/schema";
-import { getSession } from "@/lib/auth-server";
 import { eq, and } from "drizzle-orm";
 
 export async function GET(
@@ -9,15 +9,13 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireMerchant();
+    if (!auth.authorized) return auth.response;
 
     const { id } = await params;
 
     const invoice = await db.query.eftInvoices.findFirst({
-      where: and(eq(eftInvoices.id, id), eq(eftInvoices.merchantId, session.user.id)),
+      where: and(eq(eftInvoices.id, id), eq(eftInvoices.merchantId, auth.session.user.id)),
     });
 
     if (!invoice) {

@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/auth/authorization";
 import { db } from "@/lib/db";
 import { eftSystemFees } from "@/lib/db/schema";
-import { getSession } from "@/lib/auth-server";
 
 // GET /api/admin/recon/fees — get system default fee settings
 export async function GET() {
   try {
-    const session = await getSession();
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.authorized) return auth.response;
 
     const rows = await db.select().from(eftSystemFees).limit(1);
     const defaults = rows[0] || {
@@ -30,10 +28,8 @@ export async function GET() {
 // PATCH /api/admin/recon/fees — update system default fee settings
 export async function PATCH(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.authorized) return auth.response;
 
     const body = await request.json();
     const { fixedFeeValue, percentageFeeValue, volumeFeeValue, vatEnabled, vatRate } = body;
@@ -48,7 +44,7 @@ export async function PATCH(request: NextRequest) {
         volumeFeeValue: String(volumeFeeValue ?? "0.0500"),
         vatEnabled: vatEnabled ?? true,
         vatRate: String(vatRate ?? "15.00"),
-        updatedBy: session.user.id,
+        updatedBy: auth.session.user.id,
       }).returning();
       return NextResponse.json({ success: true, data: created });
     }
@@ -62,7 +58,7 @@ export async function PATCH(request: NextRequest) {
         ...(vatEnabled !== undefined && { vatEnabled }),
         ...(vatRate !== undefined && { vatRate: String(vatRate) }),
         updatedAt: new Date(),
-        updatedBy: session.user.id,
+        updatedBy: auth.session.user.id,
       })
       .returning();
 

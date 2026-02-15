@@ -1,33 +1,25 @@
 /**
- * Admin API - Token Management
- * 
+ * Token Management API
+ *
  * Allows merchants to view and manage saved credential tokens
  * (metadata only - no actual credentials)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { requireMerchant } from '@/lib/auth/authorization';
 import { db } from '@/lib/db';
 import { customerBankTokens, tokenizationAuditLog, eftBanks } from '@/lib/db/schema';
 import { eq, and, desc, sql } from 'drizzle-orm';
-import { auth } from '@/lib/auth';
 
 /**
  * GET - Retrieve all tokens for the authenticated merchant
  */
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
+    const auth = await requireMerchant();
+    if (!auth.authorized) return auth.response;
 
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const merchantId = session.user.id;
+    const merchantId = auth.session.user.id;
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '50');
@@ -77,7 +69,7 @@ export async function GET(request: NextRequest) {
     const stats = await db
       .select({
         totalTokens: sql<number>`count(*)`,
-        totalCustomers: sql<number>`count(distinct ${customerBankTokens.deviceFingerprint})`, // Count unique devices instead
+        totalCustomers: sql<number>`count(distinct ${customerBankTokens.deviceFingerprint})`,
         totalUsage: sql<number>`sum(${customerBankTokens.usageCount})`,
         defaultTokens: sql<number>`sum(case when ${customerBankTokens.isDefault} then 1 else 0 end)`,
       })
@@ -114,18 +106,10 @@ export async function GET(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
+    const auth = await requireMerchant();
+    if (!auth.authorized) return auth.response;
 
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const merchantId = session.user.id;
+    const merchantId = auth.session.user.id;
     const { searchParams } = new URL(request.url);
     const tokenId = searchParams.get('tokenId');
 
@@ -166,12 +150,12 @@ export async function DELETE(request: NextRequest) {
       tokenId,
       merchantId,
       action: 'deleted',
-      ipAddress: request.headers.get('x-forwarded-for') || 
-                 request.headers.get('x-real-ip') || 
+      ipAddress: request.headers.get('x-forwarded-for') ||
+                 request.headers.get('x-real-ip') ||
                  'unknown',
       userAgent: request.headers.get('user-agent') || undefined,
       deviceFingerprint: token.deviceFingerprint,
-      metadata: { deletedBy: 'admin' },
+      metadata: { deletedBy: auth.session.user.email || merchantId },
     });
 
     return NextResponse.json({

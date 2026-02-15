@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/auth/authorization";
 import { db } from "@/lib/db";
 import { eftMerchantFees } from "@/lib/db/schema";
-import { getSession } from "@/lib/auth-server";
 import { eq } from "drizzle-orm";
 
 // GET /api/admin/recon/merchant-fees/[merchantId] — get merchant-specific fee config
@@ -10,10 +10,8 @@ export async function GET(
   { params }: { params: Promise<{ merchantId: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.authorized) return auth.response;
 
     const { merchantId } = await params;
     const fee = await db.query.eftMerchantFees.findFirst({
@@ -33,10 +31,8 @@ export async function PUT(
   { params }: { params: Promise<{ merchantId: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.authorized) return auth.response;
 
     const { merchantId } = await params;
     const body = await request.json();
@@ -87,10 +83,8 @@ export async function DELETE(
   { params }: { params: Promise<{ merchantId: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.authorized) return auth.response;
 
     const { merchantId } = await params;
     await db.delete(eftMerchantFees).where(eq(eftMerchantFees.merchantId, merchantId));

@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireMerchant } from "@/lib/auth/authorization";
 import { db } from "@/lib/db";
 import { eftInvoices, eftInvoiceItems } from "@/lib/db/schema";
-import { getSession } from "@/lib/auth-server";
 import { eq, and, desc, count } from "drizzle-orm";
 
 // GET /api/merchant/invoices — merchant views their own invoices
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireMerchant();
+    if (!auth.authorized) return auth.response;
 
     const url = new URL(request.url);
     const status = url.searchParams.get("status");
@@ -18,7 +16,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(url.searchParams.get("limit") || "20");
     const offset = (page - 1) * limit;
 
-    const conditions = [eq(eftInvoices.merchantId, session.user.id)];
+    const conditions = [eq(eftInvoices.merchantId, auth.session.user.id)];
     if (status && status !== "all") {
       conditions.push(eq(eftInvoices.status, status as any));
     }

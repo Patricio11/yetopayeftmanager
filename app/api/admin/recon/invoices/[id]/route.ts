@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/auth/authorization";
 import { db } from "@/lib/db";
 import { eftInvoices, eftInvoiceItems, users } from "@/lib/db/schema";
-import { getSession } from "@/lib/auth-server";
 import { eq } from "drizzle-orm";
 
 // GET /api/admin/recon/invoices/[id] — get invoice detail with items
@@ -10,10 +10,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.authorized) return auth.response;
 
     const { id } = await params;
 
@@ -59,10 +57,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.authorized) return auth.response;
 
     const { id } = await params;
     const body = await request.json();
@@ -101,10 +97,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.authorized) return auth.response;
 
     const { id } = await params;
 

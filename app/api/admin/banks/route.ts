@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth } from "@/lib/auth-server";
+import { requireAdmin } from "@/lib/auth/authorization";
 import { db } from "@/lib/db";
 import { eftBanks, eftTransactions } from "@/lib/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
@@ -19,15 +19,8 @@ const createBankSchema = z.object({
  */
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireAuth();
-
-    // Only admins can manage banks
-    if ((session.user.role || 'merchant') !== "admin") {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized - Admin access required" },
-        { status: 403 }
-      );
-    }
+    const auth = await requireAdmin();
+    if (!auth.authorized) return auth.response;
 
     // Fetch all banks with transaction stats in a single query
     const banks = await db
@@ -75,15 +68,8 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireAuth();
-
-    // Only admins can manage banks
-    if ((session.user.role || 'merchant') !== "admin") {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized - Admin access required" },
-        { status: 403 }
-      );
-    }
+    const auth = await requireAdmin();
+    if (!auth.authorized) return auth.response;
 
     // Parse and validate request body
     const body = await request.json();

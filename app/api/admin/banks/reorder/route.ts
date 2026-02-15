@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth } from "@/lib/auth-server";
+import { requireAdmin } from "@/lib/auth/authorization";
 import { db } from "@/lib/db";
 import { eftBanks } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -20,15 +20,8 @@ const reorderSchema = z.object({
  */
 export async function PATCH(request: NextRequest) {
   try {
-    const session = await requireAuth();
-
-    // Only admins can manage banks
-    if ((session.user.role || 'merchant') !== "admin") {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized - Admin access required" },
-        { status: 403 }
-      );
-    }
+    const auth = await requireAdmin();
+    if (!auth.authorized) return auth.response;
 
     // Parse and validate request body
     const body = await request.json();

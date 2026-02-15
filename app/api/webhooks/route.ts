@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { requireMerchant } from "@/lib/auth/authorization";
 import { db } from "@/lib/db";
 import { webhookConfigurations } from "@/lib/db/schema/team";
 import { eq, and } from "drizzle-orm";
@@ -11,18 +10,10 @@ import crypto from "crypto";
  */
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const auth = await requireMerchant();
+    if (!auth.authorized) return auth.response;
 
-    if (!session) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    const merchantId = session.user.id;
+    const merchantId = auth.session.user.id;
 
     // Fetch webhook configurations
     const webhooks = await db
@@ -57,18 +48,10 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const auth = await requireMerchant();
+    if (!auth.authorized) return auth.response;
 
-    if (!session) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    const merchantId = session.user.id;
+    const merchantId = auth.session.user.id;
     const body = await request.json();
 
     // Validate input
@@ -108,13 +91,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const invalidEvents = events.filter(e => !validEvents.includes(e));
+    const invalidEvents = events.filter((e: string) => !validEvents.includes(e));
     if (invalidEvents.length > 0) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           message: `Invalid events: ${invalidEvents.join(', ')}`,
-          validEvents 
+          validEvents
         },
         { status: 400 }
       );
@@ -163,18 +146,10 @@ export async function POST(request: NextRequest) {
  */
 export async function PATCH(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const auth = await requireMerchant();
+    if (!auth.authorized) return auth.response;
 
-    if (!session) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    const merchantId = session.user.id;
+    const merchantId = auth.session.user.id;
     const body = await request.json();
 
     const { webhookId, url, events, isActive } = body;
@@ -238,13 +213,13 @@ export async function PATCH(request: NextRequest) {
         );
       }
 
-      const invalidEvents = events.filter(e => !validEvents.includes(e));
+      const invalidEvents = events.filter((e: string) => !validEvents.includes(e));
       if (invalidEvents.length > 0) {
         return NextResponse.json(
-          { 
-            success: false, 
+          {
+            success: false,
             message: `Invalid events: ${invalidEvents.join(', ')}`,
-            validEvents 
+            validEvents
           },
           { status: 400 }
         );
@@ -288,18 +263,10 @@ export async function PATCH(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const auth = await requireMerchant();
+    if (!auth.authorized) return auth.response;
 
-    if (!session) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    const merchantId = session.user.id;
+    const merchantId = auth.session.user.id;
     const { searchParams } = new URL(request.url);
     const webhookId = searchParams.get('id');
 

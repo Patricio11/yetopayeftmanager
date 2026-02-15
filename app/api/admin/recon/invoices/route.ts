@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/auth/authorization";
 import { db } from "@/lib/db";
 import { eftInvoices, eftInvoiceItems, eftMerchantFees, eftSystemFees, eftTransactions, users } from "@/lib/db/schema";
-import { getSession } from "@/lib/auth-server";
 import { eq, and, gte, lte, sql, desc, count } from "drizzle-orm";
 
 // GET /api/admin/recon/invoices — list all invoices (admin only)
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.authorized) return auth.response;
 
     const url = new URL(request.url);
     const status = url.searchParams.get("status");
@@ -82,10 +80,8 @@ export async function GET(request: NextRequest) {
 // POST /api/admin/recon/invoices — generate invoice for a merchant
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.authorized) return auth.response;
 
     const body = await request.json();
     const { merchantId, periodStart, periodEnd, notes, dueDate } = body;
@@ -210,7 +206,7 @@ export async function POST(request: NextRequest) {
       status: "draft",
       dueDate: dueDate ? new Date(dueDate) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Default: 30 days
       notes: notes || null,
-      createdBy: session.user.id,
+      createdBy: auth.session.user.id,
     }).returning();
 
     // 6. Create line item(s)

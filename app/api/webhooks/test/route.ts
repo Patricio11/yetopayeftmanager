@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { requireMerchant } from "@/lib/auth/authorization";
 import { db } from "@/lib/db";
 import { webhookConfigurations } from "@/lib/db/schema/team";
 import { eq, and } from "drizzle-orm";
@@ -11,18 +10,10 @@ import { testWebhookEndpoint } from "@/lib/webhooks/dispatcher";
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const auth = await requireMerchant();
+    if (!auth.authorized) return auth.response;
 
-    if (!session) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    const merchantId = session.user.id;
+    const merchantId = auth.session.user.id;
     const body = await request.json();
     const { webhookId } = body;
 

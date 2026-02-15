@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth } from "@/lib/auth-server";
+import { requireAdmin } from "@/lib/auth/authorization";
 import { db } from "@/lib/db";
 import { eftBanks } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -22,15 +22,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await requireAuth();
-
-    // Only admins can manage banks
-    if ((session.user.role || 'merchant') !== "admin") {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized - Admin access required" },
-        { status: 403 }
-      );
-    }
+    const auth = await requireAdmin();
+    if (!auth.authorized) return auth.response;
 
     const { id } = await params;
 
@@ -78,15 +71,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await requireAuth();
-
-    // Only admins can manage banks
-    if ((session.user.role || 'merchant') !== "admin") {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized - Admin access required" },
-        { status: 403 }
-      );
-    }
+    const auth = await requireAdmin();
+    if (!auth.authorized) return auth.response;
 
     const { id } = await params;
 
@@ -167,15 +153,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await requireAuth();
-
-    // Only admins can manage banks
-    if ((session.user.role || 'merchant') !== "admin") {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized - Admin access required" },
-        { status: 403 }
-      );
-    }
+    const auth = await requireAdmin();
+    if (!auth.authorized) return auth.response;
 
     const { id } = await params;
 
@@ -198,9 +177,9 @@ export async function DELETE(
 
     if (transactions.length > 0) {
       return NextResponse.json(
-        { 
-          success: false, 
-          message: `Cannot delete bank with ${transactions.length} transaction(s). Disable it instead.` 
+        {
+          success: false,
+          message: `Cannot delete bank with ${transactions.length} transaction(s). Disable it instead.`
         },
         { status: 400 }
       );
