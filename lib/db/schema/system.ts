@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, jsonb, boolean, index } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, timestamp, jsonb, boolean, index, uniqueIndex } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
 // System Logs
@@ -100,6 +100,7 @@ export const userServices = pgTable("user_services", {
 }, (table) => ({
   userIdx: index("user_service_user_idx").on(table.userId),
   serviceIdx: index("user_service_name_idx").on(table.serviceName),
+  userServiceUniq: uniqueIndex("user_service_user_service_uniq").on(table.userId, table.serviceName),
 }));
 
 // Type exports

@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, jsonb, boolean, integer, index } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, timestamp, jsonb, boolean, integer, index, uniqueIndex } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
 // Merchant Team Members
@@ -25,6 +25,7 @@ export const merchantTeamMembers = pgTable("merchant_team_members", {
 }, (table) => ({
   merchantIdx: index("team_member_merchant_idx").on(table.merchantId),
   userIdx: index("team_member_user_idx").on(table.userId),
+  merchantUserUniq: uniqueIndex("team_member_merchant_user_uniq").on(table.merchantId, table.userId),
 }));
 
 // API Keys for merchant integration
@@ -84,6 +85,7 @@ export const webhookConfigurations = pgTable("webhook_configurations", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => ({
   merchantIdx: index("webhook_config_merchant_idx").on(table.merchantId),
+  merchantUrlUniq: uniqueIndex("webhook_config_merchant_url_uniq").on(table.merchantId, table.url),
 }));
 
 // Webhook Deliveries (logs)
