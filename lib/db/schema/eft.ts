@@ -35,10 +35,12 @@ export const eftTransactions = pgTable("eft_transactions", {
   description: text("description"),
   
   // Status
-  status: text("status", { 
-    enum: ["not_started", "initiated", "pending", "completed", "failed", "aborted", "cancelled", "expired"] 
+  status: text("status", {
+    enum: ["not_started", "initiated", "pending", "completed", "failed", "aborted", "cancelled", "expired"]
   }).default("not_started"),
-  
+  statusReason: text("status_reason"), // Reason for status change (admin updates)
+  updatedBy: text("updated_by").references(() => users.id), // Who last updated the status
+
   // Customer info (optional)
   customerEmail: text("customer_email"),
   customerName: text("customer_name"),

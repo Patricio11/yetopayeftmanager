@@ -30,13 +30,20 @@ import {
   Clock,
   XCircle,
   ArrowUpDown,
-  FileSpreadsheet,
   FileText,
   Calendar,
   RefreshCw,
+  Eye,
+  Pencil,
+  Send,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useRouter, useSearchParams } from "next/navigation";
+import {
+  TransactionDetailDialog,
+  UpdateStatusDialog,
+  ResendWebhookDialog,
+} from "./TransactionDialogs";
 
 type Transaction = {
   transaction: {
@@ -45,10 +52,18 @@ type Transaction = {
     amount: string;
     status: string | null;
     createdAt: Date;
+    updatedAt: Date;
     completedAt: Date | null;
     customerEmail: string | null;
     customerName: string | null;
     description: string | null;
+    statusReason: string | null;
+    updatedBy: string | null;
+    notifyUrl: string | null;
+    successUrl: string | null;
+    failureUrl: string | null;
+    cancelledUrl: string | null;
+    metadata: any;
   };
   merchant: {
     id: string;
@@ -111,6 +126,12 @@ export function TransactionsClient({
   const [localSearch, setLocalSearch] = useState(searchParams.get("search") || "");
   const [sortField, setSortField] = useState<"date" | "amount">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+  // Dialog state
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [updateStatusOpen, setUpdateStatusOpen] = useState(false);
+  const [resendWebhookOpen, setResendWebhookOpen] = useState(false);
 
   // Sort transactions locally
   const sortedTransactions = useMemo(() => {
@@ -506,14 +527,15 @@ export function TransactionsClient({
                   <TableHead>Bank</TableHead>
                   {isAdmin && <TableHead>Merchant</TableHead>}
                   <TableHead>Amount</TableHead>
-                  <TableHead className="pr-0">Status</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="pr-0 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {sortedTransactions.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={isAdmin ? 6 : 5}
+                      colSpan={isAdmin ? 7 : 6}
                       className="text-center py-12 text-slate-500 dark:text-slate-400"
                     >
                       <div className="flex flex-col items-center gap-4">
@@ -566,7 +588,7 @@ export function TransactionsClient({
                           R {parseFloat(item.transaction.amount).toFixed(2)}
                         </div>
                       </TableCell>
-                      <TableCell className="pr-0">
+                      <TableCell>
                         <span
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(
                             item.transaction.status || "not_started"
@@ -575,6 +597,53 @@ export function TransactionsClient({
                           {getStatusIcon(item.transaction.status || "not_started")}
                           {item.transaction.status || "not_started"}
                         </span>
+                      </TableCell>
+                      <TableCell className="pr-0">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                            title="View Details"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedTransaction(item as any);
+                              setDetailOpen(true);
+                            }}
+                          >
+                            <Eye className="w-4 h-4 text-blue-600" />
+                          </Button>
+                          {isAdmin && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 hover:bg-amber-50 dark:hover:bg-amber-900/20"
+                                title="Update Status"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedTransaction(item as any);
+                                  setUpdateStatusOpen(true);
+                                }}
+                              >
+                                <Pencil className="w-4 h-4 text-amber-600" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 hover:bg-green-50 dark:hover:bg-green-900/20"
+                                title="Resend Webhook"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedTransaction(item as any);
+                                  setResendWebhookOpen(true);
+                                }}
+                              >
+                                <Send className="w-4 h-4 text-green-600" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
@@ -620,6 +689,30 @@ export function TransactionsClient({
             </div>
           )}
         </Card>
+
+      {/* Dialogs */}
+      <TransactionDetailDialog
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        transaction={selectedTransaction as any}
+        isAdmin={isAdmin}
+      />
+
+      {isAdmin && (
+        <>
+          <UpdateStatusDialog
+            open={updateStatusOpen}
+            onOpenChange={setUpdateStatusOpen}
+            transaction={selectedTransaction as any}
+            onSuccess={() => router.refresh()}
+          />
+          <ResendWebhookDialog
+            open={resendWebhookOpen}
+            onOpenChange={setResendWebhookOpen}
+            transaction={selectedTransaction as any}
+          />
+        </>
+      )}
     </main>
   );
 }
