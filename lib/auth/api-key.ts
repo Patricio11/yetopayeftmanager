@@ -175,11 +175,15 @@ export async function verifyApiKey(
 
 /**
  * Generate HMAC signature for request
- * 
+ *
+ * Uses SHA-256(apiSecret) as the HMAC key, matching the server verification logic.
+ * The SDK handles this automatically. For direct API usage, merchants must also
+ * hash their secret with SHA-256 before using it as the HMAC key.
+ *
  * @param merchantId - Merchant ID
  * @param timestamp - Unix timestamp
  * @param requestBody - JSON stringified request body
- * @param apiSecret - API secret (from merchant)
+ * @param apiSecret - API secret (raw, from merchant)
  */
 export function generateSignature(
   merchantId: string,
@@ -187,13 +191,14 @@ export function generateSignature(
   requestBody: string,
   apiSecret: string
 ): string {
+  const secretHash = crypto.createHash('sha256').update(apiSecret).digest('hex');
   const payload = `${merchantId}${timestamp}${requestBody}`;
-  
+
   const signature = crypto
-    .createHmac('sha256', apiSecret)
+    .createHmac('sha256', secretHash)
     .update(payload)
     .digest('hex');
-  
+
   return `sha256=${signature}`;
 }
 

@@ -784,6 +784,12 @@ const apiSecret = 'your-api-secret';
 const merchantId = 'your-merchant-id';
 
 // Generate signature
+// Step 1: Hash the secret with SHA-256 (must match server verification)
+const secretHash = crypto
+  .createHash('sha256')
+  .update(apiSecret)
+  .digest('hex');
+
 const timestamp = Math.floor(Date.now() / 1000).toString();
 const requestBody = JSON.stringify({
   amount: 250.00,
@@ -792,9 +798,10 @@ const requestBody = JSON.stringify({
   notifyUrl: 'https://your-site.com/webhooks/payment'
 });
 
+// Step 2: Sign payload with the hashed secret
 const payload = merchantId + timestamp + requestBody;
 const signature = crypto
-  .createHmac('sha256', apiSecret)
+  .createHmac('sha256', secretHash)
   .update(payload)
   .digest('hex');
 
@@ -825,6 +832,9 @@ api_secret = 'your-api-secret'
 merchant_id = 'your-merchant-id'
 
 # Generate signature
+# Step 1: Hash the secret with SHA-256 (must match server verification)
+secret_hash = hashlib.sha256(api_secret.encode()).hexdigest()
+
 timestamp = str(int(time.time()))
 request_body = json.dumps({
     'amount': 250.00,
@@ -833,9 +843,10 @@ request_body = json.dumps({
     'notifyUrl': 'https://your-site.com/webhooks/payment'
 })
 
+# Step 2: Sign payload with the hashed secret
 payload = f"{merchant_id}{timestamp}{request_body}"
 signature = hmac.new(
-    api_secret.encode(),
+    secret_hash.encode(),
     payload.encode(),
     hashlib.sha256
 ).hexdigest()
@@ -862,6 +873,9 @@ $apiSecret = 'your-api-secret';
 $merchantId = 'your-merchant-id';
 
 // Generate signature
+// Step 1: Hash the secret with SHA-256 (must match server verification)
+$secretHash = hash('sha256', $apiSecret);
+
 $timestamp = (string)time();
 $requestBody = json_encode([
     'amount' => 250.00,
@@ -870,8 +884,9 @@ $requestBody = json_encode([
     'notifyUrl' => 'https://your-site.com/webhooks/payment'
 ]);
 
+// Step 2: Sign payload with the hashed secret
 $payload = $merchantId . $timestamp . $requestBody;
-$signature = hash_hmac('sha256', $payload, $apiSecret);
+$signature = hash_hmac('sha256', $payload, $secretHash);
 
 // Make request
 $ch = curl_init('https://your-domain.com/api/payment-links');
