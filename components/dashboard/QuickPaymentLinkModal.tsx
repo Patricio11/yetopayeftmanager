@@ -70,8 +70,8 @@ export function QuickPaymentLinkModal({ trigger = 'button' }: QuickPaymentLinkMo
 
   // Handle quick test link creation
   const handleQuickTestLink = async () => {
+    resetForm();
     setIsLoading(true);
-    setError(null);
     setOpen(true);
 
     const testReference = generateTestReference();
