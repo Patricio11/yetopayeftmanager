@@ -19,13 +19,13 @@ import { verifyPaymentToken } from '@/lib/security/payment-token';
 /**
  * GET - Retrieve metadata for saved credentials
  * Returns list of saved credential metadata (no actual credentials)
+ * paymentToken is sent via Authorization header to avoid URL logging/caching
  */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const merchantId = searchParams.get('merchantId');
     const deviceFingerprint = searchParams.get('deviceFingerprint');
-    const paymentToken = searchParams.get('paymentToken');
 
     if (!merchantId || !deviceFingerprint) {
       return NextResponse.json(
@@ -34,7 +34,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Verify payment token for authentication
+    // Verify payment token from Authorization header (not query params to avoid logging)
+    const paymentToken = request.headers.get('authorization')?.replace('Bearer ', '');
     if (!paymentToken) {
       return NextResponse.json(
         { success: false, error: 'Authentication required' },
@@ -245,13 +246,12 @@ export async function POST(request: NextRequest) {
 
 /**
  * DELETE - Remove metadata (user deletes saved credentials)
+ * Reads from request body to avoid sensitive data in URL query params
  */
 export async function DELETE(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const tokenId = searchParams.get('tokenId');
-    const merchantId = searchParams.get('merchantId');
-    const paymentToken = searchParams.get('paymentToken');
+    const body = await request.json();
+    const { tokenId, merchantId, deviceFingerprint = 'unknown' } = body;
 
     if (!tokenId || !merchantId) {
       return NextResponse.json(
@@ -260,15 +260,16 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Verify payment token for authentication
+    // Verify payment token from Authorization header
+    const paymentToken = request.headers.get('authorization')?.replace('Bearer ', '');
     if (!paymentToken) {
       return NextResponse.json(
         { success: false, error: 'Authentication required' },
         { status: 401 }
       );
     }
-    const ipAddress = request.headers.get('x-forwarded-for') || 
-                     request.headers.get('x-real-ip') || 
+    const ipAddress = request.headers.get('x-forwarded-for') ||
+                     request.headers.get('x-real-ip') ||
                      'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
     try {
@@ -279,8 +280,6 @@ export async function DELETE(request: NextRequest) {
         { status: 401 }
       );
     }
-
-    const deviceFingerprint = searchParams.get('deviceFingerprint') || 'unknown';
 
     // Soft delete (set isActive to false)
     await db

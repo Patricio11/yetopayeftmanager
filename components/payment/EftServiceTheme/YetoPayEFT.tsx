@@ -1028,8 +1028,13 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
       await deleteCredentialFromBrowser(merchantIdToUse, selectedBank.code);
       
       // Delete metadata from database
-      await fetch(`/api/tokenization/metadata?tokenId=${savedCredentialId}&merchantId=${merchantIdToUse}`, {
+      await fetch('/api/tokenization/metadata', {
         method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tokenId: savedCredentialId,
+          merchantId: merchantIdToUse,
+        }),
       });
       
       console.log('✅ Credentials deleted successfully');
