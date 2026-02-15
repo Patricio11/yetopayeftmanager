@@ -35,6 +35,9 @@ import {
   Calendar,
   FileText,
   Loader2,
+  Code,
+  ChevronDown,
+  Copy,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -91,6 +94,8 @@ export function TransactionDetailDialog({
 }: TransactionDetailDialogProps) {
   const { toast } = useToast();
   const [resending, setResending] = useState(false);
+  const [jsonOpen, setJsonOpen] = useState(false);
+  const [jsonCopied, setJsonCopied] = useState(false);
 
   if (!transaction) return null;
 
@@ -228,6 +233,82 @@ export function TransactionDetailDialog({
               </p>
             </div>
           )}
+
+          {/* JSON Response Accordion */}
+          <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+            <button
+              onClick={() => setJsonOpen(!jsonOpen)}
+              className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                <Code className="w-4 h-4 text-slate-500" />
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  Webhook JSON Response
+                </span>
+              </div>
+              <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${jsonOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {jsonOpen && (
+              <div className="border-t border-slate-200 dark:border-slate-700 p-4">
+                <div className="flex justify-end mb-2">
+                  <button
+                    onClick={() => {
+                      const jsonPayload = {
+                        event: t.status === 'completed' ? 'payment.completed' : t.status === 'failed' || t.status === 'expired' ? 'payment.failed' : t.status === 'cancelled' || t.status === 'aborted' ? 'payment.cancelled' : 'transaction.updated',
+                        data: {
+                          id: t.id,
+                          reference: t.reference,
+                          amount: parseFloat(t.amount),
+                          status: t.status,
+                          customerEmail: t.customerEmail || undefined,
+                          customerName: t.customerName || undefined,
+                          bankName: b?.bankName || undefined,
+                          metadata: t.metadata || {},
+                          createdAt: t.createdAt ? new Date(t.createdAt).toISOString() : undefined,
+                          completedAt: t.completedAt ? new Date(t.completedAt).toISOString() : undefined,
+                          message: (t.metadata as any)?.completion_message || undefined,
+                          gatewayResult: (t.metadata as any)?.gateway_result || undefined,
+                        },
+                      };
+                      navigator.clipboard.writeText(JSON.stringify(jsonPayload, null, 2));
+                      setJsonCopied(true);
+                      setTimeout(() => setJsonCopied(false), 2000);
+                    }}
+                    className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors cursor-pointer"
+                  >
+                    {jsonCopied ? <CheckCircle className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
+                    {jsonCopied ? 'Copied!' : 'Copy'}
+                  </button>
+                </div>
+                <pre className="bg-slate-900 dark:bg-slate-950 text-green-400 p-4 rounded-lg text-xs overflow-x-auto max-h-80 overflow-y-auto">
+                  {JSON.stringify(
+                    {
+                      event: t.status === 'completed' ? 'payment.completed' : t.status === 'failed' || t.status === 'expired' ? 'payment.failed' : t.status === 'cancelled' || t.status === 'aborted' ? 'payment.cancelled' : 'transaction.updated',
+                      data: {
+                        id: t.id,
+                        reference: t.reference,
+                        amount: parseFloat(t.amount),
+                        status: t.status,
+                        customerEmail: t.customerEmail || undefined,
+                        customerName: t.customerName || undefined,
+                        bankName: b?.bankName || undefined,
+                        metadata: t.metadata || {},
+                        createdAt: t.createdAt ? new Date(t.createdAt).toISOString() : undefined,
+                        completedAt: t.completedAt ? new Date(t.completedAt).toISOString() : undefined,
+                        message: (t.metadata as any)?.completion_message || undefined,
+                        gatewayResult: (t.metadata as any)?.gateway_result || undefined,
+                      },
+                    },
+                    null,
+                    2
+                  )}
+                </pre>
+                <p className="text-xs text-slate-500 mt-2">
+                  This is the JSON payload sent to the merchant via webhook when the transaction status changes.
+                </p>
+              </div>
+            )}
+          </div>
 
           {/* URLs (admin only) */}
           {isAdmin && (t.notifyUrl || t.successUrl || t.failureUrl) && (
