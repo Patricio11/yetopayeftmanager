@@ -1498,7 +1498,7 @@ function WebhookSettings() {
                         </Badge>
                       </div>
                       <p className="text-sm text-gray-600 mb-2">
-                        Secret: <code className="bg-gray-100 px-2 py-1 rounded">{webhook.secret}</code>
+                        Secret: <code className="bg-gray-100 px-2 py-1 rounded text-gray-400">whsec_••••••••••••••••</code>
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {(webhook.events as string[]).map((event) => (
