@@ -41,6 +41,7 @@ interface PaymentInterfaceProps {
   }>;
   token: string;
   merchantBankAccount: any;
+  isDemo?: boolean;
 }
 
 export default function PaymentInterface({
@@ -48,7 +49,8 @@ export default function PaymentInterface({
   merchant,
   banks,
   token,
-  merchantBankAccount
+  merchantBankAccount,
+  isDemo
 }: PaymentInterfaceProps) {
   const [isClient, setIsClient] = useState(false);
 
@@ -108,6 +110,7 @@ export default function PaymentInterface({
             bankCode: merchantBankAccount.bankCode,
           },
           token,
+          isDemo,
         }}
       />
     </div>

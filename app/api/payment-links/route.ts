@@ -103,12 +103,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Fetch merchant's default EFT URLs as fallbacks
+    // Fetch merchant's default EFT URLs and account mode
     const merchant = await db.query.users.findFirst({
       where: eq(users.id, merchantId),
-      columns: { eftSettings: true },
+      columns: { eftSettings: true, accountMode: true },
     });
     const eftDefaults = (merchant?.eftSettings as any) || {};
+    const isDemo = merchant?.accountMode === 'demo';
 
     // Create transaction record (per-transaction URLs override merchant defaults)
     const [transaction] = await db
@@ -125,6 +126,7 @@ export async function POST(request: NextRequest) {
         failureUrl: validatedData.failureUrl || eftDefaults.failureUrl || null,
         cancelledUrl: validatedData.cancelledUrl || eftDefaults.cancelledUrl || null,
         status: "not_started",
+        isDemo: isDemo,
         createdAt: new Date(),
         metadata: validatedData.metadata || {},
       })

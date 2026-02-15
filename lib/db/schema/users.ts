@@ -38,6 +38,7 @@ export const users = pgTable("user", {
   // KYC & Status
   kycStatus: text("kyc_status", { enum: ["pending", "approved", "rejected"] }).default("pending"),
   isActive: boolean("is_active").default(true),
+  accountMode: text("account_mode", { enum: ["demo", "live"] }).default("demo"),
   lastLogin: timestamp("last_login"),
   
   // Financial

@@ -154,6 +154,7 @@ export async function GET(
           },
         },
         banks: mappedBanks,
+        isDemo: !!transaction.isDemo,
         step: "init", // Initial step for frontend
         token, // Include token for subsequent requests
       },

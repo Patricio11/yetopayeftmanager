@@ -133,8 +133,8 @@ export async function POST(
       });
     }
 
-    // "completed" requires a valid EFT service signature to prevent forgery
-    if (validatedData.status === "completed") {
+    // "completed" requires a valid EFT service signature to prevent forgery (skip for demo transactions)
+    if (validatedData.status === "completed" && !transaction.isDemo) {
       if (!validatedData.eftSignature) {
         console.error(`❌ Missing eftSignature for completed status on ${transactionId}`);
         return NextResponse.json(
@@ -161,6 +161,10 @@ export async function POST(
       console.log(`✅ EFT signature verified for completion: ${transactionId}`);
     }
 
+    if (transaction.isDemo) {
+      console.log(`🧪 Demo transaction completion: ${transactionId} -> ${validatedData.status}`);
+    }
+
     // Update transaction status
     const [updatedTransaction] = await db
       .update(eftTransactions)
@@ -170,6 +174,7 @@ export async function POST(
         updatedAt: new Date(),
         metadata: {
           ...(transaction.metadata as any || {}),
+          ...(transaction.isDemo ? { demo: true } : {}),
           frontend_completed_at: new Date().toISOString(),
           gateway_result: validatedData.gatewayResult,
           transaction_status: validatedData.transactionStatus,

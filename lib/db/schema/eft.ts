@@ -58,6 +58,9 @@ export const eftTransactions = pgTable("eft_transactions", {
   
   // Legacy token field (for backward compatibility)
   token: text("token"),
+
+  // Demo mode
+  isDemo: boolean("is_demo").default(false),
 }, (table) => ({
   merchantIdx: index("eft_transaction_merchant_idx").on(table.merchantId),
   statusIdx: index("eft_transaction_status_idx").on(table.status),

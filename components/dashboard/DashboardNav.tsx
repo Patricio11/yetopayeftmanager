@@ -13,6 +13,7 @@ import { signOut } from "@/lib/auth-client";
 
 interface DashboardNavProps {
   userRole: string;
+  accountMode?: string;
 }
 
 interface NavItem {
@@ -90,7 +91,7 @@ function NavDropdown({ group, pathname }: { group: NavGroup; pathname: string })
   );
 }
 
-export function DashboardNav({ userRole }: DashboardNavProps) {
+export function DashboardNav({ userRole, accountMode }: DashboardNavProps) {
   const pathname = usePathname();
   const router = useRouter();
   const isAdmin = userRole === "admin";
@@ -136,6 +137,12 @@ export function DashboardNav({ userRole }: DashboardNavProps) {
   };
 
   return (
+    <>
+    {accountMode === 'demo' && (
+      <div className="bg-amber-500 text-white text-center py-1.5 px-4 text-sm font-semibold sticky top-0 z-[51]">
+        You are in DEMO mode. Transactions are simulated. Contact admin to switch to LIVE.
+      </div>
+    )}
     <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
@@ -197,5 +204,6 @@ export function DashboardNav({ userRole }: DashboardNavProps) {
         </div>
       </div>
     </header>
+    </>
   );
 }

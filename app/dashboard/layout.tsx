@@ -21,7 +21,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-green-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900">
-      <DashboardNav userRole={session.user.role || 'merchant'} />
+      <DashboardNav userRole={session.user.role || 'merchant'} accountMode={(session.user as any).accountMode} />
       <DashboardErrorBoundary>
         {children}
       </DashboardErrorBoundary>

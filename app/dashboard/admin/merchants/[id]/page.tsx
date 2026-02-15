@@ -97,6 +97,9 @@ export default function MerchantDetailPage() {
                   ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400"><XCircle className="w-3 h-3" />KYC Rejected</span>
                   : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"><Clock className="w-3 h-3" />KYC Pending</span>}
                 {merchant.emailVerified && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"><Mail className="w-3 h-3" />Verified</span>}
+                {merchant.accountMode === 'live'
+                  ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400">LIVE</span>
+                  : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">DEMO</span>}
               </div>
             </div>
           </div>
@@ -733,6 +736,7 @@ function SettingsTab({ merchant, onUpdate }: { merchant: any; onUpdate: () => vo
   const [kycStatus, setKycStatus] = useState(merchant.kycStatus || 'pending');
   const [isActive, setIsActive] = useState(merchant.isActive);
   const [role, setRole] = useState(merchant.role || 'merchant');
+  const [accountMode, setAccountMode] = useState(merchant.accountMode || 'demo');
 
   const handleSave = async () => {
     setSaving(true);
@@ -740,7 +744,7 @@ function SettingsTab({ merchant, onUpdate }: { merchant: any; onUpdate: () => vo
       const res = await fetch(`/api/admin/merchants/${merchant.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ kycStatus, isActive, role }),
+        body: JSON.stringify({ kycStatus, isActive, role, accountMode }),
       });
       const data = await res.json();
       if (data.success) {
@@ -780,6 +784,16 @@ function SettingsTab({ merchant, onUpdate }: { merchant: any; onUpdate: () => vo
               <option value="merchant">Merchant</option>
               <option value="admin">Admin</option>
             </select>
+          </div>
+          <div>
+            <Label>Account Mode</Label>
+            <select value={accountMode} onChange={(e) => setAccountMode(e.target.value)} className="w-full mt-1 px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-sm">
+              <option value="demo">Demo (Test Transactions)</option>
+              <option value="live">Live (Real Transactions)</option>
+            </select>
+            <p className="text-xs text-slate-500 mt-1">
+              {accountMode === 'demo' ? 'Merchant can only create test transactions. No real bank connections.' : 'Merchant processes real EFT transactions.'}
+            </p>
           </div>
           <Button onClick={handleSave} disabled={saving} className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white gap-2">
             <Save className="w-4 h-4" />{saving ? 'Saving...' : 'Save Changes'}

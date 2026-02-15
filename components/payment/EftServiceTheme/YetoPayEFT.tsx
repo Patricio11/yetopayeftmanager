@@ -79,6 +79,7 @@ interface YetoPayEFTProps {
       bankCode: string;
     };
     token: string;
+    isDemo?: boolean;
   };
 }
 
@@ -134,7 +135,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
 
   const stepNumbers: Record<string, number> = {
     initializing: 1, init: 1, load_bank: 1,
-    auth: 2, setup: 2, processing: 2, select: 2,
+    auth: 2, setup: 2, processing: 2, select: 2, 'demo-select': 2,
     payment: 3, 'otp-payment': 3, final: 3, 'verify-result': 3,
     completed: 4, failed: 4
   };
@@ -845,6 +846,13 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
       // Continue with payment flow even if update fails
     }
     
+    // Demo mode: skip EFT service, show outcome picker
+    if (initialData?.isDemo) {
+      setIsLoading(false);
+      setCurrentStep('demo-select');
+      return;
+    }
+
     // Continue with EFT flow
     handleStepExecution(bank.code, 'load_bank', merchant);
   };
@@ -1681,6 +1689,129 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     );
   };
 
+  // --- Demo mode outcome handler ---
+  const handleDemoOutcome = async (status: 'completed' | 'failed' | 'cancelled' | 'pending' | 'expired') => {
+    setIsLoading(true);
+    setProcessingMessage('Processing demo transaction...');
+    setCurrentStep('processing');
+
+    // Small delay for UX
+    await new Promise(r => setTimeout(r, 1500));
+
+    const uiStatus = status === 'completed' ? 'completed' : status === 'cancelled' ? 'cancelled' : 'failed';
+    const messageMap: Record<string, string> = {
+      completed: 'Demo payment completed successfully',
+      failed: 'Demo payment failed',
+      cancelled: 'Demo payment cancelled',
+      pending: 'Demo payment is pending',
+      expired: 'Demo payment expired',
+    };
+
+    await finishAndRedirect(uiStatus, messageMap[status]);
+  };
+
+  const renderDemoOutcomePicker = () => (
+    <div className="space-y-4">
+      <div className="text-center mb-6">
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-50 border border-amber-200 text-amber-700 rounded-full text-xs font-semibold mb-4">
+          <AlertTriangle size={14} />
+          DEMO MODE
+        </div>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">Select Transaction Outcome</h2>
+        <p className="text-gray-500 text-sm">Choose the response you want to simulate for this test transaction.</p>
+        {selectedBank && (
+          <p className="text-sm text-gray-400 mt-1">Bank: {selectedBank.name}</p>
+        )}
+      </div>
+      <div className="grid gap-3">
+        <button
+          onClick={() => handleDemoOutcome('completed')}
+          disabled={isLoading}
+          className="w-full p-4 border-2 border-green-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition-all duration-200 flex items-center justify-between group disabled:opacity-50 cursor-pointer"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+              <CheckCircle size={20} className="text-green-600" />
+            </div>
+            <div className="text-left">
+              <span className="font-semibold text-gray-900">Completed</span>
+              <p className="text-xs text-gray-500">Payment successful</p>
+            </div>
+          </div>
+          <ChevronRight size={20} className="text-gray-400 group-hover:text-green-500" />
+        </button>
+
+        <button
+          onClick={() => handleDemoOutcome('pending')}
+          disabled={isLoading}
+          className="w-full p-4 border-2 border-blue-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 flex items-center justify-between group disabled:opacity-50 cursor-pointer"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <Clock size={20} className="text-blue-600" />
+            </div>
+            <div className="text-left">
+              <span className="font-semibold text-gray-900">Pending</span>
+              <p className="text-xs text-gray-500">Payment awaiting confirmation</p>
+            </div>
+          </div>
+          <ChevronRight size={20} className="text-gray-400 group-hover:text-blue-500" />
+        </button>
+
+        <button
+          onClick={() => handleDemoOutcome('failed')}
+          disabled={isLoading}
+          className="w-full p-4 border-2 border-red-200 rounded-lg hover:border-red-500 hover:bg-red-50 transition-all duration-200 flex items-center justify-between group disabled:opacity-50 cursor-pointer"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+              <X size={20} className="text-red-600" />
+            </div>
+            <div className="text-left">
+              <span className="font-semibold text-gray-900">Failed</span>
+              <p className="text-xs text-gray-500">Payment was declined</p>
+            </div>
+          </div>
+          <ChevronRight size={20} className="text-gray-400 group-hover:text-red-500" />
+        </button>
+
+        <button
+          onClick={() => handleDemoOutcome('cancelled')}
+          disabled={isLoading}
+          className="w-full p-4 border-2 border-amber-200 rounded-lg hover:border-amber-500 hover:bg-amber-50 transition-all duration-200 flex items-center justify-between group disabled:opacity-50 cursor-pointer"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+              <AlertTriangle size={20} className="text-amber-600" />
+            </div>
+            <div className="text-left">
+              <span className="font-semibold text-gray-900">Cancelled</span>
+              <p className="text-xs text-gray-500">User cancelled payment</p>
+            </div>
+          </div>
+          <ChevronRight size={20} className="text-gray-400 group-hover:text-amber-500" />
+        </button>
+
+        <button
+          onClick={() => handleDemoOutcome('expired')}
+          disabled={isLoading}
+          className="w-full p-4 border-2 border-gray-200 rounded-lg hover:border-gray-500 hover:bg-gray-50 transition-all duration-200 flex items-center justify-between group disabled:opacity-50 cursor-pointer"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+              <Clock size={20} className="text-gray-500" />
+            </div>
+            <div className="text-left">
+              <span className="font-semibold text-gray-900">Expired</span>
+              <p className="text-xs text-gray-500">Payment link timed out</p>
+            </div>
+          </div>
+          <ChevronRight size={20} className="text-gray-400 group-hover:text-gray-500" />
+        </button>
+      </div>
+    </div>
+  );
+
   const renderContent = () => {
     if (isInitializing) return renderInitializingLoader();
     if (currentStep === 'error') return renderPageError();
@@ -1710,6 +1841,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
           </div>
         </div>
       );
+      case 'demo-select': return renderDemoOutcomePicker();
       case 'processing': return renderProcessingLoader();
       case 'select': return renderAccountSelection();
       case 'final': return renderFinalStep();
@@ -1722,6 +1854,11 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-slate-50">
+      {initialData?.isDemo && (
+        <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-semibold">
+          DEMO MODE — This is a test transaction. No real payment will be processed.
+        </div>
+      )}
       <div className="bg-gradient-to-r from-green-600 to-slate-600 text-white">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">

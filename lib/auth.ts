@@ -39,6 +39,11 @@ export const auth = betterAuth({
         required: false,
         defaultValue: "merchant",
       },
+      accountMode: {
+        type: "string",
+        required: false,
+        defaultValue: "demo",
+      },
     },
   },
 });

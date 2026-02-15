@@ -104,6 +104,7 @@ const updateMerchantSchema = z.object({
   isActive: z.boolean().optional(),
   kycStatus: z.enum(['pending', 'approved', 'rejected']).optional(),
   role: z.enum(['merchant', 'admin']).optional(),
+  accountMode: z.enum(['demo', 'live']).optional(),
   address: z.object({
     street: z.string().optional(),
     city: z.string().optional(),
