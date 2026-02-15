@@ -56,6 +56,11 @@ type Transaction = {
     email: string;
     companyName: string | null;
   } | null;
+  bank: {
+    id: string;
+    bankName: string;
+    code: string;
+  } | null;
 };
 
 type Stats = {
@@ -74,10 +79,17 @@ type Merchant = {
   companyName: string | null;
 };
 
+type Bank = {
+  id: string;
+  bankName: string;
+  code: string;
+};
+
 interface TransactionsClientProps {
   initialTransactions: Transaction[];
   initialStats: Stats;
   merchants: Merchant[];
+  banks: Bank[];
   isAdmin: boolean;
   currentPage: number;
   totalPages: number;
@@ -87,6 +99,7 @@ export function TransactionsClient({
   initialTransactions,
   initialStats,
   merchants,
+  banks,
   isAdmin,
   currentPage,
   totalPages,
@@ -132,10 +145,11 @@ export function TransactionsClient({
   };
 
   const handleExportCSV = () => {
-    const headers = ["Date", "Reference", "Amount", "Status", "Customer", "Email", isAdmin ? "Merchant" : ""].filter(Boolean);
+    const headers = ["Date", "Reference", "Bank", "Amount", "Status", "Customer", "Email", isAdmin ? "Merchant" : ""].filter(Boolean);
     const rows = sortedTransactions.map((t) => [
       format(new Date(t.transaction.createdAt), "yyyy-MM-dd HH:mm:ss"),
       t.transaction.reference,
+      t.bank?.bankName || "-",
       `R ${parseFloat(t.transaction.amount).toFixed(2)}`,
       t.transaction.status,
       t.transaction.customerName || "-",
@@ -359,6 +373,28 @@ export function TransactionsClient({
                     </Select>
                   </div>
 
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 block">
+                      Bank
+                    </label>
+                    <Select
+                      value={searchParams.get("bankId") || "all"}
+                      onValueChange={(value) => updateFilters("bankId", value)}
+                    >
+                      <SelectTrigger className="cursor-pointer">
+                        <SelectValue placeholder="All Banks" />
+                      </SelectTrigger>
+                      <SelectContent className="cursor-pointer">
+                        <SelectItem value="all" className="cursor-pointer">All Banks</SelectItem>
+                        {banks.map((bank) => (
+                          <SelectItem key={bank.id} value={bank.id} className="cursor-pointer">
+                            {bank.bankName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
                   {isAdmin && (
                     <div>
                       <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 block">
@@ -467,6 +503,7 @@ export function TransactionsClient({
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="pl-0">Date</TableHead>
                   <TableHead>Reference</TableHead>
+                  <TableHead>Bank</TableHead>
                   {isAdmin && <TableHead>Merchant</TableHead>}
                   <TableHead>Amount</TableHead>
                   <TableHead className="pr-0">Status</TableHead>
@@ -476,7 +513,7 @@ export function TransactionsClient({
                 {sortedTransactions.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={isAdmin ? 5 : 4}
+                      colSpan={isAdmin ? 6 : 5}
                       className="text-center py-12 text-slate-500 dark:text-slate-400"
                     >
                       <div className="flex flex-col items-center gap-4">
@@ -507,6 +544,11 @@ export function TransactionsClient({
                       <TableCell>
                         <div className="font-mono text-sm text-slate-700 dark:text-slate-300">
                           {item.transaction.reference}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                          {item.bank?.bankName || "-"}
                         </div>
                       </TableCell>
                       {isAdmin && (

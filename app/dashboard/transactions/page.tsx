@@ -1,6 +1,6 @@
 import { requireAuth } from "@/lib/auth-server";
 import { db } from "@/lib/db";
-import { eftTransactions, users } from "@/lib/db/schema";
+import { eftTransactions, eftBanks, users } from "@/lib/db/schema";
 import { eq, desc, and, gte, lte, like, or, sql } from "drizzle-orm";
 import { TransactionsClient } from "@/components/dashboard/TransactionsClient";
 
@@ -16,6 +16,7 @@ export default async function TransactionsPage({
   const params = await searchParams;
   const status = params.status as string | undefined;
   const merchantId = params.merchantId as string | undefined;
+  const bankId = params.bankId as string | undefined;
   const fromDate = params.from as string | undefined;
   const toDate = params.to as string | undefined;
   const search = params.search as string | undefined;
@@ -59,7 +60,12 @@ export default async function TransactionsPage({
     );
   }
 
-  // Fetch transactions with merchant info
+  // Bank filter
+  if (bankId && bankId !== "all") {
+    conditions.push(eq(eftTransactions.eftBankId, bankId));
+  }
+
+  // Fetch transactions with merchant info and bank info
   const transactionsQuery = db
     .select({
       transaction: eftTransactions,
@@ -69,15 +75,21 @@ export default async function TransactionsPage({
         email: users.email,
         companyName: users.companyName,
       },
+      bank: {
+        id: eftBanks.id,
+        bankName: eftBanks.bankName,
+        code: eftBanks.code,
+      },
     })
     .from(eftTransactions)
     .leftJoin(users, eq(eftTransactions.merchantId, users.id))
+    .leftJoin(eftBanks, eq(eftTransactions.eftBankId, eftBanks.id))
     .where(conditions.length > 0 ? and(...conditions) : undefined)
     .orderBy(desc(eftTransactions.createdAt))
     .limit(limit)
     .offset(offset);
 
-  const [transactions, totalCount, merchants] = await Promise.all([
+  const [transactions, totalCount, merchants, banks] = await Promise.all([
     transactionsQuery,
     db
       .select({ count: sql<number>`count(*)::int` })
@@ -87,6 +99,7 @@ export default async function TransactionsPage({
     isAdmin
       ? db.select({ id: users.id, name: users.name, email: users.email, companyName: users.companyName }).from(users).where(eq(users.role, "merchant"))
       : Promise.resolve([]),
+    db.select({ id: eftBanks.id, bankName: eftBanks.bankName, code: eftBanks.code }).from(eftBanks).where(eq(eftBanks.enabled, true)).orderBy(eftBanks.bankName),
   ]);
 
   // Get statistics for the filtered data
@@ -114,6 +127,7 @@ export default async function TransactionsPage({
         totalCount,
       }}
       merchants={merchants}
+      banks={banks}
       isAdmin={isAdmin}
       currentPage={page}
       totalPages={Math.ceil(totalCount / limit)}
