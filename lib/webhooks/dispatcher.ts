@@ -1,11 +1,12 @@
 /**
  * Webhook Event Dispatcher
- * Handles sending webhook events to merchant endpoints with retry logic
+ * Handles sending webhook events to merchant endpoints with DB-persisted retry logic.
+ * Failed deliveries are stored with a nextRetryAt timestamp so retries survive restarts.
  */
 
 import { db } from "@/lib/db";
 import { webhookConfigurations, webhookDeliveries } from "@/lib/db/schema/team";
-import { eq, and } from "drizzle-orm";
+import { eq, and, lte } from "drizzle-orm";
 import crypto from "crypto";
 
 // Event types
@@ -37,6 +38,15 @@ function generateSignature(payload: string, secret: string): string {
 }
 
 /**
+ * Calculate next retry time with exponential backoff
+ */
+function calculateNextRetry(attemptNumber: number, backoffMultiplier: number): Date {
+  const baseDelay = 60000; // 1 minute
+  const delay = baseDelay * Math.pow(backoffMultiplier, attemptNumber - 1);
+  return new Date(Date.now() + delay);
+}
+
+/**
  * Send webhook to a specific endpoint
  */
 async function sendWebhook(
@@ -44,7 +54,9 @@ async function sendWebhook(
   payload: WebhookEventPayload,
   secret: string,
   webhookConfigId: string,
-  attemptNumber: number = 1
+  attemptNumber: number = 1,
+  maxRetries: number = 0,
+  backoffMultiplier: number = 2
 ): Promise<{
   success: boolean;
   statusCode?: number;
@@ -90,6 +102,7 @@ async function sendWebhook(
       success: response.ok,
       errorMessage: response.ok ? null : `HTTP ${response.status}: ${response.statusText}`,
       attemptNumber,
+      nextRetryAt: response.ok ? null : (attemptNumber < maxRetries ? calculateNextRetry(attemptNumber, backoffMultiplier) : null),
       deliveredAt: response.ok ? new Date() : null,
     });
 
@@ -102,7 +115,7 @@ async function sendWebhook(
   } catch (error: any) {
     const errorMessage = error.message || 'Unknown error';
 
-    // Log failed delivery
+    // Log failed delivery with nextRetryAt for DB-driven retries
     await db.insert(webhookDeliveries).values({
       webhookConfigId,
       transactionId: payload.data.id,
@@ -113,6 +126,7 @@ async function sendWebhook(
       success: false,
       errorMessage,
       attemptNumber,
+      nextRetryAt: attemptNumber < maxRetries ? calculateNextRetry(attemptNumber, backoffMultiplier) : null,
       deliveredAt: null,
     });
 
@@ -121,54 +135,6 @@ async function sendWebhook(
       errorMessage,
     };
   }
-}
-
-/**
- * Calculate next retry time with exponential backoff
- */
-function calculateNextRetry(attemptNumber: number, backoffMultiplier: number): Date {
-  const baseDelay = 60000; // 1 minute
-  const delay = baseDelay * Math.pow(backoffMultiplier, attemptNumber - 1);
-  return new Date(Date.now() + delay);
-}
-
-/**
- * Schedule retries with exponential backoff (in-process).
- * For production at scale, replace with a job queue (BullMQ, etc.).
- */
-function scheduleRetries(
-  url: string,
-  payload: WebhookEventPayload,
-  secret: string,
-  webhookConfigId: string,
-  maxRetries: number,
-  backoffMultiplier: number
-): void {
-  const attemptRetry = async (attemptNumber: number) => {
-    if (attemptNumber > maxRetries) {
-      console.log(`⛔ Max retries (${maxRetries}) reached for webhook ${webhookConfigId}`);
-      return;
-    }
-
-    const delay = calculateNextRetry(attemptNumber, backoffMultiplier).getTime() - Date.now();
-    console.log(`🔄 Scheduling webhook retry #${attemptNumber} in ${Math.round(delay / 1000)}s for ${webhookConfigId}`);
-
-    setTimeout(async () => {
-      try {
-        const result = await sendWebhook(url, payload, secret, webhookConfigId, attemptNumber + 1);
-        if (result.success) {
-          console.log(`✅ Webhook retry #${attemptNumber} succeeded for ${webhookConfigId}`);
-        } else {
-          attemptRetry(attemptNumber + 1);
-        }
-      } catch (error) {
-        console.error(`❌ Webhook retry #${attemptNumber} error:`, error);
-        attemptRetry(attemptNumber + 1);
-      }
-    }, delay);
-  };
-
-  attemptRetry(1);
 }
 
 /**
@@ -195,8 +161,8 @@ export async function dispatchWebhookEvent(
     // Support wildcard subscription: '*' or 'payment.all' subscribes to all events
     const subscribedWebhooks = webhooks.filter(webhook => {
       const events = webhook.events as string[];
-      return events.includes(eventType) || 
-             events.includes('*') || 
+      return events.includes(eventType) ||
+             events.includes('*') ||
              events.includes('payment.all');
     });
 
@@ -218,28 +184,17 @@ export async function dispatchWebhookEvent(
 
     // Send to all subscribed webhooks
     const deliveryPromises = subscribedWebhooks.map(async (webhook) => {
-      const result = await sendWebhook(
+      const retryPolicy = webhook.retryPolicy as { maxRetries: number; backoffMultiplier: number };
+
+      await sendWebhook(
         webhook.url,
         payload,
         webhook.secret,
         webhook.id,
-        1
+        1,
+        retryPolicy.maxRetries,
+        retryPolicy.backoffMultiplier
       );
-
-      // Schedule retries if failed (in-process with exponential backoff)
-      if (!result.success) {
-        const retryPolicy = webhook.retryPolicy as { maxRetries: number; backoffMultiplier: number };
-        if (retryPolicy.maxRetries > 0) {
-          scheduleRetries(
-            webhook.url,
-            payload,
-            webhook.secret,
-            webhook.id,
-            retryPolicy.maxRetries,
-            retryPolicy.backoffMultiplier
-          );
-        }
-      }
     });
 
     await Promise.allSettled(deliveryPromises);
@@ -249,7 +204,75 @@ export async function dispatchWebhookEvent(
 }
 
 /**
- * Retry failed webhook delivery
+ * Process pending webhook retries from the database.
+ * Call this periodically (e.g. every 30-60 seconds via cron or setInterval on startup).
+ * Picks up any failed deliveries where nextRetryAt <= now and retries them.
+ */
+export async function processWebhookRetries(): Promise<number> {
+  try {
+    // Find failed deliveries that are due for retry
+    const pendingRetries = await db
+      .select()
+      .from(webhookDeliveries)
+      .where(
+        and(
+          eq(webhookDeliveries.success, false),
+          lte(webhookDeliveries.nextRetryAt, new Date())
+        )
+      )
+      .limit(50); // Process in batches
+
+    if (pendingRetries.length === 0) return 0;
+
+    console.log(`🔄 Processing ${pendingRetries.length} pending webhook retries`);
+
+    let successCount = 0;
+
+    for (const delivery of pendingRetries) {
+      // Clear nextRetryAt so this delivery isn't picked up again while processing
+      await db
+        .update(webhookDeliveries)
+        .set({ nextRetryAt: null })
+        .where(eq(webhookDeliveries.id, delivery.id));
+
+      // Fetch webhook configuration
+      const [webhook] = await db
+        .select()
+        .from(webhookConfigurations)
+        .where(eq(webhookConfigurations.id, delivery.webhookConfigId!));
+
+      if (!webhook || !webhook.isActive) continue;
+
+      const retryPolicy = webhook.retryPolicy as { maxRetries: number; backoffMultiplier: number };
+      const nextAttempt = (delivery.attemptNumber ?? 1) + 1;
+
+      const result = await sendWebhook(
+        webhook.url,
+        delivery.payload as WebhookEventPayload,
+        webhook.secret,
+        webhook.id,
+        nextAttempt,
+        retryPolicy.maxRetries,
+        retryPolicy.backoffMultiplier
+      );
+
+      if (result.success) {
+        successCount++;
+        console.log(`✅ Webhook retry #${nextAttempt} succeeded for ${webhook.id}`);
+      } else if (nextAttempt >= retryPolicy.maxRetries) {
+        console.log(`⛔ Max retries (${retryPolicy.maxRetries}) reached for webhook ${webhook.id}`);
+      }
+    }
+
+    return successCount;
+  } catch (error) {
+    console.error('Error processing webhook retries:', error);
+    return 0;
+  }
+}
+
+/**
+ * Retry a specific failed webhook delivery (manual retry from dashboard)
  */
 export async function retryWebhookDelivery(
   deliveryId: string
@@ -278,18 +301,15 @@ export async function retryWebhookDelivery(
     const retryPolicy = webhook.retryPolicy as { maxRetries: number; backoffMultiplier: number };
     const currentAttempt = (delivery.attemptNumber as number) || 1;
 
-    if (currentAttempt >= retryPolicy.maxRetries) {
-      console.log(`Max retries reached for delivery ${deliveryId}`);
-      return false;
-    }
-
     // Retry delivery
     const result = await sendWebhook(
       webhook.url,
       delivery.payload as any,
       webhook.secret,
       webhook.id,
-      currentAttempt + 1
+      currentAttempt + 1,
+      retryPolicy.maxRetries,
+      retryPolicy.backoffMultiplier
     );
 
     return result.success;
