@@ -960,7 +960,11 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     });
 
     const isAuth = currentStep === 'auth' || apiResponse.step === 'auth';
-    if (isAuth && !agreedToTerms) {
+    // Only require T&C on the initial login form (not captcha/passphrase steps)
+    const isLoginForm = isAuth && apiResponse.inputs &&
+      apiResponse.inputs.some((i) => i.type === 'password' || (i.type === 'text' && i.html_options?.name)) &&
+      !apiResponse.inputs.some((i) => i.type === 'captcha' || i.type === 'input-group');
+    if (isLoginForm && !agreedToTerms) {
       // show tooltip and a subtle inline hint (but DO NOT disable the button)
       showTcTooltip();
       newErrors['_tc'] = 'Please agree to the Terms & Conditions before continuing.';
@@ -1441,6 +1445,10 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   const renderDynamicForm = () => {
     if (!apiResponse) return null;
     const isAuth = currentStep === 'auth' || apiResponse.step === 'auth';
+    // Only show save credentials & T&C on the initial login form (has password/text fields, no captcha)
+    const isInitialLoginForm = isAuth && apiResponse.inputs &&
+      apiResponse.inputs.some((i) => i.type === 'password' || (i.type === 'text' && i.html_options?.name)) &&
+      !apiResponse.inputs.some((i) => i.type === 'captcha' || i.type === 'input-group');
 
     return (
       <div className="space-y-6 mt-6">
@@ -1470,8 +1478,8 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
             <div className="space-y-4">
               {apiResponse.inputs.map((input) => (input.type === 'submit' || input.type === 'tc' ? null : renderInput(input)))}
 
-              {/* Tokenization Checkbox - only on auth step and if credentials don't already exist */}
-              {isAuth && !savedCredentialId && (
+              {/* Tokenization Checkbox - only on initial login form (not captcha/passphrase steps) */}
+              {isInitialLoginForm && !savedCredentialId && (
                 <div className="pt-2">
                   <CheckboxCard
                     name="save_credentials"
@@ -1488,8 +1496,8 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
                 </div>
               )}
 
-              {/* T&C block - visually before submit */}
-              {isAuth && renderTermsBlock()}
+              {/* T&C block - only on initial login form (not captcha/passphrase steps) */}
+              {isInitialLoginForm && renderTermsBlock()}
 
               <button
                 type="submit"
