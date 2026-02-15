@@ -9,6 +9,7 @@ import { webhookConfigurations, webhookDeliveries } from "@/lib/db/schema/team";
 import { eq, and, lte } from "drizzle-orm";
 import crypto from "crypto";
 import { validateWebhookUrl } from "@/lib/security/url-validation";
+import { decryptString } from "@/lib/security/credential-encryption";
 
 // Event types
 export type WebhookEventType =
@@ -203,14 +204,15 @@ export async function dispatchWebhookEvent(
       merchantId,
     };
 
-    // Send to all subscribed webhooks
+    // Send to all subscribed webhooks (decrypt secrets from DB)
     const deliveryPromises = subscribedWebhooks.map(async (webhook) => {
       const retryPolicy = webhook.retryPolicy as { maxRetries: number; backoffMultiplier: number };
+      const plainSecret = decryptString(webhook.secret);
 
       await sendWebhook(
         webhook.url,
         payload,
-        webhook.secret,
+        plainSecret,
         webhook.id,
         1,
         retryPolicy.maxRetries,
@@ -266,11 +268,12 @@ export async function processWebhookRetries(): Promise<number> {
 
       const retryPolicy = webhook.retryPolicy as { maxRetries: number; backoffMultiplier: number };
       const nextAttempt = (delivery.attemptNumber ?? 1) + 1;
+      const plainSecret = decryptString(webhook.secret);
 
       const result = await sendWebhook(
         webhook.url,
         delivery.payload as WebhookEventPayload,
-        webhook.secret,
+        plainSecret,
         webhook.id,
         nextAttempt,
         retryPolicy.maxRetries,
@@ -321,12 +324,13 @@ export async function retryWebhookDelivery(
 
     const retryPolicy = webhook.retryPolicy as { maxRetries: number; backoffMultiplier: number };
     const currentAttempt = (delivery.attemptNumber as number) || 1;
+    const plainSecret = decryptString(webhook.secret);
 
     // Retry delivery
     const result = await sendWebhook(
       webhook.url,
       delivery.payload as any,
-      webhook.secret,
+      plainSecret,
       webhook.id,
       currentAttempt + 1,
       retryPolicy.maxRetries,

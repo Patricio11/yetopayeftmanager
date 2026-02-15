@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { webhookConfigurations } from "@/lib/db/schema/team";
 import { eq, and } from "drizzle-orm";
 import crypto from "crypto";
+import { encryptString } from "@/lib/security/credential-encryption";
 
 /**
  * POST - Regenerate webhook secret
@@ -42,14 +43,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate new secret
-    const newSecret = crypto.randomBytes(32).toString('hex');
+    // Generate new secret and encrypt for storage
+    const plainSecret = crypto.randomBytes(32).toString('hex');
+    const encryptedSecret = encryptString(plainSecret);
 
-    // Update webhook with new secret
+    // Update webhook with encrypted secret
     const [updatedWebhook] = await db
       .update(webhookConfigurations)
       .set({
-        secret: newSecret,
+        secret: encryptedSecret,
         updatedAt: new Date(),
       })
       .where(eq(webhookConfigurations.id, webhookId))
@@ -60,7 +62,7 @@ export async function POST(request: NextRequest) {
       message: "Webhook secret regenerated successfully",
       data: {
         webhookId: updatedWebhook.id,
-        secret: newSecret, // Return full secret
+        secret: plainSecret, // Return full plain secret only on regeneration
       },
     });
   } catch (error) {

@@ -5,6 +5,7 @@ import { webhookConfigurations } from "@/lib/db/schema/team";
 import { eq, and } from "drizzle-orm";
 import crypto from "crypto";
 import { validateWebhookUrl } from "@/lib/security/url-validation";
+import { encryptString } from "@/lib/security/credential-encryption";
 
 /**
  * GET - List all webhook configurations for the merchant
@@ -22,10 +23,10 @@ export async function GET(request: NextRequest) {
       .from(webhookConfigurations)
       .where(eq(webhookConfigurations.merchantId, merchantId));
 
-    // Hide secret in response (only show first 8 chars)
+    // Hide secret in response (show masked placeholder)
     const sanitizedWebhooks = webhooks.map(webhook => ({
       ...webhook,
-      secret: webhook.secret.substring(0, 8) + '...',
+      secret: 'whsec_••••••••••••••••',
     }));
 
     return NextResponse.json({
@@ -103,8 +104,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate webhook secret
-    const secret = crypto.randomBytes(32).toString('hex');
+    // Generate webhook secret and encrypt for storage
+    const plainSecret = crypto.randomBytes(32).toString('hex');
+    const encryptedSecret = encryptString(plainSecret);
 
     // Create webhook configuration
     const [webhook] = await db
@@ -113,7 +115,7 @@ export async function POST(request: NextRequest) {
         merchantId,
         url,
         events,
-        secret,
+        secret: encryptedSecret,
         isActive,
         retryPolicy: {
           maxRetries: 3,
@@ -128,7 +130,7 @@ export async function POST(request: NextRequest) {
       data: {
         webhook: {
           ...webhook,
-          secret, // Return full secret only on creation
+          secret: plainSecret, // Return full plain secret only on creation
         },
       },
     }, { status: 201 });
@@ -244,7 +246,7 @@ export async function PATCH(request: NextRequest) {
       data: {
         webhook: {
           ...updatedWebhook,
-          secret: updatedWebhook.secret.substring(0, 8) + '...',
+          secret: 'whsec_••••••••••••••••',
         },
       },
     });

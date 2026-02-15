@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { webhookConfigurations } from "@/lib/db/schema/team";
 import { eq, and } from "drizzle-orm";
 import { testWebhookEndpoint } from "@/lib/webhooks/dispatcher";
+import { decryptString } from "@/lib/security/credential-encryption";
 
 /**
  * POST - Test webhook endpoint
@@ -42,8 +43,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Test the webhook endpoint
-    const result = await testWebhookEndpoint(webhook.url, webhook.secret);
+    // Decrypt secret and test the webhook endpoint
+    const plainSecret = decryptString(webhook.secret);
+    const result = await testWebhookEndpoint(webhook.url, plainSecret);
 
     return NextResponse.json({
       success: true,

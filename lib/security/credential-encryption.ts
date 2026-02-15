@@ -71,6 +71,49 @@ export function encryptCredentials(credentials: Record<string, any>): string {
 }
 
 /**
+ * Encrypt a plain string value (e.g. webhook secret)
+ * @returns Base64 encoded encrypted string
+ */
+export function encryptString(value: string): string {
+  try {
+    const key = getEncryptionKey();
+    const iv = crypto.randomBytes(IV_LENGTH);
+    const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
+    let encrypted = cipher.update(value, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    const authTag = cipher.getAuthTag();
+    const combined = Buffer.concat([iv, authTag, Buffer.from(encrypted, 'hex')]);
+    return combined.toString('base64');
+  } catch (error) {
+    console.error('String encryption error:', error);
+    throw new Error('Failed to encrypt value');
+  }
+}
+
+/**
+ * Decrypt a string value encrypted with encryptString
+ * @param encryptedData - Base64 encoded encrypted string
+ * @returns Decrypted plain string
+ */
+export function decryptString(encryptedData: string): string {
+  try {
+    const key = getEncryptionKey();
+    const combined = Buffer.from(encryptedData, 'base64');
+    const iv = combined.subarray(0, IV_LENGTH);
+    const authTag = combined.subarray(IV_LENGTH, IV_LENGTH + AUTH_TAG_LENGTH);
+    const encrypted = combined.subarray(IV_LENGTH + AUTH_TAG_LENGTH);
+    const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
+    decipher.setAuthTag(authTag);
+    let decrypted = decipher.update(encrypted.toString('hex'), 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
+  } catch (error) {
+    console.error('String decryption error:', error);
+    throw new Error('Failed to decrypt value');
+  }
+}
+
+/**
  * Decrypt bank credentials
  * @param encryptedData - Base64 encoded encrypted string
  * @returns Decrypted credentials object
