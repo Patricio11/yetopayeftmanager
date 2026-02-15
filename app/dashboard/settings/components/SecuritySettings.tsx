@@ -26,6 +26,10 @@ export function SecuritySettings() {
       toast({ title: "Error", description: "New password must be at least 8 characters", variant: "destructive" });
       return;
     }
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(newPassword)) {
+      toast({ title: "Error", description: "Password must contain uppercase, lowercase, and a number", variant: "destructive" });
+      return;
+    }
     if (newPassword !== confirmPassword) {
       toast({ title: "Error", description: "New passwords do not match", variant: "destructive" });
       return;
@@ -116,7 +120,6 @@ export function SecuritySettings() {
                 <li>At least 8 characters long</li>
                 <li>Contains uppercase and lowercase letters</li>
                 <li>Contains at least one number</li>
-                <li>Contains at least one special character</li>
               </ul>
             </div>
           </div>
