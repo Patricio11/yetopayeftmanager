@@ -1,5 +1,6 @@
 // YetoPayEFT.tsx
 import React, { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import {
   Shield, Check, Eye, EyeOff, HelpCircle, X, ChevronRight, ChevronLeft,
   AlertTriangle, CheckCircle, RefreshCcw, Save, Trash2, Clock
@@ -1242,11 +1243,13 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
           <div key={name} className="mb-4">
             {input.data_uri && (
               <div className="mb-3 flex justify-center">
-                <img
+                <Image
                   src={input.data_uri}
                   alt="Security captcha"
+                  width={200}
+                  height={80}
                   className="border border-gray-300 rounded-lg shadow-sm max-w-full h-auto"
-                  style={{ maxHeight: '80px' }}
+                  unoptimized
                 />
               </div>
             )}
@@ -1759,11 +1762,13 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
                   </div>
                   <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
                     {merchant.logo ? (
-                      <img
+                      <Image
                         src={merchant.logo}
                         alt={`${merchant.name} logo`}
+                        width={48}
+                        height={48}
                         className="w-full h-full object-cover"
-                        onError={(e: any) => { e.currentTarget.style.display = 'none'; }}
+                        unoptimized
                       />
                     ) : (
                       <div className="w-6 h-6 bg-white rounded"></div>
