@@ -8,6 +8,7 @@ import { db } from "@/lib/db";
 import { webhookConfigurations, webhookDeliveries } from "@/lib/db/schema/team";
 import { eq, and, lte } from "drizzle-orm";
 import crypto from "crypto";
+import { validateWebhookUrl } from "@/lib/security/url-validation";
 
 // Event types
 export type WebhookEventType =
@@ -64,6 +65,26 @@ async function sendWebhook(
   errorMessage?: string;
 }> {
   try {
+    // SSRF protection: validate URL before sending
+    const urlCheck = await validateWebhookUrl(url);
+    if (!urlCheck.valid) {
+      const errorMessage = `Blocked by SSRF protection: ${urlCheck.reason}`;
+      await db.insert(webhookDeliveries).values({
+        webhookConfigId,
+        transactionId: payload.data.id,
+        event: payload.type,
+        payload: payload as any,
+        response: null,
+        statusCode: null,
+        success: false,
+        errorMessage,
+        attemptNumber,
+        nextRetryAt: null, // Don't retry SSRF-blocked URLs
+        deliveredAt: null,
+      });
+      return { success: false, errorMessage };
+    }
+
     const payloadString = JSON.stringify(payload);
     const signature = generateSignature(payloadString, secret);
     const timestamp = Date.now().toString();
@@ -332,6 +353,16 @@ export async function testWebhookEndpoint(
   errorMessage?: string;
 }> {
   const startTime = Date.now();
+
+  // SSRF protection: validate URL before testing
+  const urlCheck = await validateWebhookUrl(url);
+  if (!urlCheck.valid) {
+    return {
+      success: false,
+      responseTime: Date.now() - startTime,
+      errorMessage: `Blocked by SSRF protection: ${urlCheck.reason}`,
+    };
+  }
 
   try {
     const testPayload: WebhookEventPayload = {

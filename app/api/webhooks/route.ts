@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { webhookConfigurations } from "@/lib/db/schema/team";
 import { eq, and } from "drizzle-orm";
 import crypto from "crypto";
+import { validateWebhookUrl } from "@/lib/security/url-validation";
 
 /**
  * GET - List all webhook configurations for the merchant
@@ -64,12 +65,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate URL format
-    try {
-      new URL(url);
-    } catch (e) {
+    // Validate URL format and block SSRF
+    const urlValidation = await validateWebhookUrl(url);
+    if (!urlValidation.valid) {
       return NextResponse.json(
-        { success: false, message: "Invalid URL format" },
+        { success: false, message: urlValidation.reason },
         { status: 400 }
       );
     }
@@ -185,15 +185,14 @@ export async function PATCH(request: NextRequest) {
     };
 
     if (url !== undefined) {
-      try {
-        new URL(url);
-        updates.url = url;
-      } catch (e) {
+      const urlValidation = await validateWebhookUrl(url);
+      if (!urlValidation.valid) {
         return NextResponse.json(
-          { success: false, message: "Invalid URL format" },
+          { success: false, message: urlValidation.reason },
           { status: 400 }
         );
       }
+      updates.url = url;
     }
 
     if (events !== undefined) {
