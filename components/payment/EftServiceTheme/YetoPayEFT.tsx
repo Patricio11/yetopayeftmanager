@@ -135,7 +135,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   const stepNumbers: Record<string, number> = {
     initializing: 1, init: 1, load_bank: 1,
     auth: 2, setup: 2, processing: 2, select: 2,
-    payment: 3, 'otp-payment': 3, final: 3,
+    payment: 3, 'otp-payment': 3, final: 3, 'verify-result': 3,
     completed: 4, failed: 4
   };
 
