@@ -260,7 +260,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Recent Transactions */}
-        <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-slate-200/50 dark:border-slate-700/50 shadow-xl">
+        {/* <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-slate-200/50 dark:border-slate-700/50 shadow-xl">
           <div className="p-6 border-b border-slate-200/50 dark:border-slate-700/50">
             <div className="flex items-center justify-between">
               <div>
@@ -346,7 +346,7 @@ export default async function DashboardPage() {
               ))
             )}
           </div>
-        </Card>
+        </Card> */}
       </main>
   );
 }
