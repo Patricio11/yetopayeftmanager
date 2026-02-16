@@ -1507,6 +1507,20 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
               >
                 {isLoading ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" /> : (apiResponse.submit_message || 'Continue')}
               </button>
+
+              {/* Change bank link */}
+              {isAuth && (
+                <button
+                  type="button"
+                  onClick={handleBackToBank}
+                  className="w-full text-center text-sm text-gray-500 hover:text-green-700 transition-colors py-2"
+                >
+                  <span className="flex items-center justify-center gap-1">
+                    <ChevronLeft size={14} />
+                    Change bank
+                  </span>
+                </button>
+              )}
             </div>
           </form>
         )}
