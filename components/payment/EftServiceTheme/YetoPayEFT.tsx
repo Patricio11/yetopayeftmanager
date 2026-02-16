@@ -1976,11 +1976,11 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
       {cancelConfirmOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-lg">
-            <h3 className="text-lg font-bold mb-4">Cancel Transaction?</h3>
-            <p className="text-gray-600 mb-6">Are you sure you want to cancel this transaction? This action will notify the manager and update the transaction status.</p>
-            <div className="flex justify-end gap-3">
-              <button onClick={() => setCancelConfirmOpen(false)} className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">No, go back</button>
-              <button onClick={handleCancelConfirm} className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">{cancelLoading ? "Cancelling..." : "Yes, cancel"}</button>
+            <h3 className="text-xl font-bold mb-4">Cancel Transaction?</h3>
+            <p className="text-gray-600 mb-6">Do you really want to cancel this transaction? You'll need to return to the merchant's site to continue.</p>
+            <div className="flex justify-between gap-3">
+              <button onClick={() => { setCancelConfirmOpen(false); handleBackToBank(); }} className="flex-1 px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 font-medium text-gray-700">Change Bank</button>
+              <button onClick={handleCancelConfirm} className="flex-1 px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium">{cancelLoading ? "Cancelling..." : "Cancel Payment"}</button>
             </div>
           </div>
         </div>
