@@ -65,7 +65,7 @@ export function encryptCredentials(credentials: Record<string, any>): string {
     // Return as base64
     return combined.toString('base64');
   } catch (error) {
-    console.error('Encryption error:', error);
+    console.error('Encryption failed:', error);
     throw new Error('Failed to encrypt credentials');
   }
 }
@@ -85,7 +85,7 @@ export function encryptString(value: string): string {
     const combined = Buffer.concat([iv, authTag, Buffer.from(encrypted, 'hex')]);
     return combined.toString('base64');
   } catch (error) {
-    console.error('String encryption error:', error);
+    console.error('String encryption failed');
     throw new Error('Failed to encrypt value');
   }
 }
@@ -108,7 +108,7 @@ export function decryptString(encryptedData: string): string {
     decrypted += decipher.final('utf8');
     return decrypted;
   } catch (error) {
-    console.error('String decryption error:', error);
+    console.error('String decryption failed');
     throw new Error('Failed to decrypt value');
   }
 }
@@ -141,7 +141,7 @@ export function decryptCredentials(encryptedData: string): Record<string, any> {
     // Parse JSON
     return JSON.parse(decrypted);
   } catch (error) {
-    console.error('Decryption error:', error);
+    console.error('Decryption failed');
     throw new Error('Failed to decrypt credentials');
   }
 }

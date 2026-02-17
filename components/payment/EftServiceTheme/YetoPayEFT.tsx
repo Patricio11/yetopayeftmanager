@@ -531,10 +531,10 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   // --- Network: call EFT API endpoints for bank/step ---
   const executeStepApi = async (bankCode: string, step: string, data: Record<string, any>) => {
     const url = `${EFT_API_BASE_URL}/${bankCode}/${step}?session_id=${sessionId}`;
-    console.log(`[EFT] Calling ${step} with data:`, data);
+    console.log(`[EFT] Calling ${step}`);
     const response = await fetch(url, { method: 'POST', headers: authHeader(), body: JSON.stringify({ ...data }) });
     const result: ApiResponse = await response.json();
-    console.log(`[EFT] ${step} response:`, result);
+    console.log(`[EFT] ${step} response step:`, result.step || result.next_step);
     if (!response.ok) {
       const message = (result && (result.message as string)) || `An error occurred during '${step}'.`;
       throw new Error(message);
@@ -700,7 +700,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
         // Store auth credentials before they get cleared
         if (currentExecutionStep === 'auth' && stepData && Object.keys(stepData).length > 0) {
           authCredentials = { ...stepData };
-          console.log('[DEBUG] Stored auth credentials:', Object.keys(authCredentials));
+          console.log('[DEBUG] Auth credentials stored');
         }
 
         // Check if we just completed auth step successfully
@@ -718,17 +718,12 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
           hasSelectedBank: !!selectedBank,
           previousStep,
           stepLower,
-          username: authCredentials.username
         });
         
         // Only save if user opted in AND credentials don't already exist
         if (isAuthCompleted && saveCredentials && !savedCredentialId && authCredentials && Object.keys(authCredentials).length > 0 && selectedBank) {
           try {
-            console.log('💾 Saving NEW credentials after successful auth...');
-            console.log('💾 Auth credentials:', Object.keys(authCredentials));
-            console.log('💾 Merchant ID:', merchant.id);
-            console.log('💾 Bank Code:', bankCode);
-            console.log('💾 Device Fingerprint:', deviceFingerprint);
+            console.log('Saving credentials after successful auth');
             
             // Validate merchant ID before saving
             // For customer payments: merchant.id comes from transaction
@@ -983,7 +978,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     // If we have saved credentials and this is auth step, use actual credentials instead of masked values
     let dataToSend = { ...formData };
     if (savedCredentialsData && isAuth) {
-      console.log('🔑 Using saved credentials for authentication...');
+      console.log('Using saved credentials for authentication');
       // Replace masked values with actual saved credentials
       Object.keys(savedCredentialsData).forEach((key) => {
         if (formData[key] && formData[key].includes('*')) {

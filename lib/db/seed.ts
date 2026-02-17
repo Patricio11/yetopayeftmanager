@@ -218,10 +218,9 @@ async function seed() {
     seedUsersData.forEach(user => {
       console.log(`${user.role.toUpperCase()}:`);
       console.log(`  Email:    ${user.email}`);
-      console.log(`  Password: ${user.password}`);
+      console.log(`  Password: ******`);
       console.log(`  Name:     ${user.name}`);
       console.log(`  Company:  ${user.companyName}`);
-      console.log(`  Bank:     ${user.bankAccount.bankCode} - ${user.bankAccount.accountNumber}`);
       console.log('');
     });
 
