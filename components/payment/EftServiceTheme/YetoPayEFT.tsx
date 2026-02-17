@@ -731,18 +731,9 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
             const merchantIdToUse = merchant.id || session?.user?.id;
             
             if (!merchantIdToUse) {
-              console.error('❌ Cannot save credentials: No merchant ID available');
-              console.error('❌ Merchant object:', merchant);
-              console.error('❌ Session:', session);
-              console.error('❌ This usually means the transaction was not properly initialized');
+              console.error('Cannot save credentials: No merchant ID available');
               throw new Error('Merchant ID is required for tokenization');
             }
-            
-            if (!merchant.id && session?.user?.id) {
-              console.warn('⚠️ Using session user ID as fallback (admin testing mode)');
-            }
-            
-            console.log('💾 Using merchant ID:', merchantIdToUse, merchant.id ? '(from transaction)' : '(from session - admin testing)');
             
             const saveResult = await saveCredentialsToBrowser(
               merchantIdToUse,
@@ -750,7 +741,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
               selectedBank.name,
               authCredentials
             );
-            console.log('✅ Credentials saved to browser:', saveResult);
+            console.log('Credentials saved to browser');
             setSavedCredentialId(saveResult.credentialId);
             
             // Save metadata to database
@@ -763,13 +754,16 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
                 deviceFingerprint: deviceFingerprint,
                 deviceInfo: collectDeviceInfo(),
                 isDefault: savedTokens.length === 0, // First token is default
+                paymentToken: initialData?.token,
               }),
             });
             
             const metadataResult = await metadataResponse.json();
-            console.log('✅ Metadata saved to database:', metadataResult);
+            if (!metadataResult.success) {
+              console.error('Failed to save token metadata:', metadataResult.error);
+            }
           } catch (error) {
-            console.error('❌ Failed to save credentials:', error);
+            console.error('Failed to save credentials');
             // Don't block the payment flow if save fails
           }
         }
