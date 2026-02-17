@@ -54,7 +54,8 @@ type Merchant = {
   success_url?: string;
   fail_url?: string;
   notify_url?: string;
-  transaction_id?: string;  
+  transaction_id?: string;
+  fnbVerifyResult?: boolean;
 };
 
 interface YetoPayEFTProps {
@@ -80,6 +81,7 @@ interface YetoPayEFTProps {
     };
     token: string;
     isDemo?: boolean;
+    fnbVerifyResult?: boolean;
   };
 }
 
@@ -323,6 +325,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
           fail_url: initialData.merchant.fail_url,
           notify_url: initialData.merchant.notify_url,
           transaction_id: initialData.transaction.id,
+          fnbVerifyResult: initialData.fnbVerifyResult,
         });
         setBanks(initialData.banks);
         

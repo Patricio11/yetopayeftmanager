@@ -821,6 +821,7 @@ function SettingsTab({ merchant, onUpdate }: { merchant: any; onUpdate: () => vo
   const [isActive, setIsActive] = useState(merchant.isActive);
   const [role, setRole] = useState(merchant.role || 'merchant');
   const [accountMode, setAccountMode] = useState(merchant.accountMode || 'demo');
+  const [fnbVerifyResult, setFnbVerifyResult] = useState(merchant.eftSettings?.fnbVerifyResult || false);
 
   const handleSave = async () => {
     setSaving(true);
@@ -828,7 +829,7 @@ function SettingsTab({ merchant, onUpdate }: { merchant: any; onUpdate: () => vo
       const res = await fetch(`/api/admin/merchants/${merchant.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ kycStatus, isActive, role, accountMode }),
+        body: JSON.stringify({ kycStatus, isActive, role, accountMode, eftSettings: { fnbVerifyResult } }),
       });
       const data = await res.json();
       if (data.success) {
@@ -882,6 +883,19 @@ function SettingsTab({ merchant, onUpdate }: { merchant: any; onUpdate: () => vo
           <Button onClick={handleSave} disabled={saving} className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white gap-2">
             <Save className="w-4 h-4" />{saving ? 'Saving...' : 'Save Changes'}
           </Button>
+        </div>
+      </Card>
+
+      <Card className="p-6 bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">EFT Settings</h3>
+        <div className="space-y-4">
+          <label className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-all ${fnbVerifyResult ? 'border-green-300 bg-green-50/50 dark:border-green-700 dark:bg-green-900/10' : 'border-slate-200 dark:border-slate-700'}`}>
+            <div>
+              <p className="text-sm font-medium text-slate-900 dark:text-white">FNB Verify Result</p>
+              <p className="text-xs text-slate-500 mt-1">For FNB transactions over R7,000, run additional payment verification via FNB&apos;s remittance validation</p>
+            </div>
+            <input type="checkbox" checked={fnbVerifyResult} onChange={(e) => setFnbVerifyResult(e.target.checked)} className="w-4 h-4 text-green-600 rounded" />
+          </label>
         </div>
       </Card>
 

@@ -105,6 +105,9 @@ const updateMerchantSchema = z.object({
   kycStatus: z.enum(['pending', 'approved', 'rejected']).optional(),
   role: z.enum(['merchant', 'admin']).optional(),
   accountMode: z.enum(['demo', 'live']).optional(),
+  eftSettings: z.object({
+    fnbVerifyResult: z.boolean().optional(),
+  }).optional(),
   address: z.object({
     street: z.string().optional(),
     city: z.string().optional(),
@@ -149,10 +152,17 @@ export async function PATCH(
       );
     }
 
+    // Merge eftSettings with existing values to preserve merchant's own URL settings
+    const mergedUpdates: any = { ...updates };
+    if (updates.eftSettings) {
+      const existing = (merchant.eftSettings as any) || {};
+      mergedUpdates.eftSettings = { ...existing, ...updates.eftSettings };
+    }
+
     const [updated] = await db
       .update(users)
       .set({
-        ...updates,
+        ...mergedUpdates,
         updatedAt: new Date(),
         updatedBy: auth.session.user.id,
       })

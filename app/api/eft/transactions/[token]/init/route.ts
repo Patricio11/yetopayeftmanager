@@ -155,6 +155,7 @@ export async function GET(
         },
         banks: mappedBanks,
         isDemo: !!transaction.isDemo,
+        fnbVerifyResult: !!(merchant.eftSettings as any)?.fnbVerifyResult,
         step: "init", // Initial step for frontend
         token, // Include token for subsequent requests
       },
