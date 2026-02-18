@@ -62,7 +62,7 @@ export default async function PaymentPage({ params }: PageProps) {
     }
 
     // Extract data from response
-    const { sessionId, paymentDetails, merchant, banks, token, isDemo, fnbVerifyResult } = data.data;
+    const { sessionId, paymentDetails, merchant, banks, token, isDemo, fnbVerifyResult, showSaveCredentials, showTerms, termsTitle, termsContent } = data.data;
 
     // Transform data to match component props
     const transaction = {
@@ -85,6 +85,10 @@ export default async function PaymentPage({ params }: PageProps) {
         merchantBankAccount={merchant.bankAccount}
         isDemo={isDemo}
         fnbVerifyResult={fnbVerifyResult}
+        showSaveCredentials={showSaveCredentials}
+        showTerms={showTerms}
+        termsTitle={termsTitle}
+        termsContent={termsContent}
       />
     );
   } catch (error: any) {

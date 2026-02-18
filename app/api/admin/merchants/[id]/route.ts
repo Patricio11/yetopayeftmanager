@@ -107,6 +107,7 @@ const updateMerchantSchema = z.object({
   accountMode: z.enum(['demo', 'live']).optional(),
   eftSettings: z.object({
     fnbVerifyResult: z.boolean().optional(),
+    saveCredentialsEnabled: z.boolean().optional(),
   }).optional(),
   address: z.object({
     street: z.string().optional(),

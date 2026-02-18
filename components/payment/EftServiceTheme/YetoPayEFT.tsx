@@ -82,6 +82,10 @@ interface YetoPayEFTProps {
     token: string;
     isDemo?: boolean;
     fnbVerifyResult?: boolean;
+    showSaveCredentials?: boolean;
+    showTerms?: boolean;
+    termsTitle?: string;
+    termsContent?: string;
   };
 }
 
@@ -110,6 +114,12 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   // T&C modal + agreement state
   const [showTerms, setShowTerms] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  // T&C config from merchant settings
+  const [termsEnabled, setTermsEnabled] = useState(false);
+  const [termsTitle, setTermsTitle] = useState('Terms & Conditions');
+  const [termsContent, setTermsContent] = useState('');
+  // Save credentials enabled (per-merchant setting)
+  const [saveCredentialsEnabled, setSaveCredentialsEnabled] = useState(false);
 
   // cancel UI
   const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
@@ -328,6 +338,10 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
           fnbVerifyResult: initialData.fnbVerifyResult,
         });
         setBanks(initialData.banks);
+        if (initialData.showTerms !== undefined) setTermsEnabled(!!initialData.showTerms);
+        if (initialData.termsTitle) setTermsTitle(initialData.termsTitle);
+        if (initialData.termsContent !== undefined) setTermsContent(initialData.termsContent);
+        if (initialData.showSaveCredentials !== undefined) setSaveCredentialsEnabled(!!initialData.showSaveCredentials);
         
         // Generate JWT token for EFT service using public endpoint
         const jwtResponse = await fetch(`${FRONTEND_API_BASE_URL}/eft/transactions/${initialData.token}/jwt`, {
@@ -956,7 +970,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     const isLoginForm = isAuth && apiResponse.inputs &&
       apiResponse.inputs.some((i) => i.type === 'password' || (i.type === 'text' && i.html_options?.name)) &&
       !apiResponse.inputs.some((i) => i.type === 'captcha' || i.type === 'input-group');
-    if (isLoginForm && !agreedToTerms) {
+    if (isLoginForm && termsEnabled && !agreedToTerms) {
       // show tooltip and a subtle inline hint (but DO NOT disable the button)
       showTcTooltip();
       newErrors['_tc'] = 'Please agree to the Terms & Conditions before continuing.';
@@ -1347,6 +1361,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
 
   // Render the T&C block (anchor for tooltip)
   const renderTermsBlock = () => {
+    if (!termsEnabled) return null;
     const error = formErrors['_tc'];
     return (
       <div className="mt-2 relative" ref={tcCheckboxRef}>
@@ -1470,8 +1485,8 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
             <div className="space-y-4">
               {apiResponse.inputs.map((input) => (input.type === 'submit' || input.type === 'tc' ? null : renderInput(input)))}
 
-              {/* Tokenization Checkbox - only on initial login form (not captcha/passphrase steps) */}
-              {isInitialLoginForm && !savedCredentialId && (
+              {/* Tokenization Checkbox - only on initial login form and when enabled for this merchant */}
+              {isInitialLoginForm && !savedCredentialId && saveCredentialsEnabled && (
                 <div className="pt-2">
                   <CheckboxCard
                     name="save_credentials"
@@ -1976,6 +1991,8 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
         open={showTerms}
         onClose={() => setShowTerms(false)}
         onAgree={() => { setAgreedToTerms(true); setTcTooltipVisible(false); clearTcTooltipTimer(); }}
+        title={termsTitle}
+        content={termsContent}
       />
 
       {/* Cancel confirm modal */}

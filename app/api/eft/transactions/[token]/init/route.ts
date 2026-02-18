@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { eftTransactions, eftBanks, eftBankAccounts, users } from "@/lib/db/schema";
+import { eftTransactions, eftBanks, eftBankAccounts, users, platformSettings } from "@/lib/db/schema";
 import { verifyPaymentToken } from "@/lib/security/payment-token";
-import { eq, and, asc } from "drizzle-orm";
+import { eq, and, asc, inArray } from "drizzle-orm";
 
 /**
  * Mask a bank account number, showing only the last 4 digits.
@@ -124,6 +124,13 @@ export async function GET(
       enabled: bank.enabled,
     }));
 
+    // Fetch global T&C content from platform settings
+    const tcRows = await db
+      .select()
+      .from(platformSettings)
+      .where(inArray(platformSettings.settingKey, ['eft_tc_enabled', 'eft_tc_title', 'eft_tc_content']));
+    const tc = Object.fromEntries(tcRows.map(r => [r.settingKey, r.settingValue ?? '']));
+
     // Construct response payload
     const responsePayload = {
       success: true,
@@ -156,12 +163,16 @@ export async function GET(
         banks: mappedBanks,
         isDemo: !!transaction.isDemo,
         fnbVerifyResult: !!(merchant.eftSettings as any)?.fnbVerifyResult,
+        showSaveCredentials: !!(merchant.eftSettings as any)?.saveCredentialsEnabled,
+        showTerms: tc['eft_tc_enabled'] === 'true',
+        termsTitle: tc['eft_tc_title'] || 'Terms & Conditions',
+        termsContent: tc['eft_tc_content'] || '',
         step: "init", // Initial step for frontend
         token, // Include token for subsequent requests
       },
     };
 
-    console.log(`✅ Transaction initialized: ${transaction.id} for merchant ${merchantId}`);
+    console.log('Transaction initialized successfully');
 
     return NextResponse.json(responsePayload);
 

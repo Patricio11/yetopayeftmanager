@@ -78,7 +78,7 @@ export function WebhooksSection({ selectedLanguage, onCopy, copiedCode }: Webhoo
               </div>
               <div>
                 <p className="font-medium">Select events to subscribe</p>
-                <p className="text-sm text-gray-600">Choose ⭐ <strong>All Events (*)</strong> for simplicity, or select specific events</p>
+                <p className="text-sm text-gray-600">Choose <strong>All Events (*)</strong> for simplicity, or select specific events</p>
               </div>
             </div>
             <div className="flex gap-3">
@@ -100,7 +100,7 @@ export function WebhooksSection({ selectedLanguage, onCopy, copiedCode }: Webhoo
           {/* Wildcard Option */}
           <div className="mb-4 p-4 bg-blue-50 border-2 border-blue-300 rounded-lg">
             <div className="flex items-start gap-3">
-              <div className="text-2xl">⭐</div>
+              {/* <div className="text-2xl">⭐</div> */}
               <div className="flex-1">
                 <h4 className="font-semibold text-blue-900 mb-1">Wildcard Subscription (Recommended)</h4>
                 <p className="text-sm text-blue-800 mb-2">
@@ -245,7 +245,7 @@ export function WebhooksSection({ selectedLanguage, onCopy, copiedCode }: Webhoo
           <h3 className="font-semibold text-lg mb-3">Best Practices</h3>
           <div className="space-y-2">
             <div className="flex items-start gap-2">
-              <div className="text-xl flex-shrink-0">⭐</div>
+              {/* <div className="text-xl flex-shrink-0">⭐</div> */}
               <div>
                 <p className="font-medium text-blue-700">Use wildcard subscription (*)</p>
                 <p className="text-sm text-gray-600">Subscribe to all events for simplicity and future-proofing</p>

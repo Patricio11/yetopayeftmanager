@@ -43,6 +43,10 @@ interface PaymentInterfaceProps {
   merchantBankAccount: any;
   isDemo?: boolean;
   fnbVerifyResult?: boolean;
+  showSaveCredentials?: boolean;
+  showTerms?: boolean;
+  termsTitle?: string;
+  termsContent?: string;
 }
 
 export default function PaymentInterface({
@@ -52,7 +56,11 @@ export default function PaymentInterface({
   token,
   merchantBankAccount,
   isDemo,
-  fnbVerifyResult
+  fnbVerifyResult,
+  showSaveCredentials,
+  showTerms,
+  termsTitle,
+  termsContent,
 }: PaymentInterfaceProps) {
   const [isClient, setIsClient] = useState(false);
 
@@ -114,6 +122,10 @@ export default function PaymentInterface({
           token,
           isDemo,
           fnbVerifyResult,
+          showSaveCredentials,
+          showTerms,
+          termsTitle,
+          termsContent,
         }}
       />
     </div>

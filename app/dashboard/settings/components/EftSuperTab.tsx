@@ -1,23 +1,36 @@
 "use client";
 
 import { useState } from "react";
-import { CreditCard, Webhook, ExternalLink } from "lucide-react";
+import { CreditCard, Webhook, ExternalLink, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSession } from "@/lib/auth-client";
 import { BankAccountsSettings } from "./BankAccountsSettings";
 import { WebhookSettings } from "./WebhookSettings";
 import { EftUrlSettings } from "./EftUrlSettings";
+import { TermsAndConditionsSettings } from "./TermsAndConditionsSettings";
 
-const subTabs = [
+const merchantSubTabs = [
   { id: "bank-accounts", label: "Bank Accounts", icon: CreditCard },
   { id: "webhooks", label: "Webhooks", icon: Webhook },
   { id: "eft-urls", label: "EFT URLs", icon: ExternalLink },
 ] as const;
 
-type SubTabId = typeof subTabs[number]["id"];
+const adminSubTabs = [
+  { id: "bank-accounts", label: "Bank Accounts", icon: CreditCard },
+  { id: "webhooks", label: "Webhooks", icon: Webhook },
+  { id: "eft-urls", label: "EFT URLs", icon: ExternalLink },
+  { id: "terms", label: "Terms & Conditions", icon: FileText },
+] as const;
+
+type SubTabId = "bank-accounts" | "webhooks" | "eft-urls" | "terms";
 
 export function EftSuperTab({ initialSubTab }: { initialSubTab?: string }) {
+  const { data: session } = useSession();
+  const isAdmin = (session?.user as any)?.role === "admin";
+  const subTabs = isAdmin ? adminSubTabs : merchantSubTabs;
+
   const [activeSubTab, setActiveSubTab] = useState<SubTabId>(
-    (subTabs.find(t => t.id === initialSubTab)?.id) || "bank-accounts"
+    (subTabs.find(t => t.id === initialSubTab)?.id as SubTabId) || "bank-accounts"
   );
 
   return (
@@ -30,7 +43,7 @@ export function EftSuperTab({ initialSubTab }: { initialSubTab?: string }) {
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveSubTab(tab.id)}
+                onClick={() => setActiveSubTab(tab.id as SubTabId)}
                 className={cn(
                   "flex items-center gap-2 w-full px-3 py-2.5 text-sm rounded-lg text-left transition-colors whitespace-nowrap",
                   activeSubTab === tab.id
@@ -51,6 +64,7 @@ export function EftSuperTab({ initialSubTab }: { initialSubTab?: string }) {
         {activeSubTab === "bank-accounts" && <BankAccountsSettings />}
         {activeSubTab === "webhooks" && <WebhookSettings />}
         {activeSubTab === "eft-urls" && <EftUrlSettings />}
+        {activeSubTab === "terms" && isAdmin && <TermsAndConditionsSettings />}
       </div>
     </div>
   );
