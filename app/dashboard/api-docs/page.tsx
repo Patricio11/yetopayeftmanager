@@ -570,16 +570,46 @@ function EndpointDetail({ method, path, title, description, language, onCopy, co
                 <td className="p-3">Your internal reference</td>
               </tr>
               <tr>
-                <td className="p-3"><code className="text-blue-600">customerEmail</code></td>
+                <td className="p-3"><code className="text-blue-600">description</code></td>
                 <td className="p-3"><code>string</code></td>
                 <td className="p-3"><Badge variant="outline">Optional</Badge></td>
-                <td className="p-3">Customer email address</td>
+                <td className="p-3">Payment description shown to the customer</td>
+              </tr>
+              <tr>
+                <td className="p-3"><code className="text-blue-600">successUrl</code></td>
+                <td className="p-3"><code>string</code></td>
+                <td className="p-3"><Badge variant="outline">Optional</Badge></td>
+                <td className="p-3">Redirect URL after successful payment</td>
+              </tr>
+              <tr>
+                <td className="p-3"><code className="text-blue-600">failureUrl</code></td>
+                <td className="p-3"><code>string</code></td>
+                <td className="p-3"><Badge variant="outline">Optional</Badge></td>
+                <td className="p-3">Redirect URL after failed payment</td>
+              </tr>
+              <tr>
+                <td className="p-3"><code className="text-blue-600">cancelledUrl</code></td>
+                <td className="p-3"><code>string</code></td>
+                <td className="p-3"><Badge variant="outline">Optional</Badge></td>
+                <td className="p-3">Redirect URL when customer cancels</td>
               </tr>
               <tr>
                 <td className="p-3"><code className="text-blue-600">notifyUrl</code></td>
                 <td className="p-3"><code>string</code></td>
                 <td className="p-3"><Badge variant="outline">Optional</Badge></td>
-                <td className="p-3">Webhook URL for notifications</td>
+                <td className="p-3">Legacy per-request webhook URL (prefer Settings → Webhooks)</td>
+              </tr>
+              <tr>
+                <td className="p-3"><code className="text-blue-600">expiresInHours</code></td>
+                <td className="p-3"><code>number</code></td>
+                <td className="p-3"><Badge variant="outline">Optional</Badge></td>
+                <td className="p-3">Link expiry in hours (default: 24, max: 168)</td>
+              </tr>
+              <tr>
+                <td className="p-3"><code className="text-blue-600">metadata</code></td>
+                <td className="p-3"><code>object</code></td>
+                <td className="p-3"><Badge variant="outline">Optional</Badge></td>
+                <td className="p-3">Custom key-value data returned in all webhook payloads</td>
               </tr>
             </tbody>
           </table>
@@ -776,15 +806,14 @@ function ToolCard({ name, description }: any) {
 function getQuickStartCode(lang: string) {
   const codes = {
     node: `const crypto = require('crypto');
-const fetch = require('node-fetch');
+const fetch = require('node-fetch'); // or use built-in fetch (Node 18+)
 
-// Your credentials
+// Your credentials (from Settings → API Keys)
 const apiKey = 'yp_live_abc123...';
 const apiSecret = 'your-api-secret';
 const merchantId = 'your-merchant-id';
 
-// Generate signature
-// Step 1: Hash the secret with SHA-256 (must match server verification)
+// Step 1: Hash the API secret with SHA-256
 const secretHash = crypto
   .createHash('sha256')
   .update(apiSecret)
@@ -794,18 +823,20 @@ const timestamp = Math.floor(Date.now() / 1000).toString();
 const requestBody = JSON.stringify({
   amount: 250.00,
   reference: 'INV-001',
-  customerEmail: 'customer@example.com',
-  notifyUrl: 'https://your-site.com/webhooks/payment'
+  description: 'Order payment',
+  successUrl: 'https://your-site.com/payment/success',
+  failureUrl: 'https://your-site.com/payment/failure',
+  cancelledUrl: 'https://your-site.com/payment/cancelled',
 });
 
-// Step 2: Sign payload with the hashed secret
+// Step 2: Sign: merchantId + timestamp + body
 const payload = merchantId + timestamp + requestBody;
 const signature = crypto
   .createHmac('sha256', secretHash)
   .update(payload)
   .digest('hex');
 
-// Make request
+// Step 3: Send request
 const response = await fetch('https://your-domain.com/api/payment-links', {
   method: 'POST',
   headers: {
@@ -819,39 +850,45 @@ const response = await fetch('https://your-domain.com/api/payment-links', {
 });
 
 const data = await response.json();
-console.log('Payment URL:', data.data.paymentUrl);`,
+const paymentUrl = data.data.paymentUrl;
+
+// Step 4: Redirect your customer to the payment page
+// res.redirect(paymentUrl);   // Express
+// window.location.href = paymentUrl;  // Browser
+console.log('Payment URL:', paymentUrl);`,
     python: `import hmac
 import hashlib
 import time
 import json
 import requests
 
-# Your credentials
+# Your credentials (from Settings → API Keys)
 api_key = 'yp_live_abc123...'
 api_secret = 'your-api-secret'
 merchant_id = 'your-merchant-id'
 
-# Generate signature
-# Step 1: Hash the secret with SHA-256 (must match server verification)
+# Step 1: Hash the API secret with SHA-256
 secret_hash = hashlib.sha256(api_secret.encode()).hexdigest()
 
 timestamp = str(int(time.time()))
 request_body = json.dumps({
     'amount': 250.00,
     'reference': 'INV-001',
-    'customerEmail': 'customer@example.com',
-    'notifyUrl': 'https://your-site.com/webhooks/payment'
+    'description': 'Order payment',
+    'successUrl': 'https://your-site.com/payment/success',
+    'failureUrl': 'https://your-site.com/payment/failure',
+    'cancelledUrl': 'https://your-site.com/payment/cancelled',
 })
 
-# Step 2: Sign payload with the hashed secret
-payload = f"{merchant_id}{timestamp}{request_body}"
+# Step 2: Sign: merchant_id + timestamp + body
+payload_str = f"{merchant_id}{timestamp}{request_body}"
 signature = hmac.new(
     secret_hash.encode(),
-    payload.encode(),
+    payload_str.encode(),
     hashlib.sha256
 ).hexdigest()
 
-# Make request
+# Step 3: Send request
 response = requests.post(
     'https://your-domain.com/api/payment-links',
     headers={
@@ -861,34 +898,39 @@ response = requests.post(
         'X-Signature': f'sha256={signature}',
         'Content-Type': 'application/json'
     },
-    json=json.loads(request_body)
+    data=request_body
 )
 
 data = response.json()
-print('Payment URL:', data['data']['paymentUrl'])`,
+payment_url = data['data']['paymentUrl']
+
+# Step 4: Redirect your customer
+# return redirect(payment_url)   # Flask / Django
+print('Payment URL:', payment_url)`,
     php: `<?php
-// Your credentials
+// Your credentials (from Settings → API Keys)
 $apiKey = 'yp_live_abc123...';
 $apiSecret = 'your-api-secret';
 $merchantId = 'your-merchant-id';
 
-// Generate signature
-// Step 1: Hash the secret with SHA-256 (must match server verification)
+// Step 1: Hash the API secret with SHA-256
 $secretHash = hash('sha256', $apiSecret);
 
 $timestamp = (string)time();
 $requestBody = json_encode([
     'amount' => 250.00,
     'reference' => 'INV-001',
-    'customerEmail' => 'customer@example.com',
-    'notifyUrl' => 'https://your-site.com/webhooks/payment'
+    'description' => 'Order payment',
+    'successUrl' => 'https://your-site.com/payment/success',
+    'failureUrl' => 'https://your-site.com/payment/failure',
+    'cancelledUrl' => 'https://your-site.com/payment/cancelled',
 ]);
 
-// Step 2: Sign payload with the hashed secret
+// Step 2: Sign: merchantId + timestamp + body
 $payload = $merchantId . $timestamp . $requestBody;
 $signature = hash_hmac('sha256', $payload, $secretHash);
 
-// Make request
+// Step 3: Send request
 $ch = curl_init('https://your-domain.com/api/payment-links');
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
@@ -905,19 +947,28 @@ $response = curl_exec($ch);
 curl_close($ch);
 
 $data = json_decode($response, true);
-echo 'Payment URL: ' . $data['data']['paymentUrl'];`,
-    curl: `curl -X POST https://your-domain.com/api/payment-links \\
+$paymentUrl = $data['data']['paymentUrl'];
+
+// Step 4: Redirect your customer
+header("Location: {$paymentUrl}");
+exit;`,
+    curl: `# Create a payment link
+curl -X POST https://your-domain.com/api/payment-links \\
   -H "Authorization: Bearer yp_live_abc123..." \\
   -H "X-Merchant-ID: your-merchant-id" \\
   -H "X-Timestamp: 1638360000" \\
-  -H "X-Signature: sha256=hmac-signature" \\
+  -H "X-Signature: sha256=<computed-hmac>" \\
   -H "Content-Type: application/json" \\
   -d '{
     "amount": 250.00,
     "reference": "INV-001",
-    "customerEmail": "customer@example.com",
-    "notifyUrl": "https://your-site.com/webhooks/payment"
-  }'`
+    "description": "Order payment",
+    "successUrl": "https://your-site.com/payment/success",
+    "failureUrl": "https://your-site.com/payment/failure",
+    "cancelledUrl": "https://your-site.com/payment/cancelled"
+  }'
+
+# Response contains paymentUrl — redirect your customer to it`
   };
 
   return codes[lang as keyof typeof codes];
@@ -966,43 +1017,62 @@ function getWebhookVerification(lang: string) {
   const codes = {
     node: `const crypto = require('crypto');
 
-function verifyWebhook(req, webhookSecret) {
-  const signature = req.headers['x-yetopayeft-signature'];
+// Webhook secret from Settings → Webhooks (shown once at creation)
+function verifyWebhookSignature(req, webhookSecret) {
+  const signature = req.headers['x-webhook-signature'];
   const payload = JSON.stringify(req.body);
-  
-  const expectedSignature = crypto
+
+  const expected = crypto
     .createHmac('sha256', webhookSecret)
     .update(payload)
     .digest('hex');
-  
-  return \`sha256=\${expectedSignature}\` === signature;
+
+  // Use timing-safe comparison to prevent timing attacks
+  try {
+    return crypto.timingSafeEqual(
+      Buffer.from(signature || ''),
+      Buffer.from(expected)
+    );
+  } catch {
+    return false;
+  }
 }`,
     python: `import hmac
 import hashlib
 import json
 
-def verify_webhook(request, webhook_secret):
-    signature = request.headers.get('X-Yetopayeft-Signature')
-    payload = json.dumps(request.json)
-    
-    expected_signature = hmac.new(
+# Webhook secret from Settings → Webhooks (shown once at creation)
+def verify_webhook_signature(request, webhook_secret):
+    signature = request.headers.get('X-Webhook-Signature', '')
+    payload = request.get_data(as_text=True)
+
+    expected = hmac.new(
         webhook_secret.encode(),
         payload.encode(),
         hashlib.sha256
     ).hexdigest()
-    
-    return f"sha256={expected_signature}" == signature`,
+
+    # Use constant-time comparison
+    return hmac.compare_digest(signature, expected)`,
     php: `<?php
-function verifyWebhook($request, $webhookSecret) {
-    $signature = $request->header('X-Yetopayeft-Signature');
-    $payload = json_encode($request->json());
-    
-    $expectedSignature = hash_hmac('sha256', $payload, $webhookSecret);
-    
-    return "sha256={$expectedSignature}" === $signature;
+// Webhook secret from Settings → Webhooks (shown once at creation)
+function verifyWebhookSignature($payload, $signature, $webhookSecret) {
+    $expected = hash_hmac('sha256', $payload, $webhookSecret);
+
+    // Use hash_equals for timing-safe comparison
+    return hash_equals($expected, $signature);
+}
+
+$signature = $_SERVER['HTTP_X_WEBHOOK_SIGNATURE'] ?? '';
+$payload = file_get_contents('php://input');
+
+if (!verifyWebhookSignature($payload, $signature, WEBHOOK_SECRET)) {
+    http_response_code(401);
+    exit('Invalid signature');
 }`,
-    curl: `# Webhook verification is done server-side
-# See Node.js, Python, or PHP examples`
+    curl: `# Webhook verification is done server-side.
+# See Node.js, Python, or PHP examples above.
+# The X-Webhook-Signature header contains a bare HMAC-SHA256 hex digest.`
   };
 
   return codes[lang as keyof typeof codes];

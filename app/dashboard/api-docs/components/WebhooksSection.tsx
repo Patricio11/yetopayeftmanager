@@ -131,31 +131,23 @@ export function WebhooksSection({ selectedLanguage, onCopy, copiedCode }: Webhoo
               <tbody className="divide-y">
                 <tr className="bg-blue-50">
                   <td className="p-3"><code className="text-blue-700 font-bold">*</code></td>
-                  <td className="p-3"><strong>All Events (Wildcard)</strong> - Receive all current and future events</td>
+                  <td className="p-3"><strong>All Events (Wildcard)</strong> — Receive all current and future events</td>
                 </tr>
                 <tr>
                   <td className="p-3"><code className="text-green-600">payment.completed</code></td>
-                  <td className="p-3">Payment successfully completed</td>
+                  <td className="p-3">EFT payment successfully completed</td>
                 </tr>
                 <tr>
                   <td className="p-3"><code className="text-red-600">payment.failed</code></td>
-                  <td className="p-3">Payment failed or expired</td>
+                  <td className="p-3">Payment failed or the link expired</td>
                 </tr>
                 <tr>
                   <td className="p-3"><code className="text-gray-600">payment.cancelled</code></td>
-                  <td className="p-3">Payment cancelled by customer or system</td>
-                </tr>
-                <tr>
-                  <td className="p-3"><code className="text-yellow-600">payment.pending</code></td>
-                  <td className="p-3">Payment pending verification</td>
+                  <td className="p-3">Payment cancelled or aborted by the customer</td>
                 </tr>
                 <tr>
                   <td className="p-3"><code className="text-blue-600">transaction.created</code></td>
-                  <td className="p-3">New transaction/payment link created</td>
-                </tr>
-                <tr>
-                  <td className="p-3"><code className="text-blue-600">transaction.updated</code></td>
-                  <td className="p-3">Transaction updated (e.g., bank selected)</td>
+                  <td className="p-3">New payment link created via API</td>
                 </tr>
               </tbody>
             </table>
@@ -179,21 +171,24 @@ export function WebhooksSection({ selectedLanguage, onCopy, copiedCode }: Webhoo
           <div className="bg-gray-50 rounded-lg p-4 space-y-2 font-mono text-sm">
             <div className="flex items-start gap-2">
               <span className="text-blue-600 font-semibold">X-Webhook-Signature:</span>
-              <span className="text-gray-700">HMAC-SHA256 signature</span>
+              <span className="text-gray-700">HMAC-SHA256 hex digest (bare, no prefix)</span>
             </div>
             <div className="flex items-start gap-2">
               <span className="text-blue-600 font-semibold">X-Webhook-Timestamp:</span>
-              <span className="text-gray-700">Unix timestamp</span>
+              <span className="text-gray-700">Unix millisecond timestamp</span>
             </div>
             <div className="flex items-start gap-2">
               <span className="text-blue-600 font-semibold">X-Webhook-ID:</span>
-              <span className="text-gray-700">Unique event ID</span>
+              <span className="text-gray-700">Unique event UUID (use for idempotency)</span>
             </div>
             <div className="flex items-start gap-2">
               <span className="text-blue-600 font-semibold">X-Webhook-Event:</span>
-              <span className="text-gray-700">Event type</span>
+              <span className="text-gray-700">Event type (e.g. payment.completed)</span>
             </div>
           </div>
+          <p className="text-xs text-gray-500 mt-2">
+            The signature is computed as <code className="bg-gray-100 px-1 rounded">HMAC-SHA256(webhookSecret, JSON.stringify(payload))</code> and sent as a raw hex string — no <code className="bg-gray-100 px-1 rounded">sha256=</code> prefix.
+          </p>
         </div>
 
         {/* Signature Verification */}
@@ -323,17 +318,14 @@ export function WebhooksSection({ selectedLanguage, onCopy, copiedCode }: Webhoo
 // Helper functions
 function getWebhookPayload() {
   return `{
-  "id": "evt_abc123xyz789",
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   "type": "payment.completed",
   "data": {
-    "id": "txn_def456uvw012",
+    "id": "550e8400-e29b-41d4-a716-446655440000",
     "reference": "ORDER-12345",
     "amount": 100.50,
     "status": "completed",
-    "customerEmail": "customer@example.com",
-    "customerName": "John Doe",
     "bankName": "FNB",
-    "proofOfPaymentUrl": "https://yetopayeft.com/proofs/abc123.pdf",
     "metadata": {
       "orderId": "12345"
     },
@@ -341,7 +333,7 @@ function getWebhookPayload() {
     "completedAt": "2024-12-02T10:05:00Z"
   },
   "timestamp": "2024-12-02T10:05:00Z",
-  "merchantId": "mch_ghi789jkl345"
+  "merchantId": "a7f8c910-2b3d-4e5f-6g7h-8i9j0k1l2m3n"
 }`;
 }
 
