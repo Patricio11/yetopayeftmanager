@@ -6,6 +6,7 @@ import { z } from "zod";
 import crypto from "crypto";
 import { checkRateLimit, getClientIdentifier } from "@/lib/security/rate-limit";
 import { dispatchWebhookEvent } from "@/lib/webhooks/dispatcher";
+import { checkBankHealth } from "@/lib/monitoring/bank-health";
 
 const webhookSchema = z.object({
   transaction_id: z.string().uuid(),
@@ -122,6 +123,9 @@ export async function POST(request: NextRequest) {
       .returning();
 
     console.log(`✅ Transaction updated: ${validatedData.transaction_id} -> ${validatedData.status}`);
+
+    // Fire-and-forget bank health check
+    checkBankHealth(updatedTransaction.eftBankId, validatedData.status).catch(() => {});
 
     // Dispatch to merchant's configured webhook endpoints
     try {

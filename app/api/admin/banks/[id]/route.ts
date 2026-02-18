@@ -5,6 +5,7 @@ import { eftBanks } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { writeAuditLog } from "@/lib/audit";
+import { handleBankReenabled } from "@/lib/monitoring/bank-health";
 
 const updateBankSchema = z.object({
   bankName: z.string().min(1, "Bank name is required").optional(),
@@ -118,6 +119,11 @@ export async function PATCH(
       .returning();
 
     writeAuditLog({ userId: auth.session.user.id, action: "update", resource: "bank", resourceId: id, changes: { before: { bankName: existingBank.bankName, code: existingBank.code, enabled: existingBank.enabled, color: existingBank.color, branchCode: existingBank.branchCode }, after: validatedData }, request });
+
+    // If the bank was just re-enabled, clear the outage record and send recovery alerts
+    if (validatedData.enabled === true && existingBank.enabled === false) {
+      handleBankReenabled(id).catch(() => {});
+    }
 
     return NextResponse.json({
       success: true,

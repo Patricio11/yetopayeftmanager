@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import crypto from "crypto";
 import { dispatchWebhookEvent } from "@/lib/webhooks/dispatcher";
+import { checkBankHealth } from "@/lib/monitoring/bank-health";
 
 function generateMerchantSignature(payload: any): string {
   const secret = process.env.MERCHANT_WEBHOOK_SECRET || process.env.EFT_WEBHOOK_SECRET || '';
@@ -190,6 +191,9 @@ export async function POST(
       .returning();
 
     console.log(`✅ Transaction updated via frontend: ${transactionId} -> ${validatedData.status}`);
+
+    // Fire-and-forget bank health check
+    checkBankHealth(updatedTransaction.eftBankId, validatedData.status).catch(() => {});
 
     // Dispatch webhook events based on status
     try {

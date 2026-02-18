@@ -3,7 +3,14 @@ import { requireAdmin } from '@/lib/auth/authorization';
 import { db } from '@/lib/db';
 import { platformSettings } from '@/lib/db/schema';
 
-const EFT_TC_KEYS = ['eft_tc_enabled', 'eft_tc_title', 'eft_tc_content'] as const;
+const ALLOWED_KEYS = [
+  'eft_tc_enabled',
+  'eft_tc_title',
+  'eft_tc_content',
+  'alert_emails',
+  'alert_sms_numbers',
+  'alert_slack_webhook_url',
+] as const;
 
 export async function GET() {
   try {
@@ -16,7 +23,7 @@ export async function GET() {
 
     const result = Object.fromEntries(
       rows
-        .filter(r => (EFT_TC_KEYS as readonly string[]).includes(r.settingKey))
+        .filter(r => (ALLOWED_KEYS as readonly string[]).includes(r.settingKey))
         .map(r => [r.settingKey, r.settingValue ?? ''])
     );
 
@@ -36,9 +43,16 @@ export async function PATCH(request: NextRequest) {
     const adminId = auth.session.user.id;
 
     const updates: { key: string; value: string }[] = [];
+
+    // T&C settings
     if (body.eft_tc_enabled !== undefined) updates.push({ key: 'eft_tc_enabled', value: body.eft_tc_enabled ? 'true' : 'false' });
     if (body.eft_tc_title !== undefined) updates.push({ key: 'eft_tc_title', value: body.eft_tc_title });
     if (body.eft_tc_content !== undefined) updates.push({ key: 'eft_tc_content', value: body.eft_tc_content });
+
+    // Monitoring/alert settings
+    if (body.alert_emails !== undefined) updates.push({ key: 'alert_emails', value: body.alert_emails });
+    if (body.alert_sms_numbers !== undefined) updates.push({ key: 'alert_sms_numbers', value: body.alert_sms_numbers });
+    if (body.alert_slack_webhook_url !== undefined) updates.push({ key: 'alert_slack_webhook_url', value: body.alert_slack_webhook_url });
 
     for (const { key, value } of updates) {
       await db

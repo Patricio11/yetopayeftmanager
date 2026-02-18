@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { CreditCard, Webhook, ExternalLink, FileText } from "lucide-react";
+import { CreditCard, Webhook, ExternalLink, FileText, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSession } from "@/lib/auth-client";
 import { BankAccountsSettings } from "./BankAccountsSettings";
 import { WebhookSettings } from "./WebhookSettings";
 import { EftUrlSettings } from "./EftUrlSettings";
 import { TermsAndConditionsSettings } from "./TermsAndConditionsSettings";
+import { MonitoringSettings } from "./MonitoringSettings";
 
 const merchantSubTabs = [
   { id: "bank-accounts", label: "Bank Accounts", icon: CreditCard },
@@ -20,9 +21,10 @@ const adminSubTabs = [
   { id: "webhooks", label: "Webhooks", icon: Webhook },
   { id: "eft-urls", label: "EFT URLs", icon: ExternalLink },
   { id: "terms", label: "Terms & Conditions", icon: FileText },
+  { id: "monitoring", label: "Monitoring", icon: Activity },
 ] as const;
 
-type SubTabId = "bank-accounts" | "webhooks" | "eft-urls" | "terms";
+type SubTabId = "bank-accounts" | "webhooks" | "eft-urls" | "terms" | "monitoring";
 
 export function EftSuperTab({ initialSubTab }: { initialSubTab?: string }) {
   const { data: session } = useSession();
@@ -65,6 +67,7 @@ export function EftSuperTab({ initialSubTab }: { initialSubTab?: string }) {
         {activeSubTab === "webhooks" && <WebhookSettings />}
         {activeSubTab === "eft-urls" && <EftUrlSettings />}
         {activeSubTab === "terms" && isAdmin && <TermsAndConditionsSettings />}
+        {activeSubTab === "monitoring" && isAdmin && <MonitoringSettings />}
       </div>
     </div>
   );
