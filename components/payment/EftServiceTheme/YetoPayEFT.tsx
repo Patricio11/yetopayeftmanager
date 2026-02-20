@@ -952,7 +952,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
           if (child.html_options?.disabled === 'disabled') return;
           const childName = child.html_options?.name;
           if (!childName) return;
-          const childVal = formData[childName];
+          const childVal = formData[childName] ?? child.html_options?.value;
           const childErrs = validateInput(child, childVal);
           if (childErrs.length) { newErrors[childName] = childErrs[0]; hasErrors = true; }
         });
@@ -960,7 +960,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
       }
       const name = input.html_options?.name;
       if (!name) return;
-      const val = formData[name];
+      const val = formData[name] ?? input.html_options?.value;
       const errs = validateInput(input, val);
       if (errs.length) { newErrors[name] = errs[0]; hasErrors = true; }
     });
@@ -985,6 +985,17 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
 
     // If we have saved credentials and this is auth step, use actual credentials instead of masked values
     let dataToSend = { ...formData };
+
+    // Include pre-filled values from backend inputs (e.g., Account Number on captcha retry)
+    // These are displayed via html_options.value fallback but not stored in formData
+    (apiResponse.inputs || []).forEach((input) => {
+      if (input.type === 'submit' || input.type === 'tc' || input.type === 'input-group') return;
+      const n = input.html_options?.name;
+      if (n && !(n in dataToSend) && input.html_options?.value) {
+        dataToSend[n] = input.html_options.value;
+      }
+    });
+
     if (savedCredentialsData && isAuth) {
       console.log('Using saved credentials for authentication');
       // Replace masked values with actual saved credentials
