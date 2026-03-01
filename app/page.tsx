@@ -43,12 +43,12 @@ export default function LandingPage() {
           <h1 className="text-5xl md:text-6xl font-bold text-slate-900 dark:text-white mb-6">
             Fast, Secure & Simple
             <span className="block bg-gradient-to-r from-green-600 via-slate-600 to-green-700 bg-clip-text text-transparent">
-              EFT Payment Solutions
+              Pay By Bank Solutions
             </span>
           </h1>
           
           <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-12">
-            Accept instant EFT payments from all major South African banks. Built for merchants who value speed, security, and simplicity.
+            Accept Pay By Bank payments from all major South African banks. Built for merchants who value speed, security, and simplicity.
           </p>
           
           <Link href="/auth/register">
@@ -61,15 +61,15 @@ export default function LandingPage() {
         {/* Core Features Section */}
         <section className="mb-24">
           <h2 className="text-4xl font-bold text-center text-slate-900 dark:text-white mb-12">
-            Everything You Need to Accept EFT Payments
+            Everything You Need to Accept Pay By Bank Payments
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Instant EFT */}
+            {/* Pay By Bank */}
             <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-700 hover:border-green-200 dark:hover:border-green-600">
               <div className="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-xl flex items-center justify-center mb-6">
                 <Zap className="w-8 h-8 text-green-600 dark:text-green-400" />
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">Instant EFT</h3>
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">Pay By Bank</h3>
               <p className="text-slate-600 dark:text-slate-400">
                 Real-time bank transfers with instant confirmation. Payments completed in under 2 minutes.
               </p>
@@ -129,7 +129,7 @@ export default function LandingPage() {
         {/* CTA Section */}
         <div className="bg-gradient-to-r from-green-600 to-slate-600 rounded-3xl p-12 text-center shadow-2xl">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Ready to Accept EFT Payments?
+            Ready to Accept Pay By Bank Payments?
           </h2>
           <p className="text-xl text-green-100 mb-8 max-w-2xl mx-auto">
             Join hundreds of South African merchants already using YETOPAYEFT

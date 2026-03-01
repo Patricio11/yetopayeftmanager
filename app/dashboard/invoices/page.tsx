@@ -120,7 +120,7 @@ export default function MerchantInvoicesPage() {
         <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 bg-clip-text text-transparent">
           My Invoices
         </h1>
-        <p className="text-slate-500 mt-1">View your EFT transaction fee invoices</p>
+        <p className="text-slate-500 mt-1">View your Pay By Bank transaction fee invoices</p>
       </div>
 
       {/* Summary Cards */}

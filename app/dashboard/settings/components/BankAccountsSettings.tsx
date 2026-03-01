@@ -243,7 +243,7 @@ export function BankAccountsSettings() {
                 Bank Accounts
               </CardTitle>
               <CardDescription>
-                Manage your bank accounts for receiving EFT payments
+                Manage your bank accounts for receiving Pay By Bank payments
               </CardDescription>
             </div>
             <Button onClick={openAddDialog}>
@@ -338,7 +338,7 @@ export function BankAccountsSettings() {
           <DialogHeader>
             <DialogTitle>{editingAccount ? "Edit Bank Account" : "Add Bank Account"}</DialogTitle>
             <DialogDescription>
-              {editingAccount ? "Update your bank account details" : "Link a bank account for receiving EFT payments"}
+              {editingAccount ? "Update your bank account details" : "Link a bank account for receiving Pay By Bank payments"}
             </DialogDescription>
           </DialogHeader>
 

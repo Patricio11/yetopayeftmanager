@@ -61,7 +61,7 @@ export function TermsAndConditionsSettings() {
       <div>
         <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1">Terms &amp; Conditions</h3>
         <p className="text-sm text-gray-500 dark:text-slate-400">
-          Configure the EFT Terms &amp; Conditions shown to all customers at payment time.
+          Configure the Pay By Bank Terms &amp; Conditions shown to all customers at payment time.
         </p>
       </div>
 

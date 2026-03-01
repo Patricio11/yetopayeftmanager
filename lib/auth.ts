@@ -5,6 +5,12 @@ import * as schema from "./db/schema";
 import { sendVerificationEmail, sendPasswordResetEmail } from "./email";
 
 export const auth = betterAuth({
+  trustedOrigins: [
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+    "https://www.yetopay.co.za",
+    "https://yetopay.co.za",
+    "https://oneeftmanager.vercel.app",
+  ],
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {

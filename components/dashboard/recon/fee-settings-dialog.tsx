@@ -62,7 +62,7 @@ export function FeeSettingsDialog({ currentFees, onClose, onSaved }: FeeSettings
               <Percent className="w-5 h-5 text-white" />
             </div>
             <div>
-              <CardTitle>Default EFT Fee Settings</CardTitle>
+              <CardTitle>Default Pay By Bank Fee Settings</CardTitle>
               <CardDescription>Set both fixed and percentage rates — each merchant is assigned one</CardDescription>
             </div>
           </div>
@@ -86,7 +86,7 @@ export function FeeSettingsDialog({ currentFees, onClose, onSaved }: FeeSettings
                 className="pl-8"
               />
             </div>
-            <p className="text-xs text-slate-500">Flat rand amount charged per completed EFT transaction</p>
+            <p className="text-xs text-slate-500">Flat rand amount charged per completed Pay By Bank transaction</p>
           </div>
 
           {/* Percentage Fee */}

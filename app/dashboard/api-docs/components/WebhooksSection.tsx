@@ -135,7 +135,7 @@ export function WebhooksSection({ selectedLanguage, onCopy, copiedCode }: Webhoo
                 </tr>
                 <tr>
                   <td className="p-3"><code className="text-green-600">payment.completed</code></td>
-                  <td className="p-3">EFT payment successfully completed</td>
+                  <td className="p-3">Pay By Bank payment successfully completed</td>
                 </tr>
                 <tr>
                   <td className="p-3"><code className="text-red-600">payment.failed</code></td>
@@ -195,7 +195,7 @@ export function WebhooksSection({ selectedLanguage, onCopy, copiedCode }: Webhoo
         <div>
           <h3 className="font-semibold text-lg mb-3">Verifying Webhook Signatures</h3>
           <p className="text-gray-600 mb-4">
-            Always verify webhook signatures to ensure the request came from YETOPAYEFT.
+            Always verify webhook signatures to ensure the request came from YetoPay.
           </p>
           
           {/* SDK Method */}

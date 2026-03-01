@@ -303,7 +303,7 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
             Bank Management
           </h1>
           <p className="text-slate-600 dark:text-slate-400">
-            Manage EFT payment banks and their settings. Drag banks to reorder them.
+            Manage Pay By Bank payment banks and their settings. Drag banks to reorder them.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -566,7 +566,7 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
           <DialogHeader>
             <DialogTitle>Add New Bank</DialogTitle>
             <DialogDescription>
-              Create a new bank for EFT payments
+              Create a new bank for Pay By Bank payments
             </DialogDescription>
           </DialogHeader>
 

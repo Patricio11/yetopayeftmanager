@@ -25,7 +25,7 @@ const createPaymentLinkSchema = z.object({
 
 /**
  * POST /api/payment-links
- * Create a new EFT payment link with secure token
+ * Create a new Pay By Bank payment link with secure token
  * 
  * Supports two authentication methods:
  * 1. Session-based (for dashboard UI)
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Fetch merchant's default EFT URLs and account mode
+    // Fetch merchant's default Pay By Bank URLs and account mode
     const merchant = await db.query.users.findFirst({
       where: eq(users.id, merchantId),
       columns: { eftSettings: true, accountMode: true },

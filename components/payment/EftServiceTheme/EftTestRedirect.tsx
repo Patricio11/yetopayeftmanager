@@ -24,7 +24,7 @@ const EftTestRedirect: React.FC = () => {
             ...(reference && { reference })
           });
 
-          // Redirect to backend endpoint which will create EFT payment link and redirect
+          // Redirect to backend endpoint which will create Pay By Bank payment link and redirect
           const baseUrl = process.env.NEXT_PUBLIC_EFT_SERVICE_URL || 'http://localhost:3001';
           window.location.href = `${baseUrl}/api/v1/eft-test-payment?${params.toString()}`;
         } else {
@@ -46,7 +46,7 @@ const EftTestRedirect: React.FC = () => {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Generating test EFT payment link...</p>
+          <p className="mt-4 text-gray-600">Generating test Pay By Bank payment link...</p>
         </div>
       </div>
     );

@@ -1,6 +1,6 @@
-# YETOPAYEFT - EFT Payment Management System
+# YETOPAYEFT - Pay By Bank Payment Management System
 
-A modern, secure, and fast EFT (Electronic Funds Transfer) payment management system built with Next.js 15, Better Auth, and Drizzle ORM.
+A modern, secure, and fast Pay By Bank payment management system built with Next.js 15, Better Auth, and Drizzle ORM.
 
 ## 🚀 Features
 
@@ -14,7 +14,7 @@ A modern, secure, and fast EFT (Electronic Funds Transfer) payment management sy
 - **Better Auth Integration** - No middleware needed, Vercel-friendly
 
 ### 💳 Payment Features
-- Instant EFT payments from all major South African banks
+- Pay By Bank payments from all major South African banks
 - Secure payment page with 3-step flow
 - **🆕 Bank Credential Tokenization** - Save credentials for faster repeat payments
 - Real-time transaction tracking

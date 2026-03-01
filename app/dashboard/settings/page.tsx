@@ -91,7 +91,7 @@ function SettingsContent() {
           </TabsTrigger>
           <TabsTrigger value="eft" className="flex items-center gap-2">
             <CreditCard className="w-4 h-4" />
-            <span className="hidden sm:inline">EFT</span>
+            <span className="hidden sm:inline">Pay By Bank</span>
           </TabsTrigger>
         </TabsList>
 

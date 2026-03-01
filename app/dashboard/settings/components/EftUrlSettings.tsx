@@ -45,12 +45,12 @@ export function EftUrlSettings() {
       });
       const data = await res.json();
       if (data.success) {
-        toast({ title: "Saved", description: "EFT URL settings updated successfully." });
+        toast({ title: "Saved", description: "Pay By Bank URL settings updated successfully." });
       } else {
         toast({ title: "Error", description: data.error || "Failed to save", variant: "destructive" });
       }
     } catch {
-      toast({ title: "Error", description: "Failed to save EFT settings", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to save Pay By Bank settings", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -93,7 +93,7 @@ export function EftUrlSettings() {
       value: successUrl,
       setter: setSuccessUrl,
       placeholder: "https://your-domain.com/payment/success",
-      description: "Customer is redirected here after a successful EFT payment.",
+      description: "Customer is redirected here after a successful Pay By Bank payment.",
       color: "text-green-600",
     },
     {
@@ -102,7 +102,7 @@ export function EftUrlSettings() {
       value: failureUrl,
       setter: setFailureUrl,
       placeholder: "https://your-domain.com/payment/failed",
-      description: "Customer is redirected here if the EFT payment fails.",
+      description: "Customer is redirected here if the Pay By Bank payment fails.",
       color: "text-red-600",
     },
     {
@@ -111,7 +111,7 @@ export function EftUrlSettings() {
       value: cancelledUrl,
       setter: setCancelledUrl,
       placeholder: "https://your-domain.com/payment/cancelled",
-      description: "Customer is redirected here if they cancel the EFT payment.",
+      description: "Customer is redirected here if they cancel the Pay By Bank payment.",
       color: "text-amber-600",
     },
   ];
@@ -122,10 +122,10 @@ export function EftUrlSettings() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ExternalLink className="w-5 h-5 text-blue-600" />
-            Default EFT URLs
+            Default Pay By Bank URLs
           </CardTitle>
           <CardDescription>
-            Set default callback and redirect URLs for your EFT payment transactions. These are used as fallbacks when URLs are not provided per-transaction via the API.
+            Set default callback and redirect URLs for your Pay By Bank payment transactions. These are used as fallbacks when URLs are not provided per-transaction via the API.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">

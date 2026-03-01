@@ -38,7 +38,7 @@
 //             <h4>Summary</h4>
 //             <p>
 //               Welcome to YetoPay. These Terms & Conditions (“Terms”) govern your use of YetoPay’s
-//               EFT payment experience. By continuing, you confirm you are authorized to initiate the
+//               Pay By Bank payment experience. By continuing, you confirm you are authorized to initiate the
 //               payment, and you consent to electronic communication about the transaction.
 //             </p>
 
@@ -183,7 +183,7 @@ const TermsModal: React.FC<TermsModalProps> = ({
                 <h4>Summary</h4>
                 <p>
                   Welcome to YetoPay. These Terms &amp; Conditions (&quot;Terms&quot;) govern your use of YetoPay&apos;s
-                  EFT payment experience. By continuing, you confirm you are authorized to initiate the
+                  Pay By Bank payment experience. By continuing, you confirm you are authorized to initiate the
                   payment, and you consent to electronic communication about the transaction.
                 </p>
 
