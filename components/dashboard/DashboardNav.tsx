@@ -110,6 +110,7 @@ export function DashboardNav({ userRole, accountMode }: DashboardNavProps) {
   const mainItems: NavItem[] = [
     { title: "Dashboard", href: "/dashboard", icon: Home },
     { title: "Transactions", href: "/dashboard/transactions", icon: Receipt },
+    { title: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
     { title: "Invoices", href: "/dashboard/invoices", icon: FileText },
   ];
 

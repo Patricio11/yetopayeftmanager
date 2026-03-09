@@ -39,6 +39,7 @@ export const eftTransactions = pgTable("eft_transactions", {
     enum: ["not_started", "initiated", "pending", "completed", "failed", "aborted", "cancelled", "expired"]
   }).default("not_started"),
   statusReason: text("status_reason"), // Reason for status change (admin updates)
+  failureReason: text("failure_reason"), // Why a transaction failed (set by EFT service or webhook)
   updatedBy: text("updated_by").references(() => users.id), // Who last updated the status
 
   // Customer info (optional)

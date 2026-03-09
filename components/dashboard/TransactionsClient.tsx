@@ -58,6 +58,7 @@ type Transaction = {
     customerName: string | null;
     description: string | null;
     statusReason: string | null;
+    failureReason: string | null;
     updatedBy: string | null;
     notifyUrl: string | null;
     successUrl: string | null;
@@ -166,20 +167,50 @@ export function TransactionsClient({
   };
 
   const handleExportCSV = () => {
-    const headers = ["Date", "Reference", "Bank", "Amount", "Status", "Customer", "Email", isAdmin ? "Merchant" : ""].filter(Boolean);
+    // Helper to escape CSV fields containing commas or quotes
+    const esc = (v: string) => {
+      if (v.includes(",") || v.includes('"') || v.includes("\n")) {
+        return `"${v.replace(/"/g, '""')}"`;
+      }
+      return v;
+    };
+
+    // Derive failure reason from multiple sources
+    const getFailureReason = (t: Transaction["transaction"]): string => {
+      if (t.failureReason) return t.failureReason;
+      if (t.statusReason) return t.statusReason;
+      // Try metadata for legacy transactions
+      const meta = t.metadata as Record<string, any> | null;
+      if (meta?.failure_reason) return meta.failure_reason;
+      if (meta?.completion_message) return meta.completion_message;
+      if (meta?.error) return typeof meta.error === "string" ? meta.error : JSON.stringify(meta.error);
+      const failedStatuses = ["failed", "cancelled", "aborted", "expired"];
+      if (failedStatuses.includes(t.status || "")) return t.status || "Unknown";
+      return "-";
+    };
+
+    const headers = [
+      "Date", "Completed At", "Reference", "Bank", "Amount", "Status",
+      "Failure Reason", "Customer", "Email", "Description",
+      ...(isAdmin ? ["Merchant"] : []),
+    ];
+
     const rows = sortedTransactions.map((t) => [
-      format(new Date(t.transaction.createdAt), "yyyy-MM-dd HH:mm:ss"),
-      t.transaction.reference,
-      t.bank?.bankName || "-",
+      esc(format(new Date(t.transaction.createdAt), "yyyy-MM-dd HH:mm:ss")),
+      esc(t.transaction.completedAt ? format(new Date(t.transaction.completedAt), "yyyy-MM-dd HH:mm:ss") : "-"),
+      esc(t.transaction.reference),
+      esc(t.bank?.bankName || "-"),
       `R ${parseFloat(t.transaction.amount).toFixed(2)}`,
-      t.transaction.status,
-      t.transaction.customerName || "-",
-      t.transaction.customerEmail || "-",
-      isAdmin ? (t.merchant?.companyName || t.merchant?.name || "-") : "",
-    ].filter(Boolean));
+      esc(t.transaction.status || "-"),
+      esc(getFailureReason(t.transaction)),
+      esc(t.transaction.customerName || "-"),
+      esc(t.transaction.customerEmail || "-"),
+      esc(t.transaction.description || "-"),
+      ...(isAdmin ? [esc(t.merchant?.companyName || t.merchant?.name || "-")] : []),
+    ]);
 
     const csv = [headers, ...rows].map((row) => row.join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" }); // BOM for Excel
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
