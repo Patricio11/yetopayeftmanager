@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireMerchant } from "@/lib/auth/authorization";
+import { authenticateMerchant } from "@/lib/auth/merchant-auth";
 import { db } from "@/lib/db";
 import { eftBanks } from "@/lib/db/schema";
 import { eq, asc } from "drizzle-orm";
 
 /**
  * GET /api/merchant/banks
- * List available banks for dropdown selection (enabled banks only)
+ * List available banks for dropdown selection (enabled banks only).
+ * Supports both session and API key authentication.
  */
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const auth = await requireMerchant();
-    if (!auth.authorized) return auth.response;
+    const auth = await authenticateMerchant(request, 'banks.read');
+    if (!auth.success) return auth.response;
 
     const banks = await db
       .select({

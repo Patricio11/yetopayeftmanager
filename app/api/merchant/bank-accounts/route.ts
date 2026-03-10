@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireMerchant } from "@/lib/auth/authorization";
+import { authenticateMerchant } from "@/lib/auth/merchant-auth";
 import { db } from "@/lib/db";
 import { eftBankAccounts, eftBanks } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
@@ -18,10 +18,10 @@ const createBankAccountSchema = z.object({
  * GET /api/merchant/bank-accounts
  * List merchant's bank accounts with joined bank info
  */
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const auth = await requireMerchant();
-    if (!auth.authorized) return auth.response;
+    const auth = await authenticateMerchant(request, 'bank_accounts.read');
+    if (!auth.success) return auth.response;
 
     const accounts = await db
       .select({
@@ -43,7 +43,7 @@ export async function GET(_request: NextRequest) {
       })
       .from(eftBankAccounts)
       .leftJoin(eftBanks, eq(eftBankAccounts.eftBanksId, eftBanks.id))
-      .where(eq(eftBankAccounts.merchantId, auth.session.user.id))
+      .where(eq(eftBankAccounts.merchantId, auth.merchantId))
       .orderBy(desc(eftBankAccounts.createdAt));
 
     return NextResponse.json({ success: true, data: { accounts } });
@@ -62,10 +62,10 @@ export async function GET(_request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireMerchant();
-    if (!auth.authorized) return auth.response;
+    const auth = await authenticateMerchant(request, 'bank_accounts.write');
+    if (!auth.success) return auth.response;
 
-    const merchantId = auth.session.user.id;
+    const merchantId = auth.merchantId;
     const body = await request.json();
     const validated = createBankAccountSchema.parse(body);
 

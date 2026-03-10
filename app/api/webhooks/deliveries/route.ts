@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireMerchant } from "@/lib/auth/authorization";
+import { authenticateMerchant } from "@/lib/auth/merchant-auth";
 import { db } from "@/lib/db";
 import { webhookConfigurations, webhookDeliveries } from "@/lib/db/schema/team";
 import { eq, and, desc } from "drizzle-orm";
@@ -9,10 +9,10 @@ import { eq, and, desc } from "drizzle-orm";
  */
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireMerchant();
-    if (!auth.authorized) return auth.response;
+    const auth = await authenticateMerchant(request, 'webhooks.read');
+    if (!auth.success) return auth.response;
 
-    const merchantId = auth.session.user.id;
+    const merchantId = auth.merchantId;
     const { searchParams } = new URL(request.url);
     const webhookId = searchParams.get('webhookId');
     const limit = parseInt(searchParams.get('limit') || '50');

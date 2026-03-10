@@ -462,12 +462,73 @@ function AuthenticationSection({ selectedLanguage, onCopy, copiedCode }: any) {
 // Endpoints Section
 function EndpointsSection({ selectedLanguage, onCopy, copiedCode }: any) {
   const [selectedEndpoint, setSelectedEndpoint] = useState("create-payment");
+  const [expandedGroup, setExpandedGroup] = useState("payments");
 
-  const endpoints = [
-    { id: "create-payment", method: "POST", path: "/api/payment-links", label: "Create Payment Link" },
-    { id: "list-payments", method: "GET", path: "/api/payment-links", label: "List Payment Links" },
-    { id: "list-transactions", method: "GET", path: "/api/merchant/transactions", label: "List Transactions" },
+  const endpointGroups = [
+    {
+      id: "payments",
+      label: "Payment Links",
+      endpoints: [
+        { id: "create-payment", method: "POST", path: "/api/payment-links", label: "Create Payment Link", permission: "payment_links.create" },
+        { id: "list-payments", method: "GET", path: "/api/payment-links", label: "List Payment Links", permission: "payment_links.read" },
+      ],
+    },
+    {
+      id: "transactions",
+      label: "Transactions",
+      endpoints: [
+        { id: "list-transactions", method: "GET", path: "/api/merchant/transactions", label: "List Transactions", permission: "transactions.read" },
+      ],
+    },
+    {
+      id: "analytics",
+      label: "Analytics",
+      endpoints: [
+        { id: "get-analytics", method: "GET", path: "/api/merchant/analytics", label: "Get Analytics", permission: "analytics.read" },
+      ],
+    },
+    {
+      id: "banking",
+      label: "Bank Accounts",
+      endpoints: [
+        { id: "list-banks", method: "GET", path: "/api/merchant/banks", label: "List Available Banks", permission: "banks.read" },
+        { id: "list-bank-accounts", method: "GET", path: "/api/merchant/bank-accounts", label: "List Bank Accounts", permission: "bank_accounts.read" },
+        { id: "create-bank-account", method: "POST", path: "/api/merchant/bank-accounts", label: "Add Bank Account", permission: "bank_accounts.write" },
+      ],
+    },
+    {
+      id: "settings",
+      label: "Settings",
+      endpoints: [
+        { id: "get-settings", method: "GET", path: "/api/merchant/settings", label: "Get Settings", permission: "settings.read" },
+        { id: "update-settings", method: "PATCH", path: "/api/merchant/settings", label: "Update Settings", permission: "settings.write" },
+      ],
+    },
+    {
+      id: "invoices",
+      label: "Invoices",
+      endpoints: [
+        { id: "list-invoices", method: "GET", path: "/api/merchant/invoices", label: "List Invoices", permission: "invoices.read" },
+      ],
+    },
+    {
+      id: "webhooks",
+      label: "Webhooks",
+      endpoints: [
+        { id: "list-webhooks", method: "GET", path: "/api/webhooks", label: "List Webhooks", permission: "webhooks.read" },
+        { id: "create-webhook", method: "POST", path: "/api/webhooks", label: "Create Webhook", permission: "webhooks.write" },
+        { id: "update-webhook", method: "PATCH", path: "/api/webhooks", label: "Update Webhook", permission: "webhooks.write" },
+        { id: "delete-webhook", method: "DELETE", path: "/api/webhooks?id={id}", label: "Delete Webhook", permission: "webhooks.write" },
+      ],
+    },
   ];
+
+  const methodColors: Record<string, string> = {
+    GET: "bg-blue-600 text-white",
+    POST: "bg-green-600 text-white",
+    PATCH: "bg-amber-600 text-white",
+    DELETE: "bg-red-600 text-white",
+  };
 
   return (
     <Card>
@@ -478,157 +539,460 @@ function EndpointsSection({ selectedLanguage, onCopy, copiedCode }: any) {
           </div>
           <div>
             <CardTitle>API Endpoints</CardTitle>
-            <CardDescription>Complete reference for all available endpoints</CardDescription>
+            <CardDescription>Complete reference for all available server-to-server endpoints</CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Endpoint Selector */}
-        <div className="space-y-2">
-          {endpoints.map((endpoint) => (
-            <button
-              key={endpoint.id}
-              onClick={() => setSelectedEndpoint(endpoint.id)}
-              className={`w-full flex items-center gap-3 p-3 rounded-lg border transition-all ${
-                selectedEndpoint === endpoint.id
-                  ? "border-green-500 bg-green-50"
-                  : "border-gray-200 hover:border-gray-300"
-              }`}
-            >
-              <Badge variant={endpoint.method === "POST" ? "default" : "outline"} className={
-                endpoint.method === "POST" ? "bg-green-600" : "bg-blue-600 text-white"
-              }>
-                {endpoint.method}
-              </Badge>
-              <code className="text-sm flex-1 text-left">{endpoint.path}</code>
-              <span className="text-sm text-gray-600">{endpoint.label}</span>
-            </button>
+        {/* Endpoint Groups */}
+        <div className="space-y-3">
+          {endpointGroups.map((group) => (
+            <div key={group.id} className="border rounded-lg overflow-hidden">
+              <button
+                onClick={() => setExpandedGroup(expandedGroup === group.id ? "" : group.id)}
+                className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                <span className="font-semibold text-sm">{group.label}</span>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-xs">{group.endpoints.length} endpoint{group.endpoints.length > 1 ? 's' : ''}</Badge>
+                  <ChevronRight className={`w-4 h-4 transition-transform ${expandedGroup === group.id ? 'rotate-90' : ''}`} />
+                </div>
+              </button>
+              {expandedGroup === group.id && (
+                <div className="divide-y">
+                  {group.endpoints.map((endpoint) => (
+                    <button
+                      key={endpoint.id}
+                      onClick={() => setSelectedEndpoint(endpoint.id)}
+                      className={`w-full flex items-center gap-3 p-3 transition-all ${
+                        selectedEndpoint === endpoint.id
+                          ? "bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500"
+                          : "hover:bg-gray-50 dark:hover:bg-gray-800 border-l-4 border-transparent"
+                      }`}
+                    >
+                      <Badge className={`${methodColors[endpoint.method]} text-xs font-mono min-w-[60px]`}>
+                        {endpoint.method}
+                      </Badge>
+                      <code className="text-xs flex-1 text-left text-gray-700 dark:text-gray-300">{endpoint.path}</code>
+                      <span className="text-xs text-gray-500 hidden md:inline">{endpoint.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
         </div>
 
         {/* Endpoint Details */}
-        {selectedEndpoint === "create-payment" && (
-          <EndpointDetail
-            method="POST"
-            path="/api/payment-links"
-            title="Create Payment Link"
-            description="Create a new payment link for your customer"
-            language={selectedLanguage}
-            onCopy={onCopy}
-            copiedCode={copiedCode}
-          />
-        )}
+        <EndpointDetailFull
+          endpointId={selectedEndpoint}
+          language={selectedLanguage}
+          onCopy={onCopy}
+          copiedCode={copiedCode}
+        />
       </CardContent>
     </Card>
   );
 }
 
-// Endpoint Detail Component
-function EndpointDetail({ method, path, title, description, language, onCopy, copiedCode }: any) {
+// Full endpoint details with documentation for all endpoints
+function EndpointDetailFull({ endpointId, language, onCopy, copiedCode }: any) {
+  const details: Record<string, { title: string; description: string; params?: any[]; queryParams?: any[]; bodyParams?: any[]; responseExample: string; curlExample: string }> = {
+    "create-payment": {
+      title: "Create Payment Link",
+      description: "Create a new payment link. Returns a URL to redirect your customer to.",
+      bodyParams: [
+        { name: "amount", type: "number", required: true, desc: "Payment amount in ZAR (min: 1)" },
+        { name: "reference", type: "string", required: true, desc: "Your unique internal reference" },
+        { name: "description", type: "string", required: false, desc: "Payment description shown to customer" },
+        { name: "customerName", type: "string", required: false, desc: "Customer's name" },
+        { name: "customerEmail", type: "string", required: false, desc: "Customer's email" },
+        { name: "successUrl", type: "string", required: false, desc: "Redirect URL after successful payment" },
+        { name: "failureUrl", type: "string", required: false, desc: "Redirect URL after failed payment" },
+        { name: "cancelledUrl", type: "string", required: false, desc: "Redirect URL when customer cancels" },
+        { name: "notifyUrl", type: "string", required: false, desc: "Per-request webhook URL (prefer Settings > Webhooks)" },
+        { name: "expiresInHours", type: "number", required: false, desc: "Link expiry in hours (default: 24, max: 168)" },
+        { name: "metadata", type: "object", required: false, desc: "Custom key-value data returned in webhooks" },
+      ],
+      responseExample: `{
+  "success": true,
+  "data": {
+    "transactionId": "550e8400-e29b-41d4-a716-446655440000",
+    "paymentUrl": "https://yetopay.co.za/pay/abc123...",
+    "token": "abc123...",
+    "reference": "INV-001",
+    "amount": 250.00,
+    "expiresAt": "2024-12-02T15:00:00Z",
+    "status": "not_started",
+    "createdAt": "2024-12-01T15:00:00Z"
+  }
+}`,
+      curlExample: `curl -X POST /api/payment-links \\
+  -H "Authorization: Bearer yp_live_..." \\
+  -H "X-Merchant-ID: <merchant-id>" \\
+  -H "X-Timestamp: <unix-timestamp>" \\
+  -H "X-Signature: sha256=<hmac>" \\
+  -H "Content-Type: application/json" \\
+  -d '{"amount":250,"reference":"INV-001","description":"Order #123"}'`,
+    },
+    "list-payments": {
+      title: "List Payment Links",
+      description: "Retrieve your payment links with optional filtering and pagination.",
+      queryParams: [
+        { name: "limit", type: "number", required: false, desc: "Results per page (default: 50, max: 100)" },
+        { name: "offset", type: "number", required: false, desc: "Skip first N results" },
+        { name: "status", type: "string", required: false, desc: "Filter by status: not_started, initiated, completed, failed, cancelled, aborted, expired" },
+        { name: "from", type: "string", required: false, desc: "ISO date — only show links created after this date" },
+      ],
+      responseExample: `{
+  "success": true,
+  "data": [
+    {
+      "id": "...",
+      "amount": 250.00,
+      "reference": "INV-001",
+      "status": "completed",
+      "createdAt": "2024-12-01T15:00:00Z"
+    }
+  ],
+  "pagination": { "limit": 50, "offset": 0, "total": 120, "hasMore": true }
+}`,
+      curlExample: `curl -G /api/payment-links \\
+  -d "limit=20&status=completed" \\
+  -H "Authorization: Bearer yp_live_..." \\
+  -H "X-Merchant-ID: <merchant-id>" \\
+  -H "X-Timestamp: <unix-timestamp>" \\
+  -H "X-Signature: sha256=<hmac>"`,
+    },
+    "list-transactions": {
+      title: "List Transactions",
+      description: "Get a paginated list of your transactions with optional filters.",
+      queryParams: [
+        { name: "limit", type: "number", required: false, desc: "Results per page (default: 50, max: 100)" },
+        { name: "offset", type: "number", required: false, desc: "Skip first N results" },
+        { name: "status", type: "string", required: false, desc: "Filter by status" },
+        { name: "from", type: "string", required: false, desc: "ISO date start" },
+        { name: "to", type: "string", required: false, desc: "ISO date end" },
+      ],
+      responseExample: `{
+  "success": true,
+  "data": [ { "id": "...", "amount": "250.00", "status": "completed", ... } ],
+  "pagination": { "total": 85, "limit": 50, "offset": 0, "hasMore": true }
+}`,
+      curlExample: `curl -G /api/merchant/transactions \\
+  -d "status=completed&from=2024-01-01&limit=20" \\
+  -H "Authorization: Bearer yp_live_..." \\
+  -H "X-Merchant-ID: <merchant-id>" \\
+  -H "X-Timestamp: <ts>" -H "X-Signature: sha256=<hmac>"`,
+    },
+    "get-analytics": {
+      title: "Get Analytics",
+      description: "Comprehensive analytics: KPIs, daily/hourly breakdown, bank performance, failure reasons, and all-time stats.",
+      queryParams: [
+        { name: "from", type: "string", required: false, desc: "ISO date start (default: 30 days ago)" },
+        { name: "to", type: "string", required: false, desc: "ISO date end (default: today)" },
+      ],
+      responseExample: `{
+  "success": true,
+  "data": {
+    "period": { "from": "...", "to": "..." },
+    "kpis": {
+      "revenue": 125000, "revenueGrowth": 12.5,
+      "transactionCount": 340, "successRate": 94.2,
+      "avgTransactionValue": 367.65, ...
+    },
+    "allTime": { "totalTransactions": 1200, "totalRevenue": 450000, ... },
+    "dailyBreakdown": [ { "date": "2024-12-01", "completed": 15, "failed": 1, "revenue": 5500 } ],
+    "bankPerformance": [ { "bankName": "FNB", "successRate": 96.5, ... } ],
+    "topFailureReasons": [ { "reason": "Timeout", "count": 5 } ]
+  }
+}`,
+      curlExample: `curl -G /api/merchant/analytics \\
+  -d "from=2024-11-01&to=2024-11-30" \\
+  -H "Authorization: Bearer yp_live_..." \\
+  -H "X-Merchant-ID: <merchant-id>" \\
+  -H "X-Timestamp: <ts>" -H "X-Signature: sha256=<hmac>"`,
+    },
+    "list-banks": {
+      title: "List Available Banks",
+      description: "Get the list of enabled banks that customers can pay with.",
+      responseExample: `{
+  "success": true,
+  "data": {
+    "banks": [
+      { "id": "...", "bankName": "FNB", "code": "fnb", "color": "#009933", "branchCode": "250655" },
+      { "id": "...", "bankName": "ABSA", "code": "absa", "color": "#AF1F2D", "branchCode": "632005" }
+    ]
+  }
+}`,
+      curlExample: `curl /api/merchant/banks \\
+  -H "Authorization: Bearer yp_live_..." \\
+  -H "X-Merchant-ID: <merchant-id>" \\
+  -H "X-Timestamp: <ts>" -H "X-Signature: sha256=<hmac>"`,
+    },
+    "list-bank-accounts": {
+      title: "List Bank Accounts",
+      description: "Get your configured bank accounts for receiving payments.",
+      responseExample: `{
+  "success": true,
+  "data": {
+    "accounts": [
+      {
+        "id": "...", "accountNumber": "62...", "accountHolderName": "My Company",
+        "accountType": "cheque", "bankName": "FNB", "isPrimary": true, "isVerified": true
+      }
+    ]
+  }
+}`,
+      curlExample: `curl /api/merchant/bank-accounts \\
+  -H "Authorization: Bearer yp_live_..." \\
+  -H "X-Merchant-ID: <merchant-id>" \\
+  -H "X-Timestamp: <ts>" -H "X-Signature: sha256=<hmac>"`,
+    },
+    "create-bank-account": {
+      title: "Add Bank Account",
+      description: "Add a new bank account for receiving payments.",
+      bodyParams: [
+        { name: "eftBanksId", type: "string", required: true, desc: "Bank UUID from /api/merchant/banks" },
+        { name: "accountNumber", type: "string", required: true, desc: "Bank account number" },
+        { name: "accountHolderName", type: "string", required: true, desc: "Account holder name" },
+        { name: "accountName", type: "string", required: false, desc: "Friendly label for the account" },
+        { name: "accountType", type: "string", required: false, desc: "savings, cheque, transmission, bond, investment (default: cheque)" },
+        { name: "isPrimary", type: "boolean", required: false, desc: "Set as primary account (default: false)" },
+      ],
+      responseExample: `{
+  "success": true,
+  "message": "Bank account created successfully",
+  "data": { "account": { "id": "...", "accountNumber": "62...", "bankName": "FNB", ... } }
+}`,
+      curlExample: `curl -X POST /api/merchant/bank-accounts \\
+  -H "Authorization: Bearer yp_live_..." \\
+  -H "X-Merchant-ID: <merchant-id>" \\
+  -H "X-Timestamp: <ts>" -H "X-Signature: sha256=<hmac>" \\
+  -H "Content-Type: application/json" \\
+  -d '{"eftBanksId":"<bank-uuid>","accountNumber":"62123456789","accountHolderName":"My Company"}'`,
+    },
+    "get-settings": {
+      title: "Get Settings",
+      description: "Retrieve your merchant profile, company info, banking, notification, and URL settings.",
+      responseExample: `{
+  "success": true,
+  "data": {
+    "profile": { "name": "John", "email": "john@co.za", "phone": "..." },
+    "company": { "companyName": "ACME", "address": { ... } },
+    "banking": { "bankAccount": { "account_holder": "...", ... } },
+    "notifications": { "notificationPreferences": { "payment_completed": true, ... } },
+    "eftSettings": { "notifyUrl": "", "successUrl": "", "failureUrl": "", "cancelledUrl": "" }
+  }
+}`,
+      curlExample: `curl /api/merchant/settings \\
+  -H "Authorization: Bearer yp_live_..." \\
+  -H "X-Merchant-ID: <merchant-id>" \\
+  -H "X-Timestamp: <ts>" -H "X-Signature: sha256=<hmac>"`,
+    },
+    "update-settings": {
+      title: "Update Settings",
+      description: "Update your merchant profile, company, banking, notification, or URL settings. Only include fields you want to change.",
+      bodyParams: [
+        { name: "name", type: "string", required: false, desc: "Display name" },
+        { name: "companyName", type: "string", required: false, desc: "Company name" },
+        { name: "phone", type: "string", required: false, desc: "Phone number" },
+        { name: "eftSettings", type: "object", required: false, desc: "Default URLs: { notifyUrl, successUrl, failureUrl, cancelledUrl }" },
+        { name: "notificationPreferences", type: "object", required: false, desc: "Notification toggles" },
+      ],
+      responseExample: `{
+  "success": true,
+  "message": "Settings updated successfully",
+  "data": { "name": "John", "companyName": "ACME", ... }
+}`,
+      curlExample: `curl -X PATCH /api/merchant/settings \\
+  -H "Authorization: Bearer yp_live_..." \\
+  -H "X-Merchant-ID: <merchant-id>" \\
+  -H "X-Timestamp: <ts>" -H "X-Signature: sha256=<hmac>" \\
+  -H "Content-Type: application/json" \\
+  -d '{"companyName":"New Name","eftSettings":{"successUrl":"https://example.com/success"}}'`,
+    },
+    "list-invoices": {
+      title: "List Invoices",
+      description: "Retrieve your transaction fee invoices with pagination.",
+      queryParams: [
+        { name: "page", type: "number", required: false, desc: "Page number (default: 1)" },
+        { name: "limit", type: "number", required: false, desc: "Results per page (default: 20)" },
+        { name: "status", type: "string", required: false, desc: "Filter: all, pending, paid, overdue" },
+      ],
+      responseExample: `{
+  "success": true,
+  "data": [ { "id": "...", "invoiceNumber": "INV-2024-001", "totalAmount": "150.00", "status": "paid", ... } ],
+  "pagination": { "page": 1, "limit": 20, "total": 5, "totalPages": 1 }
+}`,
+      curlExample: `curl -G /api/merchant/invoices \\
+  -d "status=paid&page=1" \\
+  -H "Authorization: Bearer yp_live_..." \\
+  -H "X-Merchant-ID: <merchant-id>" \\
+  -H "X-Timestamp: <ts>" -H "X-Signature: sha256=<hmac>"`,
+    },
+    "list-webhooks": {
+      title: "List Webhooks",
+      description: "Get all your webhook configurations.",
+      responseExample: `{
+  "success": true,
+  "data": {
+    "webhooks": [
+      { "id": "...", "url": "https://example.com/webhook", "events": ["payment.completed"], "isActive": true }
+    ],
+    "count": 1
+  }
+}`,
+      curlExample: `curl /api/webhooks \\
+  -H "Authorization: Bearer yp_live_..." \\
+  -H "X-Merchant-ID: <merchant-id>" \\
+  -H "X-Timestamp: <ts>" -H "X-Signature: sha256=<hmac>"`,
+    },
+    "create-webhook": {
+      title: "Create Webhook",
+      description: "Register a new webhook endpoint. The secret is returned only once on creation.",
+      bodyParams: [
+        { name: "url", type: "string", required: true, desc: "Your HTTPS webhook endpoint URL" },
+        { name: "events", type: "string[]", required: true, desc: "Events: payment.completed, payment.failed, payment.cancelled, payment.pending, transaction.created, transaction.updated" },
+        { name: "isActive", type: "boolean", required: false, desc: "Enable/disable (default: true)" },
+      ],
+      responseExample: `{
+  "success": true,
+  "data": {
+    "webhook": {
+      "id": "...", "url": "https://example.com/webhook",
+      "secret": "abc123...full-secret-shown-only-once",
+      "events": ["payment.completed","payment.failed"],
+      "isActive": true
+    }
+  }
+}`,
+      curlExample: `curl -X POST /api/webhooks \\
+  -H "Authorization: Bearer yp_live_..." \\
+  -H "X-Merchant-ID: <merchant-id>" \\
+  -H "X-Timestamp: <ts>" -H "X-Signature: sha256=<hmac>" \\
+  -H "Content-Type: application/json" \\
+  -d '{"url":"https://example.com/webhook","events":["payment.completed","payment.failed"]}'`,
+    },
+    "update-webhook": {
+      title: "Update Webhook",
+      description: "Update an existing webhook configuration.",
+      bodyParams: [
+        { name: "webhookId", type: "string", required: true, desc: "Webhook UUID to update" },
+        { name: "url", type: "string", required: false, desc: "New webhook URL" },
+        { name: "events", type: "string[]", required: false, desc: "Updated events list" },
+        { name: "isActive", type: "boolean", required: false, desc: "Enable or disable" },
+      ],
+      responseExample: `{
+  "success": true,
+  "message": "Webhook updated successfully",
+  "data": { "webhook": { "id": "...", "url": "...", "events": [...], "isActive": true } }
+}`,
+      curlExample: `curl -X PATCH /api/webhooks \\
+  -H "Authorization: Bearer yp_live_..." \\
+  -H "X-Merchant-ID: <merchant-id>" \\
+  -H "X-Timestamp: <ts>" -H "X-Signature: sha256=<hmac>" \\
+  -H "Content-Type: application/json" \\
+  -d '{"webhookId":"<id>","isActive":false}'`,
+    },
+    "delete-webhook": {
+      title: "Delete Webhook",
+      description: "Remove a webhook configuration permanently.",
+      queryParams: [
+        { name: "id", type: "string", required: true, desc: "Webhook UUID to delete" },
+      ],
+      responseExample: `{ "success": true, "message": "Webhook deleted successfully" }`,
+      curlExample: `curl -X DELETE "/api/webhooks?id=<webhook-id>" \\
+  -H "Authorization: Bearer yp_live_..." \\
+  -H "X-Merchant-ID: <merchant-id>" \\
+  -H "X-Timestamp: <ts>" -H "X-Signature: sha256=<hmac>"`,
+    },
+  };
+
+  const detail = details[endpointId];
+  if (!detail) return null;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 border-t pt-6">
       <div>
-        <h3 className="font-semibold text-lg mb-2">{title}</h3>
-        <p className="text-gray-600">{description}</p>
+        <h3 className="font-semibold text-lg mb-1">{detail.title}</h3>
+        <p className="text-gray-600 text-sm">{detail.description}</p>
       </div>
 
-      {/* Request */}
-      <div>
-        <h4 className="font-semibold mb-3">Request</h4>
-        <CodeBlock
-          language={language}
-          code={getEndpointCode(language, "request")}
-          onCopy={() => onCopy(getEndpointCode(language, "request"), "Request code")}
-          copied={copiedCode === "Request code"}
-        />
-      </div>
-
-      {/* Parameters */}
-      <div>
-        <h4 className="font-semibold mb-3">Parameters</h4>
-        <div className="border rounded-lg overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="text-left p-3 font-semibold">Parameter</th>
-                <th className="text-left p-3 font-semibold">Type</th>
-                <th className="text-left p-3 font-semibold">Required</th>
-                <th className="text-left p-3 font-semibold">Description</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              <tr>
-                <td className="p-3"><code className="text-blue-600">amount</code></td>
-                <td className="p-3"><code>number</code></td>
-                <td className="p-3"><Badge variant="outline" className="bg-red-50 text-red-700">Required</Badge></td>
-                <td className="p-3">Payment amount in ZAR</td>
-              </tr>
-              <tr>
-                <td className="p-3"><code className="text-blue-600">reference</code></td>
-                <td className="p-3"><code>string</code></td>
-                <td className="p-3"><Badge variant="outline" className="bg-red-50 text-red-700">Required</Badge></td>
-                <td className="p-3">Your internal reference</td>
-              </tr>
-              <tr>
-                <td className="p-3"><code className="text-blue-600">description</code></td>
-                <td className="p-3"><code>string</code></td>
-                <td className="p-3"><Badge variant="outline">Optional</Badge></td>
-                <td className="p-3">Payment description shown to the customer</td>
-              </tr>
-              <tr>
-                <td className="p-3"><code className="text-blue-600">successUrl</code></td>
-                <td className="p-3"><code>string</code></td>
-                <td className="p-3"><Badge variant="outline">Optional</Badge></td>
-                <td className="p-3">Redirect URL after successful payment</td>
-              </tr>
-              <tr>
-                <td className="p-3"><code className="text-blue-600">failureUrl</code></td>
-                <td className="p-3"><code>string</code></td>
-                <td className="p-3"><Badge variant="outline">Optional</Badge></td>
-                <td className="p-3">Redirect URL after failed payment</td>
-              </tr>
-              <tr>
-                <td className="p-3"><code className="text-blue-600">cancelledUrl</code></td>
-                <td className="p-3"><code>string</code></td>
-                <td className="p-3"><Badge variant="outline">Optional</Badge></td>
-                <td className="p-3">Redirect URL when customer cancels</td>
-              </tr>
-              <tr>
-                <td className="p-3"><code className="text-blue-600">notifyUrl</code></td>
-                <td className="p-3"><code>string</code></td>
-                <td className="p-3"><Badge variant="outline">Optional</Badge></td>
-                <td className="p-3">Legacy per-request webhook URL (prefer Settings → Webhooks)</td>
-              </tr>
-              <tr>
-                <td className="p-3"><code className="text-blue-600">expiresInHours</code></td>
-                <td className="p-3"><code>number</code></td>
-                <td className="p-3"><Badge variant="outline">Optional</Badge></td>
-                <td className="p-3">Link expiry in hours (default: 24, max: 168)</td>
-              </tr>
-              <tr>
-                <td className="p-3"><code className="text-blue-600">metadata</code></td>
-                <td className="p-3"><code>object</code></td>
-                <td className="p-3"><Badge variant="outline">Optional</Badge></td>
-                <td className="p-3">Custom key-value data returned in all webhook payloads</td>
-              </tr>
-            </tbody>
-          </table>
+      {/* Query Parameters */}
+      {detail.queryParams && detail.queryParams.length > 0 && (
+        <div>
+          <h4 className="font-semibold mb-3 text-sm">Query Parameters</h4>
+          <ParamTable params={detail.queryParams} />
         </div>
+      )}
+
+      {/* Body Parameters */}
+      {detail.bodyParams && detail.bodyParams.length > 0 && (
+        <div>
+          <h4 className="font-semibold mb-3 text-sm">Request Body</h4>
+          <ParamTable params={detail.bodyParams} />
+        </div>
+      )}
+
+      {/* cURL Example */}
+      <div>
+        <h4 className="font-semibold mb-3 text-sm">Example Request</h4>
+        <CodeBlock
+          language="curl"
+          code={detail.curlExample}
+          onCopy={() => onCopy(detail.curlExample, `${endpointId}-curl`)}
+          copied={copiedCode === `${endpointId}-curl`}
+        />
       </div>
 
       {/* Response */}
       <div>
-        <h4 className="font-semibold mb-3">Response</h4>
+        <h4 className="font-semibold mb-3 text-sm">Response</h4>
         <CodeBlock
           language="json"
-          code={getEndpointCode(language, "response")}
-          onCopy={() => onCopy(getEndpointCode(language, "response"), "Response code")}
-          copied={copiedCode === "Response code"}
+          code={detail.responseExample}
+          onCopy={() => onCopy(detail.responseExample, `${endpointId}-response`)}
+          copied={copiedCode === `${endpointId}-response`}
         />
       </div>
     </div>
   );
 }
+
+function ParamTable({ params }: { params: any[] }) {
+  return (
+    <div className="border rounded-lg overflow-hidden">
+      <table className="w-full text-sm">
+        <thead className="bg-gray-50 dark:bg-gray-800">
+          <tr>
+            <th className="text-left p-2.5 font-semibold text-xs">Parameter</th>
+            <th className="text-left p-2.5 font-semibold text-xs">Type</th>
+            <th className="text-left p-2.5 font-semibold text-xs">Required</th>
+            <th className="text-left p-2.5 font-semibold text-xs">Description</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y">
+          {params.map((p: any) => (
+            <tr key={p.name}>
+              <td className="p-2.5"><code className="text-blue-600 text-xs">{p.name}</code></td>
+              <td className="p-2.5"><code className="text-xs">{p.type}</code></td>
+              <td className="p-2.5">
+                {p.required
+                  ? <Badge variant="outline" className="bg-red-50 text-red-700 text-xs">Required</Badge>
+                  : <Badge variant="outline" className="text-xs">Optional</Badge>
+                }
+              </td>
+              <td className="p-2.5 text-xs text-gray-600">{p.desc}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// Old EndpointDetail removed - replaced by EndpointDetailFull above
 
 // Old WebhooksSection removed - now using WebhooksSectionComponent from components folder
 

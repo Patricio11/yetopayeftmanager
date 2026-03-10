@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireMerchant } from "@/lib/auth/authorization";
+import { authenticateMerchant } from "@/lib/auth/merchant-auth";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -57,12 +57,12 @@ const updateSettingsSchema = z.object({
  * Fetch current merchant settings (profile, company, banking, notifications)
  */
 export async function GET(request: NextRequest) {
-  const auth = await requireMerchant();
-  if (!auth.authorized) return auth.response;
+  const auth = await authenticateMerchant(request, 'settings.read');
+  if (!auth.success) return auth.response;
 
   try {
     const user = await db.query.users.findFirst({
-      where: eq(users.id, auth.session.user.id),
+      where: eq(users.id, auth.merchantId),
     });
 
     if (!user) {
@@ -122,8 +122,8 @@ export async function GET(request: NextRequest) {
  * Update merchant settings (profile, company, banking, notifications)
  */
 export async function PATCH(request: NextRequest) {
-  const auth = await requireMerchant();
-  if (!auth.authorized) return auth.response;
+  const auth = await authenticateMerchant(request, 'settings.write');
+  if (!auth.success) return auth.response;
 
   try {
     const body = await request.json();
@@ -132,7 +132,7 @@ export async function PATCH(request: NextRequest) {
     // Build the update object from only provided fields
     const updateData: Record<string, any> = {
       updatedAt: new Date(),
-      updatedBy: auth.session.user.id,
+      updatedBy: auth.merchantId,
     };
 
     // Profile fields
@@ -155,7 +155,7 @@ export async function PATCH(request: NextRequest) {
     // EFT Settings
     if (validated.eftSettings !== undefined) {
       const currentUser = await db.query.users.findFirst({
-        where: eq(users.id, auth.session.user.id),
+        where: eq(users.id, auth.merchantId),
         columns: { eftSettings: true },
       });
       const currentEft = (currentUser?.eftSettings as any) || {};
@@ -170,7 +170,7 @@ export async function PATCH(request: NextRequest) {
     // Company metadata (registrationNumber, vatNumber, website stored in metadata JSONB)
     if (validated.registrationNumber !== undefined || validated.vatNumber !== undefined || validated.website !== undefined) {
       const currentUser = await db.query.users.findFirst({
-        where: eq(users.id, auth.session.user.id),
+        where: eq(users.id, auth.merchantId),
       });
       const currentMetadata = (currentUser?.metadata as any) || {};
       updateData.metadata = {
@@ -184,7 +184,7 @@ export async function PATCH(request: NextRequest) {
     const [updated] = await db
       .update(users)
       .set(updateData)
-      .where(eq(users.id, auth.session.user.id))
+      .where(eq(users.id, auth.merchantId))
       .returning();
 
     return NextResponse.json({

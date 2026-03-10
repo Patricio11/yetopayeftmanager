@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireMerchant } from '@/lib/auth/authorization';
+import { authenticateMerchant } from '@/lib/auth/merchant-auth';
 import { db } from '@/lib/db';
 import { eftTransactions } from '@/lib/db/schema';
 import { eq, and, desc, gte, lte } from 'drizzle-orm';
@@ -15,12 +15,12 @@ const querySchema = z.object({
 
 /**
  * GET /api/merchant/transactions
- * List merchant's own transactions
- * Admin can see all, merchant sees only own
+ * List merchant's own transactions.
+ * Supports both session and API key authentication.
  */
 export async function GET(request: NextRequest) {
-  const auth = await requireMerchant();
-  if (!auth.authorized) return auth.response;
+  const auth = await authenticateMerchant(request, 'transactions.read');
+  if (!auth.success) return auth.response;
 
   try {
     const { searchParams } = request.nextUrl;
@@ -35,10 +35,8 @@ export async function GET(request: NextRequest) {
     // Build where conditions
     const conditions = [];
 
-    // Merchant sees only own transactions, admin sees all
-    if (auth.authorized && (auth.session.user.role || 'merchant') !== 'admin') {
-      conditions.push(eq(eftTransactions.merchantId, auth.session.user.id));
-    }
+    // Scope to merchant's own transactions
+    conditions.push(eq(eftTransactions.merchantId, auth.merchantId));
 
     // Filter by status
     if (query.status) {

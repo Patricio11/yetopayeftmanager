@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireMerchant } from "@/lib/auth/authorization";
+import { authenticateMerchant } from "@/lib/auth/merchant-auth";
 import { db } from "@/lib/db";
 import { eftInvoices, eftInvoiceItems } from "@/lib/db/schema";
 import { eq, and, desc, count } from "drizzle-orm";
 
 // GET /api/merchant/invoices — merchant views their own invoices
+// Supports both session and API key authentication.
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireMerchant();
-    if (!auth.authorized) return auth.response;
+    const auth = await authenticateMerchant(request, 'invoices.read');
+    if (!auth.success) return auth.response;
 
     const url = new URL(request.url);
     const status = url.searchParams.get("status");
@@ -16,7 +17,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(url.searchParams.get("limit") || "20");
     const offset = (page - 1) * limit;
 
-    const conditions = [eq(eftInvoices.merchantId, auth.session.user.id)];
+    const conditions = [eq(eftInvoices.merchantId, auth.merchantId)];
     if (status && status !== "all") {
       conditions.push(eq(eftInvoices.status, status as any));
     }

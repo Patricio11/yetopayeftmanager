@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth-server";
-import { authenticateApiRequest, requirePermission } from "@/lib/auth/api-middleware";
+import { authenticateMerchant } from "@/lib/auth/merchant-auth";
 import { db } from "@/lib/db";
 import { eftTransactions, paymentTokens, users } from "@/lib/db/schema";
 import { generatePaymentToken } from "@/lib/security/payment-token";
@@ -38,44 +37,10 @@ export async function POST(request: NextRequest) {
   if (rateLimitResponse) return rateLimitResponse;
 
   try {
-    let merchantId: string;
-    
-    // Try API key authentication first
-    const authHeader = request.headers.get('authorization');
-    
-    if (authHeader && authHeader.startsWith('Bearer yp_')) {
-      // API key authentication
-      const apiAuth = await authenticateApiRequest(request);
-      
-      if (!apiAuth.authenticated) {
-        return apiAuth.response!;
-      }
-      
-      // Check permission
-      const permCheck = requirePermission(
-        apiAuth.permissions!,
-        'payment_links.create'
-      );
-      
-      if (!permCheck.authorized) {
-        return permCheck.response!;
-      }
-      
-      merchantId = apiAuth.merchantId!;
-      
-    } else {
-      // Session-based authentication (dashboard)
-      const session = await getSession();
-      
-      if (!session) {
-        return NextResponse.json(
-          { error: "Unauthorized", message: "Please sign in to create payment links" },
-          { status: 401 }
-        );
-      }
-      
-      merchantId = session.user.id;
-    }
+    // Authenticate via API key or session
+    const auth = await authenticateMerchant(request, 'payment_links.create');
+    if (!auth.success) return auth.response;
+    const merchantId = auth.merchantId;
 
     // Parse and validate request body
     const body = await request.json();
@@ -216,19 +181,13 @@ export async function POST(request: NextRequest) {
 
 /**
  * GET /api/payment-links
- * List payment links for authenticated merchant
+ * List payment links for authenticated merchant.
+ * Supports both session and API key authentication.
  */
 export async function GET(request: NextRequest) {
   try {
-    // Check authentication
-    const session = await getSession();
-    
-    if (!session) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
+    const auth = await authenticateMerchant(request, 'payment_links.read');
+    if (!auth.success) return auth.response;
 
     // Get query parameters
     const searchParams = request.nextUrl.searchParams;
@@ -238,7 +197,7 @@ export async function GET(request: NextRequest) {
     const fromDate = searchParams.get("from"); // Optional date filter
 
     // Build where clause
-    let whereClause = eq(eftTransactions.merchantId, session.user.id);
+    let whereClause = eq(eftTransactions.merchantId, auth.merchantId);
     
     if (status) {
       whereClause = and(
@@ -266,7 +225,7 @@ export async function GET(request: NextRequest) {
     const countResult = await db
       .select({ count: eftTransactions.id })
       .from(eftTransactions)
-      .where(eq(eftTransactions.merchantId, session.user.id));
+      .where(eq(eftTransactions.merchantId, auth.merchantId));
     const total = countResult.length;
 
     return NextResponse.json({

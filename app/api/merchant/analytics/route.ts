@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth-server";
+import { authenticateMerchant } from "@/lib/auth/merchant-auth";
 import { db } from "@/lib/db";
 import { eftTransactions, eftBanks } from "@/lib/db/schema";
 import { eq, and, gte, lte, sql, count, sum } from "drizzle-orm";
@@ -7,18 +7,17 @@ import { eq, and, gte, lte, sql, count, sum } from "drizzle-orm";
 /**
  * GET /api/merchant/analytics
  * Returns comprehensive analytics data for the merchant dashboard.
+ * Supports both session and API key authentication.
  *
  * Query params:
  *   from - ISO date (start of period)
  *   to   - ISO date (end of period)
  */
 export async function GET(req: NextRequest) {
-  const session = await getSession();
-  if (!session) {
-    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await authenticateMerchant(req, 'analytics.read');
+  if (!auth.success) return auth.response;
 
-  const merchantId = session.user.id;
+  const merchantId = auth.merchantId;
   const url = new URL(req.url);
 
   // Parse date range (default: last 30 days)

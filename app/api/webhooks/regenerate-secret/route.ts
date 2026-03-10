@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireMerchant } from "@/lib/auth/authorization";
+import { authenticateMerchant } from "@/lib/auth/merchant-auth";
 import { db } from "@/lib/db";
 import { webhookConfigurations } from "@/lib/db/schema/team";
 import { eq, and } from "drizzle-orm";
@@ -11,10 +11,10 @@ import { encryptString } from "@/lib/security/credential-encryption";
  */
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireMerchant();
-    if (!auth.authorized) return auth.response;
+    const auth = await authenticateMerchant(request, 'webhooks.write');
+    if (!auth.success) return auth.response;
 
-    const merchantId = auth.session.user.id;
+    const merchantId = auth.merchantId;
     const body = await request.json();
     const { webhookId } = body;
 

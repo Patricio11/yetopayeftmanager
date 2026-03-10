@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireMerchant } from "@/lib/auth/authorization";
+import { authenticateMerchant } from "@/lib/auth/merchant-auth";
 import { db } from "@/lib/db";
 import { webhookConfigurations } from "@/lib/db/schema/team";
 import { eq, and } from "drizzle-orm";
@@ -9,13 +9,14 @@ import { encryptString } from "@/lib/security/credential-encryption";
 
 /**
  * GET - List all webhook configurations for the merchant
+ * Supports both session and API key authentication.
  */
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireMerchant();
-    if (!auth.authorized) return auth.response;
+    const auth = await authenticateMerchant(request, 'webhooks.read');
+    if (!auth.success) return auth.response;
 
-    const merchantId = auth.session.user.id;
+    const merchantId = auth.merchantId;
 
     // Fetch webhook configurations
     const webhooks = await db
@@ -47,13 +48,14 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST - Create a new webhook configuration
+ * Supports both session and API key authentication.
  */
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireMerchant();
-    if (!auth.authorized) return auth.response;
+    const auth = await authenticateMerchant(request, 'webhooks.write');
+    if (!auth.success) return auth.response;
 
-    const merchantId = auth.session.user.id;
+    const merchantId = auth.merchantId;
     const body = await request.json();
 
     // Validate input
@@ -145,13 +147,14 @@ export async function POST(request: NextRequest) {
 
 /**
  * PATCH - Update webhook configuration
+ * Supports both session and API key authentication.
  */
 export async function PATCH(request: NextRequest) {
   try {
-    const auth = await requireMerchant();
-    if (!auth.authorized) return auth.response;
+    const auth = await authenticateMerchant(request, 'webhooks.write');
+    if (!auth.success) return auth.response;
 
-    const merchantId = auth.session.user.id;
+    const merchantId = auth.merchantId;
     const body = await request.json();
 
     const { webhookId, url, events, isActive } = body;
@@ -261,13 +264,14 @@ export async function PATCH(request: NextRequest) {
 
 /**
  * DELETE - Delete webhook configuration
+ * Supports both session and API key authentication.
  */
 export async function DELETE(request: NextRequest) {
   try {
-    const auth = await requireMerchant();
-    if (!auth.authorized) return auth.response;
+    const auth = await authenticateMerchant(request, 'webhooks.write');
+    if (!auth.success) return auth.response;
 
-    const merchantId = auth.session.user.id;
+    const merchantId = auth.merchantId;
     const { searchParams } = new URL(request.url);
     const webhookId = searchParams.get('id');
 
