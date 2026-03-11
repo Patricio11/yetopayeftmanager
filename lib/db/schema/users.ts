@@ -13,9 +13,12 @@ export const users = pgTable("user", {
   // YETOPAYEFT specific fields
   fullName: text("full_name"),
   phone: text("phone"),
-  role: text("role", { enum: ["merchant", "admin"] }).default("merchant"),
+  role: text("role", { enum: ["merchant", "admin", "partner"] }).default("merchant"),
   companyName: text("company_name"),
   companyLogoUrl: text("company_logo_url"),
+
+  // Partner relationship (merchants linked to a partner)
+  partnerId: text("partner_id"),
   
   // Address
   address: jsonb("address").$type<{

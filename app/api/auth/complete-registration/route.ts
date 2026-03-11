@@ -9,6 +9,7 @@ const registrationSchema = z.object({
   fullName: z.string().max(255).optional(),
   phone: z.string().max(20).optional(),
   companyName: z.string().max(255).optional(),
+  website: z.string().url().max(255).optional().or(z.literal("")),
 });
 
 /**
@@ -23,7 +24,7 @@ const registrationSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userId, fullName, phone, companyName } = registrationSchema.parse(body);
+    const { userId, fullName, phone, companyName, website } = registrationSchema.parse(body);
 
     // Only allow updates on unverified users (just registered)
     const [user] = await db
@@ -50,6 +51,7 @@ export async function POST(request: NextRequest) {
     if (fullName !== undefined) updateData.fullName = fullName;
     if (phone !== undefined) updateData.phone = phone;
     if (companyName !== undefined) updateData.companyName = companyName;
+    if (website) updateData.metadata = { website };
 
     await db
       .update(users)

@@ -103,7 +103,8 @@ const updateMerchantSchema = z.object({
   companyLogoUrl: z.string().url().optional().nullable(),
   isActive: z.boolean().optional(),
   kycStatus: z.enum(['pending', 'approved', 'rejected']).optional(),
-  role: z.enum(['merchant', 'admin']).optional(),
+  role: z.enum(['merchant', 'admin', 'partner']).optional(),
+  partnerId: z.string().nullable().optional(),
   accountMode: z.enum(['demo', 'live']).optional(),
   eftSettings: z.object({
     fnbVerifyResult: z.boolean().optional(),

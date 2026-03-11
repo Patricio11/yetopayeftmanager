@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Mail, Lock, Eye, EyeOff, User, Building, ArrowRight, AlertCircle, CheckCircle, Phone } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, User, Building, ArrowRight, AlertCircle, CheckCircle, Phone, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,6 +17,7 @@ export default function RegisterPage() {
     email: '',
     phone: '',
     companyName: '',
+    website: '',
     password: '',
     confirmPassword: '',
     agreeToTerms: false,
@@ -52,6 +53,10 @@ export default function RegisterPage() {
 
     if (!formData.companyName.trim()) {
       newErrors.companyName = 'Company name is required';
+    }
+
+    if (formData.website.trim() && !/^https?:\/\/[a-zA-Z0-9][-a-zA-Z0-9.]*\.[a-zA-Z]{2,}(\/.*)?$/.test(formData.website.trim())) {
+      newErrors.website = 'Please enter a valid URL (e.g. https://example.com)';
     }
 
     if (!formData.password) {
@@ -106,6 +111,7 @@ export default function RegisterPage() {
               fullName: formData.fullName,
               phone: formData.phone,
               companyName: formData.companyName,
+              website: formData.website.trim() || undefined,
             }),
           });
         } catch {
@@ -315,6 +321,33 @@ export default function RegisterPage() {
                   </p>
                 )}
               </div>
+            </div>
+
+            {/* Website */}
+            <div>
+              <Label htmlFor="website" className="text-slate-700 dark:text-slate-300">
+                Website <span className="text-slate-400 font-normal">(optional)</span>
+              </Label>
+              <div className="relative mt-2">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Globe className="w-5 h-5 text-slate-400" />
+                </div>
+                <Input
+                  type="url"
+                  id="website"
+                  value={formData.website}
+                  onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                  className={`pl-10 ${errors.website ? 'border-red-300 dark:border-red-600' : ''}`}
+                  placeholder="https://yourcompany.com"
+                  disabled={isLoading}
+                />
+              </div>
+              {errors.website && (
+                <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center">
+                  <AlertCircle className="w-4 h-4 mr-1" />
+                  {errors.website}
+                </p>
+              )}
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">

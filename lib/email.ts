@@ -182,3 +182,130 @@ export async function sendBankRecoveryEmail(
 
   await transporter.sendMail({ from, to: recipients.join(", "), subject, html });
 }
+
+// ─── Partner Email Templates ─────────────────────────────────────────────────
+
+export async function sendPartnerInvitationEmail(email: string, invitationLink: string) {
+  await transporter.sendMail({
+    from,
+    to: email,
+    subject: "You've been invited to join Yetopay as a Partner",
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(to right, #7c3aed, #6d28d9); padding: 32px; text-align: center;">
+          <h1 style="color: white; margin: 0;">Yetopay</h1>
+          <p style="color: #ddd6fe; margin: 8px 0 0;">Partner Invitation</p>
+        </div>
+        <div style="padding: 32px; background: #ffffff;">
+          <h2 style="color: #1f2937;">You're invited to become a Partner</h2>
+          <p style="color: #4b5563; line-height: 1.6;">
+            You've been invited to join Yetopay as a partner. As a partner, you'll be able to
+            manage merchants, view transactions across your merchant network, and earn commissions.
+          </p>
+          <div style="text-align: center; margin: 32px 0;">
+            <a href="${invitationLink}" style="background-color: #7c3aed; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+              Accept Invitation
+            </a>
+          </div>
+          <p style="color: #9ca3af; font-size: 14px;">
+            This invitation link will expire in 7 days. If you didn't expect this email, you can safely ignore it.
+          </p>
+        </div>
+        <div style="padding: 16px; text-align: center; color: #9ca3af; font-size: 12px;">
+          &copy; ${new Date().getFullYear()} Yetopay. All rights reserved.
+        </div>
+      </div>
+    `,
+  });
+}
+
+export async function sendMerchantInvitedByPartnerEmail(
+  email: string,
+  invitationLink: string,
+  partnerCompanyName: string
+) {
+  await transporter.sendMail({
+    from,
+    to: email,
+    subject: `You've been invited to join Yetopay by ${partnerCompanyName}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(to right, #16a34a, #059669); padding: 32px; text-align: center;">
+          <h1 style="color: white; margin: 0;">Yetopay</h1>
+          <p style="color: #bbf7d0; margin: 8px 0 0;">Merchant Invitation</p>
+        </div>
+        <div style="padding: 32px; background: #ffffff;">
+          <h2 style="color: #1f2937;">You're invited by ${partnerCompanyName}</h2>
+          <p style="color: #4b5563; line-height: 1.6;">
+            <strong>${partnerCompanyName}</strong> has invited you to join Yetopay as a merchant.
+            Accept the invitation to set up your account and start accepting EFT payments.
+          </p>
+          <div style="text-align: center; margin: 32px 0;">
+            <a href="${invitationLink}" style="background-color: #16a34a; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+              Accept Invitation
+            </a>
+          </div>
+          <p style="color: #9ca3af; font-size: 14px;">
+            This invitation link will expire in 7 days. If you didn't expect this email, you can safely ignore it.
+          </p>
+        </div>
+        <div style="padding: 16px; text-align: center; color: #9ca3af; font-size: 12px;">
+          &copy; ${new Date().getFullYear()} Yetopay. All rights reserved.
+        </div>
+      </div>
+    `,
+  });
+}
+
+export async function sendPartnerActionNotificationEmail(
+  recipients: string[],
+  partnerName: string,
+  action: string,
+  details: Record<string, string>
+) {
+  const detailRows = Object.entries(details)
+    .map(([key, value], i) => `
+      <tr style="background: ${i % 2 === 0 ? '#f9fafb' : '#ffffff'};">
+        <td style="padding: 10px 16px; color: #6b7280; font-size: 14px;">${key}</td>
+        <td style="padding: 10px 16px; color: #111827; font-weight: 600;">${value}</td>
+      </tr>
+    `).join('');
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background: linear-gradient(to right, #d97706, #b45309); padding: 32px; text-align: center;">
+        <h1 style="color: white; margin: 0;">Yetopay</h1>
+        <p style="color: #fef3c7; margin: 8px 0 0;">Partner Action Alert</p>
+      </div>
+      <div style="padding: 32px; background: #ffffff;">
+        <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+          <h2 style="color: #d97706; margin: 0 0 8px;">Partner Action: ${action}</h2>
+          <p style="color: #92400e; margin: 0;">By: <strong>${partnerName}</strong></p>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin: 24px 0;">
+          ${detailRows}
+          <tr style="background: #f9fafb;">
+            <td style="padding: 10px 16px; color: #6b7280; font-size: 14px;">Timestamp</td>
+            <td style="padding: 10px 16px; color: #111827; font-weight: 600;">${new Date().toUTCString()}</td>
+          </tr>
+        </table>
+        <div style="text-align: center; margin: 32px 0;">
+          <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/admin/partners"
+            style="background-color: #d97706; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+            View Partners Dashboard
+          </a>
+        </div>
+      </div>
+      <div style="padding: 16px; text-align: center; color: #9ca3af; font-size: 12px;">
+        &copy; ${new Date().getFullYear()} Yetopay. Automated partner activity notification.
+      </div>
+    </div>
+  `;
+
+  await transporter.sendMail({
+    from,
+    to: recipients.join(", "),
+    subject: `Partner Action: ${partnerName} — ${action}`,
+    html,
+  });
+}

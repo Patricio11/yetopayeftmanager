@@ -55,7 +55,7 @@ export async function requireAuth() {
 /**
  * Require specific role - redirect if user doesn't have required role
  */
-export async function requireRole(role: "admin" | "merchant"): Promise<ExtendedSession> {
+export async function requireRole(role: "admin" | "merchant" | "partner"): Promise<ExtendedSession> {
   const session = await requireAuth();
   
   const userRole = session.user.role || "merchant";

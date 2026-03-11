@@ -24,12 +24,11 @@ const nextConfig: NextConfig = {
           { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
         ],
       },
-      // Payment page - allow iframe embedding by merchants
+      // Payment page - shared headers only (iframe policy set by middleware dynamically)
       {
         source: "/pay/:token*",
         headers: [
           ...sharedHeaders,
-          { key: "Content-Security-Policy", value: "frame-ancestors *" },
         ],
       },
     ];

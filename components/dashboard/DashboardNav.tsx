@@ -95,6 +95,7 @@ export function DashboardNav({ userRole, accountMode }: DashboardNavProps) {
   const pathname = usePathname();
   const router = useRouter();
   const isAdmin = userRole === "admin";
+  const isPartner = userRole === "partner";
 
   const handleLogout = async () => {
     try {
@@ -120,9 +121,22 @@ export function DashboardNav({ userRole, accountMode }: DashboardNavProps) {
     icon: ShieldCheck,
     items: [
       { title: "Merchants", href: "/dashboard/admin/merchants", icon: Store },
+      { title: "Partners", href: "/dashboard/admin/partners", icon: Users },
       { title: "Users", href: "/dashboard/admin/users", icon: Users },
       { title: "Banks", href: "/dashboard/banks", icon: Building2 },
       { title: "Recon", href: "/dashboard/admin/recon", icon: BarChart3 },
+    ],
+  };
+
+  // Partner dropdown group
+  const partnerGroup: NavGroup = {
+    label: "Partner",
+    icon: Building2,
+    items: [
+      { title: "Merchants", href: "/dashboard/partner/merchants", icon: Store },
+      { title: "Transactions", href: "/dashboard/partner/transactions", icon: Receipt },
+      { title: "Analytics", href: "/dashboard/partner/analytics", icon: BarChart3 },
+      { title: "Invoices", href: "/dashboard/partner/invoices", icon: FileText },
     ],
   };
 
@@ -183,6 +197,9 @@ export function DashboardNav({ userRole, accountMode }: DashboardNavProps) {
                 </Link>
               );
             })}
+
+            {/* Partner dropdown (partner only) */}
+            {isPartner && <NavDropdown group={partnerGroup} pathname={pathname} />}
 
             {/* Admin dropdown (admin only) */}
             {isAdmin && <NavDropdown group={adminGroup} pathname={pathname} />}

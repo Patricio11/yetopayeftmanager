@@ -6,46 +6,46 @@ import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import crypto from 'crypto';
 import { writeAuditLog } from '@/lib/audit';
+import { sendPartnerInvitationEmail } from '@/lib/email';
 
-const createMerchantSchema = z.object({
+const createPartnerSchema = z.object({
   email: z.string().email(),
   name: z.string().min(1),
   companyName: z.string().min(1),
   companyLogoUrl: z.string().url().optional(),
-  partnerId: z.string().optional(), // Assign merchant to a partner
 });
 
 /**
- * GET /api/admin/merchants
- * List all merchants (admin only)
+ * GET /api/admin/partners
+ * List all partners (admin only)
  */
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin();
   if (!auth.authorized) return auth.response;
 
   try {
-    const merchants = await db
+    const partners = await db
       .select()
       .from(users)
-      .where(eq(users.role, 'merchant'));
+      .where(eq(users.role, 'partner'));
 
     return NextResponse.json({
       success: true,
-      data: merchants,
-      count: merchants.length,
+      data: partners,
+      count: partners.length,
     });
   } catch (error: any) {
-    console.error('Error fetching merchants:', error);
+    console.error('Error fetching partners:', error);
     return NextResponse.json(
-      { error: 'Internal server error', message: 'Failed to fetch merchants' },
+      { error: 'Internal server error', message: 'Failed to fetch partners' },
       { status: 500 }
     );
   }
 }
 
 /**
- * POST /api/admin/merchants
- * Create a new merchant (admin only)
+ * POST /api/admin/partners
+ * Create a new partner via invitation (admin only)
  */
 export async function POST(request: NextRequest) {
   const auth = await requireAdmin();
@@ -53,20 +53,19 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const validatedData = createMerchantSchema.parse(body);
+    const validatedData = createPartnerSchema.parse(body);
 
-    const merchantId = crypto.randomUUID();
+    const partnerId = crypto.randomUUID();
 
-    const [merchant] = await db
+    const [partner] = await db
       .insert(users)
       .values({
-        id: merchantId,
+        id: partnerId,
         email: validatedData.email,
         name: validatedData.name,
-        role: 'merchant',
+        role: 'partner',
         companyName: validatedData.companyName,
         companyLogoUrl: validatedData.companyLogoUrl,
-        partnerId: validatedData.partnerId || null,
         emailVerified: false,
         isActive: false, // Inactive until they accept the invitation
         createdAt: new Date(),
@@ -74,7 +73,7 @@ export async function POST(request: NextRequest) {
       })
       .returning();
 
-    // Generate a secure invitation token (48 bytes = 64 chars hex)
+    // Generate a secure invitation token (48 bytes = 96 chars hex)
     const invitationToken = crypto.randomBytes(48).toString('hex');
     const invitationExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
@@ -88,22 +87,27 @@ export async function POST(request: NextRequest) {
     });
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    const invitationLink = `${appUrl}/auth/accept-invitation?token=${invitationToken}&email=${encodeURIComponent(validatedData.email)}`;
+    const invitationLink = `${appUrl}/auth/accept-invitation?token=${invitationToken}&email=${encodeURIComponent(validatedData.email)}&role=partner`;
 
-    writeAuditLog({ userId: auth.session.user.id, action: "create", resource: "merchant", resourceId: merchantId, changes: { after: { email: validatedData.email, name: validatedData.name, companyName: validatedData.companyName } }, request });
+    // Send invitation email (fire-and-forget)
+    sendPartnerInvitationEmail(validatedData.email, invitationLink).catch((err) =>
+      console.error('Failed to send partner invitation email:', err)
+    );
+
+    writeAuditLog({ userId: auth.session.user.id, action: "create", resource: "partner", resourceId: partnerId, changes: { after: { email: validatedData.email, name: validatedData.name, companyName: validatedData.companyName } }, request });
 
     return NextResponse.json({
       success: true,
-      message: 'Merchant created successfully. Send the invitation link to the merchant.',
-      data: merchant,
+      message: 'Partner created successfully. Send the invitation link to the partner.',
+      data: partner,
       invitation: {
         link: invitationLink,
         expiresAt: invitationExpiry.toISOString(),
-        note: 'Send this link to the merchant so they can set up their password and activate their account.',
+        note: 'Send this link to the partner so they can set up their password and activate their account.',
       },
     }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating merchant:', error);
+    console.error('Error creating partner:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -113,7 +117,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: 'Internal server error', message: 'Failed to create merchant' },
+      { error: 'Internal server error', message: 'Failed to create partner' },
       { status: 500 }
     );
   }

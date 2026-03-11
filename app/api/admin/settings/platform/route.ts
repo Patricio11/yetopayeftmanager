@@ -10,6 +10,7 @@ const ALLOWED_KEYS = [
   'alert_emails',
   'alert_sms_numbers',
   'alert_slack_webhook_url',
+  'allowed_iframe_domains',
 ] as const;
 
 export async function GET() {
@@ -53,6 +54,9 @@ export async function PATCH(request: NextRequest) {
     if (body.alert_emails !== undefined) updates.push({ key: 'alert_emails', value: body.alert_emails });
     if (body.alert_sms_numbers !== undefined) updates.push({ key: 'alert_sms_numbers', value: body.alert_sms_numbers });
     if (body.alert_slack_webhook_url !== undefined) updates.push({ key: 'alert_slack_webhook_url', value: body.alert_slack_webhook_url });
+
+    // Iframe domain whitelist (comma-separated domains for payment page embedding)
+    if (body.allowed_iframe_domains !== undefined) updates.push({ key: 'allowed_iframe_domains', value: body.allowed_iframe_domains });
 
     for (const { key, value } of updates) {
       await db

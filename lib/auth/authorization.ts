@@ -82,8 +82,42 @@ export async function requireMerchant() {
   };
 }
 
+export async function requirePartner() {
+  const session = await getSession();
+
+  if (!session) {
+    return {
+      authorized: false as const,
+      response: NextResponse.json(
+        { error: 'Unauthorized', message: 'Please sign in to access this resource' },
+        { status: 401 }
+      ),
+    };
+  }
+
+  if (!['admin', 'partner'].includes(session.user.role || '')) {
+    return {
+      authorized: false as const,
+      response: NextResponse.json(
+        { error: 'Forbidden', message: 'Partner access required' },
+        { status: 403 }
+      ),
+    };
+  }
+
+  return {
+    authorized: true as const,
+    session,
+  };
+}
+
 export function isAdmin(role: string | null | undefined): boolean {
   return role === 'admin';
+}
+
+export function isPartner(role: string | null | undefined): boolean {
+  if (!role) return false;
+  return ['admin', 'partner'].includes(role);
 }
 
 export function isMerchant(role: string | null | undefined): boolean {
