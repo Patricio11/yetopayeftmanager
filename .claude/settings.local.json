@@ -3,7 +3,8 @@
     "allow": [
       "Bash(mkdir -p \"c:/Users/patri/Downloads/PayLink Pro/yetopayeft/app/api/admin/partners/[id]/commission\")",
       "Bash(mkdir -p \"c:/Users/patri/Downloads/PayLink Pro/yetopayeft/app/api/admin/partners/[id]/merchants\")",
-      "Bash(npx next build)"
+      "Bash(npx next build)",
+      "Bash(wc -l \"c:\\\\Users\\\\patri\\\\Downloads\\\\PayLink Pro\\\\yetopayeft\\\\lib\\\\db\\\\schema\"/*.ts)"
     ]
   }
 }

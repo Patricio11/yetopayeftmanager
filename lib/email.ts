@@ -1,8 +1,12 @@
 import nodemailer from "nodemailer";
 
+const isProd = process.env.NODE_ENV === "production";
+const port = Number(process.env.SMTP_PORT) || (isProd ? 587 : 2525);
+
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT) || 2525,
+  host: process.env.SMTP_HOST || (isProd ? "smtp.resend.com" : "sandbox.smtp.mailtrap.io"),
+  port,
+  secure: process.env.SMTP_SECURE === "true", // true for port 465, false for 587 (STARTTLS)
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
