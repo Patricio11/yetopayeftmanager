@@ -95,19 +95,23 @@ export default function RegisterPage() {
       }
 
       // Save extra merchant fields (phone, companyName) that Better Auth doesn't handle
-      try {
-        await fetch('/api/merchant/settings', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            fullName: formData.fullName,
-            phone: formData.phone,
-            companyName: formData.companyName,
-          }),
-        });
-      } catch {
-        // Non-critical — user can update these later in settings
-        console.warn('Failed to save extra registration fields');
+      // Uses a dedicated endpoint since the session isn't established before email verification
+      if (data?.user?.id) {
+        try {
+          await fetch('/api/auth/complete-registration', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: data.user.id,
+              fullName: formData.fullName,
+              phone: formData.phone,
+              companyName: formData.companyName,
+            }),
+          });
+        } catch {
+          // Non-critical — user can update these later in settings
+          console.warn('Failed to save extra registration fields');
+        }
       }
 
       // Show verification notice
