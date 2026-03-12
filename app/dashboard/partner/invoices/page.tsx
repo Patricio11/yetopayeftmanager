@@ -30,7 +30,7 @@ const formatDate = (d: string | null) => {
 const statusConfig: Record<string, { label: string; color: string; bg: string; icon: React.ElementType }> = {
   draft: { label: "Draft", color: "text-gray-600", bg: "bg-gray-100 border-gray-200", icon: FileText },
   sent: { label: "Sent", color: "text-blue-600", bg: "bg-blue-50 border-blue-200", icon: Send },
-  paid: { label: "Paid", color: "text-green-600", bg: "bg-green-50 border-green-200", icon: CheckCircle },
+  paid: { label: "Paid", color: "text-amber-500", bg: "bg-amber-50 border-amber-200", icon: CheckCircle },
   overdue: { label: "Overdue", color: "text-red-600", bg: "bg-red-50 border-red-200", icon: AlertCircle },
   cancelled: { label: "Cancelled", color: "text-gray-500", bg: "bg-gray-50 border-gray-200", icon: X },
 };

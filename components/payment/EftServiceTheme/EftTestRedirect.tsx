@@ -16,10 +16,10 @@ const EftTestRedirect: React.FC = () => {
         const amount = searchParams.get('amount') || '100.00';
         const reference = searchParams.get('reference');
 
-        if (test === 'true' && service === 'yetopayeft') {
+        if (test === 'true' && service === 'onegateeft') {
           const params = new URLSearchParams({
             test: 'true',
-            service: 'yetopayeft',
+            service: 'onegateeft',
             amount,
             ...(reference && { reference })
           });
@@ -28,7 +28,7 @@ const EftTestRedirect: React.FC = () => {
           const baseUrl = process.env.NEXT_PUBLIC_EFT_SERVICE_URL || 'http://localhost:3001';
           window.location.href = `${baseUrl}/api/v1/eft-test-payment?${params.toString()}`;
         } else {
-          setError('Invalid test parameters. Use ?test=true&service=yetopayeft');
+          setError('Invalid test parameters. Use ?test=true&service=onegateeft');
           setLoading(false);
         }
       } catch (err) {
@@ -60,7 +60,7 @@ const EftTestRedirect: React.FC = () => {
             <p>{error}</p>
           </div>
           <p className="mt-4 text-sm text-gray-500">
-            Expected URL format: /payment?test=true&service=yetopayeft&amount=100.00
+            Expected URL format: /payment?test=true&service=onegateeft&amount=100.00
           </p>
         </div>
       </div>

@@ -137,12 +137,12 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-6">
       {/* Notification */}
       {notification && (
         <div className={`fixed top-6 right-6 z-50 p-4 rounded-xl shadow-lg border animate-slide-down ${
           notification.type === 'success' 
-            ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-400' 
+            ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-400' 
             : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-400'
         }`}>
           <div className="flex items-center space-x-2">
@@ -160,18 +160,16 @@ export default function RegisterPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-2 mb-6">
-            <div className="w-12 h-12 bg-gradient-to-r from-green-600 to-slate-600 rounded-xl flex items-center justify-center shadow-lg">
-              <User className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-slate-900 dark:text-white">YETOPAYEFT</span>
+            <img src="/ogeft.jpg" alt="OneGate EFT" className="h-10 w-10 rounded" />
+            <span className="text-2xl font-bold text-slate-900 dark:text-white">OneGate EFT</span>
           </Link>
         </div>
 
         {/* Email Verification Notice */}
         {showVerifyNotice && (
           <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-white/20 dark:border-slate-700/50 p-8 shadow-2xl text-center">
-            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Mail className="w-8 h-8 text-green-600" />
+            <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Mail className="w-8 h-8 text-amber-600" />
             </div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Verify Your Email</h1>
             <p className="text-slate-600 dark:text-slate-400 mb-2">
@@ -182,7 +180,7 @@ export default function RegisterPage() {
             </p>
             <div className="space-y-3">
               <Link href="/auth/login">
-                <Button className="w-full bg-gradient-to-r from-green-600 to-slate-600 text-white">
+                <Button className="w-full bg-gradient-to-r from-amber-500 to-pink-600 text-white">
                   Go to Sign In
                 </Button>
               </Link>
@@ -428,15 +426,15 @@ export default function RegisterPage() {
                   id="agreeToTerms"
                   checked={formData.agreeToTerms}
                   onChange={(e) => setFormData({ ...formData, agreeToTerms: e.target.checked })}
-                  className="w-4 h-4 mt-1 text-green-600 border-slate-300 rounded focus:ring-green-500"
+                  className="w-4 h-4 mt-1 text-amber-600 border-slate-300 rounded focus:ring-amber-500"
                 />
                 <label htmlFor="agreeToTerms" className="ml-2 text-sm text-slate-700 dark:text-slate-300">
                   I agree to the{' '}
-                  <Link href="/terms" className="text-green-600 dark:text-green-400 hover:underline">
+                  <Link href="/terms" className="text-amber-600 dark:text-amber-400 hover:underline">
                     Terms and Conditions
                   </Link>{' '}
                   and{' '}
-                  <Link href="/privacy" className="text-green-600 dark:text-green-400 hover:underline">
+                  <Link href="/privacy" className="text-amber-600 dark:text-amber-400 hover:underline">
                     Privacy Policy
                   </Link>
                 </label>
@@ -453,7 +451,7 @@ export default function RegisterPage() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-green-600 to-slate-600 hover:from-green-700 hover:to-slate-700 text-white py-6 rounded-xl shadow-lg transform hover:scale-[1.02] transition-all duration-200"
+              className="w-full bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white py-6 rounded-xl shadow-lg transform hover:scale-[1.02] transition-all duration-200"
             >
               {isLoading ? (
                 <span className="flex items-center justify-center">
@@ -476,7 +474,7 @@ export default function RegisterPage() {
           <div className="mt-8 text-center">
             <p className="text-slate-600 dark:text-slate-400">
               Already have an account?{' '}
-              <Link href="/auth/login" className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium">
+              <Link href="/auth/login" className="text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium">
                 Sign in
               </Link>
             </p>

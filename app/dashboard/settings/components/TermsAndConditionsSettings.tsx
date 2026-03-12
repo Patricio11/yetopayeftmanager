@@ -68,7 +68,7 @@ export function TermsAndConditionsSettings() {
       {/* Global enable toggle */}
       <div className={`flex items-center justify-between p-4 border rounded-lg transition-all ${
         enabled
-          ? 'border-green-300 bg-green-50/50 dark:border-green-700 dark:bg-green-900/10'
+          ? 'border-amber-300 bg-amber-50/50 dark:border-amber-600 dark:bg-amber-900/10'
           : 'border-gray-200 dark:border-slate-700'
       }`}>
         <div>
@@ -90,7 +90,7 @@ export function TermsAndConditionsSettings() {
           value={title}
           onChange={e => setTitle(e.target.value)}
           placeholder="Terms &amp; Conditions"
-          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
         />
       </div>
 
@@ -103,7 +103,7 @@ export function TermsAndConditionsSettings() {
               onClick={() => setActiveTab('edit')}
               className={`flex items-center gap-1.5 px-3 py-1.5 transition-colors ${
                 activeTab === 'edit'
-                  ? 'bg-green-600 text-white'
+                  ? 'bg-amber-500 text-white'
                   : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700'
               }`}
             >
@@ -113,7 +113,7 @@ export function TermsAndConditionsSettings() {
               onClick={() => setActiveTab('preview')}
               className={`flex items-center gap-1.5 px-3 py-1.5 transition-colors ${
                 activeTab === 'preview'
-                  ? 'bg-green-600 text-white'
+                  ? 'bg-amber-500 text-white'
                   : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700'
               }`}
             >
@@ -128,7 +128,7 @@ export function TermsAndConditionsSettings() {
             onChange={e => setContent(e.target.value)}
             rows={16}
             placeholder={`# Terms & Conditions\n\nWrite your terms here using markdown.\n\n## Section 1\n\nYour content...\n\n- Bullet point\n- Another point\n\n**Bold text** and *italic text* are supported.`}
-            className="w-full px-3 py-3 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-mono bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-y leading-relaxed"
+            className="w-full px-3 py-3 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-mono bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-y leading-relaxed"
           />
         ) : (
           <div className="min-h-[16rem] border border-gray-200 dark:border-slate-600 rounded-lg px-5 py-4 prose max-w-none text-sm overflow-auto bg-white dark:bg-slate-800">
@@ -157,7 +157,7 @@ export function TermsAndConditionsSettings() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 px-5 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 px-5 py-2 bg-amber-500 text-white text-sm font-medium rounded-lg hover:bg-amber-600 transition-colors disabled:opacity-50"
         >
           <Save className="w-4 h-4" />
           {saving ? 'Saving…' : saved ? 'Saved!' : 'Save Changes'}

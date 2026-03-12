@@ -30,7 +30,7 @@ export function IntegrationFlows({ selectedFlow, onFlowChange }: IntegrationFlow
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
           <p className="text-sm text-gray-700 leading-relaxed">
             Your backend creates a payment link via <code className="bg-gray-200 px-1.5 py-0.5 rounded text-xs font-mono">POST /api/payment-links</code>.
-            The response contains a <strong>paymentUrl</strong> — a unique, signed URL that takes the customer to the Yetopay payment page.
+            The response contains a <strong>paymentUrl</strong> — a unique, signed URL that takes the customer to the OneGate EFT payment page.
             Choose one of the two methods below to present it.
           </p>
         </div>
@@ -192,8 +192,8 @@ exit;`}</pre>
               <div className="flex gap-3">
                 <div className="flex-shrink-0 w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold">4</div>
                 <div className="flex-1">
-                  <p className="font-medium mb-2">Customer completes payment on Yetopay page</p>
-                  <p className="text-sm text-gray-600">Yetopay handles the entire EFT flow. On completion, the customer is redirected to your configured URL.</p>
+                  <p className="font-medium mb-2">Customer completes payment on OneGate EFT page</p>
+                  <p className="text-sm text-gray-600">OneGate EFT handles the entire EFT flow. On completion, the customer is redirected to your configured URL.</p>
                 </div>
               </div>
               <div className="flex gap-3">
@@ -245,7 +245,7 @@ exit;`}</pre>
   height="680"
   frameborder="0"
   allow="payment"
-  title="Yetopay Payment"
+  title="OneGate EFT Payment"
 ></iframe>`}</pre>
                   </div>
                 </div>
@@ -257,7 +257,7 @@ exit;`}</pre>
                   <div className="bg-gray-900 text-blue-300 rounded-lg p-3 font-mono text-xs overflow-x-auto">
                     <pre>{`window.addEventListener('message', (event) => {
   // Always verify the origin
-  if (event.origin !== 'https://your-yetopay-domain.com') return;
+  if (event.origin !== 'https://onegate.co.za') return;
 
   const { type, status, reference } = event.data;
 

@@ -282,7 +282,7 @@ export function BankAccountsSettings() {
                           </Badge>
                         )}
                         {account.isVerified && (
-                          <Badge className="bg-green-50 text-green-700 border-green-200" variant="outline">
+                          <Badge className="bg-amber-50 text-amber-600 border-amber-200" variant="outline">
                             Verified
                           </Badge>
                         )}

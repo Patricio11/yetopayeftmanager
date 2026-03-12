@@ -94,7 +94,7 @@ export function EftUrlSettings() {
       setter: setSuccessUrl,
       placeholder: "https://your-domain.com/payment/success",
       description: "Customer is redirected here after a successful Pay By Bank payment.",
-      color: "text-green-600",
+      color: "text-amber-500",
     },
     {
       id: "failureUrl",

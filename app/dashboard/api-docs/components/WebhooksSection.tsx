@@ -195,7 +195,7 @@ export function WebhooksSection({ selectedLanguage, onCopy, copiedCode }: Webhoo
         <div>
           <h3 className="font-semibold text-lg mb-3">Verifying Webhook Signatures</h3>
           <p className="text-gray-600 mb-4">
-            Always verify webhook signatures to ensure the request came from YetoPay.
+            Always verify webhook signatures to ensure the request came from OneGate EFT.
           </p>
           
           {/* SDK Method */}
@@ -338,9 +338,9 @@ function getWebhookPayload() {
 }
 
 function getSDKVerification() {
-  return `import { YetoPayEFTClient } from '@yetopayeft/sdk';
+  return `import { OneGateEFTClient } from '@onegateeft/sdk';
 
-const client = new YetoPayEFTClient({ apiKey: 'your-key' });
+const client = new OneGateEFTClient({ apiKey: 'your-key' });
 
 app.post('/webhooks/payment', (req, res) => {
   const signature = req.headers['x-webhook-signature'];

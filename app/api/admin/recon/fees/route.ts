@@ -14,7 +14,7 @@ export async function GET() {
     const defaults = rows[0] || {
       fixedFeeValue: "5.00",
       percentageFeeValue: "2.50",
-      volumeFeeValue: "0.0500",
+      volumeFeeValue: "2.00",
       vatEnabled: true,
       vatRate: "15.00",
     };
@@ -42,7 +42,7 @@ export async function PATCH(request: NextRequest) {
       const [created] = await db.insert(eftSystemFees).values({
         fixedFeeValue: String(fixedFeeValue ?? "5.00"),
         percentageFeeValue: String(percentageFeeValue ?? "2.50"),
-        volumeFeeValue: String(volumeFeeValue ?? "0.0500"),
+        volumeFeeValue: String(volumeFeeValue ?? "2.00"),
         vatEnabled: vatEnabled ?? true,
         vatRate: String(vatRate ?? "15.00"),
         updatedBy: auth.session.user.id,

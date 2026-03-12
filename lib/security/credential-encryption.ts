@@ -28,7 +28,7 @@ function getEncryptionKey(): Buffer {
   }
   
   // Otherwise derive key using PBKDF2
-  const salt = Buffer.from(process.env.CREDENTIAL_ENCRYPTION_SALT || 'yetopay-credential-salt', 'utf8');
+  const salt = Buffer.from(process.env.CREDENTIAL_ENCRYPTION_SALT || 'onegate-credential-salt', 'utf8');
   return crypto.pbkdf2Sync(key, salt, 100000, 32, 'sha256');
 }
 

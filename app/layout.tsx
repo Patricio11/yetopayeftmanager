@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "YetoPayEFT - South African Pay By Bank Payment Gateway",
+  title: "OneGate EFT - South African Pay By Bank Payment Gateway",
   description: "Accept Pay By Bank payments from South African banks. Secure, real-time payment processing for merchants.",
 };
 

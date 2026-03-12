@@ -82,7 +82,7 @@ export default function MerchantDetailPage() {
       <Card className="p-6 mb-6 bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-pink-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
               {(merchant.companyName || merchant.name || '?')[0].toUpperCase()}
             </div>
             <div>
@@ -90,16 +90,16 @@ export default function MerchantDetailPage() {
               <p className="text-slate-500">{merchant.email}</p>
               <div className="flex items-center gap-3 mt-2">
                 {merchant.isActive
-                  ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"><div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />Active</span>
+                  ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"><div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />Active</span>
                   : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400">Inactive</span>}
                 {merchant.kycStatus === 'approved'
-                  ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"><CheckCircle className="w-3 h-3" />KYC Approved</span>
+                  ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"><CheckCircle className="w-3 h-3" />KYC Approved</span>
                   : merchant.kycStatus === 'rejected'
                   ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400"><XCircle className="w-3 h-3" />KYC Rejected</span>
                   : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"><Clock className="w-3 h-3" />KYC Pending</span>}
                 {merchant.emailVerified && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"><Mail className="w-3 h-3" />Verified</span>}
                 {merchant.accountMode === 'live'
-                  ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400">LIVE</span>
+                  ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">LIVE</span>
                   : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">DEMO</span>}
               </div>
             </div>
@@ -114,7 +114,7 @@ export default function MerchantDetailPage() {
         {merchant.stats && (
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6 pt-6 border-t border-slate-100 dark:border-slate-700/50">
             <div><p className="text-2xl font-bold text-slate-900 dark:text-white">{merchant.stats.transactions.total}</p><p className="text-xs text-slate-500">Transactions</p></div>
-            <div><p className="text-2xl font-bold text-green-600">R {parseFloat(merchant.stats.transactions.totalAmount || '0').toLocaleString()}</p><p className="text-xs text-slate-500">Total Volume</p></div>
+            <div><p className="text-2xl font-bold text-amber-500">R {parseFloat(merchant.stats.transactions.totalAmount || '0').toLocaleString()}</p><p className="text-xs text-slate-500">Total Volume</p></div>
             <div><p className="text-2xl font-bold text-slate-900 dark:text-white">{merchant.stats.teamMembers}</p><p className="text-xs text-slate-500">Team Members</p></div>
             <div><p className="text-2xl font-bold text-slate-900 dark:text-white">{merchant.stats.bankAccounts}</p><p className="text-xs text-slate-500">Bank Accounts</p></div>
             <div><p className="text-2xl font-bold text-slate-900 dark:text-white">{merchant.stats.apiKeys}</p><p className="text-xs text-slate-500">API Keys</p></div>
@@ -130,7 +130,7 @@ export default function MerchantDetailPage() {
             onClick={() => setActiveTab(tab.key)}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
               activeTab === tab.key
-                ? 'bg-white dark:bg-slate-700 text-green-600 dark:text-green-400 shadow-sm'
+                ? 'bg-white dark:bg-slate-700 text-amber-500 dark:text-amber-400 shadow-sm'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
@@ -154,7 +154,7 @@ function OverviewTab({ merchant, onUpdate }: { merchant: any; onUpdate: () => vo
   return (
     <div className="grid md:grid-cols-2 gap-6">
       <Card className="p-6 bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50">
-        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2"><Building2 className="w-5 h-5 text-green-600" />Company Information</h3>
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2"><Building2 className="w-5 h-5 text-amber-500" />Company Information</h3>
         <div className="space-y-3">
           <InfoRow label="Company Name" value={merchant.companyName} />
           <InfoRow label="Contact Name" value={merchant.fullName || merchant.name} />
@@ -236,7 +236,7 @@ function TransactionsTab({ merchantId }: { merchantId: string }) {
   useEffect(() => { fetchTx(); }, [fetchTx]);
 
   const statusColor = (s: string) => {
-    if (s === 'completed') return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400';
+    if (s === 'completed') return 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400';
     if (s === 'failed') return 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400';
     if (s === 'initiated') return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
     return 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400';
@@ -348,7 +348,7 @@ function TeamTab({ merchantId }: { merchantId: string }) {
   return (
     <Card className="bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50 overflow-hidden">
       <div className="p-4 border-b border-slate-100 dark:border-slate-700/50">
-        <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2"><Users className="w-5 h-5 text-green-600" />Team Members</h3>
+        <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2"><Users className="w-5 h-5 text-amber-500" />Team Members</h3>
       </div>
       {loading ? (
         <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
@@ -385,7 +385,7 @@ function TeamTab({ merchantId }: { merchantId: string }) {
               </div>
               <div className="flex items-center gap-3">
                 {roleBadge(m.role)}
-                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${m.status === 'active' ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'}`}>
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${m.status === 'active' ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'}`}>
                   {m.status}
                 </span>
               </div>
@@ -414,7 +414,7 @@ function BankingTab({ merchantId }: { merchantId: string }) {
   return (
     <Card className="bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50 overflow-hidden">
       <div className="p-4 border-b border-slate-100 dark:border-slate-700/50">
-        <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2"><Landmark className="w-5 h-5 text-green-600" />Bank Accounts</h3>
+        <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2"><Landmark className="w-5 h-5 text-amber-500" />Bank Accounts</h3>
       </div>
       {loading ? (
         <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
@@ -463,7 +463,7 @@ function BankingTab({ merchantId }: { merchantId: string }) {
                 <div className="flex items-center gap-2">
                   {a.isPrimary && <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Primary</span>}
                   {a.isVerified
-                    ? <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"><CheckCircle className="w-3 h-3 inline mr-1" />Verified</span>
+                    ? <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"><CheckCircle className="w-3 h-3 inline mr-1" />Verified</span>
                     : <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">Unverified</span>}
                 </div>
               </div>
@@ -610,7 +610,7 @@ function BillingTab({ merchantId }: { merchantId: string }) {
 
   const sysFixed = systemFees?.fixedFeeValue || '5.00';
   const sysPercentage = systemFees?.percentageFeeValue || '2.50';
-  const sysVolume = systemFees?.volumeFeeValue || '0.0500';
+  const sysVolume = systemFees?.volumeFeeValue || '2.00';
   const sysVatEnabled = systemFees?.vatEnabled ?? true;
   const sysVatRate = systemFees?.vatRate || '15.00';
 
@@ -619,7 +619,7 @@ function BillingTab({ merchantId }: { merchantId: string }) {
       {/* Fee Type Assignment */}
       <Card className="p-6 bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50">
         <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
-          <Receipt className="w-5 h-5 text-green-600" />
+          <Receipt className="w-5 h-5 text-amber-500" />
           Fee Type
         </h3>
         <p className="text-sm text-slate-500 mb-4">Choose which fee model this merchant uses for EFT billing</p>
@@ -629,16 +629,16 @@ function BillingTab({ merchantId }: { merchantId: string }) {
             onClick={() => setFeeType('fixed')}
             className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
               feeType === 'fixed'
-                ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20'
                 : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
             }`}
           >
             <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-              feeType === 'fixed' ? 'bg-green-100 dark:bg-green-900/40' : 'bg-slate-100 dark:bg-slate-700'
+              feeType === 'fixed' ? 'bg-amber-100 dark:bg-amber-900/40' : 'bg-slate-100 dark:bg-slate-700'
             }`}>
-              <DollarSign className={`w-5 h-5 ${feeType === 'fixed' ? 'text-green-600' : 'text-slate-400'}`} />
+              <DollarSign className={`w-5 h-5 ${feeType === 'fixed' ? 'text-amber-500' : 'text-slate-400'}`} />
             </div>
-            <span className={`text-sm font-semibold ${feeType === 'fixed' ? 'text-green-700 dark:text-green-400' : 'text-slate-600 dark:text-slate-400'}`}>
+            <span className={`text-sm font-semibold ${feeType === 'fixed' ? 'text-amber-600 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400'}`}>
               Fixed
             </span>
             <span className="text-xs text-slate-500">R{useCustomFixed ? customFixedValue : sysFixed} / txn</span>
@@ -706,7 +706,7 @@ function BillingTab({ merchantId }: { merchantId: string }) {
           <div className="space-y-2">
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={useCustomFixed} onChange={(e) => setUseCustomFixed(e.target.checked)}
-                className="w-4 h-4 rounded border-slate-300 text-green-600 focus:ring-green-500" />
+                className="w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500" />
               <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Custom Fixed Fee</span>
             </label>
             {useCustomFixed && (
@@ -744,9 +744,9 @@ function BillingTab({ merchantId }: { merchantId: string }) {
             {useCustomVolume && (
               <div className="relative ml-6">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">%</span>
-                <Input type="number" step="0.0001" min="0" max="100" value={customVolumeValue}
+                <Input type="number" step="0.01" min="0" max="100" value={customVolumeValue}
                   onChange={(e) => setCustomVolumeValue(e.target.value)} className="pl-8" placeholder={sysVolume} />
-                <p className="text-xs text-slate-500 mt-1">Percentage of total transaction volume for the billing period</p>
+                <p className="text-xs text-slate-500 mt-1">Percentage of total transaction volume for the billing period (e.g. 2% of total volume)</p>
               </div>
             )}
           </div>
@@ -763,7 +763,7 @@ function BillingTab({ merchantId }: { merchantId: string }) {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-slate-600 dark:text-slate-400">VAT Enabled</span>
                   <button onClick={() => setVatEnabled(!vatEnabled)}
-                    className={`relative w-11 h-6 rounded-full transition-colors ${vatEnabled ? 'bg-green-500' : 'bg-slate-300'}`}>
+                    className={`relative w-11 h-6 rounded-full transition-colors ${vatEnabled ? 'bg-amber-500' : 'bg-slate-300'}`}>
                     <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${vatEnabled ? 'translate-x-5' : ''}`} />
                   </button>
                 </div>
@@ -782,7 +782,7 @@ function BillingTab({ merchantId }: { merchantId: string }) {
         {/* Actions */}
         <div className="flex gap-3 mt-6">
           <Button onClick={handleSave} disabled={saving}
-            className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white gap-2">
+            className="flex-1 bg-gradient-to-r from-amber-500 to-pink-600 text-white gap-2">
             <Save className="w-4 h-4" />{saving ? 'Saving...' : 'Save Billing Config'}
           </Button>
           {merchantFee && (
@@ -794,9 +794,9 @@ function BillingTab({ merchantId }: { merchantId: string }) {
         </div>
 
         {/* Current effective config summary */}
-        <div className="mt-4 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800 rounded-lg p-3">
-          <p className="text-xs font-semibold text-green-700 dark:text-green-400 mb-1">Effective Config for this Merchant</p>
-          <p className="text-xs text-green-800 dark:text-green-300">
+        <div className="mt-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+          <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 mb-1">Effective Config for this Merchant</p>
+          <p className="text-xs text-amber-700 dark:text-amber-300">
             Fee: {feeType === 'fixed'
               ? `R${useCustomFixed ? customFixedValue || sysFixed : sysFixed} per transaction (fixed)`
               : feeType === 'percentage'
@@ -882,7 +882,7 @@ function SettingsTab({ merchant, onUpdate }: { merchant: any; onUpdate: () => vo
               {accountMode === 'demo' ? 'Merchant can only create test transactions. No real bank connections.' : 'Merchant processes real EFT transactions.'}
             </p>
           </div>
-          <Button onClick={handleSave} disabled={saving} className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white gap-2">
+          <Button onClick={handleSave} disabled={saving} className="w-full bg-gradient-to-r from-amber-500 to-pink-600 text-white gap-2">
             <Save className="w-4 h-4" />{saving ? 'Saving...' : 'Save Changes'}
           </Button>
         </div>
@@ -891,14 +891,14 @@ function SettingsTab({ merchant, onUpdate }: { merchant: any; onUpdate: () => vo
       <Card className="p-6 bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50">
         <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">EFT Settings</h3>
         <div className="space-y-3">
-          <div className={`flex items-center justify-between p-4 border rounded-lg transition-all ${fnbVerifyResult ? 'border-green-300 bg-green-50/50 dark:border-green-700 dark:bg-green-900/10' : 'border-slate-200 dark:border-slate-700'}`}>
+          <div className={`flex items-center justify-between p-4 border rounded-lg transition-all ${fnbVerifyResult ? 'border-amber-300 bg-amber-50/50 dark:border-amber-600 dark:bg-amber-900/10' : 'border-slate-200 dark:border-slate-700'}`}>
             <div>
               <p className="text-sm font-medium text-slate-900 dark:text-white">FNB Verify Result</p>
               <p className="text-xs text-slate-500 mt-1">For FNB transactions over R7,000, run additional payment verification via FNB&apos;s remittance validation</p>
             </div>
             <Switch checked={fnbVerifyResult} onCheckedChange={setFnbVerifyResult} />
           </div>
-          <div className={`flex items-center justify-between p-4 border rounded-lg transition-all ${saveCredentialsEnabled ? 'border-green-300 bg-green-50/50 dark:border-green-700 dark:bg-green-900/10' : 'border-slate-200 dark:border-slate-700'}`}>
+          <div className={`flex items-center justify-between p-4 border rounded-lg transition-all ${saveCredentialsEnabled ? 'border-amber-300 bg-amber-50/50 dark:border-amber-600 dark:bg-amber-900/10' : 'border-slate-200 dark:border-slate-700'}`}>
             <div>
               <p className="text-sm font-medium text-slate-900 dark:text-white">Save Credentials</p>
               <p className="text-xs text-slate-500 mt-1">Allow customers to save their banking credentials on their device for faster future payments</p>

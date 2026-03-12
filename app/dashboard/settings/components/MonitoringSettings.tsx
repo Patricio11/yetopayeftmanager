@@ -88,8 +88,8 @@ export function MonitoringSettings() {
       {/* Alert Emails */}
       <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-            <Mail className="w-4 h-4 text-green-700" />
+          <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
+            <Mail className="w-4 h-4 text-amber-600" />
           </div>
           <div>
             <p className="text-sm font-medium text-gray-900">Email Alerts</p>
@@ -101,7 +101,7 @@ export function MonitoringSettings() {
           onChange={(e) => setAlertEmails(e.target.value)}
           placeholder="admin@example.com, ops@example.com"
           rows={3}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent font-mono resize-none"
+          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent font-mono resize-none"
         />
         <p className="text-xs text-gray-400">
           Requires SMTP configuration in environment variables (SMTP_HOST, SMTP_USER, SMTP_PASS).
@@ -124,7 +124,7 @@ export function MonitoringSettings() {
           onChange={(e) => setAlertSmsNumbers(e.target.value)}
           placeholder="+27821234567, +27831234567"
           rows={2}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent font-mono resize-none"
+          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent font-mono resize-none"
         />
         <p className="text-xs text-gray-400">
           Requires Twilio credentials: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER.
@@ -147,7 +147,7 @@ export function MonitoringSettings() {
           value={alertSlackWebhookUrl}
           onChange={(e) => setAlertSlackWebhookUrl(e.target.value)}
           placeholder="https://hooks.slack.com/services/..."
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent font-mono"
+          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent font-mono"
         />
         <p className="text-xs text-gray-400">
           Create an Incoming Webhook in your Slack workspace app settings and paste the URL here.
@@ -175,7 +175,7 @@ export function MonitoringSettings() {
       {/* Save */}
       <div className="flex items-center justify-between pt-2">
         {savedAt ? (
-          <p className="text-xs text-green-600">
+          <p className="text-xs text-amber-500">
             Saved at {savedAt.toLocaleTimeString()}
           </p>
         ) : (
@@ -184,7 +184,7 @@ export function MonitoringSettings() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white text-sm font-medium rounded-lg hover:bg-amber-600 disabled:opacity-50 transition-colors"
         >
           {saving ? (
             <Loader2 className="w-4 h-4 animate-spin" />

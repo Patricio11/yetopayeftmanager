@@ -107,8 +107,8 @@ function CreateApiKeyModal({ onClose }: { onClose: () => void }) {
           ) : (
             <div className="space-y-6">
               <div className="flex items-center justify-center py-4">
-                <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
-                  <Check className="w-8 h-8 text-green-600" />
+                <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center">
+                  <Check className="w-8 h-8 text-amber-500" />
                 </div>
               </div>
 
@@ -238,7 +238,7 @@ export function ApiKeysSettings() {
                     <Badge
                       variant="outline"
                       className={key.status === "active"
-                        ? "bg-green-50 text-green-700 border-green-200"
+                        ? "bg-amber-50 text-amber-600 border-amber-200"
                         : "bg-gray-50 text-gray-700 border-gray-200"
                       }
                     >

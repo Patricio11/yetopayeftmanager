@@ -322,7 +322,7 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
               resetForm();
               setIsCreateDialogOpen(true);
             }}
-            className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+            className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add Bank
@@ -353,11 +353,11 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
           </div>
         </Card>
 
-        <Card className="p-5 bg-gradient-to-br from-white to-green-50/50 dark:from-slate-800 dark:to-green-900/10 border-slate-200/50 dark:border-slate-700/50">
+        <Card className="p-5 bg-gradient-to-br from-white to-amber-50/50 dark:from-slate-800 dark:to-amber-900/10 border-slate-200/50 dark:border-slate-700/50">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-9 h-9 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                <div className="w-9 h-9 bg-gradient-to-br from-amber-500 to-pink-600 rounded-lg flex items-center justify-center">
                   <CheckCircle className="w-5 h-5 text-white" />
                 </div>
                 <h3 className="text-xs font-medium text-slate-600 dark:text-slate-400">
@@ -488,7 +488,7 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
                         <div className="flex items-center gap-2">
                           <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-gradient-to-r from-green-500 to-emerald-600"
+                              className="h-full bg-gradient-to-r from-amber-500 to-pink-600"
                               style={{ width: `${successRate}%` }}
                             />
                           </div>

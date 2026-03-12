@@ -27,7 +27,7 @@ export function FeeSettingsDialog({ currentFees, onClose, onSaved }: FeeSettings
   const [saving, setSaving] = useState(false);
   const [fixedFeeValue, setFixedFeeValue] = useState(currentFees?.fixedFeeValue || "5.00");
   const [percentageFeeValue, setPercentageFeeValue] = useState(currentFees?.percentageFeeValue || "2.50");
-  const [volumeFeeValue, setVolumeFeeValue] = useState(currentFees?.volumeFeeValue || "0.0500");
+  const [volumeFeeValue, setVolumeFeeValue] = useState(currentFees?.volumeFeeValue || "2.00");
   const [vatEnabled, setVatEnabled] = useState(currentFees?.vatEnabled ?? true);
   const [vatRate, setVatRate] = useState(currentFees?.vatRate || "15.00");
 
@@ -71,7 +71,7 @@ export function FeeSettingsDialog({ currentFees, onClose, onSaved }: FeeSettings
           {/* Fixed Fee */}
           <div className="space-y-2">
             <Label htmlFor="fixedFee" className="flex items-center gap-2">
-              <DollarSign className="w-4 h-4 text-green-600" />
+              <DollarSign className="w-4 h-4 text-amber-500" />
               Fixed Fee per Transaction (ZAR)
             </Label>
             <div className="relative">
@@ -122,7 +122,7 @@ export function FeeSettingsDialog({ currentFees, onClose, onSaved }: FeeSettings
               <Input
                 id="volumeFee"
                 type="number"
-                step="0.0001"
+                step="0.01"
                 min="0"
                 max="100"
                 value={volumeFeeValue}
@@ -130,7 +130,7 @@ export function FeeSettingsDialog({ currentFees, onClose, onSaved }: FeeSettings
                 className="pl-8"
               />
             </div>
-            <p className="text-xs text-slate-500">Percentage of total transaction volume for the billing period (e.g. 0.050%)</p>
+            <p className="text-xs text-slate-500">Percentage of total transaction volume for the billing period (e.g. 2%)</p>
           </div>
 
           {/* VAT Toggle */}
@@ -140,7 +140,7 @@ export function FeeSettingsDialog({ currentFees, onClose, onSaved }: FeeSettings
               <button
                 onClick={() => setVatEnabled(!vatEnabled)}
                 className={`relative w-11 h-6 rounded-full transition-colors ${
-                  vatEnabled ? "bg-green-500" : "bg-slate-300"
+                  vatEnabled ? "bg-amber-500" : "bg-slate-300"
                 }`}
               >
                 <span

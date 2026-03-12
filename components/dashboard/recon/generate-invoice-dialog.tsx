@@ -140,7 +140,7 @@ export function GenerateInvoiceDialog({ merchants, onClose, onGenerated }: Gener
       <Card className="w-full max-w-lg shadow-2xl border-0">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/30">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-pink-600 flex items-center justify-center shadow-lg shadow-amber-500/30">
               <FileText className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -163,7 +163,7 @@ export function GenerateInvoiceDialog({ merchants, onClose, onGenerated }: Gener
                 onClick={() => setMerchantDropdownOpen(!merchantDropdownOpen)}
                 className={`w-full h-10 px-3 rounded-md border text-sm text-left flex items-center justify-between transition-all ${
                   merchantDropdownOpen
-                    ? "border-green-500 ring-2 ring-green-500/20"
+                    ? "border-amber-500 ring-2 ring-amber-500/20"
                     : "border-slate-200 hover:border-slate-300"
                 } bg-white dark:bg-slate-800 dark:border-slate-700`}
               >
@@ -202,7 +202,7 @@ export function GenerateInvoiceDialog({ merchants, onClose, onGenerated }: Gener
                         value={merchantSearch}
                         onChange={(e) => setMerchantSearch(e.target.value)}
                         placeholder="Search by name or email..."
-                        className="w-full h-9 pl-8 pr-3 text-sm rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="w-full h-9 pl-8 pr-3 text-sm rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                       />
                     </div>
                   </div>
@@ -225,11 +225,11 @@ export function GenerateInvoiceDialog({ merchants, onClose, onGenerated }: Gener
                           }}
                           className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors ${
                             idx === highlightedIndex
-                              ? "bg-green-50 dark:bg-green-900/20"
+                              ? "bg-amber-50 dark:bg-amber-900/20"
                               : "hover:bg-slate-50 dark:hover:bg-slate-700/50"
-                          } ${m.id === merchantId ? "bg-green-50/50 dark:bg-green-900/10" : ""}`}
+                          } ${m.id === merchantId ? "bg-amber-50/50 dark:bg-amber-900/10" : ""}`}
                         >
-                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-pink-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                             {(m.companyName || m.name || "?")[0].toUpperCase()}
                           </div>
                           <div className="min-w-0 flex-1">
@@ -239,7 +239,7 @@ export function GenerateInvoiceDialog({ merchants, onClose, onGenerated }: Gener
                             <p className="text-xs text-slate-500 truncate">{m.email}</p>
                           </div>
                           {m.id === merchantId && (
-                            <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
+                            <Check className="w-4 h-4 text-amber-500 flex-shrink-0" />
                           )}
                         </button>
                       ))
@@ -301,7 +301,7 @@ export function GenerateInvoiceDialog({ merchants, onClose, onGenerated }: Gener
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
-              className="w-full px-3 py-2 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+              className="w-full px-3 py-2 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
               placeholder="Any additional notes for this invoice..."
             />
           </div>
@@ -323,7 +323,7 @@ export function GenerateInvoiceDialog({ merchants, onClose, onGenerated }: Gener
             <Button
               onClick={handleGenerate}
               disabled={generating}
-              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+              className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white"
             >
               {generating ? "Generating..." : "Generate Invoice"}
             </Button>

@@ -108,7 +108,7 @@ export default function TokensPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-green-50 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-amber-50 p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -129,8 +129,8 @@ export default function TokensPage() {
                   <p className="text-sm text-gray-600 mb-1">Total Tokens</p>
                   <p className="text-2xl font-bold text-gray-900">{stats.totalTokens}</p>
                 </div>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <CreditCard className="w-6 h-6 text-green-600" />
+                <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+                  <CreditCard className="w-6 h-6 text-amber-500" />
                 </div>
               </div>
             </div>
@@ -183,13 +183,13 @@ export default function TokensPage() {
                 placeholder="Search by customer name, bank, or account number..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
               />
             </div>
             <button
               onClick={fetchTokens}
               disabled={loading}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+              className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors flex items-center gap-2 disabled:opacity-50"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               Refresh

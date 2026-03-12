@@ -171,7 +171,7 @@ export async function POST(request: NextRequest) {
       feeValue = (merchantFee?.isActive && merchantFee?.percentageFeeValue) || sys.percentageFeeValue;
     } else {
       // volume: percentage of total transaction volume
-      feeValue = (merchantFee?.isActive && merchantFee?.volumeFeeValue) || sys.volumeFeeValue || "0.0500";
+      feeValue = (merchantFee?.isActive && merchantFee?.volumeFeeValue) || sys.volumeFeeValue || "2.00";
     }
 
     // VAT: merchant override > system default
@@ -223,7 +223,7 @@ export async function POST(request: NextRequest) {
       totalAmount: totalAmount.toFixed(2),
       transactionCount: txnCount,
       transactionVolume: txnVolume.toFixed(2),
-      feeType: feeConfig.feeType as "fixed" | "percentage",
+      feeType: feeConfig.feeType as "fixed" | "percentage" | "volume",
       feeValue: feeConfig.feeValue,
       vatRate: feeConfig.vatRate,
       vatEnabled: feeConfig.vatEnabled,
@@ -247,7 +247,7 @@ export async function POST(request: NextRequest) {
       lineQuantity = 1;
       lineUnitAmount = txnVolume.toFixed(4);
     } else {
-      feeDescription = `EFT Volume-Based Fee (${feeVal}% of R${txnVolume.toFixed(2)} total volume, ${txnCount} transactions)`;
+      feeDescription = `EFT Volume-Based Fee (${feeVal}% of total volume R${txnVolume.toFixed(2)}, ${txnCount} transactions)`;
       lineQuantity = 1;
       lineUnitAmount = txnVolume.toFixed(4);
     }

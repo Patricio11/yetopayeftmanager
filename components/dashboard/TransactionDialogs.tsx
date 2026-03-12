@@ -280,7 +280,7 @@ export function TransactionDetailDialog({
                     {jsonCopied ? 'Copied!' : 'Copy'}
                   </button>
                 </div>
-                <pre className="bg-slate-900 dark:bg-slate-950 text-green-400 p-4 rounded-lg text-xs overflow-x-auto max-h-80 overflow-y-auto">
+                <pre className="bg-slate-900 dark:bg-slate-950 text-amber-400 p-4 rounded-lg text-xs overflow-x-auto max-h-80 overflow-y-auto">
                   {JSON.stringify(
                     {
                       event: t.status === 'completed' ? 'payment.completed' : t.status === 'failed' || t.status === 'expired' ? 'payment.failed' : t.status === 'cancelled' || t.status === 'aborted' ? 'payment.cancelled' : 'transaction.updated',

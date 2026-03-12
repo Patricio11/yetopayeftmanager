@@ -7,23 +7,21 @@ import { Button } from '@/components/ui/button';
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-colors duration-300">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-colors duration-300">
       {/* Header */}
       <header className="flex justify-between items-center p-6 max-w-7xl mx-auto">
         <div className="flex items-center space-x-2">
-          <div className="w-10 h-10 bg-gradient-to-r from-green-600 to-slate-600 rounded-xl flex items-center justify-center shadow-lg">
-            <CreditCard className="w-6 h-6 text-white" />
-          </div>
-          <span className="text-xl font-bold text-slate-900 dark:text-white">YETOPAYEFT</span>
+          <img src="/ogeft.jpg" alt="OneGate EFT" className="h-8 w-8 rounded" />
+          <span className="text-xl font-bold text-slate-900 dark:text-white">OneGateEFT</span>
         </div>
         <div className="flex items-center space-x-4">
           <Link href="/auth/login">
-            <Button variant="ghost" className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300">
+            <Button variant="ghost" className="text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300">
               Sign In
             </Button>
           </Link>
           <Link href="/auth/register">
-            <Button className="bg-gradient-to-r from-green-600 to-slate-600 hover:from-green-700 hover:to-slate-700 text-white shadow-lg">
+            <Button className="og-gradient hover:opacity-90 text-white shadow-lg">
               Get Started
             </Button>
           </Link>
@@ -35,14 +33,14 @@ export default function LandingPage() {
         <div className="text-center mb-16">
           <div className="flex justify-center mb-6">
             <div className="relative">
-              <Sparkles className="w-12 h-12 text-green-600 dark:text-green-400 animate-pulse" />
-              <div className="absolute -top-2 -right-2 w-4 h-4 bg-green-500 rounded-full animate-bounce"></div>
+              <Sparkles className="w-12 h-12 text-amber-500 dark:text-amber-400 animate-pulse" />
+              <div className="absolute -top-2 -right-2 w-4 h-4 bg-pink-500 rounded-full animate-bounce"></div>
             </div>
           </div>
           
           <h1 className="text-5xl md:text-6xl font-bold text-slate-900 dark:text-white mb-6">
             Fast, Secure & Simple
-            <span className="block bg-gradient-to-r from-green-600 via-slate-600 to-green-700 bg-clip-text text-transparent">
+            <span className="block bg-gradient-to-r from-amber-500 via-pink-600 to-pink-700 bg-clip-text text-transparent">
               Pay By Bank Solutions
             </span>
           </h1>
@@ -52,7 +50,7 @@ export default function LandingPage() {
           </p>
           
           <Link href="/auth/register">
-            <Button size="lg" className="px-8 py-6 bg-gradient-to-r from-green-600 to-slate-600 hover:from-green-700 hover:to-slate-700 text-white text-lg font-semibold rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300">
+            <Button size="lg" className="px-8 py-6 og-gradient hover:opacity-90 text-white text-lg font-semibold rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300">
               Start Accepting Payments
             </Button>
           </Link>
@@ -65,9 +63,9 @@ export default function LandingPage() {
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {/* Pay By Bank */}
-            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-700 hover:border-green-200 dark:hover:border-green-600">
-              <div className="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-xl flex items-center justify-center mb-6">
-                <Zap className="w-8 h-8 text-green-600 dark:text-green-400" />
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-700 hover:border-amber-200 dark:hover:border-amber-600">
+              <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/20 rounded-xl flex items-center justify-center mb-6">
+                <Zap className="w-8 h-8 text-amber-500 dark:text-amber-400" />
               </div>
               <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">Pay By Bank</h3>
               <p className="text-slate-600 dark:text-slate-400">
@@ -76,9 +74,9 @@ export default function LandingPage() {
             </div>
 
             {/* Secure Payment Links */}
-            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-700 hover:border-green-200 dark:hover:border-green-600">
-              <div className="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-xl flex items-center justify-center mb-6">
-                <LinkIcon className="w-8 h-8 text-green-600 dark:text-green-400" />
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-700 hover:border-amber-200 dark:hover:border-amber-600">
+              <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/20 rounded-xl flex items-center justify-center mb-6">
+                <LinkIcon className="w-8 h-8 text-amber-500 dark:text-amber-400" />
               </div>
               <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">Secure Payment Links</h3>
               <p className="text-slate-600 dark:text-slate-400">
@@ -102,7 +100,7 @@ export default function LandingPage() {
         {/* Why Choose Us */}
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-24">
           <div className="text-center">
-            <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-12 h-12 bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl flex items-center justify-center mx-auto mb-4">
               <Zap className="w-6 h-6 text-white" />
             </div>
             <h4 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Lightning Fast</h4>
@@ -110,7 +108,7 @@ export default function LandingPage() {
           </div>
           
           <div className="text-center">
-            <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-slate-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-12 h-12 bg-gradient-to-r from-amber-500 to-pink-600 rounded-xl flex items-center justify-center mx-auto mb-4">
               <TrendingUp className="w-6 h-6 text-white" />
             </div>
             <h4 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Real-Time Analytics</h4>
@@ -127,12 +125,12 @@ export default function LandingPage() {
         </div>
 
         {/* CTA Section */}
-        <div className="bg-gradient-to-r from-green-600 to-slate-600 rounded-3xl p-12 text-center shadow-2xl">
+        <div className="bg-gradient-to-r from-amber-500 to-pink-600 rounded-3xl p-12 text-center shadow-2xl">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Ready to Accept Pay By Bank Payments?
           </h2>
-          <p className="text-xl text-green-100 mb-8 max-w-2xl mx-auto">
-            Join hundreds of South African merchants already using YETOPAYEFT
+          <p className="text-xl text-amber-100 mb-8 max-w-2xl mx-auto">
+            Join hundreds of South African merchants already using OneGate EFT
           </p>
           <Link href="/auth/register">
             <Button size="lg" variant="secondary" className="px-8 py-6 text-lg font-semibold rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300">
@@ -149,7 +147,7 @@ export default function LandingPage() {
             <Globe className="w-4 h-4" />
             <span className="text-sm">Proudly serving South African businesses</span>
           </div>
-          <p>&copy; 2024 YETOPAYEFT. All rights reserved. | Contact: support@yetopayeft.com</p>
+          <p>&copy; 2024 OneGate EFT. All rights reserved. | Contact: support@onegate.co.za</p>
         </div>
       </footer>
     </div>

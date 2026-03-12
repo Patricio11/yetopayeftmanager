@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
     const token = jwt.sign(payload, privateKey, {
       algorithm: 'RS256',
       audience: 'eft-service',
-      issuer: process.env.NEXT_PUBLIC_APP_URL || 'https://manager.yetopayeft.com',
+      issuer: process.env.NEXT_PUBLIC_APP_URL || 'https://manager.onegate.co.za',
       expiresIn: '1h', // Token valid for 1 hour
     });
 

@@ -41,7 +41,7 @@ const statusBadge = (status: string) => {
     case "active":
     case "completed":
     case "verified":
-      return "bg-green-100 text-green-700 border-green-200";
+      return "bg-amber-100 text-amber-600 border-amber-200";
     case "suspended":
     case "inactive":
     case "failed":
@@ -188,7 +188,7 @@ export default function PartnerMerchantDetailPage() {
 
       {/* Header */}
       <div className="flex items-center gap-4">
-        <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+        <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-pink-600 rounded-xl flex items-center justify-center">
           <Building2 className="w-6 h-6 text-white" />
         </div>
         <div>
@@ -267,7 +267,7 @@ export default function PartnerMerchantDetailPage() {
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
           <div className="flex items-center gap-2 mb-2">
-            <CheckCircle className="w-4 h-4 text-green-500" />
+            <CheckCircle className="w-4 h-4 text-amber-500" />
             <span className="text-xs font-medium text-slate-500">Completed</span>
           </div>
           <p className="text-2xl font-bold text-slate-900">{stats.completedTransactions.toLocaleString()}</p>
@@ -281,7 +281,7 @@ export default function PartnerMerchantDetailPage() {
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
           <div className="flex items-center gap-2 mb-2">
-            <DollarSign className="w-4 h-4 text-green-500" />
+            <DollarSign className="w-4 h-4 text-amber-500" />
             <span className="text-xs font-medium text-slate-500">Total Volume</span>
           </div>
           <p className="text-2xl font-bold text-slate-900">{formatCurrency(stats.totalVolume)}</p>
@@ -297,7 +297,7 @@ export default function PartnerMerchantDetailPage() {
         {saveMessage && (
           <div className={`mb-4 px-4 py-3 rounded-lg text-sm ${
             saveMessage.includes("success")
-              ? "bg-green-50 border border-green-200 text-green-700"
+              ? "bg-amber-50 border border-amber-200 text-amber-600"
               : "bg-red-50 border border-red-200 text-red-700"
           }`}>
             {saveMessage}
@@ -315,7 +315,7 @@ export default function PartnerMerchantDetailPage() {
                   type="text"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                 />
               </div>
               <div>
@@ -324,7 +324,7 @@ export default function PartnerMerchantDetailPage() {
                   type="text"
                   value={formCompanyName}
                   onChange={(e) => setFormCompanyName(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                 />
               </div>
               <div>
@@ -334,7 +334,7 @@ export default function PartnerMerchantDetailPage() {
                   value={formPhone}
                   onChange={(e) => setFormPhone(e.target.value)}
                   placeholder="+27..."
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                 />
               </div>
               <div>
@@ -344,7 +344,7 @@ export default function PartnerMerchantDetailPage() {
                   value={formWebsite}
                   onChange={(e) => setFormWebsite(e.target.value)}
                   placeholder="https://example.com"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -361,7 +361,7 @@ export default function PartnerMerchantDetailPage() {
                   value={formNotifyUrl}
                   onChange={(e) => setFormNotifyUrl(e.target.value)}
                   placeholder="https://example.com/webhook"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                 />
               </div>
               <div>
@@ -371,7 +371,7 @@ export default function PartnerMerchantDetailPage() {
                   value={formSuccessUrl}
                   onChange={(e) => setFormSuccessUrl(e.target.value)}
                   placeholder="https://example.com/success"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                 />
               </div>
               <div>
@@ -381,7 +381,7 @@ export default function PartnerMerchantDetailPage() {
                   value={formFailureUrl}
                   onChange={(e) => setFormFailureUrl(e.target.value)}
                   placeholder="https://example.com/failure"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                 />
               </div>
               <div>
@@ -391,7 +391,7 @@ export default function PartnerMerchantDetailPage() {
                   value={formCancelledUrl}
                   onChange={(e) => setFormCancelledUrl(e.target.value)}
                   placeholder="https://example.com/cancelled"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -405,7 +405,7 @@ export default function PartnerMerchantDetailPage() {
             <Button
               onClick={handleSave}
               disabled={saving}
-              className="bg-green-600 hover:bg-green-700 text-white"
+              className="bg-amber-500 hover:bg-amber-600 text-white"
             >
               <Save className="w-4 h-4 mr-2" />
               {saving ? "Saving..." : "Save Changes"}

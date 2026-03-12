@@ -61,7 +61,7 @@ const formatDateLong = (d: string | null) => {
 const statusConfig: Record<string, { label: string; color: string; bg: string; icon: any }> = {
   draft: { label: "Draft", color: "text-slate-600", bg: "bg-slate-100 border-slate-200", icon: FileText },
   sent: { label: "Sent", color: "text-blue-600", bg: "bg-blue-50 border-blue-200", icon: Send },
-  paid: { label: "Paid", color: "text-green-600", bg: "bg-green-50 border-green-200", icon: CheckCircle },
+  paid: { label: "Paid", color: "text-amber-500", bg: "bg-amber-50 border-amber-200", icon: CheckCircle },
   overdue: { label: "Overdue", color: "text-red-600", bg: "bg-red-50 border-red-200", icon: AlertCircle },
   cancelled: { label: "Cancelled", color: "text-gray-500", bg: "bg-gray-50 border-gray-200", icon: X },
 };
@@ -141,17 +141,17 @@ export default function MerchantInvoicesPage() {
           </CardContent>
         </Card>
 
-        <Card className="relative overflow-hidden border-0 shadow-lg shadow-green-500/5">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-transparent rounded-bl-full" />
+        <Card className="relative overflow-hidden border-0 shadow-lg shadow-amber-500/5">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-500/10 to-transparent rounded-bl-full" />
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
-                <CheckCircle className="w-5 h-5 text-green-600" />
+              <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                <CheckCircle className="w-5 h-5 text-amber-500" />
               </div>
               <span className="text-sm font-medium text-slate-500">Total Paid</span>
             </div>
             <p className="text-2xl font-bold text-slate-900">{formatCurrency(totalPaid)}</p>
-            <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+            <p className="text-xs text-amber-500 mt-1 flex items-center gap-1">
               <ArrowUpRight className="w-3 h-3" />
               {invoices.filter((i) => i.status === "paid").length} invoices paid
             </p>
@@ -318,9 +318,9 @@ function MerchantViewInvoiceDialog({ invoice, onClose }: { invoice: Invoice; onC
           </div>
 
           {invoice.paidAt && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-600" />
-              <span className="text-sm text-green-800 font-medium">Paid on {formatDateLong(invoice.paidAt)}</span>
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-amber-500" />
+              <span className="text-sm text-amber-700 font-medium">Paid on {formatDateLong(invoice.paidAt)}</span>
             </div>
           )}
 

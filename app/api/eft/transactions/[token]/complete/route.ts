@@ -271,7 +271,7 @@ export async function POST(
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-YETOPAYEFT-Signature': generateMerchantSignature(merchantWebhookPayload),
+            'X-ONEGATEEFT-Signature': generateMerchantSignature(merchantWebhookPayload),
           },
           body: JSON.stringify(merchantWebhookPayload),
         }).catch((error) => {

@@ -169,7 +169,7 @@ export function SecuritySettings() {
                 <p className="text-sm text-gray-600">Windows • Chrome • Johannesburg, South Africa</p>
                 <p className="text-xs text-gray-500 mt-1">Last active: Just now</p>
               </div>
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+              <Badge variant="outline" className="bg-amber-50 text-amber-600 border-amber-200">
                 Active
               </Badge>
             </div>

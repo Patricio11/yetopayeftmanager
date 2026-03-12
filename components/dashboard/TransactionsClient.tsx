@@ -271,7 +271,7 @@ export function TransactionsClient({
             variant="outline"
             size="sm"
             onClick={handleExportCSV}
-            className="hover:bg-green-50 dark:hover:bg-green-900/20"
+            className="hover:bg-amber-50 dark:hover:bg-amber-900/20"
           >
             <Download className="w-4 h-4" />
             Export CSV
@@ -302,11 +302,11 @@ export function TransactionsClient({
           </div>
         </Card>
 
-        <Card className="p-5 bg-gradient-to-br from-white to-green-50/50 dark:from-slate-800 dark:to-green-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer">
+        <Card className="p-5 bg-gradient-to-br from-white to-amber-50/50 dark:from-slate-800 dark:to-amber-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-9 h-9 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                <div className="w-9 h-9 bg-gradient-to-br from-amber-500 to-pink-600 rounded-lg flex items-center justify-center">
                   <CheckCircle className="w-5 h-5 text-white" />
                 </div>
                 <h3 className="text-xs font-medium text-slate-600 dark:text-slate-400">
@@ -662,7 +662,7 @@ export function TransactionsClient({
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-8 w-8 p-0 hover:bg-green-50 dark:hover:bg-green-900/20"
+                                className="h-8 w-8 p-0 hover:bg-amber-50 dark:hover:bg-amber-900/20"
                                 title="Resend Webhook"
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -670,7 +670,7 @@ export function TransactionsClient({
                                   setResendWebhookOpen(true);
                                 }}
                               >
-                                <Send className="w-4 h-4 text-green-600" />
+                                <Send className="w-4 h-4 text-amber-500" />
                               </Button>
                             </>
                           )}

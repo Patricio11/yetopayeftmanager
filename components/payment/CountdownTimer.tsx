@@ -125,7 +125,7 @@ export function CountdownTimer({
               className={`transition-all duration-1000 ease-linear ${
                 isWarning
                   ? 'text-amber-500 dark:text-amber-400'
-                  : 'text-green-500 dark:text-green-400'
+                  : 'text-amber-500 dark:text-amber-400'
               }`}
             />
           </svg>
@@ -158,7 +158,7 @@ export function CountdownTimer({
           className={`flex items-center gap-2 px-4 py-2 rounded-full ${
             isWarning
               ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
-              : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+              : 'bg-amber-100 dark:bg-amber-900/30 text-amber-500 dark:text-amber-400'
           }`}
         >
           <Clock className={config.icon} />

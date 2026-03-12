@@ -95,7 +95,7 @@ export default function AdminMerchantsPage() {
   };
 
   const kycBadge = (s: string) => {
-    if (s === 'approved') return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"><CheckCircle className="w-3 h-3" />Approved</span>;
+    if (s === 'approved') return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"><CheckCircle className="w-3 h-3" />Approved</span>;
     if (s === 'rejected') return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400"><XCircle className="w-3 h-3" />Rejected</span>;
     return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"><Clock className="w-3 h-3" />Pending</span>;
   };
@@ -109,7 +109,7 @@ export default function AdminMerchantsPage() {
         </div>
         <div className="flex gap-3">
           <Button variant="outline" onClick={fetchMerchants} className="gap-2"><RefreshCw className="w-4 h-4" />Refresh</Button>
-          <Button onClick={() => { setShowCreate(true); setInviteLink(''); }} className="gap-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white"><Plus className="w-4 h-4" />Add Merchant</Button>
+          <Button onClick={() => { setShowCreate(true); setInviteLink(''); }} className="gap-2 bg-gradient-to-r from-amber-500 to-pink-600 text-white"><Plus className="w-4 h-4" />Add Merchant</Button>
         </div>
       </div>
 
@@ -117,7 +117,7 @@ export default function AdminMerchantsPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
           { label: 'Total Merchants', value: stats.total, icon: Building2, bg: 'bg-blue-100 dark:bg-blue-900/30', fg: 'text-blue-600 dark:text-blue-400' },
-          { label: 'Active', value: stats.active, icon: CheckCircle, bg: 'bg-green-100 dark:bg-green-900/30', fg: 'text-green-600 dark:text-green-400' },
+          { label: 'Active', value: stats.active, icon: CheckCircle, bg: 'bg-amber-100 dark:bg-amber-900/30', fg: 'text-amber-500 dark:text-amber-400' },
           { label: 'Inactive', value: stats.inactive, icon: XCircle, bg: 'bg-slate-100 dark:bg-slate-800', fg: 'text-slate-600 dark:text-slate-400' },
           { label: 'KYC Pending', value: stats.kycPending, icon: Clock, bg: 'bg-amber-100 dark:bg-amber-900/30', fg: 'text-amber-600 dark:text-amber-400' },
         ].map((s) => (
@@ -168,14 +168,14 @@ export default function AdminMerchantsPage() {
             {filtered.map((m) => (
               <div key={m.id} className="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
                 <div className="flex items-center gap-4 min-w-0 flex-1">
-                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white font-bold text-lg shrink-0">
+                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500 to-pink-600 flex items-center justify-center text-white font-bold text-lg shrink-0">
                     {(m.companyName || m.name || '?')[0].toUpperCase()}
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="font-semibold text-slate-900 dark:text-white truncate">{m.companyName || m.name}</p>
                       {m.isActive
-                        ? <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" title="Active" />
+                        ? <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" title="Active" />
                         : <span className="w-2 h-2 rounded-full bg-slate-400 shrink-0" title="Inactive" />}
                     </div>
                     <p className="text-sm text-slate-500 truncate">{m.email}</p>
@@ -186,7 +186,7 @@ export default function AdminMerchantsPage() {
                   <span className="text-sm text-slate-500">{new Date(m.createdAt).toLocaleDateString()}</span>
                 </div>
                 <div className="flex items-center gap-2 ml-4">
-                  <Button size="sm" variant="ghost" onClick={() => toggleStatus(m.id, m.isActive)} className={m.isActive ? 'text-amber-600 hover:text-amber-700' : 'text-green-600 hover:text-green-700'}>
+                  <Button size="sm" variant="ghost" onClick={() => toggleStatus(m.id, m.isActive)} className={m.isActive ? 'text-amber-600 hover:text-amber-700' : 'text-amber-500 hover:text-amber-600'}>
                     {m.isActive ? 'Deactivate' : 'Activate'}
                   </Button>
                   <Link href={`/dashboard/admin/merchants/${m.id}`}>
@@ -206,8 +206,8 @@ export default function AdminMerchantsPage() {
             <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Create New Merchant</h2>
             {inviteLink ? (
               <div>
-                <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg mb-4">
-                  <p className="text-sm font-medium text-green-800 dark:text-green-400 mb-2">Merchant created! Send this invitation link:</p>
+                <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg mb-4">
+                  <p className="text-sm font-medium text-amber-700 dark:text-amber-400 mb-2">Merchant created! Send this invitation link:</p>
                   <div className="flex gap-2">
                     <Input value={inviteLink} readOnly className="text-xs" />
                     <Button size="sm" onClick={() => { navigator.clipboard.writeText(inviteLink); toast({ title: 'Copied!' }); }}><Copy className="w-4 h-4" /></Button>
@@ -222,7 +222,7 @@ export default function AdminMerchantsPage() {
                 <div><Label>Company Name</Label><Input value={form.companyName} onChange={(e) => setForm({ ...form, companyName: e.target.value })} required placeholder="Company (Pty) Ltd" /></div>
                 <div className="flex gap-3 pt-2">
                   <Button type="button" variant="outline" onClick={() => setShowCreate(false)} className="flex-1">Cancel</Button>
-                  <Button type="submit" disabled={creating} className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white">{creating ? 'Creating...' : 'Create & Invite'}</Button>
+                  <Button type="submit" disabled={creating} className="flex-1 bg-gradient-to-r from-amber-500 to-pink-600 text-white">{creating ? 'Creating...' : 'Create & Invite'}</Button>
                 </div>
               </form>
             )}

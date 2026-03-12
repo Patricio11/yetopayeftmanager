@@ -111,7 +111,7 @@ export const eftSystemFees = pgTable("eft_system_fees", {
   // Both fee values are always set at system level
   fixedFeeValue: numeric("fixed_fee_value", { precision: 10, scale: 4 }).notNull().default("5.00"),
   percentageFeeValue: numeric("percentage_fee_value", { precision: 10, scale: 4 }).notNull().default("2.50"),
-  volumeFeeValue: numeric("volume_fee_value", { precision: 10, scale: 4 }).notNull().default("0.0500"), // Default volume fee percentage
+  volumeFeeValue: numeric("volume_fee_value", { precision: 10, scale: 4 }).notNull().default("2.00"), // Default volume fee percentage (e.g. 2% of total volume)
 
   // VAT defaults
   vatEnabled: boolean("vat_enabled").default(true),

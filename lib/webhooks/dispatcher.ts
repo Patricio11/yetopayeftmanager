@@ -99,7 +99,7 @@ async function sendWebhook(
         'X-Webhook-Timestamp': timestamp,
         'X-Webhook-ID': payload.id,
         'X-Webhook-Event': payload.type,
-        'User-Agent': 'YetoPayEFT-Webhooks/1.0',
+        'User-Agent': 'OneGateEFT-Webhooks/1.0',
       },
       body: payloadString,
       signal: AbortSignal.timeout(30000), // 30 second timeout
@@ -394,7 +394,7 @@ export async function testWebhookEndpoint(
         'X-Webhook-Timestamp': Date.now().toString(),
         'X-Webhook-ID': testPayload.id,
         'X-Webhook-Event': testPayload.type,
-        'User-Agent': 'YetoPayEFT-Webhooks/1.0',
+        'User-Agent': 'OneGateEFT-Webhooks/1.0',
       },
       body: payloadString,
       signal: AbortSignal.timeout(10000), // 10 second timeout for test

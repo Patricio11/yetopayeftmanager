@@ -1,4 +1,4 @@
-// YetoPayEFT.tsx
+// OneGateEFT.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import {
@@ -58,7 +58,7 @@ type Merchant = {
   fnbVerifyResult?: boolean;
 };
 
-interface YetoPayEFTProps {
+interface OneGateEFTProps {
   initialData?: {
     transaction: {
       id: string;
@@ -89,7 +89,7 @@ interface YetoPayEFTProps {
   };
 }
 
-const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
+const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
   // --- Auth Session (for admin testing) ---
   const { data: session } = useSession();
   
@@ -921,11 +921,11 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     subtitle?: React.ReactNode;
   }> = ({ name, checked, onChange, title, subtitle }) => (
     <label className={`w-full p-3 border rounded-lg transition-all duration-200 flex items-center justify-between cursor-pointer
-      ${checked ? 'border-green-500 bg-green-50 shadow-sm' : 'border-gray-200 hover:border-green-400'}`}>
+      ${checked ? 'border-amber-500 bg-amber-50 shadow-sm' : 'border-gray-200 hover:border-amber-400'}`}>
       <input type="checkbox" className="sr-only" checked={checked} onChange={(e) => onChange(e.target.checked)} name={name} />
       <div className="flex items-center gap-3">
         <span className={`w-5 h-5 rounded-md border-2 flex items-center justify-center
-          ${checked ? 'border-green-600 bg-green-600' : 'border-gray-300 bg-white'}`}>
+          ${checked ? 'border-amber-500 bg-amber-500' : 'border-gray-300 bg-white'}`}>
           {checked && <Check size={12} className="text-white" />}
         </span>
         <div>
@@ -1118,7 +1118,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   // --- Rendering helpers ---
   const renderInitializingLoader = () => (
     <div className="flex flex-col items-center justify-center text-center p-8">
-      <div className="w-16 h-16 bg-gradient-to-r from-green-600 to-slate-600 rounded-full flex items-center justify-center mx-auto mb-4">
+      <div className="w-16 h-16 bg-gradient-to-r from-amber-500 to-slate-600 rounded-full flex items-center justify-center mx-auto mb-4">
         <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
       </div>
       <h3 className="text-lg font-semibold text-gray-900 mb-2">Preparing Your Secure Payment</h3>
@@ -1128,7 +1128,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
 
   const renderProcessingLoader = () => (
     <div className="flex flex-col items-center justify-center text-center p-8">
-      <div className="w-16 h-16 bg-gradient-to-r from-green-600 to-slate-600 rounded-full flex items-center justify-center mx-auto mb-4">
+      <div className="w-16 h-16 bg-gradient-to-r from-amber-500 to-slate-600 rounded-full flex items-center justify-center mx-auto mb-4">
         <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
       </div>
       <h3 className="text-lg font-semibold text-gray-900 mb-2">{processingMessage}</h3>
@@ -1166,16 +1166,16 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 ${
                 step < currentStepNum
-                  ? 'bg-green-500 text-white'
+                  ? 'bg-amber-500 text-white'
                   : step === currentStepNum
-                  ? 'bg-gradient-to-r from-green-600 to-slate-600 text-white'
+                  ? 'bg-gradient-to-r from-amber-500 to-slate-600 text-white'
                   : 'bg-gray-200 text-gray-400'
               }`}
             >
               {step < currentStepNum ? <Check size={16} /> : step}
             </div>
             {step < 3 && (
-              <div className={`w-12 h-0.5 mx-2 transition-all duration-300 ${step < currentStepNum ? 'bg-green-500' : 'bg-gray-200'}`} />
+              <div className={`w-12 h-0.5 mx-2 transition-all duration-300 ${step < currentStepNum ? 'bg-amber-500' : 'bg-gray-200'}`} />
             )}
           </React.Fragment>
         ))}
@@ -1208,8 +1208,8 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
                 disabled={isAutoFilled}
                 className={`w-full py-3 border rounded-lg transition-all duration-200 ${
                   isAutoFilled 
-                    ? 'bg-green-50 border-green-300 text-green-900 cursor-not-allowed font-mono pl-10 pr-4'
-                    : `px-4 focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                    ? 'bg-amber-50 border-amber-300 text-amber-900 cursor-not-allowed font-mono pl-10 pr-4'
+                    : `px-4 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 ${
                         error ? 'border-red-500' : 'border-gray-300'
                       }`
                 } ${input.type === 'password' && !isAutoFilled ? 'pr-12' : ''}`}
@@ -1217,7 +1217,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
               />
               {isAutoFilled && (
                 <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                  <CheckCircle size={18} className="text-green-600" />
+                  <CheckCircle size={18} className="text-amber-500" />
                 </div>
               )}
               {input.type === 'password' && (
@@ -1242,7 +1242,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
               name={name}
               value={value}
               onChange={(e) => handleInputChange(name, e.target.value)}
-              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-white ${
+              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white ${
                 error ? 'border-red-500' : 'border-gray-300'
               }`}
             >
@@ -1289,7 +1289,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
               value={value}
               onChange={(e) => handleInputChange(name, e.target.value)}
               placeholder={input.html_options?.placeholder || 'Enter the code shown above'}
-              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 ${
+              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 ${
                 error ? 'border-red-500' : 'border-gray-300'
               }`}
               autoComplete="off"
@@ -1386,7 +1386,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
               <button
                 type="button"
                 onClick={() => setShowTerms(true)}
-                className="text-green-700 hover:text-green-800 underline underline-offset-2"
+                className="text-amber-600 hover:text-amber-700 underline underline-offset-2"
               >
                 Terms &amp; Conditions
               </button>
@@ -1407,7 +1407,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
           <div className="w-[320px] sm:w-[380px] bg-white border border-gray-200 shadow-xl rounded-xl p-3">
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0">
-                <div className="w-10 h-10 rounded-md bg-gradient-to-r from-green-600 to-slate-600 text-white flex items-center justify-center">
+                <div className="w-10 h-10 rounded-md bg-gradient-to-r from-amber-500 to-slate-600 text-white flex items-center justify-center">
                   <Shield size={18} />
                 </div>
               </div>
@@ -1431,7 +1431,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
                   <button
                     type="button"
                     onClick={() => setShowTerms(true)}
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-gradient-to-r from-green-600 to-slate-600 text-white text-sm hover:from-green-700 hover:to-slate-700"
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-gradient-to-r from-amber-500 to-slate-600 text-white text-sm hover:from-amber-600 hover:to-slate-700"
                   >
                     View T&Cs
                   </button>
@@ -1480,7 +1480,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
               type="button"
               onClick={handleResendInApp}
               disabled={isLoading}
-              className="ml-4 inline-flex items-center text-sm text-green-700 hover:text-green-900"
+              className="ml-4 inline-flex items-center text-sm text-amber-600 hover:text-amber-700"
               title="Resend app approval"
             >
               <RefreshCcw className="w-4 h-4 mr-1" />
@@ -1505,7 +1505,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
                     onChange={(v) => setSaveCredentials(v)}
                     title={
                       <span className="flex items-center gap-2">
-                        <Save size={14} className="text-green-600" />
+                        <Save size={14} className="text-amber-500" />
                         Save my credentials for faster payments
                       </span>
                     }
@@ -1521,7 +1521,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
                 type="submit"
                 // button remains enabled even when not agreed; tooltip handles guidance
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-green-600 to-slate-600 text-white py-3 px-6 rounded-lg font-medium hover:from-green-700 hover:to-slate-700 focus:ring-4 focus:ring-green-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                className="w-full bg-gradient-to-r from-amber-500 to-slate-600 text-white py-3 px-6 rounded-lg font-medium hover:from-amber-600 hover:to-slate-700 focus:ring-4 focus:ring-amber-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
                 {isLoading ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" /> : (apiResponse.submit_message || 'Continue')}
               </button>
@@ -1531,7 +1531,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
                 <button
                   type="button"
                   onClick={handleBackToBank}
-                  className="w-full text-center text-sm text-gray-500 hover:text-green-700 transition-colors py-2"
+                  className="w-full text-center text-sm text-gray-500 hover:text-amber-600 transition-colors py-2"
                 >
                   <span className="flex items-center justify-center gap-1">
                     <ChevronLeft size={14} />
@@ -1566,7 +1566,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
               <label
                 key={option.value}
                 className={`w-full p-4 border rounded-lg transition-all duration-200 flex items-center justify-between group cursor-pointer ${
-                  isSelected ? 'border-green-500 shadow-md bg-green-50' : 'border-gray-200 hover:border-green-400'
+                  isSelected ? 'border-amber-500 shadow-md bg-amber-50' : 'border-gray-200 hover:border-amber-400'
                 }`}
               >
                 <input
@@ -1580,7 +1580,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
                 <span className="font-medium text-gray-900">{option.text}</span>
                 <div
                   className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
-                    isSelected ? 'border-green-500 bg-green-500' : 'border-gray-300'
+                    isSelected ? 'border-amber-500 bg-amber-500' : 'border-gray-300'
                   }`}
                 >
                   {isSelected && <Check size={12} className="text-white" />}
@@ -1592,7 +1592,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
         <button
           type="submit"
           disabled={isLoading || !selectedValue}
-          className="w-full bg-gradient-to-r from-green-600 to-slate-600 text-white py-3 px-6 rounded-lg font-medium hover:from-green-700 hover:to-slate-700 focus:ring-4 focus:ring-green-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+          className="w-full bg-gradient-to-r from-amber-500 to-slate-600 text-white py-3 px-6 rounded-lg font-medium hover:from-amber-600 hover:to-slate-700 focus:ring-4 focus:ring-amber-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
         >
           {isLoading ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" /> : (apiResponse.submit_message || 'Continue')}
         </button>
@@ -1608,10 +1608,10 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     return (
       <div className="text-center space-y-8">
         {/* Icon */}
-        <div className="w-20 h-20 bg-gradient-to-r from-green-600 to-slate-600 rounded-full flex items-center justify-center mx-auto relative">
-          <div className="absolute inset-0 border-2 border-green-300 rounded-full animate-ping"></div>
+        <div className="w-20 h-20 bg-gradient-to-r from-amber-500 to-slate-600 rounded-full flex items-center justify-center mx-auto relative">
+          <div className="absolute inset-0 border-2 border-amber-300 rounded-full animate-ping"></div>
           <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
-            <Shield className="w-8 h-8 text-green-600" />
+            <Shield className="w-8 h-8 text-amber-500" />
           </div>
         </div>
 
@@ -1713,7 +1713,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
                 {isSuccess ? 'Redirecting you back to the merchant...' : 'You will be redirected shortly...'}
               </p>
               <div className="flex justify-center mt-2">
-                <div className="w-6 h-6 border-2 border-gray-300 border-t-green-600 rounded-full animate-spin"></div>
+                <div className="w-6 h-6 border-2 border-gray-300 border-t-amber-500 rounded-full animate-spin"></div>
               </div>
             </div>
           ) : (
@@ -1723,7 +1723,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
           )}
         </div>
         {/* <div className="flex justify-center">
-          <div className="w-8 h-8 border-2 border-gray-300 border-t-green-600 rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-2 border-gray-300 border-t-amber-500 rounded-full animate-spin"></div>
         </div> */}
       </div>
     );
@@ -1869,13 +1869,13 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
                 key={bank.code}
                 onClick={() => handleBankSelect(bank)}
                 disabled={isLoading || selectedBank !== null}
-                className="w-full p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition-all duration-200 flex items-center justify-between group disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="w-full p-4 border border-gray-200 rounded-lg hover:border-amber-500 hover:shadow-md transition-all duration-200 flex items-center justify-between group disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 <div className="flex items-center">
                   <div className="w-1 h-8 rounded-full mr-4" style={{ backgroundColor: bank.color || '#16a34a' }} />
                   <span className="font-medium text-gray-900">{bank.name}</span>
                 </div>
-                <ChevronRight size={20} className="text-gray-400 group-hover:text-green-500 transition-colors duration-200" />
+                <ChevronRight size={20} className="text-gray-400 group-hover:text-amber-500 transition-colors duration-200" />
               </button>
             ))}
           </div>
@@ -1893,26 +1893,26 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-slate-50">
       {initialData?.isDemo && (
         <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-semibold">
           DEMO MODE — This is a test transaction. No real payment will be processed.
         </div>
       )}
-      <div className="bg-gradient-to-r from-green-600 to-slate-600 text-white">
+      <div className="bg-gradient-to-r from-amber-500 to-slate-600 text-white">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
                 <div className="w-6 h-6 bg-white rounded-full"></div>
               </div>
-              <h1 className="text-2xl font-bold">YetoPay</h1>
+              <h1 className="text-2xl font-bold">OneGate EFT</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <HelpCircle size={20} className="cursor-pointer hover:text-green-200 transition-colors" />
+              <HelpCircle size={20} className="cursor-pointer hover:text-amber-200 transition-colors" />
               <button
                 onClick={handleCancel}
-                className="cursor-pointer hover:text-green-200 transition-colors"
+                className="cursor-pointer hover:text-amber-200 transition-colors"
                 title="Cancel payment"
                 aria-label="Cancel payment"
               >
@@ -1988,8 +1988,8 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
               Secure TLS Encryption
             </div>
             <p className="text-xs text-gray-400">
-              By continuing you agree to YetoPay&apos;s{' '}
-              <button className="text-green-600 hover:underline" onClick={() => setShowTerms(true)}>
+              By continuing you agree to OneGate EFT&apos;s{' '}
+              <button className="text-amber-500 hover:underline" onClick={() => setShowTerms(true)}>
                 T&amp;Cs
               </button>
             </p>
@@ -2026,4 +2026,4 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   );
 };
 
-export default YetoPayEFT;
+export default OneGateEFT;

@@ -10,7 +10,7 @@ export const users = pgTable("user", {
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
   
-  // YETOPAYEFT specific fields
+  // OneGate EFT specific fields
   fullName: text("full_name"),
   phone: text("phone"),
   role: text("role", { enum: ["merchant", "admin", "partner"] }).default("merchant"),

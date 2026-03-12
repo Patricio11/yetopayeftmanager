@@ -51,18 +51,18 @@ function VerifyEmailContent() {
 
   if (verified) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-white/20 dark:border-slate-700/50 p-8 shadow-2xl text-center">
-            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-8 h-8 text-green-600" />
+            <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle className="w-8 h-8 text-amber-600" />
             </div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Email Verified!</h1>
             <p className="text-slate-600 dark:text-slate-400 mb-6">
               Your email has been verified successfully. You can now sign in to your account.
             </p>
             <Link href="/auth/login">
-              <Button className="w-full bg-gradient-to-r from-green-600 to-slate-600 text-white">
+              <Button className="w-full bg-gradient-to-r from-amber-500 to-pink-600 text-white">
                 Sign In
               </Button>
             </Link>
@@ -73,14 +73,12 @@ function VerifyEmailContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-6">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-2 mb-6">
-            <div className="w-12 h-12 bg-gradient-to-r from-green-600 to-slate-600 rounded-xl flex items-center justify-center shadow-lg">
-              <Mail className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-slate-900 dark:text-white">YETOPAYEFT</span>
+            <img src="/ogeft.jpg" alt="OneGate EFT" className="h-10 w-10 rounded" />
+            <span className="text-2xl font-bold text-slate-900 dark:text-white">OneGate EFT</span>
           </Link>
         </div>
 
@@ -108,8 +106,8 @@ function VerifyEmailContent() {
           )}
 
           {sent && (
-            <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl">
-              <div className="flex items-center space-x-2 text-green-800 dark:text-green-400">
+            <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+              <div className="flex items-center space-x-2 text-amber-800 dark:text-amber-400">
                 <CheckCircle className="w-5 h-5" />
                 <span className="text-sm font-medium">Verification email sent! Check your inbox.</span>
               </div>
@@ -138,14 +136,14 @@ function VerifyEmailContent() {
             <Button
               onClick={handleResend}
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-green-600 to-slate-600 hover:from-green-700 hover:to-slate-700 text-white py-6 rounded-xl"
+              className="w-full bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white py-6 rounded-xl"
             >
               {isLoading ? 'Sending...' : 'Resend Verification Email'}
             </Button>
           </div>
 
           <div className="mt-6 text-center">
-            <Link href="/auth/login" className="text-slate-600 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-400 text-sm font-medium inline-flex items-center">
+            <Link href="/auth/login" className="text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 text-sm font-medium inline-flex items-center">
               <ArrowLeft className="w-4 h-4 mr-1" />
               Back to Sign In
             </Link>

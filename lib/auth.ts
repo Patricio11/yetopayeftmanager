@@ -7,8 +7,8 @@ import { sendVerificationEmail, sendPasswordResetEmail } from "./email";
 export const auth = betterAuth({
   trustedOrigins: [
     process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-    "https://www.yetopay.co.za",
-    "https://yetopay.co.za",
+    "https://www.onegate.co.za",
+    "https://onegate.co.za",
     "https://oneeftmanager.vercel.app",
   ],
   database: drizzleAdapter(db, {

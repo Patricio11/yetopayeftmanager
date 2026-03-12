@@ -64,7 +64,7 @@ export function DashboardCharts({ data }: DashboardChartsProps) {
       <Card className="p-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-slate-200/50 dark:border-slate-700/50 shadow-xl">
         <div className="mb-6">
           <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-green-600" />
+            <TrendingUp className="w-5 h-5 text-amber-500" />
             Revenue Trend (Last 30 Days)
           </h3>
           <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
@@ -75,8 +75,8 @@ export function DashboardCharts({ data }: DashboardChartsProps) {
           <AreaChart data={data.dailyData}>
             <defs>
               <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" className="dark:stroke-slate-700" />
@@ -93,7 +93,7 @@ export function DashboardCharts({ data }: DashboardChartsProps) {
             <Area
               type="monotone"
               dataKey="revenue"
-              stroke="#10b981"
+              stroke="#f59e0b"
               strokeWidth={2}
               fillOpacity={1}
               fill="url(#colorRevenue)"
@@ -128,7 +128,7 @@ export function DashboardCharts({ data }: DashboardChartsProps) {
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend />
-              <Bar dataKey="completed" fill="#10b981" name="Completed" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="completed" fill="#f59e0b" name="Completed" radius={[4, 4, 0, 0]} />
               <Bar dataKey="pending" fill="#f59e0b" name="Pending" radius={[4, 4, 0, 0]} />
               <Bar dataKey="failed" fill="#ef4444" name="Failed" radius={[4, 4, 0, 0]} />
             </BarChart>
