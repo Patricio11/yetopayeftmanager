@@ -1,4 +1,7 @@
-import { AlertTriangle, ExternalLink } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { AlertTriangle, ExternalLink, X } from "lucide-react";
 import Link from "next/link";
 
 interface Outage {
@@ -13,11 +16,14 @@ interface BankOutageNoticeProps {
 }
 
 /**
- * Server-rendered banner shown to all dashboard users when one or more banks
+ * Banner shown to all dashboard users when one or more banks
  * have been automatically disabled due to consecutive failures.
+ * Includes a dismiss button to hide until next page load.
  */
 export function BankOutageNotice({ outages }: BankOutageNoticeProps) {
-  if (outages.length === 0) return null;
+  const [dismissed, setDismissed] = useState(false);
+
+  if (outages.length === 0 || dismissed) return null;
 
   const names = outages.map((o) => o.bankName).join(", ");
   const plural = outages.length > 1;
@@ -37,13 +43,22 @@ export function BankOutageNotice({ outages }: BankOutageNoticeProps) {
               : "Automatically disabled due to consecutive transaction failures."}
           </p>
         </div>
-        <Link
-          href="/dashboard/banks"
-          className="flex items-center gap-1 text-xs bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full whitespace-nowrap transition-colors flex-shrink-0"
-        >
-          Manage Banks
-          <ExternalLink className="w-3 h-3" />
-        </Link>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <Link
+            href="/dashboard/banks"
+            className="flex items-center gap-1 text-xs bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full whitespace-nowrap transition-colors"
+          >
+            Manage Banks
+            <ExternalLink className="w-3 h-3" />
+          </Link>
+          <button
+            onClick={() => setDismissed(true)}
+            className="p-1 rounded-full hover:bg-white/20 transition-colors"
+            aria-label="Dismiss notification"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </div>
   );

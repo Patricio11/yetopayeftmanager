@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { eftBanks, eftTransactions, platformSettings } from "@/lib/db/schema";
-import { eq, and, desc, inArray } from "drizzle-orm";
+import { eq, and, desc, inArray, gte } from "drizzle-orm";
 import { sendBankAlertEmail, sendBankRecoveryEmail } from "@/lib/email";
 
 const FAILURE_THRESHOLD = 10;
@@ -194,12 +194,26 @@ export async function checkBankHealth(
 
   if (!bank || !bank.enabled) return; // Already disabled — nothing more to do
 
+  // Check if this bank was recently re-enabled — only count transactions
+  // after the re-enable timestamp so old failures don't cause instant re-disable
+  const reenableKey = `bank_reenabled_at_${bankId}`;
+  const reenableRaw = await getSetting(reenableKey);
+  const reenableDate = reenableRaw ? new Date(reenableRaw) : null;
+
+  // Build query conditions
+  const conditions = [
+    eq(eftTransactions.eftBankId, bankId),
+    inArray(eftTransactions.status, [...FINALIZED_STATUSES]),
+  ];
+
+  // Only consider transactions after the bank was re-enabled
+  if (reenableDate && !isNaN(reenableDate.getTime())) {
+    conditions.push(gte(eftTransactions.updatedAt, reenableDate));
+  }
+
   // Fetch last FAILURE_THRESHOLD finalized transactions for this bank
   const recent = await db.query.eftTransactions.findMany({
-    where: and(
-      eq(eftTransactions.eftBankId, bankId),
-      inArray(eftTransactions.status, [...FINALIZED_STATUSES])
-    ),
+    where: and(...conditions),
     orderBy: [desc(eftTransactions.updatedAt)],
     limit: FAILURE_THRESHOLD,
   });
@@ -278,6 +292,12 @@ export async function handleBankReenabled(bankId: string): Promise<void> {
   // Clear cooldown so next failure cycle triggers fresh alerts
   const cooldownKey = `bank_alert_cooldown_${bank.code}`;
   await setSetting(cooldownKey, "");
+
+  // Record the re-enable timestamp so checkBankHealth only counts
+  // transactions AFTER this point — prevents instant re-disable from
+  // old failed transactions still in the query window.
+  const reenableKey = `bank_reenabled_at_${bankId}`;
+  await setSetting(reenableKey, new Date().toISOString());
 
   console.log(`✅ Bank ${bank.bankName} re-enabled — sending recovery alerts`);
 
