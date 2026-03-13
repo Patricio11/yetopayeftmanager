@@ -1118,7 +1118,7 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
   // --- Rendering helpers ---
   const renderInitializingLoader = () => (
     <div className="flex flex-col items-center justify-center text-center p-8">
-      <div className="w-16 h-16 bg-gradient-to-r from-amber-500 to-slate-600 rounded-full flex items-center justify-center mx-auto mb-4">
+      <div className="w-16 h-16 bg-gradient-to-r from-amber-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
         <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
       </div>
       <h3 className="text-lg font-semibold text-gray-900 mb-2">Preparing Your Secure Payment</h3>
@@ -1128,7 +1128,7 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
 
   const renderProcessingLoader = () => (
     <div className="flex flex-col items-center justify-center text-center p-8">
-      <div className="w-16 h-16 bg-gradient-to-r from-amber-500 to-slate-600 rounded-full flex items-center justify-center mx-auto mb-4">
+      <div className="w-16 h-16 bg-gradient-to-r from-amber-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
         <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
       </div>
       <h3 className="text-lg font-semibold text-gray-900 mb-2">{processingMessage}</h3>
@@ -1168,7 +1168,7 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
                 step < currentStepNum
                   ? 'bg-amber-500 text-white'
                   : step === currentStepNum
-                  ? 'bg-gradient-to-r from-amber-500 to-slate-600 text-white'
+                  ? 'bg-gradient-to-r from-amber-500 to-pink-600 text-white'
                   : 'bg-gray-200 text-gray-400'
               }`}
             >
@@ -1407,7 +1407,7 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
           <div className="w-[320px] sm:w-[380px] bg-white border border-gray-200 shadow-xl rounded-xl p-3">
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0">
-                <div className="w-10 h-10 rounded-md bg-gradient-to-r from-amber-500 to-slate-600 text-white flex items-center justify-center">
+                <div className="w-10 h-10 rounded-md bg-gradient-to-r from-amber-500 to-pink-600 text-white flex items-center justify-center">
                   <Shield size={18} />
                 </div>
               </div>
@@ -1431,7 +1431,7 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
                   <button
                     type="button"
                     onClick={() => setShowTerms(true)}
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-gradient-to-r from-amber-500 to-slate-600 text-white text-sm hover:from-amber-600 hover:to-slate-700"
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-gradient-to-r from-amber-500 to-pink-600 text-white text-sm hover:from-amber-600 hover:to-pink-700"
                   >
                     View T&Cs
                   </button>
@@ -1521,7 +1521,7 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
                 type="submit"
                 // button remains enabled even when not agreed; tooltip handles guidance
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-amber-500 to-slate-600 text-white py-3 px-6 rounded-lg font-medium hover:from-amber-600 hover:to-slate-700 focus:ring-4 focus:ring-amber-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                className="w-full bg-gradient-to-r from-amber-500 to-pink-600 text-white py-3 px-6 rounded-lg font-medium hover:from-amber-600 hover:to-pink-700 focus:ring-4 focus:ring-amber-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
                 {isLoading ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" /> : (apiResponse.submit_message || 'Continue')}
               </button>
@@ -1592,7 +1592,7 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
         <button
           type="submit"
           disabled={isLoading || !selectedValue}
-          className="w-full bg-gradient-to-r from-amber-500 to-slate-600 text-white py-3 px-6 rounded-lg font-medium hover:from-amber-600 hover:to-slate-700 focus:ring-4 focus:ring-amber-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+          className="w-full bg-gradient-to-r from-amber-500 to-pink-600 text-white py-3 px-6 rounded-lg font-medium hover:from-amber-600 hover:to-pink-700 focus:ring-4 focus:ring-amber-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
         >
           {isLoading ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" /> : (apiResponse.submit_message || 'Continue')}
         </button>
@@ -1608,7 +1608,7 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
     return (
       <div className="text-center space-y-8">
         {/* Icon */}
-        <div className="w-20 h-20 bg-gradient-to-r from-amber-500 to-slate-600 rounded-full flex items-center justify-center mx-auto relative">
+        <div className="w-20 h-20 bg-gradient-to-r from-amber-500 to-pink-600 rounded-full flex items-center justify-center mx-auto relative">
           <div className="absolute inset-0 border-2 border-amber-300 rounded-full animate-ping"></div>
           <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
             <Shield className="w-8 h-8 text-amber-500" />
@@ -1872,7 +1872,7 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
                 className="w-full p-4 border border-gray-200 rounded-lg hover:border-amber-500 hover:shadow-md transition-all duration-200 flex items-center justify-between group disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 <div className="flex items-center">
-                  <div className="w-1 h-8 rounded-full mr-4" style={{ backgroundColor: bank.color || '#16a34a' }} />
+                  <div className="w-1 h-8 rounded-full mr-4" style={{ backgroundColor: bank.color || '#F9B233' }} />
                   <span className="font-medium text-gray-900">{bank.name}</span>
                 </div>
                 <ChevronRight size={20} className="text-gray-400 group-hover:text-amber-500 transition-colors duration-200" />
@@ -1893,19 +1893,17 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-pink-50">
       {initialData?.isDemo && (
         <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-semibold">
           DEMO MODE — This is a test transaction. No real payment will be processed.
         </div>
       )}
-      <div className="bg-gradient-to-r from-amber-500 to-slate-600 text-white">
+      <div className="bg-gradient-to-r from-amber-500 to-pink-600 text-white">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
-                <div className="w-6 h-6 bg-white rounded-full"></div>
-              </div>
+              <img src="/ogeft.jpg" alt="OneGate EFT" className="w-10 h-10 rounded-lg shadow-sm" />
               <h1 className="text-2xl font-bold">OneGate EFT</h1>
             </div>
             <div className="flex items-center space-x-4">

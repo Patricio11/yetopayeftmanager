@@ -18,7 +18,7 @@
 //         {/* Header */}
 //         <div className="flex items-center justify-between px-6 py-4 border-b">
 //           <div className="flex items-center gap-3">
-//             <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-green-600 to-slate-600 text-white flex items-center justify-center">
+//             <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-amber-500 to-pink-600 text-white flex items-center justify-center">
 //               <FileText size={20} />
 //             </div>
 //             <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
@@ -116,7 +116,7 @@
 //             </button>
 //             <button
 //               onClick={() => { onAgree?.(); onClose(); }}
-//               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-green-600 to-slate-600 text-white hover:from-green-700 hover:to-slate-700"
+//               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-pink-600 text-white hover:from-green-700 hover:to-slate-700"
 //             >
 //               <Check size={18} />
 //               Agree & Close
@@ -159,7 +159,7 @@ const TermsModal: React.FC<TermsModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-green-600 to-slate-600 text-white flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-amber-500 to-pink-600 text-white flex items-center justify-center">
               <FileText size={20} />
             </div>
             <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
@@ -263,7 +263,7 @@ const TermsModal: React.FC<TermsModalProps> = ({
             </button>
             <button
               onClick={() => { onAgree?.(); onClose(); }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-green-600 to-slate-600 text-white hover:from-green-700 hover:to-slate-700"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-pink-600 text-white hover:from-green-700 hover:to-slate-700"
             >
               <Check size={18} />
               Agree &amp; Close

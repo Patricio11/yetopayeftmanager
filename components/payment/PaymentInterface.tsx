@@ -71,9 +71,9 @@ export default function PaymentInterface({
 
   if (!isClient) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-pink-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Loading payment interface...</p>
         </div>
       </div>
@@ -110,7 +110,7 @@ export default function PaymentInterface({
           banks: banks.map(bank => ({
             code: bank.code,
             name: bank.name,
-            color: bank.color || '#16a34a',
+            color: bank.color || '#F9B233',
           })),
           merchantBankAccount: {
             accountNumber: merchantBankAccount.accountNumber,
