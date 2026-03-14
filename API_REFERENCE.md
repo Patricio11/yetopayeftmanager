@@ -287,6 +287,65 @@ Get a paginated list of your transactions.
 }
 ```
 
+#### GET /api/merchant/transactions/{id}
+
+Look up a single transaction by UUID or reference string. Only returns transactions belonging to the authenticated merchant.
+
+**Path Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `id` | string | Yes | Transaction UUID or reference string |
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "status": "completed",
+    "amount": "250.00",
+    "reference": "INV-2024-001",
+    "description": "Order #1234",
+    "customerEmail": "customer@example.com",
+    "customerName": "Jane Doe",
+    "failureReason": null,
+    "statusReason": null,
+    "bank": { "name": "FNB", "code": "fnb" },
+    "createdAt": "2024-12-01T15:00:00Z",
+    "updatedAt": "2024-12-01T15:30:00Z",
+    "completedAt": "2024-12-01T15:30:00Z"
+  }
+}
+```
+
+**Error (404):**
+
+```json
+{
+  "error": "Transaction not found"
+}
+```
+
+**cURL Example:**
+
+```bash
+# By transaction ID
+curl /api/merchant/transactions/550e8400-e29b-41d4-a716-446655440000 \
+  -H "Authorization: Bearer yp_live_..." \
+  -H "X-Merchant-ID: <merchant-id>" \
+  -H "X-Timestamp: $(date +%s)000" \
+  -H "X-Signature: sha256=<hmac>"
+
+# By reference
+curl /api/merchant/transactions/INV-2024-001 \
+  -H "Authorization: Bearer yp_live_..." \
+  -H "X-Merchant-ID: <merchant-id>" \
+  -H "X-Timestamp: $(date +%s)000" \
+  -H "X-Signature: sha256=<hmac>"
+```
+
 ---
 
 ### Analytics

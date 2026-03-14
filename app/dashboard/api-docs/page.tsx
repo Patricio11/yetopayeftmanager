@@ -478,6 +478,7 @@ function EndpointsSection({ selectedLanguage, onCopy, copiedCode }: any) {
       label: "Transactions",
       endpoints: [
         { id: "list-transactions", method: "GET", path: "/api/merchant/transactions", label: "List Transactions", permission: "transactions.read" },
+        { id: "get-transaction", method: "GET", path: "/api/merchant/transactions/{id}", label: "Get Transaction", permission: "transactions.read" },
       ],
     },
     {
@@ -681,6 +682,42 @@ function EndpointDetailFull({ endpointId, language, onCopy, copiedCode }: any) {
 }`,
       curlExample: `curl -G /api/merchant/transactions \\
   -d "status=completed&from=2024-01-01&limit=20" \\
+  -H "Authorization: Bearer yp_live_..." \\
+  -H "X-Merchant-ID: <merchant-id>" \\
+  -H "X-Timestamp: <ts>" -H "X-Signature: sha256=<hmac>"`,
+    },
+    "get-transaction": {
+      title: "Get Transaction",
+      description: "Look up a single transaction by ID (UUID) or reference string. Returns full transaction details including bank info and failure reasons.",
+      params: [
+        { name: "id", type: "string", required: true, desc: "Transaction UUID or reference string" },
+      ],
+      responseExample: `{
+  "success": true,
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "status": "completed",
+    "amount": "250.00",
+    "reference": "INV-2024-001",
+    "description": "Order #1234",
+    "customerEmail": "customer@example.com",
+    "customerName": "Jane Doe",
+    "failureReason": null,
+    "statusReason": null,
+    "bank": { "name": "FNB", "code": "fnb" },
+    "createdAt": "2024-12-01T15:00:00Z",
+    "updatedAt": "2024-12-01T15:30:00Z",
+    "completedAt": "2024-12-01T15:30:00Z"
+  }
+}`,
+      curlExample: `# By transaction ID
+curl /api/merchant/transactions/550e8400-e29b-41d4-a716-446655440000 \\
+  -H "Authorization: Bearer yp_live_..." \\
+  -H "X-Merchant-ID: <merchant-id>" \\
+  -H "X-Timestamp: <ts>" -H "X-Signature: sha256=<hmac>"
+
+# By reference
+curl /api/merchant/transactions/INV-2024-001 \\
   -H "Authorization: Bearer yp_live_..." \\
   -H "X-Merchant-ID: <merchant-id>" \\
   -H "X-Timestamp: <ts>" -H "X-Signature: sha256=<hmac>"`,
