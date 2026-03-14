@@ -92,7 +92,8 @@ export async function GET(
       );
     }
 
-    // Fetch merchant's primary bank account
+    // Fetch merchant's primary bank account (not required for demo mode)
+    const isDemo = !!transaction.isDemo;
     const primaryBankAccount = await db.query.eftBankAccounts.findFirst({
       where: and(
         eq(eftBankAccounts.merchantId, merchantId),
@@ -100,11 +101,11 @@ export async function GET(
       ),
     });
 
-    if (!primaryBankAccount) {
+    if (!primaryBankAccount && !isDemo) {
       return NextResponse.json(
-        { 
-          success: false, 
-          message: "Merchant has no primary bank account configured. Please contact the merchant." 
+        {
+          success: false,
+          message: "Merchant has no primary bank account configured. Please contact the merchant."
         },
         { status: 400 }
       );
@@ -151,13 +152,19 @@ export async function GET(
           name: merchant.companyName || merchant.name,
           logo: merchant.companyLogoUrl,
           email: merchant.email,
-          // Bank account details for payment
-          bankAccount: {
+          // Bank account details for payment (placeholder for demo mode)
+          bankAccount: primaryBankAccount ? {
             accountNumber: maskAccountNumber(primaryBankAccount.accountNumber),
             accountName: primaryBankAccount.accountHolderName,
             branchCode: primaryBankAccount.branchCode,
             bankCode: primaryBankAccount.bankCode,
             accountType: primaryBankAccount.accountType,
+          } : {
+            accountNumber: '••••••0000',
+            accountName: 'Demo Account',
+            branchCode: '000000',
+            bankCode: 'demo',
+            accountType: 'cheque',
           },
         },
         banks: mappedBanks,
@@ -213,7 +220,7 @@ export async function GET(
       );
     }
 
-    if (error.message?.includes("rate limit")) {
+    if (error.message?.includes("rate limit") || error.message?.includes("Too many")) {
       return NextResponse.json(
         { 
           success: false, 

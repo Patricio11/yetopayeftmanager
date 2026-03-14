@@ -61,7 +61,8 @@ export async function POST(
       );
     }
 
-    // Fetch merchant's primary bank account
+    // Fetch merchant's primary bank account (not required for demo mode)
+    const isDemo = !!transaction.isDemo;
     const primaryBankAccount = await db.query.eftBankAccounts.findFirst({
       where: and(
         eq(eftBankAccounts.merchantId, merchantId),
@@ -69,14 +70,25 @@ export async function POST(
       ),
     });
 
-    if (!primaryBankAccount) {
+    if (!primaryBankAccount && !isDemo) {
       return NextResponse.json(
-        { 
-          success: false, 
-          message: "Merchant bank account not configured" 
+        {
+          success: false,
+          message: "Merchant bank account not configured"
         },
         { status: 400 }
       );
+    }
+
+    // Demo mode: skip JWT generation — no real EFT service call needed
+    if (isDemo) {
+      return NextResponse.json({
+        success: true,
+        jwt_token: 'demo_token',
+        expires_in: 3600,
+        eft_service_url: 'demo',
+        isDemo: true,
+      });
     }
 
     // Load private key from environment variable or file path
@@ -108,12 +120,12 @@ export async function POST(
       transaction_id: transactionId,
       amount: transaction.amount,
       reference: transaction.reference,
-      merchant_account_number: primaryBankAccount.accountNumber,
-      merchant_account_name: primaryBankAccount.accountHolderName,
-      merchant_account_type: primaryBankAccount.accountType,
+      merchant_account_number: primaryBankAccount!.accountNumber,
+      merchant_account_name: primaryBankAccount!.accountHolderName,
+      merchant_account_type: primaryBankAccount!.accountType,
       merchant_reference: transaction.reference,
       merchant_name: merchant.companyName || merchant.name,
-      merchant_bank: primaryBankAccount.bankCode?.toLowerCase(),
+      merchant_bank: primaryBankAccount!.bankCode?.toLowerCase(),
       notify_url: transaction.notifyUrl || '',
     };
 

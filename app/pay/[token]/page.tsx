@@ -22,10 +22,11 @@ export default async function PaymentPage({ params }: PageProps) {
 
     const data = await response.json();
 
-    // Handle terminal statuses (completed, failed, expired, etc.)
+    // Handle non-OK responses
     if (!response.ok) {
+      console.error(`Payment init failed [${response.status}]:`, data.message || data.error || 'Unknown error');
       const status = data.status;
-      
+
       if (status === 'completed' || status === 'failed') {
         const isSuccess = status === 'completed';
         return (
@@ -92,25 +93,44 @@ export default async function PaymentPage({ params }: PageProps) {
       />
     );
   } catch (error: any) {
+    const msg = error.message || '';
+    console.error('Payment page error:', msg);
+
+    const getErrorDisplay = (message: string) => {
+      if (message.includes('expired'))
+        return { title: 'Payment Link Expired', text: 'This payment link has expired. Please request a new one from the merchant.' };
+      if (message.includes('already been used'))
+        return { title: 'Payment Link Used', text: 'This payment link has already been used and cannot be accessed again.' };
+      if (message.includes('revoked') || message.includes('cancelled'))
+        return { title: 'Payment Link Cancelled', text: 'This payment link has been cancelled by the merchant.' };
+      if (message.includes('Too many') || message.includes('rate limit'))
+        return { title: 'Too Many Attempts', text: 'Too many attempts on this link. Please try again later or request a new link.' };
+      if (message.includes('bank account'))
+        return { title: 'Configuration Error', text: message };
+      if (message.includes('Merchant not found'))
+        return { title: 'Merchant Not Found', text: 'The merchant associated with this payment link could not be found.' };
+      // Show actual API error message if available, fallback to generic
+      return {
+        title: 'Invalid Payment Link',
+        text: message || 'This payment link is invalid or has encountered an error.',
+      };
+    };
+
+    const display = getErrorDisplay(msg);
+
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-green-50 dark:from-slate-900 dark:to-slate-800 p-6">
-        <div className="max-w-md w-full text-center p-8 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700">
-          <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-white to-pink-50 p-6">
+        <div className="max-w-md w-full text-center p-8 bg-white rounded-2xl shadow-2xl border border-slate-200">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Invalid Payment Link</h1>
-          <p className="text-slate-600 dark:text-slate-400 mb-6">
-            {error.message === 'This payment link has expired' 
-              ? 'This payment link has expired. Please request a new one from the merchant.'
-              : error.message === 'This payment link has already been used'
-              ? 'This payment link has already been used and cannot be accessed again.'
-              : error.message === 'This payment link has been revoked'
-              ? 'This payment link has been cancelled by the merchant.'
-              : 'This payment link is invalid or has encountered an error.'}
+          <h1 className="text-2xl font-bold text-slate-900 mb-2">{display.title}</h1>
+          <p className="text-slate-600 mb-6">
+            {display.text}
           </p>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-slate-500">
             If you believe this is an error, please contact the merchant.
           </p>
         </div>

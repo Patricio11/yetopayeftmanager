@@ -343,17 +343,19 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
         if (initialData.termsContent !== undefined) setTermsContent(initialData.termsContent);
         if (initialData.showSaveCredentials !== undefined) setSaveCredentialsEnabled(!!initialData.showSaveCredentials);
         
-        // Generate JWT token for EFT service using public endpoint
-        const jwtResponse = await fetch(`${FRONTEND_API_BASE_URL}/eft/transactions/${initialData.token}/jwt`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        
-        const jwtData = await jwtResponse.json();
-        if (jwtData.success && jwtData.jwt_token) {
-          setAuthSecretBearerToken(jwtData.jwt_token);
-        } else {
-          throw new Error(jwtData.message || 'Failed to generate JWT token');
+        // Generate JWT token for EFT service (skip for demo mode)
+        if (!initialData.isDemo) {
+          const jwtResponse = await fetch(`${FRONTEND_API_BASE_URL}/eft/transactions/${initialData.token}/jwt`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+          });
+
+          const jwtData = await jwtResponse.json();
+          if (jwtData.success && jwtData.jwt_token) {
+            setAuthSecretBearerToken(jwtData.jwt_token);
+          } else {
+            throw new Error(jwtData.message || 'Failed to generate JWT token');
+          }
         }
         
         setCurrentStep('init');
