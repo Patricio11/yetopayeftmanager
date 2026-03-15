@@ -73,7 +73,7 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 border-b border-slate-200/60 dark:border-white/5 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <img src="/ogeft.jpg" alt="OneGate EFT" className="h-9 w-9 rounded-lg shadow-sm group-hover:shadow-md transition-shadow" />
+            <img src="/ogeft.png" alt="OneGate EFT" className="h-9 w-9 rounded-lg shadow-sm group-hover:shadow-md transition-shadow" />
             <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
               OneGate<span className="og-gradient-text">EFT</span>
             </span>
@@ -354,7 +354,7 @@ export default function LandingPage() {
             {/* Brand */}
             <div className="col-span-2 md:col-span-1">
               <Link href="/" className="flex items-center gap-2.5">
-                <img src="/ogeft.jpg" alt="OneGate EFT" className="h-9 w-9 rounded-lg" />
+                <img src="/ogeft.png" alt="OneGate EFT" className="h-9 w-9 rounded-lg" />
                 <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
                   OneGate<span className="og-gradient-text">EFT</span>
                 </span>

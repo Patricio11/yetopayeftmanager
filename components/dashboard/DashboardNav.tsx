@@ -169,7 +169,7 @@ export function DashboardNav({ userRole, accountMode }: DashboardNavProps) {
               </div> */}
               <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-amber-400 rounded-full border-2 border-white dark:border-slate-900 animate-pulse" />
             </div>
-            <img src="/ogeft.jpg" alt="OneGate EFT" className="h-14 w-14 rounded" />
+            <img src="/ogeft.png" alt="OneGate EFT" className="h-14 w-14 rounded" />
             <span className="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
               OneGate EFT
             </span>

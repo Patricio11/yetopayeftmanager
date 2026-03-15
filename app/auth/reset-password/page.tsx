@@ -103,7 +103,7 @@ function ForgotPassword() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-2 mb-6">
-            <img src="/ogeft.jpg" alt="OneGate EFT" className="h-10 w-10 rounded" />
+            <img src="/ogeft.png" alt="OneGate EFT" className="h-10 w-10 rounded" />
             <span className="text-2xl font-bold text-slate-900 dark:text-white">OneGate EFT</span>
           </Link>
         </div>
@@ -261,7 +261,7 @@ function SetNewPassword({ token }: { token: string }) {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-2 mb-6">
-            <img src="/ogeft.jpg" alt="OneGate EFT" className="h-10 w-10 rounded" />
+            <img src="/ogeft.png" alt="OneGate EFT" className="h-10 w-10 rounded" />
             <span className="text-2xl font-bold text-slate-900 dark:text-white">OneGate EFT</span>
           </Link>
         </div>

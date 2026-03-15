@@ -1914,7 +1914,7 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <img src="/ogeft.jpg" alt="OneGate EFT" className="w-10 h-10 rounded-lg shadow-sm" />
+              <img src="/ogeft.png" alt="OneGate EFT" className="w-10 h-10 rounded-lg shadow-sm" />
               <h1 className="text-2xl font-bold">OneGate EFT</h1>
             </div>
             <div className="flex items-center space-x-4">
