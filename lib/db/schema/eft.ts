@@ -9,6 +9,7 @@ export const eftBanks = pgTable("eft_banks", {
   color: text("color"), // Brand color for UI
   branchCode: text("branch_code"),
   enabled: boolean("enabled").default(true),
+  eftServiceUrl: text("eft_service_url"), // Per-bank EFT service URL (overrides default)
   displayOrder: integer("display_order").default(0), // Order for display in payment page
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

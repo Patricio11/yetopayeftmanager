@@ -13,6 +13,7 @@ const updateBankSchema = z.object({
   color: z.string().optional(),
   branchCode: z.string().optional(),
   enabled: z.boolean().optional(),
+  eftServiceUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
 });
 
 /**
@@ -113,12 +114,13 @@ export async function PATCH(
       .update(eftBanks)
       .set({
         ...validatedData,
+        eftServiceUrl: validatedData.eftServiceUrl || null,
         updatedAt: new Date(),
       })
       .where(eq(eftBanks.id, id))
       .returning();
 
-    writeAuditLog({ userId: auth.session.user.id, action: "update", resource: "bank", resourceId: id, changes: { before: { bankName: existingBank.bankName, code: existingBank.code, enabled: existingBank.enabled, color: existingBank.color, branchCode: existingBank.branchCode }, after: validatedData }, request });
+    writeAuditLog({ userId: auth.session.user.id, action: "update", resource: "bank", resourceId: id, changes: { before: { bankName: existingBank.bankName, code: existingBank.code, enabled: existingBank.enabled, color: existingBank.color, branchCode: existingBank.branchCode, eftServiceUrl: existingBank.eftServiceUrl }, after: validatedData }, request });
 
     // If the bank was just re-enabled, clear the outage record and send recovery alerts
     if (validatedData.enabled === true && existingBank.enabled === false) {

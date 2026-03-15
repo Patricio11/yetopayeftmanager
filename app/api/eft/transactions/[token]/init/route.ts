@@ -117,12 +117,14 @@ export async function GET(
       orderBy: [asc(eftBanks.displayOrder)],
     });
 
-    // Map banks to frontend format
+    // Map banks to frontend format (include per-bank EFT service URL if set)
+    const defaultEftUrl = process.env.NEXT_PUBLIC_EFT_SERVICE_URL || 'http://localhost:8080/v1/eft';
     const mappedBanks = enabledBanks.map(bank => ({
       code: bank.code,
       name: bank.bankName,
       color: bank.color,
       enabled: bank.enabled,
+      eftServiceUrl: bank.eftServiceUrl || defaultEftUrl,
     }));
 
     // Fetch global T&C content from platform settings

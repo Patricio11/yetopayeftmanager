@@ -11,10 +11,10 @@ import { getDeviceFingerprint, collectDeviceInfo, getDeviceDescription } from '@
 import { saveCredentialsToBrowser, deleteCredentialFromBrowser } from '@/lib/utils/browser-credential-storage';
 import { useSession } from '@/lib/auth-client';
 
-const EFT_API_BASE_URL = process.env.NEXT_PUBLIC_EFT_SERVICE_URL || 'http://localhost:8080/v1/eft';
+const DEFAULT_EFT_API_BASE_URL = process.env.NEXT_PUBLIC_EFT_SERVICE_URL || 'http://localhost:8080/v1/eft';
 const FRONTEND_API_BASE_URL = '/api';
 
-type Bank = { code: string; name: string; color?: string };
+type Bank = { code: string; name: string; color?: string; eftServiceUrl?: string };
 type ApiInputOption = { value: string; text: string };
 type ApiInput = {
   type: 'text' | 'password' | 'select' | 'checkbox' | 'hidden' | 'tc' | 'submit' | 'captcha' | 'input-group';
@@ -539,6 +539,15 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
     return errors;
   };
 
+  // Get EFT service URL for a specific bank (supports per-bank routing)
+  const getEftUrl = (bankCode?: string) => {
+    if (bankCode) {
+      const bank = banks.find(b => b.code === bankCode);
+      if (bank?.eftServiceUrl) return bank.eftServiceUrl;
+    }
+    return DEFAULT_EFT_API_BASE_URL;
+  };
+
   const handleInputChange = (name: string, value: any) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (formErrors[name]) setFormErrors((prev) => ({ ...prev, [name]: null }));
@@ -546,7 +555,7 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
 
   // --- Network: call EFT API endpoints for bank/step ---
   const executeStepApi = async (bankCode: string, step: string, data: Record<string, any>) => {
-    const url = `${EFT_API_BASE_URL}/${bankCode}/${step}?session_id=${sessionId}`;
+    const url = `${getEftUrl(bankCode)}/${bankCode}/${step}?session_id=${sessionId}`;
     console.log(`[EFT] Calling ${step}`);
     const response = await fetch(url, { method: 'POST', headers: authHeader(), body: JSON.stringify({ ...data }) });
     const result: ApiResponse = await response.json();
@@ -564,7 +573,7 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
     if (sseRef.current) { sseRef.current.close(); sseRef.current = null; }
     if (finalPollTimer.current) { clearInterval(finalPollTimer.current); finalPollTimer.current = null; }
 
-    const sseUrl = `${EFT_API_BASE_URL}/${bankCode}/events?session_id=${sessionId}&token=${encodeURIComponent(authSecretBearerToken)}`;
+    const sseUrl = `${getEftUrl(bankCode)}/${bankCode}/events?session_id=${sessionId}&token=${encodeURIComponent(authSecretBearerToken)}`;
     console.log('[SSE] Connecting to:', sseUrl);
 
     const es = new EventSource(sseUrl);
@@ -888,7 +897,7 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
       // cancel the transaction via EFT service
       const bankCode = selectedBank?.code || '';
       const sid = sessionId || transactionIdToSend;
-      const response = await fetch(`${EFT_API_BASE_URL}/${bankCode}/cancel?session_id=${sid}`, {
+      const response = await fetch(`${getEftUrl(bankCode)}/${bankCode}/cancel?session_id=${sid}`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(authSecretBearerToken ? { Authorization: `Bearer ${authSecretBearerToken}` } : {}) },
       });

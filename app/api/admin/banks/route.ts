@@ -11,6 +11,7 @@ const createBankSchema = z.object({
   code: z.string().min(1, "Bank code is required").regex(/^[a-z0-9_-]+$/, "Code must be lowercase alphanumeric with hyphens/underscores"),
   color: z.string().optional(),
   branchCode: z.string().optional(),
+  eftServiceUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
   enabled: z.boolean().default(true),
 });
 
@@ -96,6 +97,7 @@ export async function POST(request: NextRequest) {
         code: validatedData.code,
         color: validatedData.color,
         branchCode: validatedData.branchCode,
+        eftServiceUrl: validatedData.eftServiceUrl || null,
         enabled: validatedData.enabled,
         createdAt: new Date(),
         updatedAt: new Date(),
