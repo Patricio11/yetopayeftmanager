@@ -34,7 +34,7 @@ const completeSchema = z.object({
 
 /**
  * Verify the EFT service signature that proves the payment was genuinely completed.
- * The EFT service signs: HMAC-SHA256(secret, transactionId + amount + reference + "completed")
+ * The EFT service signs: HMAC-SHA256(secret, transactionId|amount|reference|completed)
  * and returns this signature to the frontend on redirect.
  */
 function verifyEftServiceSignature(
