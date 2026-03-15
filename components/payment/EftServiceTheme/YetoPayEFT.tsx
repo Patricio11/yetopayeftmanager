@@ -1484,7 +1484,7 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
         <div className="flex items-start justify-between">
           <div className="text-left">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">{apiResponse.title}</h2>
-            <div className="text-gray-600" dangerouslySetInnerHTML={{ __html: apiResponse.message || '' }} />
+            <div className="text-gray-600" style={{ whiteSpace: 'pre-line' }}>{apiResponse.message || ''}</div>
           </div>
           {currentStep === 'final' && isInAppStep && (
             <button
@@ -1629,7 +1629,7 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
         {/* Title & Description */}
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{approvalTitle}</h2>
-          <div className="text-gray-600 dark:text-gray-400" dangerouslySetInnerHTML={{ __html: approvalMessage }} />
+          <div className="text-gray-600 dark:text-gray-400" style={{ whiteSpace: 'pre-line' }}>{approvalMessage}</div>
         </div>
 
         {/* Countdown Timer */}

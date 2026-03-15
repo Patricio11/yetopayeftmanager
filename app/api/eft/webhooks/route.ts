@@ -61,23 +61,62 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const signaturePayload = JSON.stringify({
+    // Signature payload includes amount to prevent amount tampering.
+    // For backward compat: try amount-inclusive signature first, then legacy (without amount).
+    const signaturePayloadWithAmount = JSON.stringify({
+      transaction_id: validatedData.transaction_id,
+      status: validatedData.status,
+      amount: validatedData.amount.toString(),
+      timestamp: validatedData.timestamp,
+    });
+    const expectedWithAmount = crypto
+      .createHmac('sha256', webhookSecret)
+      .update(signaturePayloadWithAmount)
+      .digest('hex');
+
+    const signaturePayloadLegacy = JSON.stringify({
       transaction_id: validatedData.transaction_id,
       status: validatedData.status,
       timestamp: validatedData.timestamp,
     });
-    const expectedSignature = crypto
+    const expectedLegacy = crypto
       .createHmac('sha256', webhookSecret)
-      .update(signaturePayload)
+      .update(signaturePayloadLegacy)
       .digest('hex');
 
     // Constant-time comparison to prevent timing attacks
+    // Accept either amount-inclusive (preferred) or legacy signature
     const sigBuffer = Buffer.from(validatedData.signature);
-    const expectedBuffer = Buffer.from(expectedSignature);
-    if (sigBuffer.length !== expectedBuffer.length || !crypto.timingSafeEqual(sigBuffer, expectedBuffer)) {
+    const withAmountBuffer = Buffer.from(expectedWithAmount);
+    const legacyBuffer = Buffer.from(expectedLegacy);
+
+    const matchesWithAmount = sigBuffer.length === withAmountBuffer.length &&
+      crypto.timingSafeEqual(sigBuffer, withAmountBuffer);
+    const matchesLegacy = !matchesWithAmount && sigBuffer.length === legacyBuffer.length &&
+      crypto.timingSafeEqual(sigBuffer, legacyBuffer);
+
+    if (!matchesWithAmount && !matchesLegacy) {
       console.error("❌ Invalid webhook signature");
       return NextResponse.json(
         { error: "Invalid signature" },
+        { status: 401 }
+      );
+    }
+
+    if (matchesLegacy) {
+      console.warn("⚠️ Webhook using legacy signature (without amount) — update EFT service to include amount in signature payload");
+    }
+
+    // Validate timestamp freshness (reject webhooks older than 5 minutes to prevent replay)
+    const webhookTimestamp = typeof validatedData.timestamp === 'string'
+      ? new Date(validatedData.timestamp).getTime()
+      : validatedData.timestamp;
+    const now = Date.now();
+    const MAX_WEBHOOK_AGE_MS = 5 * 60 * 1000; // 5 minutes
+    if (isNaN(webhookTimestamp) || Math.abs(now - webhookTimestamp) > MAX_WEBHOOK_AGE_MS) {
+      console.error(`❌ Webhook timestamp too old or invalid: ${validatedData.timestamp} (age: ${Math.abs(now - webhookTimestamp)}ms)`);
+      return NextResponse.json(
+        { error: "Webhook timestamp expired or invalid" },
         { status: 401 }
       );
     }
@@ -92,6 +131,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "Transaction not found" },
         { status: 404 }
+      );
+    }
+
+    // Verify webhook amount matches DB amount (prevent amount tampering)
+    const webhookAmount = parseFloat(validatedData.amount.toString());
+    const dbAmount = parseFloat(transaction.amount);
+    if (Math.abs(webhookAmount - dbAmount) > 0.001) {
+      console.error(`❌ Webhook amount mismatch: webhook=${webhookAmount}, db=${dbAmount} for ${validatedData.transaction_id}`);
+      return NextResponse.json(
+        { error: "Amount mismatch" },
+        { status: 400 }
       );
     }
 

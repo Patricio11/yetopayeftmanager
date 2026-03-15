@@ -49,7 +49,7 @@ function verifyEftServiceSignature(
     return false;
   }
 
-  const payload = `${transactionId}${amount}${reference}completed`;
+  const payload = `${transactionId}|${amount}|${reference}|completed`;
   const expected = crypto
     .createHmac("sha256", secret)
     .update(payload)
@@ -134,6 +134,22 @@ export async function POST(
       });
     }
 
+    // Validate status transitions — prevent going backward or skipping states
+    const VALID_TRANSITIONS: Record<string, string[]> = {
+      not_started: ["initiated", "pending", "cancelled", "expired"],
+      initiated: ["pending", "completed", "failed", "aborted", "cancelled", "expired"],
+      pending: ["completed", "failed", "aborted", "cancelled", "expired"],
+    };
+    const currentStatus = transaction.status || "not_started";
+    const allowedNext = VALID_TRANSITIONS[currentStatus];
+    if (allowedNext && !allowedNext.includes(validatedData.status)) {
+      console.error(`❌ Invalid status transition: ${currentStatus} -> ${validatedData.status} for ${transactionId}`);
+      return NextResponse.json(
+        { success: false, message: `Cannot transition from '${currentStatus}' to '${validatedData.status}'` },
+        { status: 400 }
+      );
+    }
+
     // "completed" requires a valid EFT service signature to prevent forgery (skip for demo transactions)
     if (validatedData.status === "completed" && !transaction.isDemo) {
       if (!validatedData.eftSignature) {
@@ -162,6 +178,11 @@ export async function POST(
       console.log(`✅ EFT signature verified for completion: ${transactionId}`);
     }
 
+    // Log unsigned status changes for security monitoring
+    if (validatedData.status !== "completed" && !transaction.isDemo) {
+      console.warn(`⚠️ [SECURITY] Unsigned status change: ${transactionId} -> ${validatedData.status} from IP ${ipAddress}`);
+    }
+
     if (transaction.isDemo) {
       console.log(`🧪 Demo transaction completion: ${transactionId} -> ${validatedData.status}`);
     }
@@ -176,6 +197,8 @@ export async function POST(
         metadata: {
           ...(transaction.metadata as any || {}),
           ...(transaction.isDemo ? { demo: true } : {}),
+          status_source: validatedData.eftSignature ? "eft_service_signed" : "frontend_unsigned",
+          status_source_ip: ipAddress,
           frontend_completed_at: new Date().toISOString(),
           gateway_result: validatedData.gatewayResult,
           transaction_status: validatedData.transactionStatus,
