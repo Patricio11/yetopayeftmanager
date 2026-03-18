@@ -38,6 +38,7 @@ interface PaymentInterfaceProps {
     code: string;
     name: string;
     color?: string;
+    eftServiceUrl?: string;
   }>;
   token: string;
   merchantBankAccount: any;
@@ -111,6 +112,7 @@ export default function PaymentInterface({
             code: bank.code,
             name: bank.name,
             color: bank.color || '#F9B233',
+            eftServiceUrl: bank.eftServiceUrl,
           })),
           merchantBankAccount: {
             accountNumber: merchantBankAccount.accountNumber,
