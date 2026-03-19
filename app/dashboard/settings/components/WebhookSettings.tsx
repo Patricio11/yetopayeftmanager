@@ -448,7 +448,7 @@ export function WebhookSettings() {
             <h4 className="font-medium mb-2">Verifying Webhook Signatures</h4>
             <p className="text-sm text-gray-600 mb-3">
               All webhook requests include an <code className="bg-gray-100 px-1 rounded">X-Webhook-Signature</code> header.
-              Verify this signature to ensure the request came from OneGate EFT.
+              Verify this signature to ensure the request came from FyroPay.
             </p>
             <div className="bg-gray-900 text-gray-100 p-4 rounded-lg text-xs overflow-x-auto">
               <pre>{`const crypto = require('crypto');

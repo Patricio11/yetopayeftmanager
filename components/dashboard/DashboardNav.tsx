@@ -54,7 +54,7 @@ function NavDropdown({ group, pathname }: { group: NavGroup; pathname: string })
         className={cn(
           "gap-1.5 cursor-pointer transition-all",
           hasActive
-            ? "bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400"
+            ? "bg-amber-50 dark:bg-fyro-navy text-fyro-gold dark:text-fyro-gold-light"
             : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
         )}
       >
@@ -76,7 +76,7 @@ function NavDropdown({ group, pathname }: { group: NavGroup; pathname: string })
                 className={cn(
                   "flex items-center gap-3 px-3.5 py-2.5 text-sm transition-colors",
                   isActive
-                    ? "bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 font-medium"
+                    ? "bg-amber-50 dark:bg-fyro-navy text-fyro-gold dark:text-fyro-gold-light font-medium"
                     : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white"
                 )}
               >
@@ -154,24 +154,21 @@ export function DashboardNav({ userRole, accountMode }: DashboardNavProps) {
   return (
     <>
     {accountMode === 'demo' && (
-      <div className="bg-amber-500 text-white text-center py-1.5 px-4 text-sm font-semibold sticky top-0 z-[51]">
-        You are in DEMO mode. Transactions are simulated. Contact admin to switch to LIVE.
+      <div className="bg-fyro-navy text-fyro-gold-light text-center py-1.5 px-4 text-sm font-semibold sticky top-0 z-[51] border-b border-fyro-gold/30">
+        You are in DEMO mode — transactions are simulated. Contact admin to activate LIVE.
       </div>
     )}
-    <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-50">
+    <header className="bg-white/90 dark:bg-[#0c1120]/90 backdrop-blur-xl border-b border-slate-200/50 dark:border-fyro-gold/10 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
+          {/* FyroPay Logo */}
           <Link href="/dashboard" className="flex items-center gap-3 group cursor-pointer">
-            <div className="relative">
-              {/* <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:shadow-amber-500/50 transition-all">
-                <Zap className="w-5 h-5 text-white" />
-              </div> */}
-              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-amber-400 rounded-full border-2 border-white dark:border-slate-900 animate-pulse" />
+            <div className="relative flex items-center justify-center w-9 h-9 rounded-xl bg-fyro-navy border border-fyro-gold/40 shadow-sm group-hover:shadow-fyro-gold/20 group-hover:border-fyro-gold/70 transition-all duration-200">
+              <span className="text-fyro-gold font-bold text-lg leading-none" style={{fontFamily:'Georgia,serif'}}>F</span>
+              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-fyro-gold rounded-full border-2 border-white dark:border-[#0c1120] animate-pulse" />
             </div>
-            <img src="/ogeft.png" alt="OneGate EFT" className="h-14 w-14 rounded" />
-            <span className="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
-              OneGate EFT
+            <span className="text-xl font-bold tracking-tight">
+              <span className="text-slate-900 dark:text-white">Fyro</span><span className="text-fyro-gold">Pay</span>
             </span>
           </Link>
 
@@ -188,7 +185,7 @@ export function DashboardNav({ userRole, accountMode }: DashboardNavProps) {
                     className={cn(
                       "gap-2 cursor-pointer transition-all",
                       isActive
-                        ? "bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400"
+                        ? "bg-amber-50 dark:bg-fyro-navy text-fyro-gold dark:text-fyro-gold-light"
                         : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                     )}
                   >

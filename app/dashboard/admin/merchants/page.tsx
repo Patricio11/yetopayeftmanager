@@ -109,7 +109,7 @@ export default function AdminMerchantsPage() {
         </div>
         <div className="flex gap-3">
           <Button variant="outline" onClick={fetchMerchants} className="gap-2"><RefreshCw className="w-4 h-4" />Refresh</Button>
-          <Button onClick={() => { setShowCreate(true); setInviteLink(''); }} className="gap-2 bg-gradient-to-r from-amber-500 to-pink-600 text-white"><Plus className="w-4 h-4" />Add Merchant</Button>
+          <Button onClick={() => { setShowCreate(true); setInviteLink(''); }} className="gap-2 bg-gradient-to-r from-fyro-navy to-fyro-gold text-white"><Plus className="w-4 h-4" />Add Merchant</Button>
         </div>
       </div>
 
@@ -168,7 +168,7 @@ export default function AdminMerchantsPage() {
             {filtered.map((m) => (
               <div key={m.id} className="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
                 <div className="flex items-center gap-4 min-w-0 flex-1">
-                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500 to-pink-600 flex items-center justify-center text-white font-bold text-lg shrink-0">
+                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-fyro-navy to-fyro-gold flex items-center justify-center text-white font-bold text-lg shrink-0">
                     {(m.companyName || m.name || '?')[0].toUpperCase()}
                   </div>
                   <div className="min-w-0">
@@ -222,7 +222,7 @@ export default function AdminMerchantsPage() {
                 <div><Label>Company Name</Label><Input value={form.companyName} onChange={(e) => setForm({ ...form, companyName: e.target.value })} required placeholder="Company (Pty) Ltd" /></div>
                 <div className="flex gap-3 pt-2">
                   <Button type="button" variant="outline" onClick={() => setShowCreate(false)} className="flex-1">Cancel</Button>
-                  <Button type="submit" disabled={creating} className="flex-1 bg-gradient-to-r from-amber-500 to-pink-600 text-white">{creating ? 'Creating...' : 'Create & Invite'}</Button>
+                  <Button type="submit" disabled={creating} className="flex-1 bg-gradient-to-r from-fyro-navy to-fyro-gold text-white">{creating ? 'Creating...' : 'Create & Invite'}</Button>
                 </div>
               </form>
             )}

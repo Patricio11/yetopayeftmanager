@@ -1883,7 +1883,7 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
                 className="w-full p-4 border border-gray-200 rounded-lg hover:border-amber-500 hover:shadow-md transition-all duration-200 flex items-center justify-between group disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 <div className="flex items-center">
-                  <div className="w-1 h-8 rounded-full mr-4" style={{ backgroundColor: bank.color || '#F9B233' }} />
+                  <div className="w-1 h-8 rounded-full mr-4" style={{ backgroundColor: bank.color || '#C8941A' }} />
                   <span className="font-medium text-gray-900">{bank.name}</span>
                 </div>
                 <ChevronRight size={20} className="text-gray-400 group-hover:text-amber-500 transition-colors duration-200" />
@@ -1914,8 +1914,10 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <img src="/ogeft.png" alt="OneGate EFT" className="w-10 h-10 rounded-lg shadow-sm" />
-              <h1 className="text-2xl font-bold">OneGate EFT</h1>
+              <div className="flex items-center justify-center w-10 h-10 rounded-xl border border-fyro-gold/50 shadow-sm" style={{background:'#0f1629'}}>
+                <span style={{color:'#C8941A',fontFamily:'Georgia,serif',fontWeight:700,fontSize:'1.25rem',lineHeight:1}}>F</span>
+              </div>
+              <h1 className="text-2xl font-bold tracking-tight"><span className="opacity-90">Fyro</span><span style={{color:'#C8941A'}}>Pay</span></h1>
             </div>
             <div className="flex items-center space-x-4">
               <HelpCircle size={20} className="cursor-pointer hover:text-amber-200 transition-colors" />
@@ -1997,7 +1999,7 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
               Secure TLS Encryption
             </div>
             <p className="text-xs text-gray-400">
-              By continuing you agree to OneGate EFT&apos;s{' '}
+              By continuing you agree to FyroPay&apos;s{' '}
               <button className="text-amber-500 hover:underline" onClick={() => setShowTerms(true)}>
                 T&amp;Cs
               </button>

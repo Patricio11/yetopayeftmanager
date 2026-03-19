@@ -128,7 +128,7 @@ export default function PartnerDashboardPage() {
       value: data.activeMerchants.toString(),
       subtitle: "Currently active",
       icon: Users,
-      iconBg: "from-amber-500 to-pink-600",
+      iconBg: "from-fyro-navy to-fyro-gold",
       cardBg: "to-amber-50/50",
     },
     {

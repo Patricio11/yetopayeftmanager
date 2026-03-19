@@ -100,7 +100,7 @@ export default function AdminPartnersPage() {
         </div>
         <div className="flex gap-3">
           <Button variant="outline" onClick={fetchPartners} className="gap-2"><RefreshCw className="w-4 h-4" />Refresh</Button>
-          <Button onClick={() => { setShowCreate(true); setInviteLink(''); }} className="gap-2 bg-gradient-to-r from-amber-500 to-pink-600 text-white"><Plus className="w-4 h-4" />Invite Partner</Button>
+          <Button onClick={() => { setShowCreate(true); setInviteLink(''); }} className="gap-2 bg-gradient-to-r from-fyro-navy to-fyro-gold text-white"><Plus className="w-4 h-4" />Invite Partner</Button>
         </div>
       </div>
 
@@ -211,7 +211,7 @@ export default function AdminPartnersPage() {
                 <div><Label>Company Name</Label><Input value={form.companyName} onChange={(e) => setForm({ ...form, companyName: e.target.value })} required placeholder="Partner Co (Pty) Ltd" /></div>
                 <div className="flex gap-3 pt-2">
                   <Button type="button" variant="outline" onClick={() => setShowCreate(false)} className="flex-1">Cancel</Button>
-                  <Button type="submit" disabled={creating} className="flex-1 bg-gradient-to-r from-amber-500 to-pink-600 text-white">{creating ? 'Creating...' : 'Create & Invite'}</Button>
+                  <Button type="submit" disabled={creating} className="flex-1 bg-gradient-to-r from-fyro-navy to-fyro-gold text-white">{creating ? 'Creating...' : 'Create & Invite'}</Button>
                 </div>
               </form>
             )}

@@ -160,12 +160,12 @@ export function QuickPaymentLinkModal({ trigger = 'button' }: QuickPaymentLinkMo
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           {trigger === 'button' ? (
-            <Button className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40 transition-all duration-300">
+            <Button className="bg-gradient-to-r from-fyro-navy to-fyro-gold  text-white shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40 transition-all duration-300">
               <Plus className="w-4 h-4 mr-2" />
               Generate Payment Link
             </Button>
           ) : (
-            <Button className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white shadow-lg">
+            <Button className="bg-gradient-to-r from-fyro-navy to-fyro-gold  text-white shadow-lg">
               <Plus className="w-4 h-4 mr-2" />
               Create Payment Link
             </Button>
@@ -175,7 +175,7 @@ export function QuickPaymentLinkModal({ trigger = 'button' }: QuickPaymentLinkMo
         {!paymentUrl ? (
           <>
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-amber-500 to-pink-600 bg-clip-text text-transparent">
+              <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-fyro-navy to-fyro-gold bg-clip-text text-transparent">
                 Generate Payment Link
               </DialogTitle>
               <DialogDescription className="text-slate-600 dark:text-slate-400">
@@ -241,7 +241,7 @@ export function QuickPaymentLinkModal({ trigger = 'button' }: QuickPaymentLinkMo
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-12 bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white shadow-lg font-semibold text-base"
+                className="w-full h-12 bg-gradient-to-r from-fyro-navy to-fyro-gold  text-white shadow-lg font-semibold text-base"
               >
                 {isLoading ? (
                   <span className="flex items-center justify-center">
@@ -284,7 +284,7 @@ export function QuickPaymentLinkModal({ trigger = 'button' }: QuickPaymentLinkMo
             <div className="space-y-6 mt-4">
               {/* Success Icon */}
               <div className="flex justify-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-pink-600 rounded-full flex items-center justify-center shadow-lg shadow-amber-500/30">
+                <div className="w-20 h-20 bg-gradient-to-br from-fyro-navy to-fyro-gold rounded-full flex items-center justify-center shadow-lg shadow-amber-500/30">
                   <CheckCircle className="w-10 h-10 text-white" />
                 </div>
               </div>

@@ -82,7 +82,7 @@ export default function MerchantDetailPage() {
       <Card className="p-6 mb-6 bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-pink-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-fyro-navy to-fyro-gold flex items-center justify-center text-white font-bold text-2xl shadow-lg">
               {(merchant.companyName || merchant.name || '?')[0].toUpperCase()}
             </div>
             <div>
@@ -782,7 +782,7 @@ function BillingTab({ merchantId }: { merchantId: string }) {
         {/* Actions */}
         <div className="flex gap-3 mt-6">
           <Button onClick={handleSave} disabled={saving}
-            className="flex-1 bg-gradient-to-r from-amber-500 to-pink-600 text-white gap-2">
+            className="flex-1 bg-gradient-to-r from-fyro-navy to-fyro-gold text-white gap-2">
             <Save className="w-4 h-4" />{saving ? 'Saving...' : 'Save Billing Config'}
           </Button>
           {merchantFee && (
@@ -882,7 +882,7 @@ function SettingsTab({ merchant, onUpdate }: { merchant: any; onUpdate: () => vo
               {accountMode === 'demo' ? 'Merchant can only create test transactions. No real bank connections.' : 'Merchant processes real EFT transactions.'}
             </p>
           </div>
-          <Button onClick={handleSave} disabled={saving} className="w-full bg-gradient-to-r from-amber-500 to-pink-600 text-white gap-2">
+          <Button onClick={handleSave} disabled={saving} className="w-full bg-gradient-to-r from-fyro-navy to-fyro-gold text-white gap-2">
             <Save className="w-4 h-4" />{saving ? 'Saving...' : 'Save Changes'}
           </Button>
         </div>

@@ -140,7 +140,7 @@ export function GenerateInvoiceDialog({ merchants, onClose, onGenerated }: Gener
       <Card className="w-full max-w-lg shadow-2xl border-0">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-pink-600 flex items-center justify-center shadow-lg shadow-amber-500/30">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-fyro-navy to-fyro-gold flex items-center justify-center shadow-lg shadow-amber-500/30">
               <FileText className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -229,7 +229,7 @@ export function GenerateInvoiceDialog({ merchants, onClose, onGenerated }: Gener
                               : "hover:bg-slate-50 dark:hover:bg-slate-700/50"
                           } ${m.id === merchantId ? "bg-amber-50/50 dark:bg-amber-900/10" : ""}`}
                         >
-                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-pink-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-fyro-navy to-fyro-gold flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                             {(m.companyName || m.name || "?")[0].toUpperCase()}
                           </div>
                           <div className="min-w-0 flex-1">
@@ -323,7 +323,7 @@ export function GenerateInvoiceDialog({ merchants, onClose, onGenerated }: Gener
             <Button
               onClick={handleGenerate}
               disabled={generating}
-              className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white"
+              className="bg-gradient-to-r from-fyro-navy to-fyro-gold  text-white"
             >
               {generating ? "Generating..." : "Generate Invoice"}
             </Button>

@@ -9,7 +9,7 @@
 //   title?: string;
 // };
 
-// const TermsModal: React.FC<TermsModalProps> = ({ open, onClose, onAgree, title = "OneGate EFT Terms & Conditions" }) => {
+// const TermsModal: React.FC<TermsModalProps> = ({ open, onClose, onAgree, title = "FyroPay Terms & Conditions" }) => {
 //   if (!open) return null;
 
 //   return (
@@ -37,15 +37,15 @@
 //           <div className="prose max-w-none">
 //             <h4>Summary</h4>
 //             <p>
-//               Welcome to OneGate EFT. These Terms & Conditions (“Terms”) govern your use of OneGate EFT’s
+//               Welcome to FyroPay. These Terms & Conditions (“Terms”) govern your use of FyroPay’s
 //               Pay By Bank payment experience. By continuing, you confirm you are authorized to initiate the
 //               payment, and you consent to electronic communication about the transaction.
 //             </p>
 
 //             <h4>1. Service Description</h4>
 //             <p>
-//               OneGate EFT enables you to pay a participating merchant via your selected bank using
-//               secure redirection and automated steps. OneGate EFT is not your bank and does not store
+//               FyroPay enables you to pay a participating merchant via your selected bank using
+//               secure redirection and automated steps. FyroPay is not your bank and does not store
 //               banking credentials. Your bank may require additional authentication such as an in-app
 //               approval or one-time password (OTP).
 //             </p>
@@ -78,12 +78,12 @@
 //             <h4>6. Disputes & Refunds</h4>
 //             <p>
 //               Transaction disputes, chargebacks, or refunds are handled by the merchant and your
-//               bank in line with their policies. OneGate EFT provides payment facilitation only.
+//               bank in line with their policies. FyroPay provides payment facilitation only.
 //             </p>
 
 //             <h4>7. Limitation of Liability</h4>
 //             <p>
-//               To the maximum extent permitted by law, OneGate EFT is not liable for indirect, incidental,
+//               To the maximum extent permitted by law, FyroPay is not liable for indirect, incidental,
 //               or consequential damages. Our aggregate liability is limited to the fees earned for the
 //               transaction giving rise to the claim.
 //             </p>
@@ -97,7 +97,7 @@
 //             <h4>9. Contact</h4>
 //             <p>
 //               For support relating to this transaction, contact the merchant first. For platform
-//               support, contact OneGate EFT support via the details provided on our website.
+//               support, contact FyroPay support via the details provided on our website.
 //             </p>
 //           </div>
 //         </div>
@@ -148,7 +148,7 @@ const TermsModal: React.FC<TermsModalProps> = ({
   open,
   onClose,
   onAgree,
-  title = 'OneGate EFT Terms & Conditions',
+  title = 'FyroPay Terms & Conditions',
   content,
 }) => {
   if (!open) return null;
@@ -182,15 +182,15 @@ const TermsModal: React.FC<TermsModalProps> = ({
               <>
                 <h4>Summary</h4>
                 <p>
-                  Welcome to OneGate EFT. These Terms &amp; Conditions (&quot;Terms&quot;) govern your use of OneGate EFT&apos;s
+                  Welcome to FyroPay. These Terms &amp; Conditions (&quot;Terms&quot;) govern your use of FyroPay&apos;s
                   Pay By Bank payment experience. By continuing, you confirm you are authorized to initiate the
                   payment, and you consent to electronic communication about the transaction.
                 </p>
 
                 <h4>1. Service Description</h4>
                 <p>
-                  OneGate EFT enables you to pay a participating merchant via your selected bank using
-                  secure redirection and automated steps. OneGate EFT is not your bank and does not store
+                  FyroPay enables you to pay a participating merchant via your selected bank using
+                  secure redirection and automated steps. FyroPay is not your bank and does not store
                   banking credentials. Your bank may require additional authentication such as an in-app
                   approval or one-time password (OTP).
                 </p>
@@ -223,12 +223,12 @@ const TermsModal: React.FC<TermsModalProps> = ({
                 <h4>6. Disputes &amp; Refunds</h4>
                 <p>
                   Transaction disputes, chargebacks, or refunds are handled by the merchant and your
-                  bank in line with their policies. OneGate EFT provides payment facilitation only.
+                  bank in line with their policies. FyroPay provides payment facilitation only.
                 </p>
 
                 <h4>7. Limitation of Liability</h4>
                 <p>
-                  To the maximum extent permitted by law, OneGate EFT is not liable for indirect, incidental,
+                  To the maximum extent permitted by law, FyroPay is not liable for indirect, incidental,
                   or consequential damages. Our aggregate liability is limited to the fees earned for the
                   transaction giving rise to the claim.
                 </p>
@@ -242,7 +242,7 @@ const TermsModal: React.FC<TermsModalProps> = ({
                 <h4>9. Contact</h4>
                 <p>
                   For support relating to this transaction, contact the merchant first. For platform
-                  support, contact OneGate EFT support via the details provided on our website.
+                  support, contact FyroPay support via the details provided on our website.
                 </p>
               </>
             )}

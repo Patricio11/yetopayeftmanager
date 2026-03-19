@@ -286,7 +286,7 @@ export default function AnalyticsPage() {
           change={k.revenueGrowth}
           subtitle="vs previous period"
           icon={DollarSign}
-          iconBg="from-amber-500 to-pink-600"
+          iconBg="from-fyro-navy to-fyro-gold"
           cardBg="to-amber-50/50"
         />
 

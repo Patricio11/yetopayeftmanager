@@ -169,7 +169,7 @@ export default async function DashboardPage() {
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-9 h-9 bg-gradient-to-br from-amber-500 to-pink-600 rounded-lg flex items-center justify-center">
+                  <div className="w-9 h-9 bg-gradient-to-br from-fyro-navy to-fyro-gold rounded-lg flex items-center justify-center">
                     <DollarSign className="w-5 h-5 text-white" />
                   </div>
                   <h3 className="text-xs font-medium text-slate-600 dark:text-slate-400">

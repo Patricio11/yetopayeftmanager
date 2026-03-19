@@ -190,7 +190,7 @@ export default function ReconPage() {
           </Button>
           <Button
             onClick={() => setShowGenerate(true)}
-            className="gap-2 bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white shadow-lg shadow-amber-500/25"
+            className="gap-2 bg-gradient-to-r from-fyro-navy to-fyro-gold  text-white shadow-lg shadow-amber-500/25"
           >
             <Plus className="w-4 h-4" />
             Generate Invoice

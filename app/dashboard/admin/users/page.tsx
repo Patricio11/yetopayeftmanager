@@ -91,7 +91,7 @@ export default function AdminUsersPage() {
           { label: 'Total Users', value: stats.total, icon: Users, bg: 'bg-blue-100 dark:bg-blue-900/30', fg: 'text-blue-600 dark:text-blue-400' },
           { label: 'Merchants', value: stats.merchants, icon: Building2, bg: 'bg-amber-100 dark:bg-amber-900/30', fg: 'text-amber-500 dark:text-amber-400' },
           { label: 'Admins', value: stats.admins, icon: Shield, bg: 'bg-purple-100 dark:bg-purple-900/30', fg: 'text-purple-600 dark:text-purple-400' },
-          { label: 'Active', value: stats.active, icon: CheckCircle, bg: 'bg-pink-100 dark:bg-pink-900/30', fg: 'text-pink-600 dark:text-pink-400' },
+          { label: 'Active', value: stats.active, icon: CheckCircle, bg: 'bg-fyro-navy dark:bg-fyro-gold/10', fg: 'text-fyro-gold dark:text-fyro-gold' },
         ].map((s) => (
           <Card key={s.label} className="p-4 bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50">
             <div className="flex items-center gap-3">
@@ -160,7 +160,7 @@ export default function AdminUsersPage() {
                     <tr key={u.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/20">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-pink-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-fyro-navy to-fyro-gold flex items-center justify-center text-white font-bold text-sm shrink-0">
                             {(u.name || '?')[0].toUpperCase()}
                           </div>
                           <div>

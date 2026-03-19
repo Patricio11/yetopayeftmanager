@@ -195,7 +195,7 @@ export function WebhooksSection({ selectedLanguage, onCopy, copiedCode }: Webhoo
         <div>
           <h3 className="font-semibold text-lg mb-3">Verifying Webhook Signatures</h3>
           <p className="text-gray-600 mb-4">
-            Always verify webhook signatures to ensure the request came from OneGate EFT.
+            Always verify webhook signatures to ensure the request came from FyroPay.
           </p>
           
           {/* SDK Method */}
@@ -338,9 +338,9 @@ function getWebhookPayload() {
 }
 
 function getSDKVerification() {
-  return `import { OneGateEFTClient } from '@onegateeft/sdk';
+  return `import { FyroPayClient } from '@fyropay/sdk';
 
-const client = new OneGateEFTClient({ apiKey: 'your-key' });
+const client = new FyroPayClient({ apiKey: 'your-key' });
 
 app.post('/webhooks/payment', (req, res) => {
   const signature = req.headers['x-webhook-signature'];

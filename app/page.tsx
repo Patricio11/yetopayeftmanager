@@ -2,7 +2,7 @@ import Link from 'next/link';
 import {
   Shield, Zap, TrendingUp, Globe, ArrowRight,
   Link as LinkIcon, Users, Wallet, CreditCard,
-  Building2, BarChart3, Lock, CheckCircle, ChevronRight
+  Building2, BarChart3, Lock, CheckCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -27,8 +27,8 @@ const features = [
     icon: LinkIcon,
     title: 'Secure Payment Links',
     description: 'Generate encrypted, time-limited payment links with bank-level security. Share via SMS, email, or embed on your site.',
-    iconColor: 'text-pink-500',
-    bgColor: 'bg-pink-500/10',
+    iconColor: 'text-amber-500',
+    bgColor: 'bg-amber-500/10',
   },
   {
     icon: BarChart3,
@@ -73,9 +73,11 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 border-b border-slate-200/60 dark:border-white/5 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <img src="/ogeft.png" alt="OneGate EFT" className="h-9 w-9 rounded-lg shadow-sm group-hover:shadow-md transition-shadow" />
-            <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-              OneGate<span className="og-gradient-text">EFT</span>
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-fyro-navy border border-fyro-gold/40 shadow-sm group-hover:border-fyro-gold/70 transition-all">
+              <span className="text-fyro-gold font-bold text-base leading-none" style={{fontFamily:'Georgia,serif'}}>F</span>
+            </div>
+            <span className="text-lg font-bold tracking-tight">
+              <span className="text-slate-900 dark:text-white">Fyro</span><span className="text-fyro-gold">Pay</span>
             </span>
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600 dark:text-slate-400">
@@ -90,7 +92,7 @@ export default function LandingPage() {
               </Button>
             </Link>
             <Link href="/auth/register">
-              <Button size="sm" className="og-gradient text-white shadow-md hover:shadow-lg hover:opacity-95 transition-all">
+              <Button size="sm" className="fp-gradient text-white shadow-md hover:shadow-lg hover:opacity-95 transition-all">
                 Get Started <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Button>
             </Link>
@@ -102,9 +104,9 @@ export default function LandingPage() {
       <section className="relative">
         {/* Background Effects */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-amber-500/8 via-pink-500/5 to-transparent rounded-full blur-3xl" />
-          <div className="absolute top-40 -left-40 w-80 h-80 bg-amber-400/10 rounded-full blur-3xl" />
-          <div className="absolute top-60 -right-40 w-80 h-80 bg-pink-500/10 rounded-full blur-3xl" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-fyro-navy/6 via-fyro-gold/4 to-transparent rounded-full blur-3xl" />
+          <div className="absolute top-40 -left-40 w-80 h-80 bg-fyro-gold/6 rounded-full blur-3xl" />
+          <div className="absolute top-60 -right-40 w-80 h-80 bg-fyro-navy/8 rounded-full blur-3xl" />
           {/* Grid pattern */}
           <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px]" />
         </div>
@@ -114,7 +116,7 @@ export default function LandingPage() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-50 dark:bg-amber-500/10 border border-amber-200/60 dark:border-amber-500/20 mb-8">
               <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-              <span className="text-sm font-medium text-amber-700 dark:text-amber-400">Trusted by South African businesses</span>
+              <span className="text-sm font-medium text-amber-700 dark:text-fyro-gold-light">Trusted by South African businesses</span>
             </div>
 
             {/* Headline */}
@@ -132,7 +134,7 @@ export default function LandingPage() {
             {/* CTA Group */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
               <Link href="/auth/register">
-                <Button size="lg" className="px-8 h-13 og-gradient text-white text-base font-semibold rounded-xl shadow-lg shadow-amber-500/25 hover:shadow-xl hover:shadow-amber-500/30 hover:opacity-95 transition-all">
+                <Button size="lg" className="px-8 h-13 fp-gradient text-white text-base font-semibold rounded-xl shadow-lg shadow-fyro-gold/20 hover:shadow-xl hover:shadow-fyro-gold/30 hover:opacity-95 transition-all">
                   Start Accepting Payments
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
@@ -210,10 +212,10 @@ export default function LandingPage() {
               <div key={item.step} className="relative text-center md:text-left">
                 {/* Connector line */}
                 {i < steps.length - 1 && (
-                  <div className="hidden md:block absolute top-8 left-[calc(50%+40px)] right-[calc(-50%+40px)] h-px bg-gradient-to-r from-amber-300 to-pink-300 dark:from-amber-500/40 dark:to-pink-500/40" />
+                  <div className="hidden md:block absolute top-8 left-[calc(50%+40px)] right-[calc(-50%+40px)] h-px bg-gradient-to-r from-fyro-gold/60 to-amber-200/60 dark:from-fyro-gold/40 dark:to-amber-400/20" />
                 )}
                 {/* Step number */}
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl og-gradient text-white text-xl font-extrabold mb-5 shadow-lg shadow-amber-500/20">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl fp-gradient text-fyro-gold-bright text-xl font-extrabold mb-5 shadow-lg shadow-fyro-gold/20">
                   {item.step}
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{item.title}</h3>
@@ -259,12 +261,12 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
             {/* Left: Text */}
             <div>
-              <span className="text-sm font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400">Why OneGate EFT</span>
+              <span className="text-sm font-semibold uppercase tracking-widest text-fyro-gold dark:text-fyro-gold-light">Why FyroPay</span>
               <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mt-3 tracking-tight">
                 Built for businesses that move fast
               </h2>
               <p className="text-lg text-slate-500 dark:text-slate-400 mt-4 leading-relaxed">
-                We built OneGate EFT because South African businesses deserve a payment platform that&apos;s reliable, transparent, and simple. No hidden fees, no complicated setup, no downtime.
+                We built FyroPay because South African businesses deserve a payment platform that&apos;s reliable, transparent, and simple. No hidden fees, no complicated setup, no downtime.
               </p>
 
               <div className="mt-8 space-y-4">
@@ -275,8 +277,8 @@ export default function LandingPage() {
                   '24/7 payment processing — always on',
                 ].map((item) => (
                   <div key={item} className="flex items-start gap-3">
-                    <div className="w-5 h-5 rounded-full og-gradient flex items-center justify-center mt-0.5 shrink-0">
-                      <CheckCircle className="w-3 h-3 text-white" />
+                    <div className="w-5 h-5 rounded-full fp-gradient flex items-center justify-center mt-0.5 shrink-0">
+                      <CheckCircle className="w-3 h-3 text-fyro-gold-bright" />
                     </div>
                     <span className="text-slate-600 dark:text-slate-400">{item}</span>
                   </div>
@@ -285,7 +287,7 @@ export default function LandingPage() {
 
               <div className="mt-10">
                 <Link href="/auth/register">
-                  <Button size="lg" className="og-gradient text-white font-semibold rounded-xl shadow-lg shadow-amber-500/20 hover:shadow-xl hover:opacity-95 transition-all">
+                  <Button size="lg" className="fp-gradient text-white font-semibold rounded-xl shadow-lg shadow-fyro-gold/20 hover:shadow-xl hover:opacity-95 transition-all">
                     Start Free Today
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
@@ -299,7 +301,7 @@ export default function LandingPage() {
                 { icon: Lock, label: 'Bank-Grade Security', desc: '256-bit AES encryption', color: 'from-emerald-500 to-teal-500' },
                 { icon: Zap, label: 'Instant Settlement', desc: 'Real-time confirmations', color: 'from-amber-500 to-orange-500' },
                 { icon: Users, label: 'Partner Programme', desc: 'White-label ready', color: 'from-violet-500 to-purple-500' },
-                { icon: TrendingUp, label: 'Live Reporting', desc: 'Real-time dashboards', color: 'from-pink-500 to-rose-500' },
+                { icon: TrendingUp, label: 'Live Reporting', desc: 'Real-time dashboards', color: 'from-fyro-navy to-fyro-gold' },
               ].map((card) => (
                 <div key={card.label} className="bg-white dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-700/50 hover:shadow-lg transition-all duration-300 group">
                   <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
@@ -317,7 +319,7 @@ export default function LandingPage() {
       {/* ───── Final CTA ───── */}
       <section className="py-24 md:py-32">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="relative overflow-hidden rounded-3xl og-gradient p-12 md:p-20 text-center">
+          <div className="relative overflow-hidden rounded-3xl fp-gradient p-12 md:p-20 text-center">
             {/* Background decorations */}
             <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl" />
@@ -327,7 +329,7 @@ export default function LandingPage() {
                 Ready to transform your payments?
               </h2>
               <p className="text-lg text-white/80 max-w-2xl mx-auto mb-10">
-                Join South African businesses already processing payments faster, safer, and simpler with OneGate EFT.
+                Join South African businesses already processing payments faster, safer, and simpler with FyroPay.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link href="/auth/register">
@@ -354,9 +356,11 @@ export default function LandingPage() {
             {/* Brand */}
             <div className="col-span-2 md:col-span-1">
               <Link href="/" className="flex items-center gap-2.5">
-                <img src="/ogeft.png" alt="OneGate EFT" className="h-9 w-9 rounded-lg" />
-                <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-                  OneGate<span className="og-gradient-text">EFT</span>
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-fyro-navy border border-fyro-gold/40">
+                  <span className="text-fyro-gold font-bold text-base leading-none" style={{fontFamily:'Georgia,serif'}}>F</span>
+                </div>
+                <span className="text-lg font-bold tracking-tight">
+                  <span className="text-slate-900 dark:text-white">Fyro</span><span className="text-fyro-gold">Pay</span>
                 </span>
               </Link>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-4 leading-relaxed">
@@ -408,10 +412,10 @@ export default function LandingPage() {
           {/* Bottom bar */}
           <div className="pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              &copy; {new Date().getFullYear()} OneGate EFT. All rights reserved.
+              &copy; {new Date().getFullYear()} FyroPay. All rights reserved.
             </p>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              support@onegate.co.za
+              support@fyropay.co.za
             </p>
           </div>
         </div>
