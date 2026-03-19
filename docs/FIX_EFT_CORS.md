@@ -181,9 +181,9 @@ For production, use specific origins:
 
 ```javascript
 const allowedOrigins = [
-  'https://manager.yetopayeft.com',
-  'https://pay.yetopayeft.com',
-  'https://yetopayeft.com'
+  'https://manager.fyropay.com',
+  'https://pay.fyropay.com',
+  'https://fyropay.com'
 ];
 
 app.use(cors({

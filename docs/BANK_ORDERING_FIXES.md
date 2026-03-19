@@ -31,7 +31,7 @@
 - Disable all bank buttons once one is selected
 
 **Files Modified:**
-- `components/payment/EftServiceTheme/YetoPayEFT.tsx`
+- `components/payment/EftServiceTheme/FyroPayEFT.tsx`
   - Updated `handleBankSelect()` (lines 481-485): Added double-click prevention
   - Updated bank button className (line 1124): Added cursor styles
   - Updated button disabled condition (line 1124): Check for selectedBank
@@ -208,7 +208,7 @@ All changes are:
 
 ### Files Modified (5 files)
 1. `components/dashboard/BanksManagementClient.tsx` - Added displayOrder field
-2. `components/payment/EftServiceTheme/YetoPayEFT.tsx` - Improved UX
+2. `components/payment/EftServiceTheme/FyroPayEFT.tsx` - Improved UX
 3. `lib/db/schema/eft.ts` - Added displayOrder column (already done)
 4. `app/api/admin/banks/reorder/route.ts` - Reorder endpoint (already done)
 5. `app/api/eft/transactions/[token]/init/route.ts` - Sort by order (already done)

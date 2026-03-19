@@ -28,7 +28,7 @@
 
 **SDK Flow**:
 ```
-1. Install SDK: npm install @yetopayeft/sdk
+1. Install SDK: npm install @fyropay/sdk
 2. Initialize client with API key
 3. Create payment with one method call
 4. Benefits: Type-safe, error handling, webhook verification
@@ -54,9 +54,9 @@
 
 **SDK Example** (TypeScript):
 ```typescript
-import { YetoPayEFTClient } from '@yetopayeft/sdk';
+import { FyroPayEFTClient } from '@fyropay/sdk';
 
-const client = new YetoPayEFTClient({
+const client = new FyroPayEFTClient({
   apiKey: process.env.YETOPAY_API_KEY,
 });
 
@@ -73,7 +73,7 @@ const payment = await client.createPaymentToken({
 ```javascript
 const axios = require('axios');
 
-const response = await axios.post('https://yetopayeft.com/api/payment-tokens', {
+const response = await axios.post('https://fyropay.com/api/payment-tokens', {
   amount: 100.50,
   reference: 'ORDER-12345',
   customerEmail: 'customer@example.com'
@@ -149,9 +149,9 @@ X-Webhook-Event: <event-type>
 
 **Using SDK**:
 ```typescript
-import { YetoPayEFTClient } from '@yetopayeft/sdk';
+import { FyroPayEFTClient } from '@fyropay/sdk';
 
-const client = new YetoPayEFTClient({ apiKey: 'your-key' });
+const client = new FyroPayEFTClient({ apiKey: 'your-key' });
 
 app.post('/webhooks/payment', (req, res) => {
   const signature = req.headers['x-webhook-signature'];

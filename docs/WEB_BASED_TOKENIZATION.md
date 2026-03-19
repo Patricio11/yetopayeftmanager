@@ -198,7 +198,7 @@ app/api/tokenization/
 components/payment/
 ├── SetDefaultAccountDialog.tsx      # Default account dialog
 └── EftServiceTheme/
-    └── YetoPayEFT.tsx              # Payment component (updated)
+    └── FyroPayEFT.tsx              # Payment component (updated)
 
 lib/db/schema/
 └── tokenization.ts                  # Metadata-only schema

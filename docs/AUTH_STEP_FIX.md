@@ -141,7 +141,7 @@ npm start
 
 ### **2. Test Next.js App:**
 ```bash
-cd C:\Users\patri\Downloads\PayLink Pro\project\yetopayeft
+cd C:\Users\patri\Downloads\PayLink Pro\project\fyropay
 npm run dev
 ```
 
@@ -158,7 +158,7 @@ npm run dev
 
 ## ✅ **Fixed in Both Apps**
 
-- ✅ React app: `C:\Users\patri\Downloads\PayLink Pro\project\src\components\Public\EftServiceTheme\YetoPayEFT.tsx` (Line 481)
-- ✅ Next.js app: `c:\Users\patri\Downloads\PayLink Pro\project\yetopayeft\components\payment\EftServiceTheme\YetoPayEFT.tsx` (Line 529)
+- ✅ React app: `C:\Users\patri\Downloads\PayLink Pro\project\src\components\Public\EftServiceTheme\FyroPayEFT.tsx` (Line 481)
+- ✅ Next.js app: `c:\Users\patri\Downloads\PayLink Pro\project\fyropay\components\payment\EftServiceTheme\FyroPayEFT.tsx` (Line 529)
 
 **Test the complete payment flow now!** 🎉

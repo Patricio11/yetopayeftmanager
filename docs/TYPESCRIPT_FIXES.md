@@ -79,7 +79,7 @@ export async function POST(request: Request) {
 ```typescript
 // Before (Error)
 this.client.interceptors.request.use((config) => {  // ❌ Parameter 'config' implicitly has an 'any' type
-  console.log('[YetoPayEFT SDK] Request:', {
+  console.log('[FyroPayEFT SDK] Request:', {
     method: config.method,
     url: config.url,
     data: config.data,
@@ -90,7 +90,7 @@ this.client.interceptors.request.use((config) => {  // ❌ Parameter 'config' im
 this.client.interceptors.response.use(
   (response) => {  // ❌ Parameter 'response' implicitly has an 'any' type
     if (this.config.debug) {
-      console.log('[YetoPayEFT SDK] Response:', response.data);
+      console.log('[FyroPayEFT SDK] Response:', response.data);
     }
     return response;
   },
@@ -101,7 +101,7 @@ this.client.interceptors.response.use(
 
 // After (Fixed) ✅
 this.client.interceptors.request.use((config: any) => {
-  console.log('[YetoPayEFT SDK] Request:', {
+  console.log('[FyroPayEFT SDK] Request:', {
     method: config.method,
     url: config.url,
     data: config.data,
@@ -112,7 +112,7 @@ this.client.interceptors.request.use((config: any) => {
 this.client.interceptors.response.use(
   (response: any) => {
     if (this.config.debug) {
-      console.log('[YetoPayEFT SDK] Response:', response.data);
+      console.log('[FyroPayEFT SDK] Response:', response.data);
     }
     return response;
   },
@@ -165,7 +165,7 @@ banks.forEach((bank: any) => {
 
 **Explanation**: Added explicit `any` types to forEach parameters and catch error. In example code, this is acceptable for simplicity.
 
-**Note**: Line 6 (`import { YetoPayEFTClient } from '@yetopayeft/sdk'`) is expected - the SDK needs to be built and published/linked before examples can import it.
+**Note**: Line 6 (`import { FyroPayEFTClient } from '@fyropay/sdk'`) is expected - the SDK needs to be built and published/linked before examples can import it.
 
 ---
 
@@ -179,7 +179,7 @@ banks.forEach((bank: any) => {
 ```typescript
 // Before (Error) - Repeated 4 times
 } catch (error) {  // ❌ 'error' is of type 'unknown'
-  if (error instanceof YetoPayEFTError) {
+  if (error instanceof FyroPayEFTError) {
     res.status(error.statusCode || 500).json({
       error: error.message,
       code: error.code,
@@ -193,7 +193,7 @@ banks.forEach((bank: any) => {
 
 // After (Fixed) ✅ - All 4 catch blocks
 } catch (error: any) {
-  if (error instanceof YetoPayEFTError) {
+  if (error instanceof FyroPayEFTError) {
     res.status(error.statusCode || 500).json({
       error: error.message,
       code: error.code,
@@ -208,7 +208,7 @@ banks.forEach((bank: any) => {
 
 **Explanation**: Added explicit `any` type to all catch block error parameters. This allows accessing error properties safely.
 
-**Note**: Import errors for `express` and `@yetopayeft/sdk` are expected - these are example files that require dependencies to be installed.
+**Note**: Import errors for `express` and `@fyropay/sdk` are expected - these are example files that require dependencies to be installed.
 
 ---
 
@@ -248,7 +248,7 @@ Cannot find module 'axios' - Line 6 in sdk/src/client.ts
 
 ### **Example Files**
 ```
-Cannot find module '@yetopayeft/sdk' - Lines 6 in examples
+Cannot find module '@fyropay/sdk' - Lines 6 in examples
 Cannot find module 'express' - Line 6 in express-integration.ts
 ```
 **Resolution**: 
@@ -335,7 +335,7 @@ npm link
 4. **Use in your project**:
 ```bash
 cd your-project
-npm link @yetopayeft/sdk
+npm link @fyropay/sdk
 ```
 
 5. **Or publish to npm**:

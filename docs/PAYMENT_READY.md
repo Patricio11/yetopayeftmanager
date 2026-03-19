@@ -46,7 +46,7 @@ npm run dev
 #### **A. Create Payment Link (as Merchant)**
 ```
 1. Login: http://localhost:3000/auth/login
-   Email: admineft@yetopayeft.com
+   Email: admineft@fyropay.com
    Password: Admin@123456
 
 2. Go to Payment Links section
@@ -144,7 +144,7 @@ Response: {
 
 1. ✅ `app/api/eft/transactions/[token]/jwt/route.ts` - Public JWT endpoint
 2. ✅ Updated `.env.local` - Added JWT configuration (using existing keys)
-3. ✅ `components/payment/EftServiceTheme/YetoPayEFT.tsx` - Updated to use public JWT endpoint
+3. ✅ `components/payment/EftServiceTheme/FyroPayEFT.tsx` - Updated to use public JWT endpoint
 4. ✅ `components/payment/PaymentInterface.tsx` - Next.js wrapper component
 
 ## 🔑 **Using Existing Keys:**

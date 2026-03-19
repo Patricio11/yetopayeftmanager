@@ -2,7 +2,7 @@
 
 ## 📋 **Task: Replicate React Payment Page Design**
 
-The React payment page at `C:\Users\patri\Downloads\PayLink Pro\project\src\components\Public\EftServiceTheme\YetoPayEFT.tsx` has a beautiful, smooth design that we need to replicate in the Next.js app.
+The React payment page at `C:\Users\patri\Downloads\PayLink Pro\project\src\components\Public\EftServiceTheme\FyroPayEFT.tsx` has a beautiful, smooth design that we need to replicate in the Next.js app.
 
 ---
 
@@ -29,7 +29,7 @@ hover:from-green-700 hover:to-slate-700
         <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg">
           <div className="w-6 h-6 bg-white rounded-full"></div>
         </div>
-        <h1 className="text-2xl font-bold">YetoPay</h1>
+        <h1 className="text-2xl font-bold">FyroPay</h1>
       </div>
       <div className="flex items-center space-x-4">
         <HelpCircle /> 
@@ -145,7 +145,7 @@ hover:from-green-700 hover:to-slate-700
 
 ## 🔧 **Implementation Steps**
 
-1. **Copy the React component structure** from `YetoPayEFT.tsx`
+1. **Copy the React component structure** from `FyroPayEFT.tsx`
 2. **Adapt for Next.js:**
    - Change React Router to Next.js navigation
    - Use Next.js Image component for logos
@@ -181,7 +181,7 @@ hover:from-green-700 hover:to-slate-700
 
 ```bash
 # 1. Copy the React component
-cp "C:\Users\patri\Downloads\PayLink Pro\project\src\components\Public\EftServiceTheme\YetoPayEFT.tsx" \
+cp "C:\Users\patri\Downloads\PayLink Pro\project\src\components\Public\EftServiceTheme\FyroPayEFT.tsx" \
    "components/payment/PaymentInterface.tsx"
 
 # 2. Update imports for Next.js

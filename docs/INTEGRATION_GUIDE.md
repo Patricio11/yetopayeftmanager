@@ -157,7 +157,7 @@ const response = await fetch('/api/auth/sign-in/email', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    email: 'merchanteft@yetopayeft.com',
+    email: 'merchanteft@fyropay.com',
     password: 'Merchant@123'
   }),
   credentials: 'include' // Important for cookies
@@ -246,7 +246,7 @@ function verifySignature(payload, signature, secret) {
 app.post('/webhooks/payment', async (req, res) => {
   try {
     // 1. Verify signature
-    const signature = req.headers['x-yetopayeft-signature'];
+    const signature = req.headers['x-fyropay-signature'];
     const secret = process.env.WEBHOOK_SECRET;
     
     if (!verifySignature(req.body, signature, secret)) {
@@ -347,11 +347,11 @@ app.get('/payment/cancelled', async (req, res) => {
 
 ```
 Admin:
-  Email: admineft@yetopayeft.com
+  Email: admineft@fyropay.com
   Password: Admin@123456
 
 Merchant 1:
-  Email: merchanteft@yetopayeft.com
+  Email: merchanteft@fyropay.com
   Password: Merchant@123
 
 Merchant 2:
@@ -453,9 +453,9 @@ https://abc123.ngrok.io/webhooks/payment
 
 ### Contact
 
-- **Email**: support@yetopayeft.com
+- **Email**: support@fyropay.com
 - **Portal**: https://your-domain.com/dashboard
-- **Status**: https://status.yetopayeft.com
+- **Status**: https://status.fyropay.com
 
 ### Common Issues
 

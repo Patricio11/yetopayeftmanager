@@ -17,7 +17,7 @@ Run these commands in PowerShell:
 
 ```powershell
 # Navigate to your project
-cd "c:\Users\patri\Downloads\PayLink Pro\project\yetopayeft"
+cd "c:\Users\patri\Downloads\PayLink Pro\project\fyropay"
 
 # Generate private key
 openssl genrsa -out eft-jwt-private.pem 2048

@@ -1,4 +1,4 @@
-// OneGateEFT.tsx
+// FyroPay.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import {
@@ -58,7 +58,7 @@ type Merchant = {
   fnbVerifyResult?: boolean;
 };
 
-interface OneGateEFTProps {
+interface FyroPayEFTProps {
   initialData?: {
     transaction: {
       id: string;
@@ -89,7 +89,7 @@ interface OneGateEFTProps {
   };
 }
 
-const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
+const FyroPayEFT: React.FC<FyroPayEFTProps> = ({ initialData }) => {
   // --- Auth Session (for admin testing) ---
   const { data: session } = useSession();
   
@@ -2037,4 +2037,4 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
   );
 };
 
-export default OneGateEFT;
+export default FyroPayEFT;

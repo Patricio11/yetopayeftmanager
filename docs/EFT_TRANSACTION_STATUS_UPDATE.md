@@ -67,7 +67,7 @@ The EFT payment system was not properly updating transaction status in our datab
 ```
 
 ### 2. Updated Frontend Component
-**File**: `components/payment/EftServiceTheme/YetoPayEFT.tsx`
+**File**: `components/payment/EftServiceTheme/FyroPayEFT.tsx`
 
 **Changes**:
 
@@ -304,7 +304,7 @@ const startFinalPolling = (bankCode: string) => {
 - `docs/EFT_TRANSACTION_STATUS_UPDATE.md`
 
 ### Modified:
-- `components/payment/EftServiceTheme/YetoPayEFT.tsx`
+- `components/payment/EftServiceTheme/FyroPayEFT.tsx`
 
 ### Unchanged (but related):
 - `app/api/eft/webhooks/route.ts` (still handles webhooks)

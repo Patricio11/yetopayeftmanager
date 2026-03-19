@@ -4,7 +4,7 @@
 
 ### **👨‍💼 ADMIN USER**
 ```
-Email:    admineft@yetopayeft.com
+Email:    admineft@fyropay.com
 Password: Admin@123456
 Role:     admin
 Company:  YETOPAYEFT Admin
@@ -35,7 +35,7 @@ Company:  YETOPAYEFT Admin
 
 ### **👤 MERCHANT 1 - Acme Corporation**
 ```
-Email:    merchanteft@yetopayeft.com
+Email:    merchanteft@fyropay.com
 Password: Merchant@123
 Role:     merchant
 Company:  Acme Corporation
@@ -140,7 +140,7 @@ Since we're using Better Auth, you need to create the users through the sign-up 
 ## 📝 **Testing Scenarios**
 
 ### **Scenario 1: Create Payment Link (Merchant)**
-1. Login as `merchant@yetopayeft.com`
+1. Login as `merchant@fyropay.com`
 2. Go to Dashboard
 3. Click "Create Payment Link"
 4. Fill in:
@@ -160,7 +160,7 @@ Since we're using Better Auth, you need to create the users through the sign-up 
 7. Complete payment
 
 ### **Scenario 3: Admin Dashboard**
-1. Login as `admin@yetopayeft.com`
+1. Login as `admin@fyropay.com`
 2. View all merchants
 3. View all transactions
 4. Manage banks
@@ -189,8 +189,8 @@ All test passwords meet these requirements:
 
 | User Type | Email | Password | Company | Bank |
 |-----------|-------|----------|---------|------|
-| Admin | admineft@yetopayeft.com | Admin@123456 | YETOPAYEFT Admin | FNB |
-| Merchant | merchanteft@yetopayeft.com | Merchant@123 | Acme Corporation | FNB |
+| Admin | admineft@fyropay.com | Admin@123456 | YETOPAYEFT Admin | FNB |
+| Merchant | merchanteft@fyropay.com | Merchant@123 | Acme Corporation | FNB |
 | Merchant | saraheft@techstore.com | Sarah@123456 | Tech Store SA | Standard Bank |
 
 ---

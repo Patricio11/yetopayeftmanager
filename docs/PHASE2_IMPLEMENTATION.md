@@ -345,7 +345,7 @@ Errors are displayed to the user with clear messages and actions.
 
 ```bash
 # Terminal 1: Start YETOPAYEFT
-cd yetopayeft
+cd fyropay
 npm run dev
 
 # Terminal 2: Start EFT Service

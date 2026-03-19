@@ -25,7 +25,7 @@ The component was calling the wrong endpoint path.
 
 ## 🔧 **What Was Fixed:**
 
-### **File:** `components/payment/EftServiceTheme/YetoPayEFT.tsx`
+### **File:** `components/payment/EftServiceTheme/FyroPayEFT.tsx`
 
 ### **Added Step Mapping:**
 ```typescript

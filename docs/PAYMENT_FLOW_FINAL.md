@@ -102,13 +102,13 @@ return c.json({ success: true });
 return c.json({ success: true, next_step: 'load_bank' });
 ```
 
-### **2. Next.js Component** (`YetoPayEFT.tsx` line 425):
+### **2. Next.js Component** (`FyroPayEFT.tsx` line 425):
 ```typescript
 // Changed from 'init' to 'session/init'
 handleStepExecution(bank.code, 'session/init', merchant);
 ```
 
-### **3. Removed Step Mapping** (`YetoPayEFT.tsx` line 337):
+### **3. Removed Step Mapping** (`FyroPayEFT.tsx` line 337):
 ```typescript
 // REMOVED the step mapping that was converting 'init' → 'session/init'
 // Component now calls endpoints directly as named

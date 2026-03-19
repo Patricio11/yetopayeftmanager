@@ -43,15 +43,15 @@ sdk/
 ### Installation
 
 ```bash
-npm install @yetopayeft/sdk
+npm install @fyropay/sdk
 ```
 
 ### Basic Usage
 
 ```typescript
-import { YetoPayEFTClient } from '@yetopayeft/sdk';
+import { FyroPayEFTClient } from '@fyropay/sdk';
 
-const client = new YetoPayEFTClient({
+const client = new FyroPayEFTClient({
   apiKey: 'your-api-key',
 });
 
@@ -245,12 +245,12 @@ const isConnected = await client.testConnection();
 ## 🔧 Configuration
 
 ```typescript
-const client = new YetoPayEFTClient({
+const client = new FyroPayEFTClient({
   // Required
   apiKey: 'your-api-key',
   
   // Optional
-  baseUrl: 'https://yetopayeft.com',  // Default: production URL
+  baseUrl: 'https://fyropay.com',  // Default: production URL
   timeout: 30000,                       // Default: 30 seconds
   debug: true,                          // Default: false
 });
@@ -264,7 +264,7 @@ const client = new YetoPayEFTClient({
 
 ```typescript
 // Configuration
-interface YetoPayEFTConfig {
+interface FyroPayEFTConfig {
   apiKey: string;
   baseUrl?: string;
   timeout?: number;
@@ -323,7 +323,7 @@ interface WebhookEvent {
 }
 
 // Error
-class YetoPayEFTError extends Error {
+class FyroPayEFTError extends Error {
   code: string;
   statusCode?: number;
   details?: any;
@@ -343,7 +343,7 @@ try {
     reference: 'ORDER-123',
   });
 } catch (error) {
-  if (error instanceof YetoPayEFTError) {
+  if (error instanceof FyroPayEFTError) {
     console.error('Code:', error.code);
     console.error('Message:', error.message);
     console.error('Status:', error.statusCode);
@@ -373,10 +373,10 @@ try {
 
 ```typescript
 import express from 'express';
-import { YetoPayEFTClient } from '@yetopayeft/sdk';
+import { FyroPayEFTClient } from '@fyropay/sdk';
 
 const app = express();
-const client = new YetoPayEFTClient({ apiKey: process.env.API_KEY });
+const client = new FyroPayEFTClient({ apiKey: process.env.API_KEY });
 
 app.post('/create-payment', async (req, res) => {
   const payment = await client.createPaymentToken({
@@ -395,9 +395,9 @@ app.post('/create-payment', async (req, res) => {
 
 ```typescript
 // pages/api/create-payment.ts
-import { YetoPayEFTClient } from '@yetopayeft/sdk';
+import { FyroPayEFTClient } from '@fyropay/sdk';
 
-const client = new YetoPayEFTClient({
+const client = new FyroPayEFTClient({
   apiKey: process.env.YETOPAY_API_KEY!,
 });
 
@@ -523,7 +523,7 @@ cd sdk
 npm link
 
 cd ../your-project
-npm link @yetopayeft/sdk
+npm link @fyropay/sdk
 ```
 
 ---
@@ -533,7 +533,7 @@ npm link @yetopayeft/sdk
 ### Test Connection
 
 ```typescript
-const client = new YetoPayEFTClient({
+const client = new FyroPayEFTClient({
   apiKey: 'your-api-key',
   debug: true,
 });
@@ -573,12 +573,12 @@ console.log('Recent transactions:', transactions.transactions.length);
 
 ```typescript
 // ✅ Good - Use environment variables
-const client = new YetoPayEFTClient({
+const client = new FyroPayEFTClient({
   apiKey: process.env.YETOPAY_API_KEY,
 });
 
 // ❌ Bad - Never hardcode API keys
-const client = new YetoPayEFTClient({
+const client = new FyroPayEFTClient({
   apiKey: 'sk_live_abc123...',
 });
 ```
@@ -591,7 +591,7 @@ const client = new YetoPayEFTClient({
 try {
   const payment = await client.createPaymentToken({...});
 } catch (error) {
-  if (error instanceof YetoPayEFTError) {
+  if (error instanceof FyroPayEFTError) {
     // Handle API errors
     logger.error('Payment error:', error.code, error.message);
   } else {
@@ -685,7 +685,7 @@ webhook.data.metadata.userId // Available in webhook
 - [ ] **Caching** - Cache bank list and other static data
 - [ ] **Batch Operations** - Create multiple payments at once
 - [ ] **React Hooks** - `usePayment()`, `useTransaction()`
-- [ ] **Vue Composables** - `useYetoPay()`
+- [ ] **Vue Composables** - `useFyroPay()`
 - [ ] **CLI Tool** - Command-line interface for testing
 - [ ] **Mock Server** - Local testing without API calls
 
@@ -734,7 +734,7 @@ webhook.data.metadata.userId // Available in webhook
 
 **The SDK is production-ready and can be published to npm!** 🎉
 
-**Installation**: `npm install @yetopayeft/sdk`  
+**Installation**: `npm install @fyropay/sdk`  
 **Usage**: Import and use with just your API key  
 **Support**: Full TypeScript support with IntelliSense  
 

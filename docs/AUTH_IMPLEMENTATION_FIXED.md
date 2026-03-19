@@ -155,7 +155,7 @@ if (!session) {
 ### **Test 1: Login with Seeded User**
 ```bash
 1. Go to http://localhost:3000/auth/login
-2. Enter: admin@yetopayeft.com
+2. Enter: admin@fyropay.com
 3. Password: Admin@123456
 4. Click "Sign In"
 5. Should redirect to /dashboard
@@ -247,7 +247,7 @@ npm run dev
 http://localhost:3000/auth/login
 
 # 3. Login with seeded admin
-Email: admin@yetopayeft.com
+Email: admin@fyropay.com
 Password: Admin@123456
 
 # 4. Should redirect to dashboard ✅

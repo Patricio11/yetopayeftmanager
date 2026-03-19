@@ -35,7 +35,7 @@ handleStepExecution(bank.code, 'init', merchant);
 
 ### **Changed both apps to call `'load_bank'`:**
 
-**React App:** `C:\Users\patri\Downloads\PayLink Pro\project\src\components\Public\EftServiceTheme\YetoPayEFT.tsx`
+**React App:** `C:\Users\patri\Downloads\PayLink Pro\project\src\components\Public\EftServiceTheme\FyroPayEFT.tsx`
 ```typescript
 // Line 377
 const handleBankSelect = (bank: Bank) => {
@@ -44,7 +44,7 @@ const handleBankSelect = (bank: Bank) => {
 };
 ```
 
-**Next.js App:** `c:\Users\patri\Downloads\PayLink Pro\project\yetopayeft\components\payment\EftServiceTheme\YetoPayEFT.tsx`
+**Next.js App:** `c:\Users\patri\Downloads\PayLink Pro\project\fyropay\components\payment\EftServiceTheme\FyroPayEFT.tsx`
 ```typescript
 // Line 425
 const handleBankSelect = (bank: Bank) => {
@@ -169,7 +169,7 @@ npm start
 
 ### **3. Test Next.js App:**
 ```bash
-cd C:\Users\patri\Downloads\PayLink Pro\project\yetopayeft
+cd C:\Users\patri\Downloads\PayLink Pro\project\fyropay
 npm run dev
 ```
 - Open payment link
