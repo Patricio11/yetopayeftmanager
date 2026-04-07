@@ -1,0 +1,47 @@
+# Dependencies
+node_modules
+npm-debug.log*
+
+# Next.js build output (rebuilt in container)
+.next
+
+# Environment files (injected via ECS task definition)
+.env
+.env.*
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# SDK source (not needed in production)
+sdk/
+
+# Tests
+test/
+__tests__
+*.test.*
+*.spec.*
+jest.config.*
+cypress/
+
+# CI/CD
+.github/
+
+# Docker
+Dockerfile
+docker-compose*
+.dockerignore
+
+# Misc
+.claude/
+.DS_Store
+*.pem

@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Standalone output for Docker / ECS deployment
+  output: "standalone",
+
   // Security headers
   async headers() {
     const sharedHeaders = [

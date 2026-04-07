@@ -1,0 +1,104 @@
+{
+  "family": "yetopay-web",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::ACCOUNT_ID:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::ACCOUNT_ID:role/ecsTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "yetopay-web",
+      "image": "ACCOUNT_ID.dkr.ecr.af-south-1.amazonaws.com/yetopay:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        { "name": "NODE_ENV", "value": "production" },
+        { "name": "PORT", "value": "3000" },
+        { "name": "HOSTNAME", "value": "0.0.0.0" }
+      ],
+      "secrets": [
+        {
+          "name": "DATABASE_URL",
+          "valueFrom": "arn:aws:secretsmanager:af-south-1:ACCOUNT_ID:secret:yetopay/prod:DATABASE_URL::"
+        },
+        {
+          "name": "BETTER_AUTH_SECRET",
+          "valueFrom": "arn:aws:secretsmanager:af-south-1:ACCOUNT_ID:secret:yetopay/prod:BETTER_AUTH_SECRET::"
+        },
+        {
+          "name": "BETTER_AUTH_URL",
+          "valueFrom": "arn:aws:secretsmanager:af-south-1:ACCOUNT_ID:secret:yetopay/prod:BETTER_AUTH_URL::"
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_URL",
+          "valueFrom": "arn:aws:secretsmanager:af-south-1:ACCOUNT_ID:secret:yetopay/prod:NEXT_PUBLIC_APP_URL::"
+        },
+        {
+          "name": "NEXT_PUBLIC_EFT_SERVICE_URL",
+          "valueFrom": "arn:aws:secretsmanager:af-south-1:ACCOUNT_ID:secret:yetopay/prod:NEXT_PUBLIC_EFT_SERVICE_URL::"
+        },
+        {
+          "name": "PAYMENT_TOKEN_SECRET",
+          "valueFrom": "arn:aws:secretsmanager:af-south-1:ACCOUNT_ID:secret:yetopay/prod:PAYMENT_TOKEN_SECRET::"
+        },
+        {
+          "name": "CREDENTIAL_ENCRYPTION_KEY",
+          "valueFrom": "arn:aws:secretsmanager:af-south-1:ACCOUNT_ID:secret:yetopay/prod:CREDENTIAL_ENCRYPTION_KEY::"
+        },
+        {
+          "name": "CREDENTIAL_ENCRYPTION_SALT",
+          "valueFrom": "arn:aws:secretsmanager:af-south-1:ACCOUNT_ID:secret:yetopay/prod:CREDENTIAL_ENCRYPTION_SALT::"
+        },
+        {
+          "name": "EFT_WEBHOOK_SECRET",
+          "valueFrom": "arn:aws:secretsmanager:af-south-1:ACCOUNT_ID:secret:yetopay/prod:EFT_WEBHOOK_SECRET::"
+        },
+        {
+          "name": "SMTP_HOST",
+          "valueFrom": "arn:aws:secretsmanager:af-south-1:ACCOUNT_ID:secret:yetopay/prod:SMTP_HOST::"
+        },
+        {
+          "name": "SMTP_PORT",
+          "valueFrom": "arn:aws:secretsmanager:af-south-1:ACCOUNT_ID:secret:yetopay/prod:SMTP_PORT::"
+        },
+        {
+          "name": "SMTP_USER",
+          "valueFrom": "arn:aws:secretsmanager:af-south-1:ACCOUNT_ID:secret:yetopay/prod:SMTP_USER::"
+        },
+        {
+          "name": "SMTP_PASS",
+          "valueFrom": "arn:aws:secretsmanager:af-south-1:ACCOUNT_ID:secret:yetopay/prod:SMTP_PASS::"
+        },
+        {
+          "name": "SMTP_FROM",
+          "valueFrom": "arn:aws:secretsmanager:af-south-1:ACCOUNT_ID:secret:yetopay/prod:SMTP_FROM::"
+        },
+        {
+          "name": "SMTP_FROM_NAME",
+          "valueFrom": "arn:aws:secretsmanager:af-south-1:ACCOUNT_ID:secret:yetopay/prod:SMTP_FROM_NAME::"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/yetopay-web",
+          "awslogs-region": "af-south-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "healthCheck": {
+        "command": ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 60
+      }
+    }
+  ]
+}
