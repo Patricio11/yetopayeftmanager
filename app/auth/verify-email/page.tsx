@@ -62,7 +62,7 @@ function VerifyEmailContent() {
               Your email has been verified successfully. You can now sign in to your account.
             </p>
             <Link href="/auth/login">
-              <Button className="w-full fp-gradient text-white">
+              <Button className="w-full bg-gradient-to-r from-amber-500 to-pink-600 text-white">
                 Sign In
               </Button>
             </Link>
@@ -77,8 +77,8 @@ function VerifyEmailContent() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-2 mb-6">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-fyro-navy border border-fyro-gold/40 shadow-sm"><span className="text-fyro-gold font-bold text-xl leading-none" style={{fontFamily:"Georgia,serif"}}>F</span></div>
-            <span className="text-2xl font-bold tracking-tight"><span className="text-slate-900 dark:text-white">Fyro</span><span className="text-fyro-gold">Pay</span></span>
+            <img src="/ogeft.png" alt="OneGate EFT" className="h-10 w-10 rounded" />
+            <span className="text-2xl font-bold text-slate-900 dark:text-white">OneGate EFT</span>
           </Link>
         </div>
 
@@ -136,7 +136,7 @@ function VerifyEmailContent() {
             <Button
               onClick={handleResend}
               disabled={isLoading}
-              className="w-full fp-gradient  text-white py-6 rounded-xl"
+              className="w-full bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white py-6 rounded-xl"
             >
               {isLoading ? 'Sending...' : 'Resend Verification Email'}
             </Button>

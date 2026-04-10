@@ -13,17 +13,17 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const from = `${process.env.SMTP_FROM_NAME || "FyroPay"} <${process.env.SMTP_FROM || "noreply@onegate.co.za"}>`;
+const from = `${process.env.SMTP_FROM_NAME || "OneGate EFT"} <${process.env.SMTP_FROM || "noreply@onegate.co.za"}>`;
 
 export async function sendVerificationEmail(email: string, url: string) {
   await transporter.sendMail({
     from,
     to: email,
-    subject: "Verify your email - FyroPay",
+    subject: "Verify your email - OneGate EFT",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background: linear-gradient(140deg, #C8941A 0%, #0f1629 100%); padding: 32px; text-align: center;">
-          <h1 style="color: white; margin: 0;">FyroPay</h1>
+        <div style="background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%); padding: 32px; text-align: center;">
+          <h1 style="color: white; margin: 0;">OneGate EFT</h1>
         </div>
         <div style="padding: 32px; background: #ffffff;">
           <h2 style="color: #1f2937;">Verify your email address</h2>
@@ -31,7 +31,7 @@ export async function sendVerificationEmail(email: string, url: string) {
             Thanks for signing up! Please verify your email address by clicking the button below.
           </p>
           <div style="text-align: center; margin: 32px 0;">
-            <a href="${url}" style="background-color: #C8941A; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+            <a href="${url}" style="background-color: #F9B233; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
               Verify Email
             </a>
           </div>
@@ -40,7 +40,7 @@ export async function sendVerificationEmail(email: string, url: string) {
           </p>
         </div>
         <div style="padding: 16px; text-align: center; color: #9ca3af; font-size: 12px;">
-          &copy; ${new Date().getFullYear()} FyroPay. All rights reserved.
+          &copy; ${new Date().getFullYear()} OneGate EFT. All rights reserved.
         </div>
       </div>
     `,
@@ -51,11 +51,11 @@ export async function sendPasswordResetEmail(email: string, url: string) {
   await transporter.sendMail({
     from,
     to: email,
-    subject: "Reset your password - FyroPay",
+    subject: "Reset your password - OneGate EFT",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background: linear-gradient(140deg, #C8941A 0%, #0f1629 100%); padding: 32px; text-align: center;">
-          <h1 style="color: white; margin: 0;">FyroPay</h1>
+        <div style="background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%); padding: 32px; text-align: center;">
+          <h1 style="color: white; margin: 0;">OneGate EFT</h1>
         </div>
         <div style="padding: 32px; background: #ffffff;">
           <h2 style="color: #1f2937;">Reset your password</h2>
@@ -63,7 +63,7 @@ export async function sendPasswordResetEmail(email: string, url: string) {
             We received a request to reset your password. Click the button below to choose a new password.
           </p>
           <div style="text-align: center; margin: 32px 0;">
-            <a href="${url}" style="background-color: #C8941A; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+            <a href="${url}" style="background-color: #F9B233; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
               Reset Password
             </a>
           </div>
@@ -72,7 +72,7 @@ export async function sendPasswordResetEmail(email: string, url: string) {
           </p>
         </div>
         <div style="padding: 16px; text-align: center; color: #9ca3af; font-size: 12px;">
-          &copy; ${new Date().getFullYear()} FyroPay. All rights reserved.
+          &copy; ${new Date().getFullYear()} OneGate EFT. All rights reserved.
         </div>
       </div>
     `,
@@ -85,11 +85,11 @@ export async function sendBankAlertEmail(
   failureCount: number,
   recipients: string[]
 ) {
-  const subject = `🚨 Bank Auto-Disabled: ${bankName} — FyroPay Alert`;
+  const subject = `🚨 Bank Auto-Disabled: ${bankName} — OneGate EFT Alert`;
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background: linear-gradient(to right, #dc2626, #b91c1c); padding: 32px; text-align: center;">
-        <h1 style="color: white; margin: 0;">FyroPay</h1>
+        <h1 style="color: white; margin: 0;">OneGate EFT</h1>
         <p style="color: #fecaca; margin: 8px 0 0;">Bank Health Alert</p>
       </div>
       <div style="padding: 32px; background: #ffffff;">
@@ -98,7 +98,7 @@ export async function sendBankAlertEmail(
           <p style="color: #7f1d1d; margin: 0;">Bank code: <strong>${bankCode}</strong></p>
         </div>
         <p style="color: #4b5563; line-height: 1.6;">
-          The FyroPay monitoring system detected <strong>${failureCount} consecutive failed transactions</strong>
+          The OneGate EFT monitoring system detected <strong>${failureCount} consecutive failed transactions</strong>
           for <strong>${bankName}</strong>. To protect customers, this bank has been automatically disabled
           and will no longer appear on payment pages.
         </p>
@@ -131,7 +131,7 @@ export async function sendBankAlertEmail(
         </div>
       </div>
       <div style="padding: 16px; text-align: center; color: #9ca3af; font-size: 12px;">
-        &copy; ${new Date().getFullYear()} FyroPay. This is an automated alert from the bank health monitoring system.
+        &copy; ${new Date().getFullYear()} OneGate EFT. This is an automated alert from the bank health monitoring system.
       </div>
     </div>
   `;
@@ -144,11 +144,11 @@ export async function sendBankRecoveryEmail(
   bankCode: string,
   recipients: string[]
 ) {
-  const subject = `✅ Bank Recovered: ${bankName} — FyroPay`;
+  const subject = `✅ Bank Recovered: ${bankName} — OneGate EFT`;
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background: linear-gradient(140deg, #C8941A 0%, #0f1629 100%); padding: 32px; text-align: center;">
-        <h1 style="color: white; margin: 0;">FyroPay</h1>
+      <div style="background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%); padding: 32px; text-align: center;">
+        <h1 style="color: white; margin: 0;">OneGate EFT</h1>
         <p style="color: #bbf7d0; margin: 8px 0 0;">Bank Health Recovery</p>
       </div>
       <div style="padding: 32px; background: #ffffff;">
@@ -179,7 +179,7 @@ export async function sendBankRecoveryEmail(
         </p>
       </div>
       <div style="padding: 16px; text-align: center; color: #9ca3af; font-size: 12px;">
-        &copy; ${new Date().getFullYear()} FyroPay. This is an automated recovery notification.
+        &copy; ${new Date().getFullYear()} OneGate EFT. This is an automated recovery notification.
       </div>
     </div>
   `;
@@ -193,21 +193,21 @@ export async function sendPartnerInvitationEmail(email: string, invitationLink: 
   await transporter.sendMail({
     from,
     to: email,
-    subject: "You've been invited to join FyroPay as a Partner",
+    subject: "You've been invited to join OneGate EFT as a Partner",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background: linear-gradient(140deg, #C8941A 0%, #0f1629 100%); padding: 32px; text-align: center;">
-          <h1 style="color: white; margin: 0;">FyroPay</h1>
+        <div style="background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%); padding: 32px; text-align: center;">
+          <h1 style="color: white; margin: 0;">OneGate EFT</h1>
           <p style="color: #ddd6fe; margin: 8px 0 0;">Partner Invitation</p>
         </div>
         <div style="padding: 32px; background: #ffffff;">
           <h2 style="color: #1f2937;">You're invited to become a Partner</h2>
           <p style="color: #4b5563; line-height: 1.6;">
-            You've been invited to join FyroPay as a partner. As a partner, you'll be able to
+            You've been invited to join OneGate EFT as a partner. As a partner, you'll be able to
             manage merchants, view transactions across your merchant network, and earn commissions.
           </p>
           <div style="text-align: center; margin: 32px 0;">
-            <a href="${invitationLink}" style="background-color: #0f1629; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+            <a href="${invitationLink}" style="background-color: #E6007E; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
               Accept Invitation
             </a>
           </div>
@@ -216,7 +216,7 @@ export async function sendPartnerInvitationEmail(email: string, invitationLink: 
           </p>
         </div>
         <div style="padding: 16px; text-align: center; color: #9ca3af; font-size: 12px;">
-          &copy; ${new Date().getFullYear()} FyroPay. All rights reserved.
+          &copy; ${new Date().getFullYear()} OneGate EFT. All rights reserved.
         </div>
       </div>
     `,
@@ -231,21 +231,21 @@ export async function sendMerchantInvitedByPartnerEmail(
   await transporter.sendMail({
     from,
     to: email,
-    subject: `You've been invited to join FyroPay by ${partnerCompanyName}`,
+    subject: `You've been invited to join OneGate EFT by ${partnerCompanyName}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background: linear-gradient(140deg, #C8941A 0%, #0f1629 100%); padding: 32px; text-align: center;">
-          <h1 style="color: white; margin: 0;">FyroPay</h1>
+        <div style="background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%); padding: 32px; text-align: center;">
+          <h1 style="color: white; margin: 0;">OneGate EFT</h1>
           <p style="color: #bbf7d0; margin: 8px 0 0;">Merchant Invitation</p>
         </div>
         <div style="padding: 32px; background: #ffffff;">
           <h2 style="color: #1f2937;">You're invited by ${partnerCompanyName}</h2>
           <p style="color: #4b5563; line-height: 1.6;">
-            <strong>${partnerCompanyName}</strong> has invited you to join FyroPay as a merchant.
+            <strong>${partnerCompanyName}</strong> has invited you to join OneGate EFT as a merchant.
             Accept the invitation to set up your account and start accepting EFT payments.
           </p>
           <div style="text-align: center; margin: 32px 0;">
-            <a href="${invitationLink}" style="background-color: #C8941A; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+            <a href="${invitationLink}" style="background-color: #F9B233; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
               Accept Invitation
             </a>
           </div>
@@ -254,7 +254,7 @@ export async function sendMerchantInvitedByPartnerEmail(
           </p>
         </div>
         <div style="padding: 16px; text-align: center; color: #9ca3af; font-size: 12px;">
-          &copy; ${new Date().getFullYear()} FyroPay. All rights reserved.
+          &copy; ${new Date().getFullYear()} OneGate EFT. All rights reserved.
         </div>
       </div>
     `,
@@ -278,7 +278,7 @@ export async function sendPartnerActionNotificationEmail(
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background: linear-gradient(to right, #d97706, #b45309); padding: 32px; text-align: center;">
-        <h1 style="color: white; margin: 0;">FyroPay</h1>
+        <h1 style="color: white; margin: 0;">OneGate EFT</h1>
         <p style="color: #fef3c7; margin: 8px 0 0;">Partner Action Alert</p>
       </div>
       <div style="padding: 32px; background: #ffffff;">
@@ -301,7 +301,7 @@ export async function sendPartnerActionNotificationEmail(
         </div>
       </div>
       <div style="padding: 16px; text-align: center; color: #9ca3af; font-size: 12px;">
-        &copy; ${new Date().getFullYear()} FyroPay. Automated partner activity notification.
+        &copy; ${new Date().getFullYear()} OneGate EFT. Automated partner activity notification.
       </div>
     </div>
   `;

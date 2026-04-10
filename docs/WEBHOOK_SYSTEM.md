@@ -244,7 +244,7 @@ X-Webhook-Timestamp: <unix-timestamp>
 X-Webhook-ID: <unique-event-id>
 X-Webhook-Event: <event-type>
 Content-Type: application/json
-User-Agent: FyroPayEFT-Webhooks/1.0
+User-Agent: YetoPayEFT-Webhooks/1.0
 ```
 
 ---

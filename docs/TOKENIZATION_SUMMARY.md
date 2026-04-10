@@ -75,7 +75,7 @@ TOKENIZATION_SUMMARY.md                    # This file
 ### Modified Files (5)
 ```
 lib/db/schema/index.ts                     # Export tokenization schema
-components/payment/EftServiceTheme/FyroPayEFT.tsx  # UI integration
+components/payment/EftServiceTheme/YetoPayEFT.tsx  # UI integration
 .env.local                                 # Environment variables
 package.json                               # Added script
 PROGRESS.md                                # Updated progress

@@ -122,7 +122,7 @@ Frontend detected payment completion but didn't update our database, leaving tra
 **Endpoint**: `POST /api/eft/transactions/[token]/complete`
 
 #### 2. **Frontend Integration**
-**File**: `components/payment/EftServiceTheme/FyroPayEFT.tsx`
+**File**: `components/payment/EftServiceTheme/YetoPayEFT.tsx`
 
 **Changes**:
 - ✅ `finishAndRedirect()` now async - updates DB before redirect
@@ -171,7 +171,7 @@ Result: Status ALWAYS updated, even if webhook delayed/fails
 1. `components/ui/button.tsx` - Added cursor-pointer
 2. `app/dashboard/page.tsx` - Added charts, updated stats cards
 3. `app/dashboard/layout.tsx` - Added navigation
-4. `components/payment/EftServiceTheme/FyroPayEFT.tsx` - EFT status updates
+4. `components/payment/EftServiceTheme/YetoPayEFT.tsx` - EFT status updates
 5. `app/api/payment-links/route.ts` - Fixed TypeScript error
 
 ---

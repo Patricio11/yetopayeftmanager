@@ -66,7 +66,7 @@
    - POST - Save new credentials
    - DELETE - Remove saved credentials
    - POST decrypt - Decrypt for use
-5. ✅ **UI Integration** (FyroPayEFT component)
+5. ✅ **UI Integration** (YetoPayEFT component)
    - Saved credentials panel
    - "Save credentials" checkbox
    - One-click payment with saved credentials

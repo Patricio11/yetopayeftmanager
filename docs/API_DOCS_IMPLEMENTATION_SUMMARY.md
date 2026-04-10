@@ -43,7 +43,7 @@ I've created a complete plan to update your API documentation with:
 **Two Integration Options**:
 
 **Option 1: SDK Integration** (Recommended)
-- Install: `npm install @fyropay/sdk`
+- Install: `npm install @yetopayeft/sdk`
 - Type-safe with IntelliSense
 - Built-in error handling
 - Webhook verification included
@@ -68,11 +68,11 @@ I've created a complete plan to update your API documentation with:
 **SDK Flow**:
 ```typescript
 // 1. Install
-npm install @fyropay/sdk
+npm install @yetopayeft/sdk
 
 // 2. Initialize
-import { FyroPayEFTClient } from '@fyropay/sdk';
-const client = new FyroPayEFTClient({ apiKey: 'your-key' });
+import { YetoPayEFTClient } from '@yetopayeft/sdk';
+const client = new YetoPayEFTClient({ apiKey: 'your-key' });
 
 // 3. Create payment
 const payment = await client.createPaymentToken({

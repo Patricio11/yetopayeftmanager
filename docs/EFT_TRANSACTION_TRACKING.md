@@ -81,7 +81,7 @@ When bank is selected, the following fields are updated:
 ```
 
 ### 4. Frontend Integration
-**File**: `components/payment/EftServiceTheme/FyroPayEFT.tsx`
+**File**: `components/payment/EftServiceTheme/YetoPayEFT.tsx`
 
 **Updated `handleBankSelect` function**:
 ```typescript
@@ -387,7 +387,7 @@ CREATE INDEX eft_transaction_bank_idx ON eft_transactions(eft_bank_id);
 - `docs/EFT_TRANSACTION_TRACKING.md`
 
 ### Modified
-- `components/payment/EftServiceTheme/FyroPayEFT.tsx`
+- `components/payment/EftServiceTheme/YetoPayEFT.tsx`
 
 ### Related (Unchanged)
 - `lib/db/schema/eft.ts` (schema already supports this)

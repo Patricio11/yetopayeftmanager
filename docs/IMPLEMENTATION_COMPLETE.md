@@ -85,7 +85,7 @@
    - Added account info fields
    - Added is_default flag
 
-2. **`components/payment/EftServiceTheme/FyroPayEFT.tsx`**
+2. **`components/payment/EftServiceTheme/YetoPayEFT.tsx`**
    - Integrated browser storage
    - Added default account dialog
    - Save only on success logic

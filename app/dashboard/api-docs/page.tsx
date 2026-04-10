@@ -93,7 +93,7 @@ export default function ApiDocsPage() {
               <h1 className="text-4xl font-bold">API Documentation</h1>
             </div>
             <p className="text-xl text-green-50 mb-6">
-              Everything you need to integrate FyroPay Pay By Bank payment system into your application
+              Everything you need to integrate OneGate EFT Pay By Bank payment system into your application
             </p>
             {/* <div className="flex flex-wrap gap-3">
               <Button 
@@ -326,7 +326,7 @@ function QuickStartSection({
           </div>
           <div>
             <CardTitle>Quick Start</CardTitle>
-            <CardDescription>Get started with FyroPay Pay By Bank API in minutes</CardDescription>
+            <CardDescription>Get started with OneGate EFT Pay By Bank API in minutes</CardDescription>
           </div>
         </div>
       </CardHeader>

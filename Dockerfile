@@ -18,6 +18,20 @@ COPY . .
 
 # Build Next.js (standalone output)
 ENV NEXT_TELEMETRY_DISABLED=1
+
+# ── Build-time environment variables ─────────────────────────────────────────
+# DATABASE_URL: dummy value to satisfy the import-time check in lib/db/index.ts
+# The real connection string is injected at runtime via ECS secrets / docker run -e
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+
+# NEXT_PUBLIC_* vars are inlined into the JS bundle at build time by Next.js.
+# These MUST be set here or they'll be empty in the final image.
+# Override at build time with: docker build --build-arg NEXT_PUBLIC_APP_URL=https://... .
+ARG NEXT_PUBLIC_APP_URL=https://yourdomain.co.za
+ARG NEXT_PUBLIC_EFT_SERVICE_URL=https://api.yetopayeft.com/v1/eft
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
+ENV NEXT_PUBLIC_EFT_SERVICE_URL=$NEXT_PUBLIC_EFT_SERVICE_URL
+
 RUN npm run build
 
 # ── Stage 3: Production runner ───────────────────────────────────────────────

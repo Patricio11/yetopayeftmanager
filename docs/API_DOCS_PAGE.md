@@ -177,7 +177,7 @@ Step 3: Make Your First Request
 
 **Test Credentials:**
 ```
-Email: merchanteft@fyropay.com
+Email: merchanteft@yetopayeft.com
 Password: Merchant@123
 ```
 

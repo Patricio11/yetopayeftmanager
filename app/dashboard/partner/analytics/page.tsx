@@ -115,7 +115,7 @@ export default function PartnerAnalyticsPage() {
       title: "Total Volume",
       value: formatCurrency(data.totalVolume),
       icon: DollarSign,
-      iconBg: "from-fyro-navy to-fyro-gold",
+      iconBg: "from-amber-500 to-pink-600",
       cardBg: "to-amber-50/50",
     },
     {

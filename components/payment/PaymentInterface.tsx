@@ -1,14 +1,14 @@
 'use client';
 
 /**
- * PaymentInterface - Next.js Wrapper for FyroPay React Component
+ * PaymentInterface - Next.js Wrapper for OneGate EFT React Component
  * 
  * This component adapts the React payment UI for Next.js and integrates
  * with the Next.js payment flow.
  */
 
 import React, { useState, useEffect } from 'react';
-import FyroPayEFT from './EftServiceTheme/YetoPayEFT';
+import OneGateEFT from './EftServiceTheme/YetoPayEFT';
 
 interface PaymentInterfaceProps {
   transaction: {
@@ -81,13 +81,13 @@ export default function PaymentInterface({
     );
   }
 
-  // Prepare data for FyroPay component
+  // Prepare data for OneGate EFT component
   // The React component expects data from URL params and API calls
   // We'll inject the data directly via a custom initialization
   
   return (
     <div>
-      <FyroPayEFT
+      <OneGateEFT
         // Pass props that will be used to initialize the component
         initialData={{
           transaction: {

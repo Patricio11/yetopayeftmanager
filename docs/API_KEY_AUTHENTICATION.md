@@ -44,7 +44,7 @@ POST /api/auth/sign-in/email
 Content-Type: application/json
 
 {
-  "email": "merchanteft@fyropay.com",
+  "email": "merchanteft@yetopayeft.com",
   "password": "Merchant@123"
 }
 ```
@@ -173,7 +173,7 @@ Content-Type: application/json
 const crypto = require('crypto');
 const fetch = require('node-fetch');
 
-class FyroPayClient {
+class YetoPayClient {
   constructor(apiKey, apiSecret, merchantId) {
     this.apiKey = apiKey;
     this.apiSecret = apiSecret;
@@ -231,7 +231,7 @@ class FyroPayClient {
 }
 
 // Usage
-const client = new FyroPayClient(
+const client = new YetoPayClient(
   process.env.YETOPAY_API_KEY,
   process.env.YETOPAY_API_SECRET,
   process.env.YETOPAY_MERCHANT_ID
@@ -257,7 +257,7 @@ import time
 import json
 import requests
 
-class FyroPayClient:
+class YetoPayClient:
     def __init__(self, api_key, api_secret, merchant_id):
         self.api_key = api_key
         self.api_secret = api_secret
@@ -307,7 +307,7 @@ class FyroPayClient:
         return self.request(f'/api/merchant/transactions{query}')
 
 # Usage
-client = FyroPayClient(
+client = YetoPayClient(
     api_key=os.getenv('YETOPAY_API_KEY'),
     api_secret=os.getenv('YETOPAY_API_SECRET'),
     merchant_id=os.getenv('YETOPAY_MERCHANT_ID')
@@ -329,7 +329,7 @@ print('Payment URL:', payment['data']['paymentUrl'])
 ```php
 <?php
 
-class FyroPayClient {
+class YetoPayClient {
     private $apiKey;
     private $apiSecret;
     private $merchantId;
@@ -387,7 +387,7 @@ class FyroPayClient {
 }
 
 // Usage
-$client = new FyroPayClient(
+$client = new YetoPayClient(
     getenv('YETOPAY_API_KEY'),
     getenv('YETOPAY_API_SECRET'),
     getenv('YETOPAY_MERCHANT_ID')
@@ -591,4 +591,4 @@ Available permissions for API keys:
 
 **Last Updated**: December 2024  
 **Version**: 1.0.0  
-**Support**: support@fyropay.com
+**Support**: support@yetopayeft.com

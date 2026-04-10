@@ -41,12 +41,6 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  /* FyroPay brand tokens */
-  --color-fyro-navy: #0f1629;
-  --color-fyro-navy-light: #1a2444;
-  --color-fyro-gold: #c8941a;
-  --color-fyro-gold-light: #e8b044;
-  --color-fyro-gold-bright: #f5c030;
 }
 
 :root {
@@ -127,20 +121,11 @@
   }
 }
 
-/* FyroPay brand gradients */
-.fp-gradient {
-  background: linear-gradient(135deg, #0f1629 0%, #c8941a 100%);
+.og-gradient {
+  background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%);
 }
-.fp-gradient-text {
-  background: linear-gradient(135deg, #c8941a 0%, #f5c030 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-/* Legacy aliases — remove after full migration */
-.og-gradient { background: linear-gradient(135deg, #0f1629 0%, #c8941a 100%); }
 .og-gradient-text {
-  background: linear-gradient(135deg, #c8941a 0%, #f5c030 100%);
+  background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

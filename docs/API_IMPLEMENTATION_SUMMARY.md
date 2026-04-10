@@ -326,7 +326,7 @@ npm run db:seed
 # 3. Login as merchant
 curl -X POST http://localhost:3000/api/auth/sign-in/email \
   -H "Content-Type: application/json" \
-  -d '{"email":"merchanteft@fyropay.com","password":"Merchant@123"}'
+  -d '{"email":"merchanteft@yetopayeft.com","password":"Merchant@123"}'
 
 # 4. Create API key
 curl -X POST http://localhost:3000/api/merchant/api-keys \

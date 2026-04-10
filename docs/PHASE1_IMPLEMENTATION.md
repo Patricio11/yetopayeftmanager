@@ -81,7 +81,7 @@ GET  /api/eft/webhooks (health check)
 ### **Step 1: Install Dependencies**
 
 ```bash
-cd fyropay
+cd yetopayeft
 npm install
 ```
 

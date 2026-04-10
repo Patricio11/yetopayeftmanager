@@ -287,7 +287,7 @@ POST /api/payment-links
   "success": true,
   "data": {
     "id": "uuid",
-    "paymentUrl": "https://fyropay.com/pay/token-xxx",
+    "paymentUrl": "https://yetopayeft.com/pay/token-xxx",
     "amount": "1.00",
     "reference": "TEST-1733384520123-A7F9K2"
   }

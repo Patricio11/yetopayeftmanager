@@ -1,6 +1,6 @@
 # Merchant User Setup Guide
 
-Complete guide to creating and managing merchant users in the FyroPay EFT system.
+Complete guide to creating and managing merchant users in the YetoPay EFT system.
 
 ## Table of Contents
 - [System Overview](#system-overview)
@@ -63,7 +63,7 @@ Navigate to: **http://localhost:3000/auth/register**
 Full Name: Test Merchant
 Email: merchant@yetopay.com
 Phone: +27 12 345 6789
-Company Name: FyroPay Test Company (Pty) Ltd
+Company Name: YetoPay Test Company (Pty) Ltd
 Password: Merchant123!
 Confirm Password: Merchant123!
 ☑ I agree to the Terms and Conditions
@@ -120,7 +120,7 @@ npm run create:merchant
    Email: merchant@yetopay.com
    Password: Merchant123!
    Phone: +27 12 345 6789
-   Company: FyroPay Test Company (Pty) Ltd
+   Company: YetoPay Test Company (Pty) Ltd
    Role: merchant
 
 ✅ User updated successfully!
@@ -133,7 +133,7 @@ npm run create:merchant
 👤 Name: Test Merchant
 📧 Email: merchant@yetopay.com
 📱 Phone: +27 12 345 6789
-🏢 Company: FyroPay Test Company (Pty) Ltd
+🏢 Company: YetoPay Test Company (Pty) Ltd
 🎭 Role: merchant
 ✅ Email Verified: true
 📊 KYC Status: approved

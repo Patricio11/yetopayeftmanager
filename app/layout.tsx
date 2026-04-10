@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FyroPay — South African Pay By Bank Payment Gateway",
-  description: "Accept Pay By Bank payments from all major South African banks. Instant settlements, enterprise security, one simple integration.",
+  title: "OneGate EFT - South African Pay By Bank Payment Gateway",
+  description: "Accept Pay By Bank payments from South African banks. Secure, real-time payment processing for merchants.",
 };
 
 export default function RootLayout({

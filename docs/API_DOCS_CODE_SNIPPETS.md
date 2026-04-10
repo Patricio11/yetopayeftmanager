@@ -8,15 +8,15 @@
 
 ### **Installation**
 ```bash
-npm install @fyropay/sdk
+npm install @yetopayeft/sdk
 ```
 
 ### **Basic Usage** (TypeScript/JavaScript)
 ```typescript
-import { FyroPayEFTClient } from '@fyropay/sdk';
+import { YetoPayEFTClient } from '@yetopayeft/sdk';
 
 // Initialize client
-const client = new FyroPayEFTClient({
+const client = new YetoPayEFTClient({
   apiKey: process.env.YETOPAY_API_KEY,
 });
 
@@ -85,7 +85,7 @@ banks.forEach(bank => {
 ```javascript
 const axios = require('axios');
 
-const response = await axios.post('https://fyropay.com/api/payment-tokens', {
+const response = await axios.post('https://yetopayeft.com/api/payment-tokens', {
   amount: 100.50,
   reference: 'ORDER-12345',
   customerEmail: 'customer@example.com'
@@ -105,7 +105,7 @@ console.log('Redirect to:', paymentUrl);
 import requests
 import os
 
-response = requests.post('https://fyropay.com/api/payment-tokens', 
+response = requests.post('https://yetopayeft.com/api/payment-tokens', 
   json={
     'amount': 100.50,
     'reference': 'ORDER-12345',
@@ -124,7 +124,7 @@ print(f'Redirect to: {payment_url}')
 ### **PHP** (cURL)
 ```php
 <?php
-$ch = curl_init('https://fyropay.com/api/payment-tokens');
+$ch = curl_init('https://yetopayeft.com/api/payment-tokens');
 
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
@@ -148,7 +148,7 @@ echo "Redirect to: $paymentUrl";
 
 ### **cURL** (Command Line)
 ```bash
-curl -X POST https://fyropay.com/api/payment-tokens \
+curl -X POST https://yetopayeft.com/api/payment-tokens \
   -H "X-API-Key: your-api-key-here" \
   -H "Content-Type: application/json" \
   -d '{
@@ -164,9 +164,9 @@ curl -X POST https://fyropay.com/api/payment-tokens \
 
 ### **Webhook Signature Verification - SDK**
 ```typescript
-import { FyroPayEFTClient } from '@fyropay/sdk';
+import { YetoPayEFTClient } from '@yetopayeft/sdk';
 
-const client = new FyroPayEFTClient({ apiKey: 'your-key' });
+const client = new YetoPayEFTClient({ apiKey: 'your-key' });
 
 app.post('/webhooks/payment', (req, res) => {
   const signature = req.headers['x-webhook-signature'];
@@ -370,7 +370,7 @@ app.listen(3000, () => {
     "customerName": "John Doe",
     "bankName": "FNB",
     "bankAccountNumber": "****1234",
-    "proofOfPaymentUrl": "https://fyropay.com/proofs/abc123.pdf",
+    "proofOfPaymentUrl": "https://yetopayeft.com/proofs/abc123.pdf",
     "metadata": {
       "orderId": "12345",
       "productName": "Premium Subscription"
@@ -395,7 +395,7 @@ X-API-Key: sk_live_abc123xyz789...
 
 ### **Example Request with Authentication**
 ```bash
-curl -X GET https://fyropay.com/api/transactions \
+curl -X GET https://yetopayeft.com/api/transactions \
   -H "X-API-Key: sk_live_abc123xyz789..." \
   -H "Content-Type: application/json"
 ```
@@ -411,7 +411,7 @@ curl -X GET https://fyropay.com/api/transactions \
   "data": {
     "id": "tok_abc123",
     "token": "pay_xyz789",
-    "paymentUrl": "https://fyropay.com/pay/pay_xyz789",
+    "paymentUrl": "https://yetopayeft.com/pay/pay_xyz789",
     "amount": 100.50,
     "reference": "ORDER-12345",
     "status": "active",
@@ -483,17 +483,17 @@ curl -X POST https://your-domain.com/webhooks/payment \
 
 ### **SDK Installation**
 ```bash
-npm install @fyropay/sdk
+npm install @yetopayeft/sdk
 ```
 
 ### **SDK Import**
 ```typescript
-import { FyroPayEFTClient } from '@fyropay/sdk';
+import { YetoPayEFTClient } from '@yetopayeft/sdk';
 ```
 
 ### **API Base URL**
 ```
-https://fyropay.com/api
+https://yetopayeft.com/api
 ```
 
 ### **Webhook Headers**

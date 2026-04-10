@@ -10,9 +10,9 @@
 ```
 Failed to compile.
 ./sdk/examples/basic-usage.ts:6:34
-Type error: Cannot find module '@fyropay/sdk' or its corresponding type declarations.
+Type error: Cannot find module '@yetopayeft/sdk' or its corresponding type declarations.
 
-> 6 | import { FyroPayEFTClient } from '@fyropay/sdk';
+> 6 | import { YetoPayEFTClient } from '@yetopayeft/sdk';
     |                                  ^
 
 Next.js build worker exited with code: 1
@@ -21,7 +21,7 @@ Error: Command "npm run build" exited with 1
 
 ### **Root Cause**:
 - Next.js was trying to compile the `sdk/` folder during build
-- The SDK examples import `@fyropay/sdk` package
+- The SDK examples import `@yetopayeft/sdk` package
 - The package doesn't exist yet (not built/published)
 - TypeScript compilation failed
 
@@ -29,7 +29,7 @@ Error: Command "npm run build" exited with 1
 When we created the SDK with examples, Next.js automatically included all `.ts` and `.tsx` files in the project for compilation. The SDK folder contains:
 - `sdk/src/` - SDK source code
 - `sdk/examples/` - Example files that import the SDK package
-- These examples expect the SDK to be built and available as `@fyropay/sdk`
+- These examples expect the SDK to be built and available as `@yetopayeft/sdk`
 
 ---
 
@@ -157,7 +157,7 @@ sdk/
 ```
 
 ### **The Issue**:
-- `examples/basic-usage.ts` imports `@fyropay/sdk`
+- `examples/basic-usage.ts` imports `@yetopayeft/sdk`
 - This package name is defined in `sdk/package.json`
 - The package needs to be **built** first with `npm run build` in SDK folder
 - Or **published** to npm registry
@@ -183,7 +183,7 @@ npm link
 
 Then in main project:
 ```bash
-npm link @fyropay/sdk
+npm link @yetopayeft/sdk
 ```
 
 ### **Option 2: Publish to NPM**
@@ -194,7 +194,7 @@ npm publish
 
 Then in main project:
 ```bash
-npm install @fyropay/sdk
+npm install @yetopayeft/sdk
 ```
 
 ### **Option 3: Use Examples as Reference**
@@ -287,8 +287,8 @@ vercel deploy
 
 ### **Option B: Move SDK to Separate Repo**
 ```
-fyropay/          # Main app
-fyropay-sdk/      # SDK repo
+yetopayeft/          # Main app
+yetopayeft-sdk/      # SDK repo
 ```
 **Pros**: Complete separation  
 **Cons**: Harder to sync changes
@@ -308,7 +308,7 @@ Add to `tsconfig.json` exclude
 ## 📝 Summary
 
 ### **Problem**:
-- SDK examples imported `@fyropay/sdk` package
+- SDK examples imported `@yetopayeft/sdk` package
 - Package not built/published yet
 - Next.js tried to compile SDK folder
 - Build failed with module not found error

@@ -6,7 +6,7 @@ After carefully analyzing the React app's flow and the EFT service structure:
 
 **React App Flow:**
 ```typescript
-// Line 377: FyroPayEFT.tsx
+// Line 377: YetoPayEFT.tsx
 handleStepExecution(bank.code, 'init', merchant);
 
 // This calls: http://localhost:8080/v1/eft/fnb/init
@@ -62,7 +62,7 @@ app.post('/v1/eft/:bank/init', requireJWT, async (c) => {
 ### **2. Updated Next.js Component**
 
 ```typescript
-// c:\Users\patri\Downloads\PayLink Pro\project\fyropay\components\payment\EftServiceTheme\FyroPayEFT.tsx
+// c:\Users\patri\Downloads\PayLink Pro\project\yetopayeft\components\payment\EftServiceTheme\YetoPayEFT.tsx
 // Line 425
 
 const handleBankSelect = (bank: Bank) => {
@@ -193,7 +193,7 @@ npm start
 
 ### **3. Test Next.js App:**
 ```bash
-cd C:\Users\patri\Downloads\PayLink Pro\project\fyropay
+cd C:\Users\patri\Downloads\PayLink Pro\project\yetopayeft
 npm run dev
 ```
 - Open payment link

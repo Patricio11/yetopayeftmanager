@@ -188,7 +188,7 @@ export default function PartnerMerchantDetailPage() {
 
       {/* Header */}
       <div className="flex items-center gap-4">
-        <div className="w-12 h-12 bg-gradient-to-br from-fyro-navy to-fyro-gold rounded-xl flex items-center justify-center">
+        <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-pink-600 rounded-xl flex items-center justify-center">
           <Building2 className="w-6 h-6 text-white" />
         </div>
         <div>

@@ -325,7 +325,7 @@ app.get('/api/v1/transaction/:token/init', async (req, res) => {
 #### 2.1 Update YETOPAYEFT API Route
 
 ```typescript
-// fyropay/app/api/payment-links/route.ts
+// yetopayeft/app/api/payment-links/route.ts
 export async function POST(request: NextRequest) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -402,7 +402,7 @@ module.exports = { generateEftServiceJWT };
 #### 3.2 Update Payment Interface to Call EFT Service
 
 ```typescript
-// fyropay/components/payment/PaymentInterface.tsx
+// yetopayeft/components/payment/PaymentInterface.tsx
 async function initializeEftSession(bank: string, sessionData: any) {
   // Get JWT token from Express server
   const jwtResponse = await fetch('/api/eft/get-jwt', {

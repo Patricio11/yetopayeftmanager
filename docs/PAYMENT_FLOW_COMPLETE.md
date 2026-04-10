@@ -32,7 +32,7 @@ origin: (o) => {
 **Problem:** Component called `/init`, EFT service has `/session/init`
 **Solution:** Added step mapping in component
 ```typescript
-// FyroPayEFT.tsx
+// YetoPayEFT.tsx
 const stepMapping = {
   'init': 'session/init',  // Maps to correct endpoint
   // ...
@@ -46,7 +46,7 @@ const stepMapping = {
 // EFT Service: src/index.js
 issuer: [
   'https://manager.paylinkpro.co.za',  // React app
-  'https://manager.fyropay.com',    // Production Next.js
+  'https://manager.yetopayeft.com',    // Production Next.js
   'http://localhost:3000',              // Next.js dev ✅
   'http://localhost:3001'               // React dev
 ]
@@ -150,7 +150,7 @@ executeStepApi('fnb', 'init', merchant);
 1. [ ] **Login as merchant**
    ```
    URL: http://localhost:3000/auth/login
-   Email: admineft@fyropay.com
+   Email: admineft@yetopayeft.com
    Password: Admin@123456
    ```
 
@@ -195,7 +195,7 @@ executeStepApi('fnb', 'init', merchant);
 
 ### **Next.js App:**
 1. ✅ `app/api/eft/transactions/[token]/jwt/route.ts` - Public JWT endpoint
-2. ✅ `components/payment/EftServiceTheme/FyroPayEFT.tsx` - Step mapping
+2. ✅ `components/payment/EftServiceTheme/YetoPayEFT.tsx` - Step mapping
 3. ✅ `components/payment/PaymentInterface.tsx` - Wrapper component
 4. ✅ `.env.local` - JWT keys configuration
 

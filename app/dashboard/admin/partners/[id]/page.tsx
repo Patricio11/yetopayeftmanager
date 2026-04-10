@@ -293,7 +293,7 @@ function MerchantsTab({ partnerId }: { partnerId: string }) {
         {merchants.map((m) => (
           <div key={m.id} className="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
             <div className="flex items-center gap-4 min-w-0 flex-1">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-fyro-navy to-fyro-gold flex items-center justify-center text-white font-bold shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-pink-600 flex items-center justify-center text-white font-bold shrink-0">
                 {(m.companyName || m.name || '?')[0].toUpperCase()}
               </div>
               <div className="min-w-0 flex-1 md:grid md:grid-cols-4 md:gap-4 md:items-center">
@@ -515,7 +515,7 @@ function CommissionTab({ partnerId }: { partnerId: string }) {
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="gap-2 bg-gradient-to-r from-fyro-navy to-fyro-gold text-white"
+          className="gap-2 bg-gradient-to-r from-amber-500 to-pink-600 text-white"
         >
           <Save className="w-4 h-4" />{saving ? 'Saving...' : 'Save Commission Config'}
         </Button>
@@ -661,7 +661,7 @@ function SettingsTab({ partner, onUpdate }: { partner: Partner; onUpdate: () => 
           <Button
             onClick={handleSave}
             disabled={saving}
-            className="w-full bg-gradient-to-r from-fyro-navy to-fyro-gold text-white gap-2"
+            className="w-full bg-gradient-to-r from-amber-500 to-pink-600 text-white gap-2"
           >
             <Save className="w-4 h-4" />{saving ? 'Saving...' : 'Save Changes'}
           </Button>

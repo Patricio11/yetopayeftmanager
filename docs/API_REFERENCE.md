@@ -111,7 +111,7 @@ POST /api/auth/sign-in/email
 Content-Type: application/json
 
 {
-  "email": "merchanteft@fyropay.com",
+  "email": "merchanteft@yetopayeft.com",
   "password": "Merchant@123"
 }
 ```
@@ -121,7 +121,7 @@ Content-Type: application/json
 {
   "user": {
     "id": "user-uuid",
-    "email": "merchanteft@fyropay.com",
+    "email": "merchanteft@yetopayeft.com",
     "name": "John Merchant",
     "role": "merchant"
   },
@@ -143,7 +143,7 @@ GET /api/auth/session
 {
   "user": {
     "id": "user-uuid",
-    "email": "merchanteft@fyropay.com",
+    "email": "merchanteft@yetopayeft.com",
     "name": "John Merchant",
     "role": "merchant"
   },
@@ -613,7 +613,7 @@ function verifyWebhookSignature(payload, signature, secret) {
 
 // Usage
 app.post('/webhooks/payment', (req, res) => {
-  const signature = req.headers['x-fyropay-signature'];
+  const signature = req.headers['x-yetopayeft-signature'];
   const secret = process.env.WEBHOOK_SECRET;
   
   if (!verifyWebhookSignature(req.body, signature, secret)) {
@@ -789,11 +789,11 @@ Route::post('/webhooks/payment', function (Request $request) {
 
 ```
 Admin:
-  Email: admineft@fyropay.com
+  Email: admineft@yetopayeft.com
   Password: Admin@123456
 
 Merchant 1:
-  Email: merchanteft@fyropay.com
+  Email: merchanteft@yetopayeft.com
   Password: Merchant@123
 
 Merchant 2:
@@ -886,4 +886,4 @@ Custom metadata is preserved throughout the payment lifecycle:
 
 **Last Updated**: December 2024  
 **API Version**: 1.0.0  
-**Support**: support@fyropay.com
+**Support**: support@yetopayeft.com

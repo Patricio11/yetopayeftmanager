@@ -2,7 +2,7 @@
 
 ## 🎨 **What Was Done**
 
-Successfully integrated the beautiful React payment UI (`FyroPayEFT.tsx`) into the Next.js application!
+Successfully integrated the beautiful React payment UI (`YetoPayEFT.tsx`) into the Next.js application!
 
 ---
 
@@ -12,7 +12,7 @@ Successfully integrated the beautiful React payment UI (`FyroPayEFT.tsx`) into t
 components/payment/
 ├── PaymentInterface.tsx          ✅ Next.js wrapper component
 ├── EftServiceTheme/
-│   ├── FyroPayEFT.tsx           ✅ Main React payment component (adapted for Next.js)
+│   ├── YetoPayEFT.tsx           ✅ Main React payment component (adapted for Next.js)
 │   └── components/
 │       └── TermsModal.tsx        ✅ Terms & Conditions modal
 ```
@@ -21,8 +21,8 @@ components/payment/
 
 ## 🔧 **Changes Made**
 
-### **1. FyroPayEFT.tsx** ✅
-- Added `FyroPayEFTProps` interface to accept Next.js data
+### **1. YetoPayEFT.tsx** ✅
+- Added `YetoPayEFTProps` interface to accept Next.js data
 - Updated imports for Next.js environment
 - Modified initialization to use props instead of URL params
 - Removed `EftTestRedirect` dependency
@@ -31,7 +31,7 @@ components/payment/
 
 ### **2. PaymentInterface.tsx** ✅
 - Created wrapper component for Next.js integration
-- Passes transaction, merchant, and bank data to FyroPayEFT
+- Passes transaction, merchant, and bank data to YetoPayEFT
 - Handles client-side rendering
 - Shows loading state during hydration
 
@@ -52,10 +52,10 @@ components/payment/
 
 2. **PaymentInterface** (Wrapper)
    - Ensures client-side rendering
-   - Transforms data for `FyroPayEFT`
+   - Transforms data for `YetoPayEFT`
    - Shows loading spinner
 
-3. **FyroPayEFT** (Main UI)
+3. **YetoPayEFT** (Main UI)
    - Receives `initialData` props
    - Generates JWT token for EFT service
    - Renders beautiful payment UI
@@ -87,7 +87,7 @@ npm run dev
 ### **2. Login**
 ```
 URL: http://localhost:3000/auth/login
-Email: admineft@fyropay.com
+Email: admineft@yetopayeft.com
 Password: Admin@123456
 ```
 
@@ -98,7 +98,7 @@ Password: Admin@123456
 
 ### **4. Test Payment**
 - Open payment URL in browser
-- Should see beautiful FyroPay UI
+- Should see beautiful YetoPay UI
 - Select a bank
 - Complete payment flow
 
@@ -120,7 +120,7 @@ DATABASE_URL=your-database-url
 
 1. **EFT Service** must be running on `localhost:8080`
 2. **JWT Token** is generated via `/api/eft/jwt` endpoint
-3. **Redirect timeout** is set to 144000ms (144 seconds) - can be changed in line 208 of FyroPayEFT.tsx
+3. **Redirect timeout** is set to 144000ms (144 seconds) - can be changed in line 208 of YetoPayEFT.tsx
 
 ---
 

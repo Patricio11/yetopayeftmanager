@@ -59,10 +59,10 @@ const data = await response.json();
 ### What Merchants Would Do:
 
 ```javascript
-// Merchant installs: npm install @fyropay/sdk
-const FyroPay = require('@fyropay/sdk');
+// Merchant installs: npm install @yetopayeft/sdk
+const YetoPay = require('@yetopayeft/sdk');
 
-const client = new FyroPay({
+const client = new YetoPay({
   apiKey: 'yp_live_...',
   apiSecret: 'secret...',
   merchantId: 'merchant-id'
@@ -230,7 +230,7 @@ console.log(payment.paymentUrl);
 
 ### Core Features
 ```javascript
-const client = new FyroPay({ apiKey, apiSecret, merchantId });
+const client = new YetoPay({ apiKey, apiSecret, merchantId });
 
 // Payment Links
 await client.paymentLinks.create({ amount, reference });
@@ -269,8 +269,8 @@ client.on('response', (res) => console.log(res));
 
 **1. Signature Helper**
 ```javascript
-// npm install @fyropay/signature
-const { generateSignature } = require('@fyropay/signature');
+// npm install @yetopayeft/signature
+const { generateSignature } = require('@yetopayeft/signature');
 
 const signature = generateSignature({
   merchantId,
@@ -282,8 +282,8 @@ const signature = generateSignature({
 
 **2. TypeScript Types**
 ```typescript
-// npm install @fyropay/types
-import { PaymentLink, Transaction } from '@fyropay/types';
+// npm install @yetopayeft/types
+import { PaymentLink, Transaction } from '@yetopayeft/types';
 
 const payment: PaymentLink = {
   amount: 250,
@@ -293,7 +293,7 @@ const payment: PaymentLink = {
 
 **3. Code Templates**
 ```bash
-# npx @fyropay/create-integration
+# npx @yetopayeft/create-integration
 # Generates starter code in your language
 ```
 

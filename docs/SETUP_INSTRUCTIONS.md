@@ -28,7 +28,7 @@ You **MUST** register each user through the sign-up page to create Better Auth a
 1. Go to: http://localhost:3000/auth/register
 2. Fill in:
    - Full Name: Admin User
-   - Email: admin@fyropay.com
+   - Email: admin@yetopayeft.com
    - Phone: +27123456789
    - Company: YETOPAYEFT Admin
    - Password: Admin@123456
@@ -44,7 +44,7 @@ You **MUST** register each user through the sign-up page to create Better Auth a
 2. Go to: http://localhost:3000/auth/register
 3. Fill in:
    - Full Name: John Merchant
-   - Email: merchant@fyropay.com
+   - Email: merchant@yetopayeft.com
    - Phone: +27123456790
    - Company: Acme Corporation
    - Password: Merchant@123
@@ -103,13 +103,13 @@ Once registered, the user will have:
 
 ### **Admin:**
 ```
-Email: admin@fyropay.com
+Email: admin@yetopayeft.com
 Password: Admin@123456
 ```
 
 ### **Merchant 1:**
 ```
-Email: merchant@fyropay.com
+Email: merchant@yetopayeft.com
 Password: Merchant@123
 ```
 
@@ -130,7 +130,7 @@ If you want to avoid the UI registration, you can manually insert accounts:
 INSERT INTO account (id, "accountId", "providerId", "userId", password, "createdAt", "updatedAt")
 VALUES (
   gen_random_uuid()::text,
-  'admin@fyropay.com',
+  'admin@yetopayeft.com',
   'credential',
   'admin-001',
   '$2b$10$YourHashedPasswordHere', -- Use bcrypt to hash
