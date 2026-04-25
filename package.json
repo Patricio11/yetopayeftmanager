@@ -34,7 +34,7 @@
     "drizzle-orm": "^0.44.7",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.553.0",
-    "next": "16.0.7",
+    "next": "16.0.10",
     "nodemailer": "^7.0.13",
     "radix-ui": "^1.4.3",
     "react": "19.2.0",
