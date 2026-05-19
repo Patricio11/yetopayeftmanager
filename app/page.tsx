@@ -126,7 +126,7 @@ export default function LandingPage() {
             </h1>
 
             <p className="text-lg sm:text-xl text-slate-500 dark:text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-              The modern payment gateway for South African merchants. Fast settlements, all major banks, enterprise security — one simple integration.
+              The modern payment gateway for South African merchants. Fast settlements, all major banks, enterprise security - one simple integration.
             </p>
 
             {/* CTA Group */}
