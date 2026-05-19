@@ -3,7 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import {
   Shield, Check, Eye, EyeOff, HelpCircle, X, ChevronRight, ChevronLeft,
-  AlertTriangle, CheckCircle, RefreshCcw, Save, Trash2, Clock
+  AlertTriangle, CheckCircle, RefreshCcw, Save, Trash2, Clock,
+  Landmark, Info, CornerDownLeft,
 } from 'lucide-react';
 import TermsModal from './components/TermsModal';
 import { CountdownTimer } from '@/components/payment/CountdownTimer';
@@ -45,6 +46,12 @@ type ApiResponse = {
   destinationAccount?: string;
   destinationBank?: string;
   countdown?: number;
+  /** Epoch-ms anchor for the countdown — when this changes the timer should restart */
+  countdownStart?: number;
+  /** Explicit signal that the countdown should restart (e.g. after a fresh in-app push) */
+  resetCountdown?: boolean;
+  /** 0 = first push, 1 = retried push (backend re-sent in-app approval) */
+  retryAttempt?: number;
 };
 
 type Merchant = {
@@ -1613,44 +1620,70 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
 
   const renderFinalStep = () => {
     const countdownSeconds = apiResponse?.countdown || 90;
-    const approvalTitle = apiResponse?.title || 'Awaiting Approval';
-    const approvalMessage = apiResponse?.message || 'Please approve the request in your banking app. This page will update automatically.';
+    // Backend stamps `countdownStart` (epoch ms) on every push. Using it as the
+    // React `key` forces CountdownTimer to remount and restart from `seconds`
+    // even when the backend sends the same `countdown` value (e.g. retry after timeout).
+    // If the field is absent (older payloads), fall back to a constant so behaviour is unchanged.
+    const countdownKey = apiResponse?.countdownStart ?? 'initial';
+    const retryAttempt = apiResponse?.retryAttempt ?? 0;
+    const isRetry = retryAttempt > 0 || apiResponse?.resetCountdown === true;
+    const approvalTitle = apiResponse?.title || 'Authorise payment in your Bank App';
+    const approvalMessage =
+      apiResponse?.message
+      || 'Authorise and return to payment window to complete transaction.';
 
     return (
-      <div className="text-center space-y-8">
-        {/* Icon */}
-        <div className="w-20 h-20 bg-gradient-to-r from-amber-500 to-pink-600 rounded-full flex items-center justify-center mx-auto relative">
-          <div className="absolute inset-0 border-2 border-amber-300 rounded-full animate-ping"></div>
-          <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
-            <Shield className="w-8 h-8 text-amber-500" />
-          </div>
+      <div className="space-y-6">
+        {/* Card: title + 3 steps */}
+        <div className="rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-white dark:bg-slate-900 p-5">
+          <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+            {approvalTitle}
+          </h3>
+          <div className="h-px bg-slate-200 dark:bg-slate-700 mt-3 mb-4" />
+          <ul className="space-y-3">
+            {[
+              { Icon: Landmark, label: 'Open your bank app' },
+              { Icon: Check, label: isRetry ? 'Approve the new request' : 'Approve User' },
+              { Icon: CornerDownLeft, label: 'Come straight back to payment' },
+            ].map(({ Icon, label }, i) => (
+              <li key={i} className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center flex-shrink-0">
+                  <Icon className="w-4 h-4 text-slate-700 dark:text-slate-200" strokeWidth={2} />
+                </div>
+                <span className="text-sm text-slate-700 dark:text-slate-300">{label}</span>
+              </li>
+            ))}
+          </ul>
         </div>
 
-        {/* Title & Description */}
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{approvalTitle}</h2>
-          <div className="text-gray-600 dark:text-gray-400" style={{ whiteSpace: 'pre-line' }}>{approvalMessage}</div>
+        {/* Info banner */}
+        <div className="rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900 p-4 flex gap-3">
+          <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-slate-700 dark:text-slate-300" style={{ whiteSpace: 'pre-line' }}>
+            {approvalMessage}
+          </p>
         </div>
 
-        {/* Countdown Timer */}
+        {/* Countdown — `key` forces remount on each fresh push (countdownStart changes) */}
         <div className="flex justify-center">
           <CountdownTimer
+            key={countdownKey}
             seconds={countdownSeconds}
-            size="lg"
-            warningThreshold={Math.min(30, Math.floor(countdownSeconds / 3))}
+            size="md"
+            warningThreshold={Math.min(20, Math.floor(countdownSeconds / 3))}
             onComplete={() => {
-              console.log('Countdown completed - transaction may have timed out');
+              console.log('Countdown completed — transaction may have timed out');
             }}
           />
         </div>
 
-        {/* Action Button - Only show if in inApp step */}
+        {/* Resend button — only if we're on the inApp step */}
         {isInAppStep && (
-          <div className="flex items-center justify-center space-x-3">
+          <div className="flex items-center justify-center">
             <button
               onClick={handleResendInApp}
               disabled={isLoading}
-              className="inline-flex items-center px-4 py-2.5 rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
             >
               <RefreshCcw className="w-4 h-4 mr-2" />
               Resend approval
@@ -1658,8 +1691,7 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
           </div>
         )}
 
-        {/* Helper text */}
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-xs text-center text-slate-500 dark:text-slate-400">
           This page will update automatically once approved.
         </p>
       </div>
