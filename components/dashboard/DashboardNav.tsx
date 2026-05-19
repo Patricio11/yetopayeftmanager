@@ -163,7 +163,7 @@ export function DashboardNav({ userRole, accountMode }: DashboardNavProps) {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/dashboard" className="flex items-center group cursor-pointer">
-            <span className="text-xl font-extrabold tracking-tight yp-gradient-text">
+            <span className="font-extrabold tracking-tight yp-gradient-text" style={{ fontSize: '2rem' }}>
               YetoPay
             </span>
           </Link>

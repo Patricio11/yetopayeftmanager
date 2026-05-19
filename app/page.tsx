@@ -73,7 +73,7 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 border-b border-slate-200/60 dark:border-white/5 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <span className="text-xl font-extrabold tracking-tight yp-gradient-text">
+            <span className="font-extrabold tracking-tight yp-gradient-text" style={{ fontSize: '2rem' }}>
               YetoPay
             </span>
           </Link>
@@ -353,7 +353,7 @@ export default function LandingPage() {
             {/* Brand */}
             <div className="col-span-2 md:col-span-1">
               <Link href="/" className="flex items-center gap-2.5">
-                <span className="text-xl font-extrabold tracking-tight yp-gradient-text">
+                <span className="font-extrabold tracking-tight yp-gradient-text" style={{ fontSize: '2rem' }}>
                   YetoPay
                 </span>
               </Link>

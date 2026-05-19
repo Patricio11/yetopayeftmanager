@@ -104,7 +104,7 @@ function ForgotPassword() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-2 mb-6">
             
-            <span className="text-2xl font-extrabold yp-gradient-text">YetoPay</span>
+            <span className="font-extrabold yp-gradient-text" style={{ fontSize: '2rem' }}>YetoPay</span>
           </Link>
         </div>
 
@@ -262,7 +262,7 @@ function SetNewPassword({ token }: { token: string }) {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-2 mb-6">
             
-            <span className="text-2xl font-extrabold yp-gradient-text">YetoPay</span>
+            <span className="font-extrabold yp-gradient-text" style={{ fontSize: '2rem' }}>YetoPay</span>
           </Link>
         </div>
 

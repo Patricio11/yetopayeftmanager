@@ -1951,7 +1951,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-extrabold yp-gradient-text">YetoPay</h1>
+              <h1 className="font-extrabold yp-gradient-text" style={{ fontSize: '2rem' }}>YetoPay</h1>
             </div>
             <div className="flex items-center space-x-4">
               <HelpCircle size={20} className="cursor-pointer hover:text-amber-200 transition-colors" />
