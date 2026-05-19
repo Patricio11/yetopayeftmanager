@@ -1634,6 +1634,20 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
 
     return (
       <div className="space-y-6">
+        {/* Countdown — sits in the hero slot where the phone-lock icon used to be.
+            `key` forces remount on each fresh push (countdownStart changes). */}
+        <div className="flex justify-center pt-2">
+          <CountdownTimer
+            key={countdownKey}
+            seconds={countdownSeconds}
+            size="md"
+            warningThreshold={Math.min(20, Math.floor(countdownSeconds / 3))}
+            onComplete={() => {
+              console.log('Countdown completed — transaction may have timed out');
+            }}
+          />
+        </div>
+
         {/* Card: title + 3 steps */}
         <div className="rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-white dark:bg-slate-900 p-5">
           <h3 className="text-base font-semibold text-slate-900 dark:text-white">
@@ -1662,19 +1676,6 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
           <p className="text-sm text-slate-700 dark:text-slate-300" style={{ whiteSpace: 'pre-line' }}>
             {approvalMessage}
           </p>
-        </div>
-
-        {/* Countdown — `key` forces remount on each fresh push (countdownStart changes) */}
-        <div className="flex justify-center">
-          <CountdownTimer
-            key={countdownKey}
-            seconds={countdownSeconds}
-            size="md"
-            warningThreshold={Math.min(20, Math.floor(countdownSeconds / 3))}
-            onComplete={() => {
-              console.log('Countdown completed — transaction may have timed out');
-            }}
-          />
         </div>
 
         {/* Resend button — only if we're on the inApp step */}
