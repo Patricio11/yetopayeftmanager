@@ -1,4 +1,4 @@
-// OneGateEFT.tsx
+// YetoPayEFT.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import {
@@ -65,7 +65,7 @@ type Merchant = {
   fnbVerifyResult?: boolean;
 };
 
-interface OneGateEFTProps {
+interface YetoPayEFTProps {
   initialData?: {
     transaction: {
       id: string;
@@ -96,7 +96,7 @@ interface OneGateEFTProps {
   };
 }
 
-const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
+const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   // --- Auth Session (for admin testing) ---
   const { data: session } = useSession();
   
@@ -1947,8 +1947,7 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <img src="/ogeft.png" alt="OneGate EFT" className="w-10 h-10 rounded-lg shadow-sm" />
-              <h1 className="text-2xl font-bold">OneGate EFT</h1>
+              <h1 className="text-2xl font-extrabold yp-gradient-text">YetoPay</h1>
             </div>
             <div className="flex items-center space-x-4">
               <HelpCircle size={20} className="cursor-pointer hover:text-amber-200 transition-colors" />
@@ -2030,7 +2029,7 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
               Secure TLS Encryption
             </div>
             <p className="text-xs text-gray-400">
-              By continuing you agree to OneGate EFT&apos;s{' '}
+              By continuing you agree to YetoPay&apos;s{' '}
               <button className="text-amber-500 hover:underline" onClick={() => setShowTerms(true)}>
                 T&amp;Cs
               </button>
@@ -2068,4 +2067,4 @@ const OneGateEFT: React.FC<OneGateEFTProps> = ({ initialData }) => {
   );
 };
 
-export default OneGateEFT;
+export default YetoPayEFT;

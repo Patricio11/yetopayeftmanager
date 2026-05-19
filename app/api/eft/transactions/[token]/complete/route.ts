@@ -294,7 +294,7 @@ export async function POST(
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-ONEGATEEFT-Signature': generateMerchantSignature(merchantWebhookPayload),
+            'X-YetoPay-Signature': generateMerchantSignature(merchantWebhookPayload),
           },
           body: JSON.stringify(merchantWebhookPayload),
         }).catch((error) => {

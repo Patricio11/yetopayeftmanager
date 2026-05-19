@@ -220,7 +220,7 @@ export async function POST(request: NextRequest) {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-ONEGATEEFT-Signature': generateMerchantSignature(merchantWebhookPayload),
+            'X-YetoPay-Signature': generateMerchantSignature(merchantWebhookPayload),
           },
           body: JSON.stringify(merchantWebhookPayload),
         });

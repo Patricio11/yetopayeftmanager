@@ -152,9 +152,8 @@ export default async function DashboardPage() {
         <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
           Welcome back, {session.user.name}
         </h1>
-        <p className="text-slate-600 dark:text-slate-400 flex items-center gap-2">
-          <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
-          Your dashboard overview
+        <p className="text-slate-500 dark:text-slate-400">
+          Here&apos;s what&apos;s happening with your payments
         </p>
       </div>
       {/* Quick Actions */}

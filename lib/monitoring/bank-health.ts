@@ -116,7 +116,7 @@ async function sendSlackAlert(
         color,
         title,
         text,
-        footer: "OneGate EFT Bank Health Monitor",
+        footer: "YetoPay Bank Health Monitor",
         ts: Math.floor(Date.now() / 1000),
       },
     ],
@@ -149,8 +149,8 @@ async function sendAlerts(
   }
 
   const smsBody = isRecovery
-    ? `[OneGate EFT] RECOVERED: ${bankName} bank is back online. Monitoring resumed.`
-    : `[OneGate EFT] ALERT: ${bankName} bank disabled after ${FAILURE_THRESHOLD} consecutive failures. Login to investigate.`;
+    ? `[YetoPay] RECOVERED: ${bankName} bank is back online. Monitoring resumed.`
+    : `[YetoPay] ALERT: ${bankName} bank disabled after ${FAILURE_THRESHOLD} consecutive failures. Login to investigate.`;
 
   const alertTasks: Promise<void>[] = [
     ...( emails.length

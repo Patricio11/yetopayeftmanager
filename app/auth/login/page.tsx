@@ -110,8 +110,8 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-2 mb-6">
-            <img src="/ogeft.png" alt="OneGate EFT" className="h-10 w-10 rounded" />
-            <span className="text-2xl font-bold text-slate-900 dark:text-white">OneGate EFT</span>
+            
+            <span className="text-2xl font-extrabold yp-gradient-text">YetoPay</span>
           </Link>
         </div>
 
@@ -120,7 +120,7 @@ export default function LoginPage() {
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Welcome Back</h1>
-            <p className="text-slate-600 dark:text-slate-400">Sign in to your OneGate EFT account</p>
+            <p className="text-slate-600 dark:text-slate-400">Sign in to your YetoPay account</p>
           </div>
 
           {/* General Error */}

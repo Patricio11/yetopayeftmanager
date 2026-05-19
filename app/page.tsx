@@ -73,9 +73,8 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 border-b border-slate-200/60 dark:border-white/5 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <img src="/ogeft.png" alt="OneGate EFT" className="h-9 w-9 rounded-lg shadow-sm group-hover:shadow-md transition-shadow" />
-            <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-              OneGate<span className="og-gradient-text">EFT</span>
+            <span className="text-xl font-extrabold tracking-tight yp-gradient-text">
+              YetoPay
             </span>
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600 dark:text-slate-400">
@@ -90,7 +89,7 @@ export default function LandingPage() {
               </Button>
             </Link>
             <Link href="/auth/register">
-              <Button size="sm" className="og-gradient text-white shadow-md hover:shadow-lg hover:opacity-95 transition-all">
+              <Button size="sm" className="yp-gradient text-white shadow-md hover:shadow-lg hover:opacity-95 transition-all">
                 Get Started <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Button>
             </Link>
@@ -120,7 +119,7 @@ export default function LandingPage() {
             {/* Headline */}
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.08] mb-6">
               Accept payments{' '}
-              <span className="og-gradient-text">instantly</span>
+              <span className="yp-gradient-text">instantly</span>
               <br className="hidden sm:block" />
               {' '}with Pay By Bank
             </h1>
@@ -132,7 +131,7 @@ export default function LandingPage() {
             {/* CTA Group */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
               <Link href="/auth/register">
-                <Button size="lg" className="px-8 h-13 og-gradient text-white text-base font-semibold rounded-xl shadow-lg shadow-amber-500/25 hover:shadow-xl hover:shadow-amber-500/30 hover:opacity-95 transition-all">
+                <Button size="lg" className="px-8 h-13 yp-gradient text-white text-base font-semibold rounded-xl shadow-lg shadow-amber-500/25 hover:shadow-xl hover:shadow-amber-500/30 hover:opacity-95 transition-all">
                   Start Accepting Payments
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
@@ -213,7 +212,7 @@ export default function LandingPage() {
                   <div className="hidden md:block absolute top-8 left-[calc(50%+40px)] right-[calc(-50%+40px)] h-px bg-gradient-to-r from-amber-300 to-pink-300 dark:from-amber-500/40 dark:to-pink-500/40" />
                 )}
                 {/* Step number */}
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl og-gradient text-white text-xl font-extrabold mb-5 shadow-lg shadow-amber-500/20">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl yp-gradient text-white text-xl font-extrabold mb-5 shadow-lg shadow-amber-500/20">
                   {item.step}
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{item.title}</h3>
@@ -259,12 +258,12 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
             {/* Left: Text */}
             <div>
-              <span className="text-sm font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400">Why OneGate EFT</span>
+              <span className="text-sm font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400">Why YetoPay</span>
               <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mt-3 tracking-tight">
                 Built for businesses that move fast
               </h2>
               <p className="text-lg text-slate-500 dark:text-slate-400 mt-4 leading-relaxed">
-                We built OneGate EFT because South African businesses deserve a payment platform that&apos;s reliable, transparent, and simple. No hidden fees, no complicated setup, no downtime.
+                We built YetoPay because South African businesses deserve a payment platform that&apos;s reliable, transparent, and simple. No hidden fees, no complicated setup, no downtime.
               </p>
 
               <div className="mt-8 space-y-4">
@@ -275,7 +274,7 @@ export default function LandingPage() {
                   '24/7 payment processing — always on',
                 ].map((item) => (
                   <div key={item} className="flex items-start gap-3">
-                    <div className="w-5 h-5 rounded-full og-gradient flex items-center justify-center mt-0.5 shrink-0">
+                    <div className="w-5 h-5 rounded-full yp-gradient flex items-center justify-center mt-0.5 shrink-0">
                       <CheckCircle className="w-3 h-3 text-white" />
                     </div>
                     <span className="text-slate-600 dark:text-slate-400">{item}</span>
@@ -285,7 +284,7 @@ export default function LandingPage() {
 
               <div className="mt-10">
                 <Link href="/auth/register">
-                  <Button size="lg" className="og-gradient text-white font-semibold rounded-xl shadow-lg shadow-amber-500/20 hover:shadow-xl hover:opacity-95 transition-all">
+                  <Button size="lg" className="yp-gradient text-white font-semibold rounded-xl shadow-lg shadow-amber-500/20 hover:shadow-xl hover:opacity-95 transition-all">
                     Start Free Today
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
@@ -317,7 +316,7 @@ export default function LandingPage() {
       {/* ───── Final CTA ───── */}
       <section className="py-24 md:py-32">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="relative overflow-hidden rounded-3xl og-gradient p-12 md:p-20 text-center">
+          <div className="relative overflow-hidden rounded-3xl yp-gradient p-12 md:p-20 text-center">
             {/* Background decorations */}
             <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl" />
@@ -327,7 +326,7 @@ export default function LandingPage() {
                 Ready to transform your payments?
               </h2>
               <p className="text-lg text-white/80 max-w-2xl mx-auto mb-10">
-                Join South African businesses already processing payments faster, safer, and simpler with OneGate EFT.
+                Join South African businesses already processing payments faster, safer, and simpler with YetoPay.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link href="/auth/register">
@@ -354,9 +353,8 @@ export default function LandingPage() {
             {/* Brand */}
             <div className="col-span-2 md:col-span-1">
               <Link href="/" className="flex items-center gap-2.5">
-                <img src="/ogeft.png" alt="OneGate EFT" className="h-9 w-9 rounded-lg" />
-                <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-                  OneGate<span className="og-gradient-text">EFT</span>
+                <span className="text-xl font-extrabold tracking-tight yp-gradient-text">
+                  YetoPay
                 </span>
               </Link>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-4 leading-relaxed">
@@ -408,10 +406,10 @@ export default function LandingPage() {
           {/* Bottom bar */}
           <div className="pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              &copy; {new Date().getFullYear()} OneGate EFT. All rights reserved.
+              &copy; {new Date().getFullYear()} YetoPay. All rights reserved.
             </p>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              support@onegate.co.za
+              support@yetopay.co.za
             </p>
           </div>
         </div>

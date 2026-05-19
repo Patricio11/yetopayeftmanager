@@ -121,10 +121,10 @@
   }
 }
 
-.og-gradient {
+.yp-gradient {
   background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%);
 }
-.og-gradient-text {
+.yp-gradient-text {
   background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

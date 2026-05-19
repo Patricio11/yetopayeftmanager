@@ -10,6 +10,8 @@ export const auth = betterAuth({
     "https://www.onegate.co.za",
     "https://onegate.co.za",
     "https://oneeftmanager.vercel.app",
+    "https://www.yetopay.co.za",
+    "https://yetopay.co.za",
   ],
   database: drizzleAdapter(db, {
     provider: "pg",

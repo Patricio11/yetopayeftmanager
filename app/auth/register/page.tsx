@@ -160,8 +160,8 @@ export default function RegisterPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-2 mb-6">
-            <img src="/ogeft.png" alt="OneGate EFT" className="h-10 w-10 rounded" />
-            <span className="text-2xl font-bold text-slate-900 dark:text-white">OneGate EFT</span>
+            
+            <span className="text-2xl font-extrabold yp-gradient-text">YetoPay</span>
           </Link>
         </div>
 

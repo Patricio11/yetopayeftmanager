@@ -88,7 +88,7 @@ export const userServices = pgTable("user_services", {
   userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   
   // Service details
-  serviceName: text("service_name").notNull(), // 'ONEGATEEFT', 'PAYMENT_LINKS', 'CALLPAYEFT', etc.
+  serviceName: text("service_name").notNull(), // 'YETOPAY', 'PAYMENT_LINKS', 'CALLPAYEFT', etc.
   isEnabled: boolean("is_enabled").default(false),
   
   // Configuration

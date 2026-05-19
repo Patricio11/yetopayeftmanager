@@ -45,7 +45,7 @@ interface CredentialMetadata {
   usageCount: number;
 }
 
-const STORAGE_KEY_PREFIX = 'onegate_cred_';
+const STORAGE_KEY_PREFIX = 'yetopay_cred_';
 const STORAGE_VERSION = 'v1';
 
 /**

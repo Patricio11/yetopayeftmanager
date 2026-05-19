@@ -1,5 +1,5 @@
 /**
- * Seed Script for OneGate EFT
+ * Seed Script for YetoPay
  * 
  * Creates admin and merchant users with Better Auth integration
  * 
@@ -24,13 +24,13 @@ const DEFAULT_PASSWORD = 'Admin@123456';
 const seedUsersData = [
   {
     name: 'Admin User',
-    email: 'admin@onegate.co.za',
+    email: 'admin@yetopay.co.za',
     password: DEFAULT_PASSWORD,
     role: 'admin' as const,
-    companyName: 'OneGate EFT Admin',
+    companyName: 'YetoPay Admin',
     bankAccount: {
       accountNumber: '99999999999',
-      accountHolderName: 'OneGate EFT Admin',
+      accountHolderName: 'YetoPay Admin',
       accountName: 'Admin Test Account',
       accountType: 'cheque' as const,
       branchCode: '250655',
@@ -40,7 +40,7 @@ const seedUsersData = [
   },
   {
     name: 'John Merchant',
-    email: 'merchant@onegate.co.za',
+    email: 'merchant@yetopay.co.za',
     password: 'Merchant@123',
     role: 'merchant' as const,
     companyName: 'Acme Corporation',
@@ -73,7 +73,7 @@ const seedUsersData = [
 ];
 
 async function seed() {
-  console.log('🌱 Starting OneGate EFT database seed...\n');
+  console.log('🌱 Starting YetoPay database seed...\n');
 
   // Check if DATABASE_URL is set
   if (!process.env.DATABASE_URL) {
@@ -174,13 +174,13 @@ async function seed() {
           createdUsers.push(user);
           console.log(`   ✅ Created ${userData.role}: ${userData.email}`);
 
-          // Enable OneGate EFT service
+          // Enable YetoPay service
           await db.insert(userServices).values({
             userId: user.id,
-            serviceName: 'onegateeft',
+            serviceName: 'yetopay',
             isEnabled: true,
           }).onConflictDoNothing();
-          console.log(`   ⚙️  Enabled OneGate EFT service`);
+          console.log(`   ⚙️  Enabled YetoPay service`);
 
           // Create bank account
           const bankId = userData.bankAccount.bankCode === 'FNB' ? fnbBank?.id : standardBank?.id;
