@@ -8,15 +8,24 @@ import { checkRateLimit, getClientIdentifier } from "@/lib/security/rate-limit";
 import { dispatchWebhookEvent } from "@/lib/webhooks/dispatcher";
 import { checkBankHealth } from "@/lib/monitoring/bank-health";
 
+const customerSchema = z.object({
+  name: z.string().optional(),
+  account: z.string().optional(),
+  account_type: z.string().optional(),
+  bank: z.string().optional(),
+  branch_code: z.string().optional(),
+}).optional();
+
 const webhookSchema = z.object({
   transaction_id: z.string().uuid(),
   status: z.enum(["completed", "failed", "aborted", "cancelled"]),
   amount: z.union([z.string(), z.number()]),
   reference: z.string(),
   customer_bank: z.string().optional(),
+  customer: customerSchema,
   timestamp: z.union([z.string(), z.number()]),
   metadata: z.record(z.string(), z.any()).optional(),
-  signature: z.string().optional(), // HMAC signature for verification
+  signature: z.string().optional(),
 });
 
 /**
@@ -155,17 +164,26 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Update transaction status
+    // Extract customer data from EFT service webhook
+    const customer = validatedData.customer;
+
+    // Update transaction status + customer info
     const [updatedTransaction] = await db
       .update(eftTransactions)
       .set({
         status: validatedData.status,
         completedAt: validatedData.status === "completed" ? new Date() : null,
         updatedAt: new Date(),
+        ...(customer?.name ? { customerName: customer.name } : {}),
+        ...(customer?.account ? { customerAccount: customer.account } : {}),
+        ...(customer?.account_type ? { customerAccountType: customer.account_type } : {}),
+        ...(customer?.bank ? { customerBank: customer.bank } : {}),
+        ...(customer?.branch_code ? { customerBranchCode: customer.branch_code } : {}),
         metadata: {
           ...(transaction.metadata as any || {}),
           webhook_received_at: new Date().toISOString(),
           customer_bank: validatedData.customer_bank,
+          ...(customer ? { customer } : {}),
           ...(validatedData.metadata || {}),
         },
       })
@@ -186,6 +204,13 @@ export async function POST(request: NextRequest) {
         status: updatedTransaction.status,
         customerEmail: updatedTransaction.customerEmail || undefined,
         customerName: updatedTransaction.customerName || undefined,
+        customer: customer ? {
+          name: updatedTransaction.customerName || undefined,
+          account: updatedTransaction.customerAccount || undefined,
+          account_type: updatedTransaction.customerAccountType || undefined,
+          bank: updatedTransaction.customerBank || undefined,
+          branch_code: updatedTransaction.customerBranchCode || undefined,
+        } : undefined,
         bankName: validatedData.customer_bank,
         metadata: updatedTransaction.metadata,
         createdAt: updatedTransaction.createdAt?.toISOString(),
@@ -212,6 +237,13 @@ export async function POST(request: NextRequest) {
           reference: validatedData.reference,
           amount: parseFloat(validatedData.amount.toString()),
           status: validatedData.status,
+          customer: customer ? {
+            name: customer.name,
+            account: customer.account,
+            account_type: customer.account_type,
+            bank: customer.bank,
+            branch_code: customer.branch_code,
+          } : undefined,
           timestamp: validatedData.timestamp,
           metadata: validatedData.metadata,
         };

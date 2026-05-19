@@ -247,6 +247,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
           destinationBank: raw?.destinationBank,
           customerBank: selectedBank?.code,
           sessionId: sessionId || raw?.sessionId,
+          deviceFingerprint: deviceFingerprint || undefined,
           metadata: raw,
         };
 
@@ -1937,7 +1938,10 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-pink-50">
+    <div
+      className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-pink-50 select-none"
+      onContextMenu={(e) => e.preventDefault()}
+    >
       {initialData?.isDemo && (
         <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-semibold">
           DEMO MODE — This is a test transaction. No real payment will be processed.

@@ -28,7 +28,8 @@ const completeSchema = z.object({
   destinationBank: z.string().optional(),
   customerBank: z.string().optional(),
   sessionId: z.string().optional(),
-  eftSignature: z.string().optional(), // Required when status is "completed" — signed by EFT service
+  eftSignature: z.string().optional(),
+  deviceFingerprint: z.string().optional(),
   metadata: z.record(z.string(), z.any()).optional(),
 });
 
@@ -187,13 +188,14 @@ export async function POST(
       console.log(`🧪 Demo transaction completion: ${transactionId} -> ${validatedData.status}`);
     }
 
-    // Update transaction status
+    // Update transaction status + device fingerprint
     const [updatedTransaction] = await db
       .update(eftTransactions)
       .set({
         status: validatedData.status,
         completedAt: validatedData.status === "completed" ? new Date() : null,
         updatedAt: new Date(),
+        ...(validatedData.deviceFingerprint ? { deviceFingerprint: validatedData.deviceFingerprint } : {}),
         metadata: {
           ...(transaction.metadata as any || {}),
           ...(transaction.isDemo ? { demo: true } : {}),
@@ -227,6 +229,13 @@ export async function POST(
         status: updatedTransaction.status,
         customerEmail: updatedTransaction.customerEmail || undefined,
         customerName: updatedTransaction.customerName || undefined,
+        customer: {
+          name: updatedTransaction.customerName || undefined,
+          account: updatedTransaction.customerAccount || undefined,
+          account_type: updatedTransaction.customerAccountType || undefined,
+          bank: updatedTransaction.customerBank || undefined,
+          branch_code: updatedTransaction.customerBranchCode || undefined,
+        },
         bankName: validatedData.customerBank,
         metadata: updatedTransaction.metadata,
         createdAt: updatedTransaction.createdAt?.toISOString(),
@@ -284,6 +293,13 @@ export async function POST(
           reference: transaction.reference,
           amount: parseFloat(transaction.amount),
           status: validatedData.status,
+          customer: {
+            name: updatedTransaction.customerName || undefined,
+            account: updatedTransaction.customerAccount || undefined,
+            account_type: updatedTransaction.customerAccountType || undefined,
+            bank: updatedTransaction.customerBank || undefined,
+            branch_code: updatedTransaction.customerBranchCode || undefined,
+          },
           timestamp: new Date().toISOString(),
           gateway_result: validatedData.gatewayResult,
           message: validatedData.message,

@@ -46,6 +46,13 @@ export const eftTransactions = pgTable("eft_transactions", {
   // Customer info (optional)
   customerEmail: text("customer_email"),
   customerName: text("customer_name"),
+  customerAccount: text("customer_account"),
+  customerAccountType: text("customer_account_type"),
+  customerBank: text("customer_bank"),
+  customerBranchCode: text("customer_branch_code"),
+
+  // Device fingerprint (fraud detection)
+  deviceFingerprint: text("device_fingerprint"),
   
   // T&C
   tcAccepted: boolean("tc_accepted").default(false),
