@@ -67,9 +67,9 @@ export default function CreatePaymentLinkPage() {
 
   if (paymentUrl) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-4 sm:p-6">
         <div className="max-w-2xl mx-auto">
-          <Card className="bg-white dark:bg-slate-800 p-8 border-slate-200 dark:border-slate-700">
+          <Card className="bg-white dark:bg-slate-800 p-5 sm:p-8 border-slate-200 dark:border-slate-700">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="w-8 h-8 text-amber-500 dark:text-amber-400" />
@@ -106,7 +106,7 @@ export default function CreatePaymentLinkPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
               <div>
                 <Label className="text-sm text-slate-600 dark:text-slate-400">Amount</Label>
                 <p className="text-lg font-bold text-slate-900 dark:text-white">R {formData.amount}</p>
@@ -117,7 +117,7 @@ export default function CreatePaymentLinkPage() {
               </div>
             </div>
 
-            <div className="flex space-x-4">
+            <div className="flex flex-col sm:flex-row gap-4">
               <Button
                 onClick={() => router.push('/dashboard')}
                 variant="outline"
@@ -148,7 +148,7 @@ export default function CreatePaymentLinkPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-4 sm:p-6">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -163,7 +163,7 @@ export default function CreatePaymentLinkPage() {
         </div>
 
         {/* Form */}
-        <Card className="bg-white dark:bg-slate-800 p-8 border-slate-200 dark:border-slate-700">
+        <Card className="bg-white dark:bg-slate-800 p-5 sm:p-8 border-slate-200 dark:border-slate-700">
           {error && (
             <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-800 dark:text-red-400">
               {error}

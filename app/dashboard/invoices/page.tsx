@@ -114,7 +114,7 @@ export default function MerchantInvoicesPage() {
     .reduce((sum, i) => sum + parseFloat(i.totalAmount), 0);
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-8">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 bg-clip-text text-transparent">

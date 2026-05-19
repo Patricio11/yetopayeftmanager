@@ -73,11 +73,11 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">User Management</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">User Management</h1>
           <p className="text-slate-600 dark:text-slate-400 mt-1">View and manage all platform users</p>
         </div>
         <Button variant="outline" onClick={() => { setPage(1); fetchUsers(); }} className="gap-2">

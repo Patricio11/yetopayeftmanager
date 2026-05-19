@@ -71,7 +71,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-white dark:bg-slate-950 overflow-hidden">
       {/* ───── Sticky Header ───── */}
       <header className="sticky top-0 z-50 border-b border-slate-200/60 dark:border-white/5 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 group">
             <span className="font-extrabold tracking-tight yp-gradient-text" style={{ fontSize: '2rem' }}>
               YetoPay
@@ -108,7 +108,7 @@ export default function LandingPage() {
           <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px]" />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-24 md:pt-32 md:pb-32">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-20 pb-24 md:pt-32 md:pb-32">
           <div className="max-w-4xl mx-auto text-center">
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-50 dark:bg-amber-500/10 border border-amber-200/60 dark:border-amber-500/20 mb-8">
@@ -163,7 +163,7 @@ export default function LandingPage() {
 
       {/* ───── Features Grid ───── */}
       <section id="features" className="relative py-24 md:py-32 bg-slate-50/50 dark:bg-slate-900/50">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="max-w-2xl mx-auto text-center mb-16">
             <span className="text-sm font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400">Features</span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white mt-3 tracking-tight">
@@ -193,7 +193,7 @@ export default function LandingPage() {
 
       {/* ───── How It Works ───── */}
       <section id="how-it-works" className="py-24 md:py-32">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="max-w-2xl mx-auto text-center mb-16">
             <span className="text-sm font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400">How It Works</span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white mt-3 tracking-tight">
@@ -225,7 +225,7 @@ export default function LandingPage() {
 
       {/* ───── Supported Banks ───── */}
       <section id="banks" className="py-24 md:py-32 bg-slate-50/50 dark:bg-slate-900/50">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="max-w-2xl mx-auto text-center mb-16">
             <span className="text-sm font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400">Supported Banks</span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white mt-3 tracking-tight">
@@ -254,7 +254,7 @@ export default function LandingPage() {
 
       {/* ───── Social Proof / Trust ───── */}
       <section className="py-24 md:py-32">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
             {/* Left: Text */}
             <div>
@@ -315,7 +315,7 @@ export default function LandingPage() {
 
       {/* ───── Final CTA ───── */}
       <section className="py-24 md:py-32">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="relative overflow-hidden rounded-3xl yp-gradient p-12 md:p-20 text-center">
             {/* Background decorations */}
             <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
@@ -348,7 +348,7 @@ export default function LandingPage() {
 
       {/* ───── Footer ───── */}
       <footer className="border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
-        <div className="max-w-7xl mx-auto px-6 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
             {/* Brand */}
             <div className="col-span-2 md:col-span-1">

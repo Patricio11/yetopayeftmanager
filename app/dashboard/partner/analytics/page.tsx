@@ -69,7 +69,7 @@ export default function PartnerAnalyticsPage() {
 
   if (loading && !data) {
     return (
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="mb-8">
           <div className="h-8 w-48 bg-slate-200 animate-pulse rounded mb-2" />
           <div className="h-4 w-72 bg-slate-200 animate-pulse rounded" />
@@ -90,7 +90,7 @@ export default function PartnerAnalyticsPage() {
 
   if (error && !data) {
     return (
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="bg-white rounded-xl border border-red-200 p-8 shadow-sm text-center">
           <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-3" />
           <h2 className="text-xl font-semibold text-slate-900 mb-2">Error Loading Analytics</h2>
@@ -138,7 +138,7 @@ export default function PartnerAnalyticsPage() {
   const sortedMerchants = [...data.merchantBreakdown].sort((a, b) => b.volume - a.volume);
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>

@@ -142,7 +142,7 @@ export default function PartnerMerchantDetailPage() {
 
   if (loading) {
     return (
-      <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="h-6 w-32 bg-slate-200 animate-pulse rounded mb-6" />
         <div className="h-8 w-64 bg-slate-200 animate-pulse rounded mb-8" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -158,7 +158,7 @@ export default function PartnerMerchantDetailPage() {
 
   if (error || !merchant) {
     return (
-      <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <Link href="/dashboard/partner/merchants" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 mb-6">
           <ArrowLeft className="w-4 h-4" /> Back to Merchants
         </Link>
@@ -180,7 +180,7 @@ export default function PartnerMerchantDetailPage() {
     : 0;
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-8 space-y-8">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-8">
       {/* Back Link */}
       <Link href="/dashboard/partner/merchants" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700">
         <ArrowLeft className="w-4 h-4" /> Back to Merchants

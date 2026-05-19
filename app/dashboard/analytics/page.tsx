@@ -194,7 +194,7 @@ export default function AnalyticsPage() {
   // ─── Render ────────────────────────────────────────────────────────────
   if (loading && !data) {
     return (
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="mb-8">
           <div className="h-8 w-48 bg-slate-200 animate-pulse rounded mb-2" />
           <div className="h-4 w-72 bg-slate-200 animate-pulse rounded" />
@@ -218,11 +218,11 @@ export default function AnalyticsPage() {
   const k = data.kpis;
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 bg-clip-text text-transparent">
             Analytics
           </h1>
           <p className="text-slate-500 mt-1">Track your payment performance and growth</p>
@@ -258,7 +258,7 @@ export default function AnalyticsPage() {
 
       {/* Custom date range */}
       {period === "custom" && (
-        <div className="flex items-center gap-3 bg-slate-50 border rounded-lg p-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-slate-50 border rounded-lg p-3">
           <label className="text-sm font-medium text-slate-600">From</label>
           <input
             type="date"

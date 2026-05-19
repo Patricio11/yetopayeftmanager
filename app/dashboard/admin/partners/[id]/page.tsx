@@ -74,7 +74,7 @@ export default function PartnerDetailPage() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="animate-pulse space-y-6">
           <div className="h-8 w-48 bg-slate-200 dark:bg-slate-700 rounded" />
           <div className="h-48 bg-slate-200 dark:bg-slate-700 rounded-xl" />
@@ -85,7 +85,7 @@ export default function PartnerDetailPage() {
 
   if (!partner) {
     return (
-      <div className="max-w-7xl mx-auto px-6 py-8 text-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 text-center">
         <p className="text-slate-500">Partner not found.</p>
         <Link href="/dashboard/admin/partners"><Button className="mt-4">Back to Partners</Button></Link>
       </div>
@@ -101,7 +101,7 @@ export default function PartnerDetailPage() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
       {/* Back */}
       <div className="flex items-center gap-4 mb-6">
         <Link href="/dashboard/admin/partners">

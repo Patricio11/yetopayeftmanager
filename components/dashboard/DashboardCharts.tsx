@@ -102,7 +102,7 @@ export function DashboardCharts({ data }: DashboardChartsProps) {
         </ResponsiveContainer>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Transaction Activity */}
         <Card className="p-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-slate-200/50 dark:border-slate-700/50 shadow-xl">
           <div className="mb-6">

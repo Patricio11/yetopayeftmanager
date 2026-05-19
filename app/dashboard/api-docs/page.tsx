@@ -84,13 +84,13 @@ export default function ApiDocsPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30">
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white">
-        <div className="container mx-auto px-6 py-16">
+        <div className="container mx-auto px-4 sm:px-6 py-10 sm:py-16">
           <div className="max-w-4xl">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
                 <Book className="w-6 h-6" />
               </div>
-              <h1 className="text-4xl font-bold">API Documentation</h1>
+              <h1 className="text-2xl sm:text-4xl font-bold">API Documentation</h1>
             </div>
             <p className="text-xl text-green-50 mb-6">
               Everything you need to integrate YetoPay Pay By Bank payment system into your application
@@ -158,7 +158,7 @@ export default function ApiDocsPage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-12">
+      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar Navigation */}
           <div className="lg:col-span-1">

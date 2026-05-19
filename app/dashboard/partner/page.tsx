@@ -80,7 +80,7 @@ export default function PartnerDashboardPage() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="mb-8">
           <div className="h-8 w-56 bg-slate-200 animate-pulse rounded mb-2" />
           <div className="h-4 w-72 bg-slate-200 animate-pulse rounded" />
@@ -101,7 +101,7 @@ export default function PartnerDashboardPage() {
 
   if (error) {
     return (
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="bg-white rounded-xl border border-red-200 p-8 shadow-sm text-center">
           <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-3" />
           <h2 className="text-xl font-semibold text-slate-900 mb-2">Error Loading Dashboard</h2>
@@ -150,7 +150,7 @@ export default function PartnerDashboardPage() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-8">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 bg-clip-text text-transparent">
