@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Search, Plus, Users, CheckCircle, XCircle, RefreshCw, Copy, ChevronRight, Percent } from 'lucide-react';
+import { Search, Plus, Users, CheckCircle, XCircle, RefreshCw, Copy, ChevronRight, Percent, Mail, Send, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,6 +16,7 @@ interface Partner {
   companyName?: string;
   phone?: string;
   isActive: boolean;
+  emailVerified: boolean;
   kycStatus: string;
   commissionMode?: string;
   merchantCount?: number;
@@ -30,6 +31,9 @@ export default function AdminPartnersPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
   const [inviteLink, setInviteLink] = useState('');
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [showLink, setShowLink] = useState(false);
+  const [resendingId, setResendingId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', email: '', companyName: '' });
 
   const fetchPartners = useCallback(async () => {
@@ -65,8 +69,10 @@ export default function AdminPartnersPage() {
       });
       const data = await res.json();
       if (data.success) {
-        toast({ title: 'Success', description: 'Partner created' });
+        toast({ title: 'Success', description: 'Partner created and invitation email sent' });
         setInviteLink(data.invitation?.link || '');
+        setInviteEmail(form.email);
+        setShowLink(false);
         setForm({ name: '', email: '', companyName: '' });
         fetchPartners();
       } else {
@@ -75,6 +81,21 @@ export default function AdminPartnersPage() {
     } catch {
       toast({ title: 'Error', description: 'Failed to create partner', variant: 'destructive' });
     } finally { setCreating(false); }
+  };
+
+  const resendInvitation = async (id: string, email: string) => {
+    setResendingId(id);
+    try {
+      const res = await fetch(`/api/admin/partners/${id}/resend-invitation`, { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        toast({ title: 'Invitation Resent', description: `Invitation email sent to ${email}` });
+      } else {
+        toast({ title: 'Error', description: data.error || 'Failed to resend', variant: 'destructive' });
+      }
+    } catch {
+      toast({ title: 'Error', description: 'Failed to resend invitation', variant: 'destructive' });
+    } finally { setResendingId(null); }
   };
 
   const toggleStatus = async (id: string, isActive: boolean) => {
@@ -163,6 +184,9 @@ export default function AdminPartnersPage() {
                       {p.isActive
                         ? <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" title="Active" />
                         : <span className="w-2 h-2 rounded-full bg-slate-400 shrink-0" title="Inactive" />}
+                      {!p.isActive && !p.emailVerified && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Pending</span>
+                      )}
                     </div>
                     <p className="text-sm text-slate-500 truncate">{p.email}</p>
                   </div>
@@ -175,6 +199,18 @@ export default function AdminPartnersPage() {
                   <span className="text-sm text-slate-500">{new Date(p.createdAt).toLocaleDateString()}</span>
                 </div>
                 <div className="flex items-center gap-2 ml-4">
+                  {!p.isActive && !p.emailVerified && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => resendInvitation(p.id, p.email)}
+                      disabled={resendingId === p.id}
+                      className="text-blue-600 hover:text-blue-700 gap-1"
+                    >
+                      <Send className="w-3 h-3" />
+                      {resendingId === p.id ? 'Sending...' : 'Resend'}
+                    </Button>
+                  )}
                   <Button size="sm" variant="ghost" onClick={() => toggleStatus(p.id, p.isActive)} className={p.isActive ? 'text-amber-600 hover:text-amber-700' : 'text-amber-500 hover:text-amber-600'}>
                     {p.isActive ? 'Deactivate' : 'Activate'}
                   </Button>
@@ -195,13 +231,27 @@ export default function AdminPartnersPage() {
             <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Invite Partner</h2>
             {inviteLink ? (
               <div>
-                <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg mb-4">
-                  <p className="text-sm font-medium text-amber-700 dark:text-amber-400 mb-2">Partner created! Send this invitation link:</p>
-                  <div className="flex gap-2">
-                    <Input value={inviteLink} readOnly className="text-xs" />
-                    <Button size="sm" onClick={() => { navigator.clipboard.writeText(inviteLink); toast({ title: 'Copied!' }); }}><Copy className="w-4 h-4" /></Button>
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg mb-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Mail className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    <p className="text-sm font-medium text-green-700 dark:text-green-400">Invitation email sent to {inviteEmail}</p>
                   </div>
+                  <p className="text-xs text-green-600 dark:text-green-500">The partner will receive an email with a link to set up their password. The link expires in 7 days.</p>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setShowLink(!showLink)}
+                  className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 mb-3 transition-colors"
+                >
+                  <ChevronDown className={`w-3 h-3 transition-transform ${showLink ? 'rotate-180' : ''}`} />
+                  {showLink ? 'Hide invitation link' : 'Show invitation link (backup)'}
+                </button>
+                {showLink && (
+                  <div className="flex gap-2 mb-4">
+                    <Input value={inviteLink} readOnly className="text-xs" />
+                    <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(inviteLink); toast({ title: 'Copied!' }); }}><Copy className="w-4 h-4" /></Button>
+                  </div>
+                )}
                 <Button onClick={() => setShowCreate(false)} className="w-full">Done</Button>
               </div>
             ) : (
