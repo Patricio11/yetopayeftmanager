@@ -224,11 +224,6 @@ export function DashboardNav({ userRole, accountMode }: DashboardNavProps) {
 
   return (
     <>
-    {accountMode === 'demo' && (
-      <div className="bg-amber-500 text-white text-center py-1.5 px-4 text-sm font-semibold sticky top-0 z-[51]">
-        You are in DEMO mode. Transactions are simulated. Contact admin to switch to LIVE.
-      </div>
-    )}
     <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
@@ -266,7 +261,12 @@ export function DashboardNav({ userRole, accountMode }: DashboardNavProps) {
             {isAdmin && <NavDropdown group={adminGroup} pathname={pathname} />}
             <NavDropdown group={moreGroup} pathname={pathname} />
 
-            <div className="ml-3 pl-3 border-l border-slate-200 dark:border-slate-700">
+            <div className="ml-3 pl-3 border-l border-slate-200 dark:border-slate-700 flex items-center gap-2">
+              {accountMode === 'demo' && (
+                <span className="px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-300 rounded-full">
+                  DEMO
+                </span>
+              )}
               <Button
                 onClick={handleLogout}
                 variant="ghost"
@@ -298,9 +298,16 @@ export function DashboardNav({ userRole, accountMode }: DashboardNavProps) {
           />
           <div className="fixed inset-y-0 right-0 w-80 max-w-[85vw] bg-white dark:bg-slate-900 z-50 lg:hidden shadow-2xl overflow-y-auto animate-in slide-in-from-right duration-200">
             <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
-              <span className="font-extrabold tracking-tight yp-gradient-text" style={{ fontSize: '1.5rem' }}>
-                YetoPay
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="font-extrabold tracking-tight yp-gradient-text" style={{ fontSize: '1.5rem' }}>
+                  YetoPay
+                </span>
+                {accountMode === 'demo' && (
+                  <span className="px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-300 rounded-full">
+                    DEMO
+                  </span>
+                )}
+              </div>
               <button
                 onClick={() => setMobileOpen(false)}
                 className="p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
