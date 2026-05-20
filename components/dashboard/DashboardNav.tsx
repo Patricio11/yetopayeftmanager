@@ -213,6 +213,7 @@ export function DashboardNav({ userRole, accountMode }: DashboardNavProps) {
     icon: MoreHorizontal,
     items: isPartner
       ? [
+          { title: "API Docs", href: "/dashboard/api-docs", icon: Book },
           { title: "Settings", href: "/dashboard/settings", icon: Settings },
         ]
       : [
