@@ -52,7 +52,23 @@ type ApiResponse = {
   resetCountdown?: boolean;
   /** 0 = first push, 1 = retried push (backend re-sent in-app approval) */
   retryAttempt?: number;
+  /** Merchant opted into a detailed receipt on the success screen */
+  enable_receipt?: boolean;
+  /** Receipt payload (only present when enable_receipt === true) */
+  receipt?: {
+    amount?: string;
+    currency?: string;
+    merchantName?: string;
+    merchantReference?: string;
+    customerReference?: string;
+    transactionId?: string;
+    destinationBank?: string;
+    destinationAccountMasked?: string;
+    paidAt?: string;
+  };
 };
+
+type ReceiptData = NonNullable<ApiResponse['receipt']>;
 
 type Merchant = {
   id?: string;
@@ -116,7 +132,12 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   const [showPassword, setShowPassword] = useState<Record<string, boolean>>({});
   const [formErrors, setFormErrors] = useState<Record<string, string | null>>({});
   const [pageError, setPageError] = useState<string | null>(null);
-  const [transactionResult, setTransactionResult] = useState<{ status: 'completed' | 'failed' | 'cancelled'; message?: string } | null>(null);
+  const [transactionResult, setTransactionResult] = useState<{
+    status: 'completed' | 'failed' | 'cancelled';
+    message?: string;
+    enableReceipt?: boolean;
+    receipt?: ReceiptData;
+  } | null>(null);
 
   // T&C modal + agreement state
   const [showTerms, setShowTerms] = useState(false);
@@ -230,7 +251,12 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   const finishAndRedirect = async (uiStatus: 'completed' | 'failed' | 'cancelled', message?: string, raw?: ApiResponse) => {
     if (finalPollTimer.current) clearInterval(finalPollTimer.current);
     if (sseRef.current) { sseRef.current.close(); sseRef.current = null; }
-    setTransactionResult({ status: uiStatus, message });
+    setTransactionResult({
+      status: uiStatus,
+      message,
+      enableReceipt: uiStatus === 'completed' ? raw?.enable_receipt === true : false,
+      receipt: uiStatus === 'completed' ? raw?.receipt : undefined,
+    });
     setCurrentStep(uiStatus);
 
     // Update transaction status in our database
@@ -1703,9 +1729,11 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   const renderTransactionResult = () => {
     const isSuccess = transactionResult?.status === 'completed';
     const isCancelled = transactionResult?.status === 'cancelled';
+    const showReceipt = isSuccess && transactionResult?.enableReceipt === true;
     console.log('[DEBUG] Rendering transaction result:', {
       isSuccess,
       isCancelled,
+      showReceipt,
       savedCredentialId,
       saveCredentials,
       selectedBank: selectedBank?.name
@@ -1725,7 +1753,11 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
         ? 'You have cancelled this transaction.'
         : 'Your payment could not be processed.';
     const resultStatus: 'completed' | 'failed' | 'cancelled' = isSuccess ? 'completed' : isCancelled ? 'cancelled' : 'failed';
-    
+
+    if (showReceipt) {
+      return renderReceipt(transactionResult!.receipt || {}, resultStatus);
+    }
+
     return (
       <div className="text-center space-y-6">
         <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto ${bgColor}`}>
@@ -1734,7 +1766,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">{title}</h2>
           <p className="text-gray-600">{transactionResult?.message || defaultMsg}</p>
-          
+
           {/* Show saved credentials info and delete option */}
           {savedCredentialId && (
             <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
@@ -1751,7 +1783,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
               </button>
             </div>
           )}
-          
+
           {pickRedirectUrl(resultStatus) ? (
             <div className="mt-4">
               <p className="text-sm text-gray-500">
@@ -1767,9 +1799,95 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
             </p>
           )}
         </div>
-        {/* <div className="flex justify-center">
-          <div className="w-8 h-8 border-2 border-gray-300 border-t-amber-500 rounded-full animate-spin"></div>
-        </div> */}
+      </div>
+    );
+  };
+
+  // Detailed receipt — rendered when the merchant has set `enable_receipt` on the session.
+  const renderReceipt = (
+    receipt: ReceiptData,
+    resultStatus: 'completed' | 'failed' | 'cancelled',
+  ) => {
+    const currency = receipt.currency || 'ZAR';
+    const amountStr = receipt.amount ? `${currency} ${Number(receipt.amount).toFixed(2)}` : null;
+    const paidAtStr = receipt.paidAt
+      ? new Date(receipt.paidAt).toLocaleString('en-ZA', { dateStyle: 'medium', timeStyle: 'short' })
+      : null;
+
+    const rows: { label: string; value?: string }[] = [
+      { label: 'Paid to', value: receipt.merchantName },
+      { label: 'Merchant reference', value: receipt.merchantReference },
+      { label: 'Your reference', value: receipt.customerReference },
+      { label: 'Bank', value: receipt.destinationBank },
+      { label: 'Account', value: receipt.destinationAccountMasked },
+      { label: 'Date', value: paidAtStr ?? undefined },
+      { label: 'Transaction ID', value: receipt.transactionId },
+    ].filter((r) => r.value);
+
+    return (
+      <div className="space-y-5">
+        {/* Header */}
+        <div className="text-center space-y-3">
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto bg-green-100">
+            <CheckCircle className="w-9 h-9 text-green-600" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Payment Successful</h2>
+            {amountStr && (
+              <p className="mt-1 text-3xl font-bold text-gray-900 tracking-tight">{amountStr}</p>
+            )}
+          </div>
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 border border-green-200 text-green-700 text-xs font-medium">
+            <Check className="w-3.5 h-3.5" />
+            Completed
+          </div>
+        </div>
+
+        {/* Receipt card */}
+        <div className="rounded-xl border border-gray-200 bg-white dark:bg-slate-900 dark:border-slate-700 overflow-hidden">
+          <div className="px-5 py-3 bg-gray-50 dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700">
+            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Receipt</p>
+          </div>
+          <dl className="divide-y divide-gray-100 dark:divide-slate-800">
+            {rows.map(({ label, value }) => (
+              <div key={label} className="flex items-start justify-between gap-4 px-5 py-3">
+                <dt className="text-sm text-gray-500 dark:text-slate-400 flex-shrink-0">{label}</dt>
+                <dd className="text-sm font-medium text-gray-900 dark:text-slate-100 text-right break-words">{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+
+        {/* Saved credentials */}
+        {savedCredentialId && (
+          <div className="p-4 bg-blue-50 dark:bg-blue-950/40 rounded-lg border border-blue-200 dark:border-blue-900">
+            <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300 mb-2">
+              <Save className="w-4 h-4" />
+              <span className="text-sm font-medium">Credentials saved for future payments</span>
+            </div>
+            <button
+              onClick={handleDeleteSavedCredentials}
+              className="inline-flex items-center gap-2 text-sm text-red-600 hover:text-red-700 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete saved credentials
+            </button>
+          </div>
+        )}
+
+        {/* Redirect / close hint */}
+        {pickRedirectUrl(resultStatus) ? (
+          <div className="text-center">
+            <p className="text-sm text-gray-500">Redirecting you back to the merchant...</p>
+            <div className="flex justify-center mt-2">
+              <div className="w-6 h-6 border-2 border-gray-300 border-t-amber-500 rounded-full animate-spin"></div>
+            </div>
+          </div>
+        ) : (
+          <p className="text-xs text-center text-gray-500">
+            This payment link is no longer active. You may close this window.
+          </p>
+        )}
       </div>
     );
   };
