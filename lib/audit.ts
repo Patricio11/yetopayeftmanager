@@ -4,7 +4,7 @@ import { NextRequest } from "next/server";
 
 interface AuditLogEntry {
   userId: string;
-  action: "create" | "update" | "delete";
+  action: "create" | "update" | "delete" | "impersonate_start" | "impersonate_stop";
   resource: string;
   resourceId?: string;
   changes?: {

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSession } from '@/lib/auth-server';
+import { getSession, getRealSession } from '@/lib/auth-server';
 
 /**
  * Authorization helpers for role-based access control
@@ -7,7 +7,7 @@ import { getSession } from '@/lib/auth-server';
 
 export async function requireAuth() {
   const session = await getSession();
-  
+
   if (!session) {
     return {
       authorized: false as const,
@@ -25,8 +25,9 @@ export async function requireAuth() {
 }
 
 export async function requireAdmin() {
-  const session = await getSession();
-  
+  // Use real session to bypass impersonation — admin endpoints must check the actual caller
+  const session = await getRealSession();
+
   if (!session) {
     return {
       authorized: false as const,

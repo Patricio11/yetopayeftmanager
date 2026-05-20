@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Search, Plus, Users, CheckCircle, XCircle, RefreshCw, Copy, ChevronRight, Percent, Mail, Send, ChevronDown } from 'lucide-react';
+import { Search, Plus, Users, CheckCircle, XCircle, RefreshCw, Copy, ChevronRight, Percent, Mail, Send, ChevronDown, Eye } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,6 +26,7 @@ interface Partner {
 
 export default function AdminPartnersPage() {
   const { toast } = useToast();
+  const router = useRouter();
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -35,6 +37,26 @@ export default function AdminPartnersPage() {
   const [showLink, setShowLink] = useState(false);
   const [resendingId, setResendingId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', email: '', companyName: '' });
+
+  const handleImpersonate = async (userId: string, name: string) => {
+    try {
+      const res = await fetch('/api/admin/impersonate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast({ title: 'Impersonating', description: `Now viewing as ${name}` });
+        router.push('/dashboard');
+        router.refresh();
+      } else {
+        toast({ title: 'Error', description: data.error || 'Failed to impersonate', variant: 'destructive' });
+      }
+    } catch {
+      toast({ title: 'Error', description: 'Failed to impersonate', variant: 'destructive' });
+    }
+  };
 
   const fetchPartners = useCallback(async () => {
     setLoading(true);
@@ -211,6 +233,10 @@ export default function AdminPartnersPage() {
                       {resendingId === p.id ? 'Sending...' : 'Resend'}
                     </Button>
                   )}
+                  <Button size="sm" variant="ghost" onClick={() => handleImpersonate(p.id, p.companyName || p.name)} className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 gap-1">
+                    <Eye className="w-3 h-3" />
+                    Impersonate
+                  </Button>
                   <Button size="sm" variant="ghost" onClick={() => toggleStatus(p.id, p.isActive)} className={p.isActive ? 'text-amber-600 hover:text-amber-700' : 'text-amber-500 hover:text-amber-600'}>
                     {p.isActive ? 'Deactivate' : 'Activate'}
                   </Button>

@@ -1,6 +1,11 @@
 import { auth } from "./auth";
-import { headers } from "next/headers";
+import { headers, cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { db } from "./db";
+import { users } from "./db/schema";
+import { eq } from "drizzle-orm";
+
+const IMPERSONATE_COOKIE = 'yp_impersonate';
 
 // Extended session type with custom fields
 export type ExtendedSession = {
@@ -13,6 +18,7 @@ export type ExtendedSession = {
     createdAt: Date;
     updatedAt: Date;
     role?: string;
+    accountMode?: string;
   };
   session: {
     id: string;
@@ -22,19 +28,78 @@ export type ExtendedSession = {
     ipAddress?: string;
     userAgent?: string;
   };
+  impersonating?: {
+    adminId: string;
+    adminName: string;
+    adminEmail: string;
+  };
 };
 
 /**
- * Get current session from server components
- * Better Auth handles authentication internally
+ * Get current session from server components.
+ * If an admin is impersonating a user, swaps the user context
+ * but preserves the admin's identity in session.impersonating.
  */
 export async function getSession(): Promise<ExtendedSession | null> {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
-    return session as ExtendedSession | null;
+    if (!session) return null;
+
+    const extended = session as ExtendedSession;
+
+    // Check for impersonation (admin only)
+    if ((extended.user.role || 'merchant') === 'admin') {
+      try {
+        const cookieStore = await cookies();
+        const targetId = cookieStore.get(IMPERSONATE_COOKIE)?.value;
+        if (targetId) {
+          const [target] = await db
+            .select()
+            .from(users)
+            .where(eq(users.id, targetId))
+            .limit(1);
+
+          if (target && target.role !== 'admin') {
+            const adminId = extended.user.id;
+            const adminName = extended.user.name;
+            const adminEmail = extended.user.email;
+
+            extended.user = {
+              ...extended.user,
+              id: target.id,
+              email: target.email,
+              name: target.name,
+              role: target.role || 'merchant',
+              emailVerified: target.emailVerified,
+              accountMode: (target as any).accountMode,
+            };
+            extended.impersonating = { adminId, adminName, adminEmail };
+          }
+        }
+      } catch {
+        // Cookie read can fail in some contexts — proceed without impersonation
+      }
+    }
+
+    return extended;
   } catch (error) {
+    return null;
+  }
+}
+
+/**
+ * Get the real admin session, bypassing impersonation.
+ * Used by admin-only endpoints to verify the caller is truly an admin.
+ */
+export async function getRealSession(): Promise<ExtendedSession | null> {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+    return session as ExtendedSession | null;
+  } catch {
     return null;
   }
 }

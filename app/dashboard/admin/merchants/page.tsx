@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Search, Plus, Building2, CheckCircle, XCircle, Clock, RefreshCw, Mail, Copy, Shield, ChevronRight } from 'lucide-react';
+import { Search, Plus, Building2, CheckCircle, XCircle, Clock, RefreshCw, Mail, Copy, Shield, ChevronRight, Eye } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,6 +26,7 @@ interface Merchant {
 
 export default function AdminMerchantsPage() {
   const { toast } = useToast();
+  const router = useRouter();
   const [merchants, setMerchants] = useState<Merchant[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -33,6 +35,26 @@ export default function AdminMerchantsPage() {
   const [creating, setCreating] = useState(false);
   const [inviteLink, setInviteLink] = useState('');
   const [form, setForm] = useState({ name: '', email: '', companyName: '' });
+
+  const handleImpersonate = async (userId: string, name: string) => {
+    try {
+      const res = await fetch('/api/admin/impersonate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast({ title: 'Impersonating', description: `Now viewing as ${name}` });
+        router.push('/dashboard');
+        router.refresh();
+      } else {
+        toast({ title: 'Error', description: data.error || 'Failed to impersonate', variant: 'destructive' });
+      }
+    } catch {
+      toast({ title: 'Error', description: 'Failed to impersonate', variant: 'destructive' });
+    }
+  };
 
   const fetchMerchants = useCallback(async () => {
     setLoading(true);
@@ -186,6 +208,10 @@ export default function AdminMerchantsPage() {
                   <span className="text-sm text-slate-500">{new Date(m.createdAt).toLocaleDateString()}</span>
                 </div>
                 <div className="flex items-center gap-2 ml-4">
+                  <Button size="sm" variant="ghost" onClick={() => handleImpersonate(m.id, m.companyName || m.name)} className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 gap-1">
+                    <Eye className="w-3 h-3" />
+                    Impersonate
+                  </Button>
                   <Button size="sm" variant="ghost" onClick={() => toggleStatus(m.id, m.isActive)} className={m.isActive ? 'text-amber-600 hover:text-amber-700' : 'text-amber-500 hover:text-amber-600'}>
                     {m.isActive ? 'Deactivate' : 'Activate'}
                   </Button>

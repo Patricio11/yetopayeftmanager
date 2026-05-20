@@ -4,6 +4,7 @@ import { DashboardNav } from '@/components/dashboard/DashboardNav';
 import { DashboardErrorBoundary } from '@/components/DashboardErrorBoundary';
 import { Toaster } from '@/components/ui/toaster';
 import { BankOutageNotice } from '@/components/dashboard/BankOutageNotice';
+import { ImpersonationBanner } from '@/components/dashboard/ImpersonationBanner';
 import { db } from '@/lib/db';
 import { platformSettings } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
@@ -44,6 +45,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-amber-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900">
+      {session.impersonating && <ImpersonationBanner />}
       <DashboardNav userRole={session.user.role || 'merchant'} accountMode={(session.user as any).accountMode} />
       <BankOutageNotice outages={outages} />
       <DashboardErrorBoundary>
