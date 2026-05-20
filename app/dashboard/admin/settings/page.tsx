@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, Globe, Plus, X, AlertCircle, CheckCircle, Shield, Loader2 } from 'lucide-react';
+import { Save, Globe, Plus, X, AlertCircle, CheckCircle, Shield, Loader2, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -43,6 +43,9 @@ export default function AdminSettingsPage() {
   const [alertSmsNumbers, setAlertSmsNumbers] = useState('');
   const [alertSlackWebhook, setAlertSlackWebhook] = useState('');
 
+  // Registration notification settings
+  const [registrationNotifyEmails, setRegistrationNotifyEmails] = useState('');
+
   useEffect(() => {
     fetchSettings();
   }, []);
@@ -59,6 +62,7 @@ export default function AdminSettingsPage() {
         setAlertEmails(s.alert_emails || '');
         setAlertSmsNumbers(s.alert_sms_numbers || '');
         setAlertSlackWebhook(s.alert_slack_webhook_url || '');
+        setRegistrationNotifyEmails(s.registration_notification_emails || '');
         const raw = s.allowed_iframe_domains || '';
         setDomains(raw.split(',').map((d: string) => d.trim()).filter(Boolean));
       }
@@ -102,6 +106,7 @@ export default function AdminSettingsPage() {
           alert_emails: alertEmails,
           alert_sms_numbers: alertSmsNumbers,
           alert_slack_webhook_url: alertSlackWebhook,
+          registration_notification_emails: registrationNotifyEmails,
           allowed_iframe_domains: domains.join(','),
         }),
       });
@@ -257,6 +262,36 @@ export default function AdminSettingsPage() {
             />
             <p className="text-xs text-slate-400">
               Supports: <code># heading</code>, <code>**bold**</code>, <code>*italic*</code>, <code>- list items</code>
+            </p>
+          </div>
+        </div>
+      </Card>
+
+      {/* User Registration Notifications */}
+      <Card className="p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+            <UserPlus className="w-5 h-5 text-green-600 dark:text-green-400" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">User Registration Notifications</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Get notified when new users register and verify their email
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="registration-emails">Notification Email Addresses</Label>
+            <Input
+              id="registration-emails"
+              placeholder="admin@yetopay.co.za, ops@yetopay.co.za"
+              value={registrationNotifyEmails}
+              onChange={e => setRegistrationNotifyEmails(e.target.value)}
+            />
+            <p className="text-xs text-slate-400">
+              Comma-separated emails. These addresses will receive notifications when a new user registers and when they verify their email.
             </p>
           </div>
         </div>

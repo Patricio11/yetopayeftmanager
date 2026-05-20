@@ -261,6 +261,121 @@ export async function sendMerchantInvitedByPartnerEmail(
   });
 }
 
+// ─── Admin Notification Templates ────────────────────────────────────────────
+
+export async function sendAdminNewRegistrationEmail(
+  recipients: string[],
+  userData: { name: string; email: string }
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%); padding: 32px; text-align: center;">
+        <h1 style="color: white; margin: 0;">YetoPay</h1>
+        <p style="color: #fde68a; margin: 8px 0 0;">New User Registration</p>
+      </div>
+      <div style="padding: 32px; background: #ffffff;">
+        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+          <h2 style="color: #1d4ed8; margin: 0 0 8px;">New Merchant Registered</h2>
+          <p style="color: #1e3a5f; margin: 0;">A new user has signed up and is awaiting email verification.</p>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin: 24px 0;">
+          <tr style="background: #f9fafb;">
+            <td style="padding: 10px 16px; color: #6b7280; font-size: 14px;">Name</td>
+            <td style="padding: 10px 16px; color: #111827; font-weight: 600;">${userData.name}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 16px; color: #6b7280; font-size: 14px;">Email</td>
+            <td style="padding: 10px 16px; color: #111827; font-weight: 600;">${userData.email}</td>
+          </tr>
+          <tr style="background: #f9fafb;">
+            <td style="padding: 10px 16px; color: #6b7280; font-size: 14px;">Status</td>
+            <td style="padding: 10px 16px; color: #d97706; font-weight: 600;">Email Not Verified</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 16px; color: #6b7280; font-size: 14px;">Registered At</td>
+            <td style="padding: 10px 16px; color: #111827; font-weight: 600;">${new Date().toUTCString()}</td>
+          </tr>
+        </table>
+        <div style="text-align: center; margin: 32px 0;">
+          <a href="${appUrl}/dashboard/admin/users"
+            style="background-color: #1d4ed8; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+            View Users Dashboard
+          </a>
+        </div>
+      </div>
+      <div style="padding: 16px; text-align: center; color: #9ca3af; font-size: 12px;">
+        &copy; ${new Date().getFullYear()} YetoPay. Automated registration notification.
+      </div>
+    </div>
+  `;
+
+  await transporter.sendMail({
+    from,
+    to: recipients.join(", "),
+    subject: `New User Registration: ${userData.name} — YetoPay`,
+    html,
+  });
+}
+
+export async function sendAdminEmailVerifiedEmail(
+  recipients: string[],
+  userData: { name: string; email: string }
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%); padding: 32px; text-align: center;">
+        <h1 style="color: white; margin: 0;">YetoPay</h1>
+        <p style="color: #bbf7d0; margin: 8px 0 0;">Email Verified</p>
+      </div>
+      <div style="padding: 32px; background: #ffffff;">
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+          <h2 style="color: #16a34a; margin: 0 0 8px;">User Email Verified</h2>
+          <p style="color: #14532d; margin: 0;">A user has successfully verified their email address.</p>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin: 24px 0;">
+          <tr style="background: #f9fafb;">
+            <td style="padding: 10px 16px; color: #6b7280; font-size: 14px;">Name</td>
+            <td style="padding: 10px 16px; color: #111827; font-weight: 600;">${userData.name}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 16px; color: #6b7280; font-size: 14px;">Email</td>
+            <td style="padding: 10px 16px; color: #111827; font-weight: 600;">${userData.email}</td>
+          </tr>
+          <tr style="background: #f9fafb;">
+            <td style="padding: 10px 16px; color: #6b7280; font-size: 14px;">Status</td>
+            <td style="padding: 10px 16px; color: #16a34a; font-weight: 600;">Email Verified ✓</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 16px; color: #6b7280; font-size: 14px;">Verified At</td>
+            <td style="padding: 10px 16px; color: #111827; font-weight: 600;">${new Date().toUTCString()}</td>
+          </tr>
+        </table>
+        <p style="color: #4b5563; line-height: 1.6;">
+          This user can now log in and access the merchant dashboard. Review their KYC status and account settings as needed.
+        </p>
+        <div style="text-align: center; margin: 32px 0;">
+          <a href="${appUrl}/dashboard/admin/users"
+            style="background-color: #16a34a; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+            View Users Dashboard
+          </a>
+        </div>
+      </div>
+      <div style="padding: 16px; text-align: center; color: #9ca3af; font-size: 12px;">
+        &copy; ${new Date().getFullYear()} YetoPay. Automated verification notification.
+      </div>
+    </div>
+  `;
+
+  await transporter.sendMail({
+    from,
+    to: recipients.join(", "),
+    subject: `Email Verified: ${userData.name} — YetoPay`,
+    html,
+  });
+}
+
 export async function sendPartnerActionNotificationEmail(
   recipients: string[],
   partnerName: string,

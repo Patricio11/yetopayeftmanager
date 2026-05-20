@@ -1,8 +1,20 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { eq } from "drizzle-orm";
 import { db } from "./db";
 import * as schema from "./db/schema";
-import { sendVerificationEmail, sendPasswordResetEmail } from "./email";
+import { sendVerificationEmail, sendPasswordResetEmail, sendAdminNewRegistrationEmail, sendAdminEmailVerifiedEmail } from "./email";
+
+const verifiedNotifications = new Set<string>();
+
+async function getRegistrationNotificationEmails(): Promise<string[]> {
+  const rows = await db
+    .select({ settingValue: schema.platformSettings.settingValue })
+    .from(schema.platformSettings)
+    .where(eq(schema.platformSettings.settingKey, "registration_notification_emails"));
+  const raw = rows[0]?.settingValue || "";
+  return raw.split(",").map((e) => e.trim()).filter(Boolean);
+}
 
 export const auth = betterAuth({
   trustedOrigins: [
@@ -51,6 +63,44 @@ export const auth = betterAuth({
         type: "string",
         required: false,
         defaultValue: "demo",
+      },
+    },
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          try {
+            const recipients = await getRegistrationNotificationEmails();
+            if (recipients.length > 0) {
+              await sendAdminNewRegistrationEmail(recipients, {
+                name: user.name,
+                email: user.email,
+              });
+            }
+          } catch (e) {
+            console.error("Failed to send admin registration notification:", e);
+          }
+        },
+      },
+      update: {
+        after: async (user) => {
+          if (user.emailVerified === true && user.id && !verifiedNotifications.has(user.id)) {
+            verifiedNotifications.add(user.id);
+            if (verifiedNotifications.size > 1000) verifiedNotifications.clear();
+            try {
+              const recipients = await getRegistrationNotificationEmails();
+              if (recipients.length > 0) {
+                await sendAdminEmailVerifiedEmail(recipients, {
+                  name: user.name,
+                  email: user.email,
+                });
+              }
+            } catch (e) {
+              console.error("Failed to send admin verification notification:", e);
+            }
+          }
+        },
       },
     },
   },
