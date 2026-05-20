@@ -1,4 +1,4 @@
-import { pgTable, text, boolean, timestamp, numeric, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, boolean, timestamp, numeric, jsonb, integer } from "drizzle-orm/pg-core";
 
 // Users table - integrated with Better Auth
 export const users = pgTable("user", {
@@ -38,8 +38,23 @@ export const users = pgTable("user", {
     branch_code?: string;
   }>().default({}),
   
-  // KYC & Status
-  kycStatus: text("kyc_status", { enum: ["pending", "approved", "rejected"] }).default("pending"),
+  // KYC & Vetting
+  kycStatus: text("kyc_status", { enum: ["pending", "pending_review", "approved", "rejected"] }).default("pending"),
+  kycData: jsonb("kyc_data").$type<Record<string, any>>().default({}),
+  kycSubmittedAt: timestamp("kyc_submitted_at"),
+  vettingStatus: text("vetting_status", {
+    enum: ["EMAIL_PENDING", "ONBOARDING_PENDING", "PENDING_REVIEW", "APPROVED", "REJECTED"],
+  }).default("APPROVED"),
+  vettingRejectionReason: text("vetting_rejection_reason"),
+  vettingAdminNote: text("vetting_admin_note"),
+  vettingReviewedAt: timestamp("vetting_reviewed_at"),
+  vettingReviewedBy: text("vetting_reviewed_by"),
+  companyReg: text("company_reg"),
+  companyAddress: text("company_address"),
+  companyCountry: text("company_country"),
+  vatNumber: text("vat_number"),
+
+  // Status
   isActive: boolean("is_active").default(true),
   accountMode: text("account_mode", { enum: ["demo", "live"] }).default("demo"),
   lastLogin: timestamp("last_login"),

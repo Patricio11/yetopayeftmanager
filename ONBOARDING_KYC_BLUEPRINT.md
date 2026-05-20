@@ -17,8 +17,7 @@ End-to-end:
 5. **Admin review modal** — see every field + every uploaded doc inline, Approve / Reject (with reason) / Request Changes (with admin note) / Resend Verification / Mark Verified (break-glass).
 6. **Admin-managed requirements** — add/edit/reorder document requirements (with optional fillable templates the user downloads).
 7. **Status pages for the client** — email-pending, onboarding-form, pending-review, approved-redirect, rejected-with-reason.
-8. **Account-number auto-assignment** on approval.
-9. **Full email fan-out** — verification, submission confirmation, admin alert, approval (with account number), rejection (with reason), request-changes (with admin note).
+8. **Full email fan-out** — verification, submission confirmation, admin alert, approval, rejection (with reason), request-changes (with admin note).
 10. **Dashboard gate** — only `APPROVED` clients can access `/dashboard/*`.
 
 Out of scope but easy to bolt on:
@@ -43,10 +42,8 @@ Argue these once, write them down, don't relitigate.
 | Email verification | **Better Auth's built-in flow** | Don't reinvent. |
 | Auto-sign-in after verify? | **Yes** | One less click, but design for the failure case (see Safe Links section). |
 | Vetting state machine | **5 states, single column** | `EMAIL_PENDING` → `ONBOARDING_PENDING` → `PENDING_REVIEW` → `APPROVED` \| `REJECTED`. No parallel flags. |
-| Account number | **Auto-generated on approval** | `SRS-{nanoid(8)}`; never reused. |
 | Re-submission flow | **Admin can request changes; status reverts to `ONBOARDING_PENDING`** | Cleaner than a separate "needs revision" state. |
 | Document set per user | **Replaced on each submission** | Re-submitting wipes old docs and re-uploads. Last submission wins. (Audit trail isn't a v1 requirement; if it is, store revisions.) |
-| Approval email content | **Always include the account number** | Users use it as a reference forever. |
 | Admin email on submission | **Yes — out-of-band nudge** | In-app notification fires too; the email catches admins not logged in. |
 
 ---
@@ -131,7 +128,6 @@ export const user = pgTable("user", {
 
     role: roleEnum("role").default("client").notNull(),
     isVetted: boolean("isVetted").default(false).notNull(),
-    accountNumber: text("accountNumber").unique(),
     companyName: text("companyName"),
     companyReg: text("companyReg"),
 
@@ -249,8 +245,6 @@ export const auth = betterAuth({
     databaseHooks: {
         user: {
             create: {
-                // Optional — assign a placeholder accountNumber on create
-                // (only flipped to a real one on approval). Or leave null until then.
                 before: async (user) => ({ data: { ...user } }),
             },
         },
@@ -280,7 +274,6 @@ export const auth = betterAuth({
         additionalFields: {
             role: { type: "string", required: false, defaultValue: "client" },
             companyName: { type: "string", required: false },
-            accountNumber: { type: "string", required: false },
             isVetted: { type: "boolean", required: false, defaultValue: false },
         },
     },
@@ -491,7 +484,7 @@ Each is a "you've reached this state, here's what to do" screen.
 
 - **EmailPendingScreen** — "We still need you to verify {email}" + Resend button. Same call as `/auth/check-email`.
 - **PendingReviewScreen** — "Thanks {companyName}! Application submitted on {date}. We typically approve within one business day." + "what happens next" steps. No actions.
-- **ApprovedScreen** — green checkmark + "You're in! Account number: {accountNumber}" + auto-redirect to `/dashboard` after 2s.
+- **ApprovedScreen** — green checkmark + "You're in!" + auto-redirect to `/dashboard` after 2s.
 - **RejectedScreen** — red callout with `vettingRejectionReason`. Contact-support link.
 
 ---
@@ -570,10 +563,6 @@ if (!target) return 404;
 if (target.role !== "client") return 400 "Only clients";
 if (target.vettingStatus === "APPROVED") return 400 "Already approved";
 
-// Auto-assign account number on first approval
-let accountNumber = target.accountNumber;
-if (!accountNumber) accountNumber = `SRS-${nanoid(8).toUpperCase()}`;
-
 await db.update(user).set({
     isVetted: true,
     vettingStatus: "APPROVED",
@@ -581,13 +570,11 @@ await db.update(user).set({
     vettingReviewedBy: session.user.id,
     vettingRejectionReason: null,
     vettingAdminNote: null,
-    accountNumber,
     updatedAt: new Date(),
 }).where(eq(user.id, id));
 
-await db.insert(clientNotifications).values({ /* welcome notification */ });
-try { await sendApprovalEmail(target.email, accountNumber, target.companyName ?? target.name); } catch {}
-return NextResponse.json({ success: true, accountNumber });
+try { await sendApprovalEmail(target.email, target.companyName ?? target.name); } catch {}
+return NextResponse.json({ success: true });
 ```
 
 ### `PATCH /api/admin/users/[id]/reject`
@@ -663,7 +650,7 @@ Six templates, all in one file, all use a shared `emailLayout(...)` for tone con
 | `sendPasswordResetEmail(to, url)` | Better Auth password reset hook | User | "Reset your password — {App Name}" |
 | `sendOnboardingSubmittedEmail(to, companyName)` | After `POST /api/auth/onboarding` | User | "We received your application — {App Name}" |
 | `sendAdminVettingNotificationEmail({ companyName, contactName, contactEmail, userId, submittedAt })` | After onboarding submit | `ADMIN_ALERT_EMAIL` env | "New onboarding submission — {companyName}" |
-| `sendApprovalEmail(to, accountNumber, companyName)` | After approve | User | "🎉 You're approved — welcome" |
+| `sendApprovalEmail(to, companyName)` | After approve | User | "You're approved — welcome" |
 | `sendRejectionEmail(to, reason, companyName)` | After reject | User | "Application update — {App Name}" |
 | `sendRequestChangesEmail(to, adminNote, companyName)` | After request-changes | User | "We need some updates — {App Name}" |
 
@@ -847,7 +834,7 @@ We require a 2-letter ISO 3166-1 alpha-2 code. Anywhere you display it (rejectio
 
 ### 7. Approval is irreversible (by design)
 
-Once `vettingStatus = APPROVED` and an `accountNumber` is assigned, we don't recycle the account number even if you later revert the user. If you need to suspend an approved user, add a separate `suspended boolean` flag — don't roll back the vetting state.
+Once `vettingStatus = APPROVED`, we don't roll back the vetting state. If you need to suspend an approved user, add a separate `suspended boolean` flag.
 
 ### 8. Multiple admins reviewing the same user
 
@@ -908,8 +895,8 @@ After every phase landing, walk through this:
    - Click Review on the new submission
    - See company info + all uploaded docs (open each one — should download/preview)
    - Click Approve → confirm
-   - User's row flips to APPROVED with an auto-generated `accountNumber`
-   - Approval email lands in user's inbox with the account number
+   - User's row flips to APPROVED
+   - Approval email lands in user's inbox
    - User signs in → lands on `/dashboard`
 
 4. **Admin reject**

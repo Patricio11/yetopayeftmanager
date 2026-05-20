@@ -1,5 +1,9 @@
 import nodemailer from "nodemailer";
 
+import { db } from "./db";
+import { platformSettings } from "./db/schema";
+import { eq } from "drizzle-orm";
+
 const isProd = process.env.NODE_ENV === "production";
 const port = Number(process.env.SMTP_PORT) || (isProd ? 587 : 2525);
 
@@ -14,6 +18,15 @@ const transporter = nodemailer.createTransport({
 });
 
 const from = `${process.env.SMTP_FROM_NAME || "YetoPay"} <${process.env.SMTP_FROM || "noreply@onegate.co.za"}>`;
+
+async function getRegistrationNotificationEmails(): Promise<string[]> {
+  const rows = await db
+    .select({ settingValue: platformSettings.settingValue })
+    .from(platformSettings)
+    .where(eq(platformSettings.settingKey, "registration_notification_emails"));
+  const raw = rows[0]?.settingValue || "";
+  return raw.split(",").map((e) => e.trim()).filter(Boolean);
+}
 
 export async function sendVerificationEmail(email: string, url: string) {
   await transporter.sendMail({
@@ -425,6 +438,204 @@ export async function sendPartnerActionNotificationEmail(
     from,
     to: recipients.join(", "),
     subject: `Partner Action: ${partnerName} — ${action}`,
+    html,
+  });
+}
+
+// ─── KYC / Onboarding Email Templates ───────────────────────────────────────
+
+const kycHeader = `
+  <div style="background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%); padding: 32px; text-align: center;">
+    <h1 style="color: white; margin: 0;">YetoPay</h1>
+  </div>`;
+
+const kycFooter = `
+  <div style="padding: 16px; text-align: center; color: #9ca3af; font-size: 12px;">
+    &copy; ${new Date().getFullYear()} YetoPay. All rights reserved.
+  </div>`;
+
+export async function sendKycSubmissionEmail(email: string, companyName: string) {
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      ${kycHeader}
+      <div style="padding: 32px; background: #ffffff;">
+        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+          <h2 style="color: #1d4ed8; margin: 0 0 8px;">Application Received</h2>
+          <p style="color: #1e3a5f; margin: 0;">We've received your onboarding application for <strong>${companyName}</strong>.</p>
+        </div>
+        <p style="color: #4b5563; line-height: 1.6;">
+          Thank you for submitting your application. Our team will review your information and documents shortly.
+          You'll receive an email once the review is complete.
+        </p>
+        <p style="color: #4b5563; line-height: 1.6;">
+          This usually takes 1–2 business days. If we need any additional information, we'll reach out.
+        </p>
+      </div>
+      ${kycFooter}
+    </div>`;
+
+  await transporter.sendMail({
+    from,
+    to: email,
+    subject: "Application Received — YetoPay",
+    html,
+  });
+}
+
+export async function sendKycApprovedEmail(email: string, companyName: string) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      ${kycHeader}
+      <div style="padding: 32px; background: #ffffff;">
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+          <h2 style="color: #16a34a; margin: 0 0 8px;">Application Approved!</h2>
+          <p style="color: #14532d; margin: 0;"><strong>${companyName}</strong> has been verified and approved.</p>
+        </div>
+        <p style="color: #4b5563; line-height: 1.6;">
+          Congratulations! Your application has been reviewed and approved. You now have full access to
+          your YetoPay dashboard.
+        </p>
+        <div style="text-align: center; margin: 32px 0;">
+          <a href="${appUrl}/dashboard"
+            style="background-color: #16a34a; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+            Go to Dashboard
+          </a>
+        </div>
+      </div>
+      ${kycFooter}
+    </div>`;
+
+  await transporter.sendMail({
+    from,
+    to: email,
+    subject: "Application Approved — YetoPay",
+    html,
+  });
+}
+
+export async function sendKycRejectedEmail(email: string, companyName: string, reason: string) {
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      ${kycHeader}
+      <div style="padding: 32px; background: #ffffff;">
+        <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+          <h2 style="color: #dc2626; margin: 0 0 8px;">Application Not Approved</h2>
+          <p style="color: #7f1d1d; margin: 0;">The application for <strong>${companyName}</strong> could not be approved at this time.</p>
+        </div>
+        <p style="color: #4b5563; line-height: 1.6; margin-bottom: 16px;">
+          Our team has reviewed your application and unfortunately it was not approved for the following reason:
+        </p>
+        <div style="background: #f9fafb; border-left: 4px solid #dc2626; padding: 12px 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0;">
+          <p style="color: #374151; margin: 0; font-style: italic;">${reason}</p>
+        </div>
+        <p style="color: #4b5563; line-height: 1.6;">
+          If you believe this was in error or need further assistance, please contact our support team
+          at <a href="mailto:support@yetopay.co.za" style="color: #1d4ed8;">support@yetopay.co.za</a>.
+        </p>
+      </div>
+      ${kycFooter}
+    </div>`;
+
+  await transporter.sendMail({
+    from,
+    to: email,
+    subject: "Application Update — YetoPay",
+    html,
+  });
+}
+
+export async function sendKycRequestChangesEmail(email: string, companyName: string, note: string) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      ${kycHeader}
+      <div style="padding: 32px; background: #ffffff;">
+        <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+          <h2 style="color: #d97706; margin: 0 0 8px;">Changes Requested</h2>
+          <p style="color: #92400e; margin: 0;">We need a few updates to your application for <strong>${companyName}</strong>.</p>
+        </div>
+        <p style="color: #4b5563; line-height: 1.6; margin-bottom: 16px;">
+          Our review team has looked at your application and needs the following changes before we can proceed:
+        </p>
+        <div style="background: #f9fafb; border-left: 4px solid #d97706; padding: 12px 16px; margin-bottom: 24px; border-radius: 0 8px 8px 0;">
+          <p style="color: #374151; margin: 0;">${note}</p>
+        </div>
+        <div style="text-align: center; margin: 32px 0;">
+          <a href="${appUrl}/auth/onboarding"
+            style="background-color: #d97706; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+            Update Application
+          </a>
+        </div>
+      </div>
+      ${kycFooter}
+    </div>`;
+
+  await transporter.sendMail({
+    from,
+    to: email,
+    subject: "Action Required: Update Your Application — YetoPay",
+    html,
+  });
+}
+
+export async function sendAdminKycActionEmail(
+  action: string,
+  userData: { name: string; email: string; companyName: string },
+  detail?: string
+) {
+  const recipients = await getRegistrationNotificationEmails();
+  if (recipients.length === 0) return;
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const colorMap: Record<string, string> = {
+    Approved: "#16a34a",
+    Rejected: "#dc2626",
+    "Requested Changes": "#d97706",
+  };
+  const color = colorMap[action] || "#1d4ed8";
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      ${kycHeader}
+      <div style="padding: 32px; background: #ffffff;">
+        <h2 style="color: ${color}; margin: 0 0 16px;">KYC ${action}: ${userData.companyName}</h2>
+        <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+          <tr style="background: #f9fafb;">
+            <td style="padding: 10px 16px; color: #6b7280; font-size: 14px;">Company</td>
+            <td style="padding: 10px 16px; color: #111827; font-weight: 600;">${userData.companyName}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 16px; color: #6b7280; font-size: 14px;">Contact</td>
+            <td style="padding: 10px 16px; color: #111827; font-weight: 600;">${userData.name}</td>
+          </tr>
+          <tr style="background: #f9fafb;">
+            <td style="padding: 10px 16px; color: #6b7280; font-size: 14px;">Email</td>
+            <td style="padding: 10px 16px; color: #111827; font-weight: 600;">${userData.email}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 16px; color: #6b7280; font-size: 14px;">Action</td>
+            <td style="padding: 10px 16px; color: ${color}; font-weight: 600;">${action}</td>
+          </tr>
+          ${detail ? `<tr style="background: #f9fafb;">
+            <td style="padding: 10px 16px; color: #6b7280; font-size: 14px;">Reason/Note</td>
+            <td style="padding: 10px 16px; color: #111827;">${detail}</td>
+          </tr>` : ""}
+        </table>
+        <div style="text-align: center; margin: 24px 0;">
+          <a href="${appUrl}/dashboard/admin/kyc"
+            style="background-color: ${color}; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+            View KYC Queue
+          </a>
+        </div>
+      </div>
+      ${kycFooter}
+    </div>`;
+
+  await transporter.sendMail({
+    from,
+    to: recipients.join(", "),
+    subject: `KYC ${action}: ${userData.companyName} — YetoPay`,
     html,
   });
 }

@@ -194,6 +194,7 @@ export function DashboardNav({ userRole, accountMode }: DashboardNavProps) {
       { title: "Users", href: "/dashboard/admin/users", icon: Users },
       { title: "Banks", href: "/dashboard/banks", icon: Building2 },
       { title: "Recon", href: "/dashboard/admin/recon", icon: BarChart3 },
+      { title: "KYC", href: "/dashboard/admin/kyc", icon: ShieldCheck },
     ],
   };
 
@@ -213,10 +214,18 @@ export function DashboardNav({ userRole, accountMode }: DashboardNavProps) {
     icon: MoreHorizontal,
     items: isPartner
       ? [
+          { title: "KYC", href: "/dashboard/kyc", icon: ShieldCheck },
+          { title: "API Docs", href: "/dashboard/api-docs", icon: Book },
+          { title: "Settings", href: "/dashboard/settings", icon: Settings },
+        ]
+      : isAdmin
+      ? [
+          { title: "Tokens", href: "/dashboard/tokens", icon: CreditCard },
           { title: "API Docs", href: "/dashboard/api-docs", icon: Book },
           { title: "Settings", href: "/dashboard/settings", icon: Settings },
         ]
       : [
+          { title: "KYC", href: "/dashboard/kyc", icon: ShieldCheck },
           { title: "Tokens", href: "/dashboard/tokens", icon: CreditCard },
           { title: "API Docs", href: "/dashboard/api-docs", icon: Book },
           { title: "Settings", href: "/dashboard/settings", icon: Settings },
