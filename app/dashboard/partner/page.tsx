@@ -65,7 +65,21 @@ export default function PartnerDashboardPage() {
         const res = await fetch("/api/partner/dashboard");
         const json = await res.json();
         if (json.success) {
-          setData(json.data);
+          const d = json.data;
+          setData({
+            totalMerchants: d.merchants?.total ?? 0,
+            activeMerchants: d.merchants?.active ?? 0,
+            transactionsThisMonth: d.transactions?.monthTotal ?? 0,
+            volumeThisMonth: parseFloat(d.transactions?.monthAmount || "0"),
+            recentTransactions: (d.recentTransactions || []).map((t: any) => ({
+              id: t.id,
+              reference: t.reference || "—",
+              merchantName: t.merchantCompany || t.merchantName || "Unknown",
+              amount: parseFloat(t.amount || "0"),
+              status: t.status,
+              createdAt: t.createdAt,
+            })),
+          });
         } else {
           setError(json.error || "Failed to load dashboard");
         }

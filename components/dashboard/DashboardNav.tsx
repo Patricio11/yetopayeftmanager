@@ -174,12 +174,16 @@ export function DashboardNav({ userRole, accountMode }: DashboardNavProps) {
     }
   };
 
-  const mainItems: NavItem[] = [
-    { title: "Dashboard", href: "/dashboard", icon: Home },
-    { title: "Transactions", href: "/dashboard/transactions", icon: Receipt },
-    { title: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
-    { title: "Invoices", href: "/dashboard/invoices", icon: FileText },
-  ];
+  const mainItems: NavItem[] = isPartner
+    ? [
+        { title: "Dashboard", href: "/dashboard/partner", icon: Home },
+      ]
+    : [
+        { title: "Dashboard", href: "/dashboard", icon: Home },
+        { title: "Transactions", href: "/dashboard/transactions", icon: Receipt },
+        { title: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
+        { title: "Invoices", href: "/dashboard/invoices", icon: FileText },
+      ];
 
   const adminGroup: NavGroup = {
     label: "Admin",
@@ -207,11 +211,15 @@ export function DashboardNav({ userRole, accountMode }: DashboardNavProps) {
   const moreGroup: NavGroup = {
     label: "More",
     icon: MoreHorizontal,
-    items: [
-      { title: "Tokens", href: "/dashboard/tokens", icon: CreditCard },
-      { title: "API Docs", href: "/dashboard/api-docs", icon: Book },
-      { title: "Settings", href: "/dashboard/settings", icon: Settings },
-    ],
+    items: isPartner
+      ? [
+          { title: "Settings", href: "/dashboard/settings", icon: Settings },
+        ]
+      : [
+          { title: "Tokens", href: "/dashboard/tokens", icon: CreditCard },
+          { title: "API Docs", href: "/dashboard/api-docs", icon: Book },
+          { title: "Settings", href: "/dashboard/settings", icon: Settings },
+        ],
   };
 
   return (
