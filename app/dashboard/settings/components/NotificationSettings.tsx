@@ -3,10 +3,16 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { UserPlus } from "lucide-react";
+import { useSession } from "@/lib/auth-client";
 import { useToast } from "@/hooks/use-toast";
 
 export function NotificationSettings() {
   const { toast } = useToast();
+  const { data: session } = useSession();
+  const isAdmin = (session?.user as any)?.role === "admin";
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [prefs, setPrefs] = useState({
@@ -15,6 +21,11 @@ export function NotificationSettings() {
     weekly_summary: false,
     security_alerts: true,
   });
+
+  // Admin-only: registration notification emails
+  const [registrationEmails, setRegistrationEmails] = useState("");
+  const [adminLoading, setAdminLoading] = useState(false);
+  const [adminFetching, setAdminFetching] = useState(true);
 
   useEffect(() => {
     fetch("/api/merchant/settings")
@@ -28,6 +39,40 @@ export function NotificationSettings() {
       .catch(() => {})
       .finally(() => setFetching(false));
   }, []);
+
+  useEffect(() => {
+    if (!isAdmin) { setAdminFetching(false); return; }
+    fetch("/api/admin/settings/platform")
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setRegistrationEmails(data.settings.registration_notification_emails || "");
+        }
+      })
+      .catch(() => {})
+      .finally(() => setAdminFetching(false));
+  }, [isAdmin]);
+
+  const handleSaveRegistrationEmails = async () => {
+    setAdminLoading(true);
+    try {
+      const res = await fetch("/api/admin/settings/platform", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ registration_notification_emails: registrationEmails }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast({ title: "Saved", description: "Registration notification emails updated." });
+      } else {
+        toast({ title: "Error", description: data.error || "Failed to save", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to save settings", variant: "destructive" });
+    } finally {
+      setAdminLoading(false);
+    }
+  };
 
   const togglePref = (key: keyof typeof prefs) => {
     setPrefs(p => ({ ...p, [key]: !p[key] }));
@@ -78,6 +123,7 @@ export function NotificationSettings() {
   }
 
   return (
+    <>
     <Card>
       <CardHeader>
         <CardTitle>Notification Preferences</CardTitle>
@@ -126,5 +172,50 @@ export function NotificationSettings() {
         </div>
       </CardContent>
     </Card>
+
+    {isAdmin && (
+      <Card className="mt-6">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+              <UserPlus className="w-5 h-5 text-green-600 dark:text-green-400" />
+            </div>
+            <div>
+              <CardTitle>User Registration Notifications</CardTitle>
+              <CardDescription>Get notified when new users register and verify their email</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {adminFetching ? (
+            <div className="space-y-2">
+              <div className="h-4 w-48 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+              <div className="h-10 w-full bg-slate-200 dark:bg-slate-700 animate-pulse rounded-md" />
+            </div>
+          ) : (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="registration-emails">Notification Email Addresses</Label>
+                <Input
+                  id="registration-emails"
+                  placeholder="admin@yetopay.co.za, ops@yetopay.co.za"
+                  value={registrationEmails}
+                  onChange={e => setRegistrationEmails(e.target.value)}
+                />
+                <p className="text-xs text-gray-500 dark:text-slate-400">
+                  Comma-separated emails. These addresses receive notifications when a new user registers and when they verify their email.
+                </p>
+              </div>
+              <div className="flex justify-end">
+                <Button onClick={handleSaveRegistrationEmails} disabled={adminLoading}>
+                  {adminLoading ? "Saving..." : "Save Notification Emails"}
+                </Button>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    )}
+    </>
   );
 }
