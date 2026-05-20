@@ -81,18 +81,18 @@ export default function ApiDocsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30">
+    <div className="min-h-screen bg-slate-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white">
-        <div className="container mx-auto px-4 sm:px-6 py-10 sm:py-16">
+      <div className="border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
           <div className="max-w-4xl">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                <Book className="w-6 h-6" />
+              <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-pink-600 rounded-xl flex items-center justify-center">
+                <Book className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-2xl sm:text-4xl font-bold">API Documentation</h1>
+              <h1 className="text-2xl sm:text-4xl font-bold text-slate-900">API Documentation</h1>
             </div>
-            <p className="text-xl text-green-50 mb-6">
+            <p className="text-xl text-slate-600 mb-6">
               Everything you need to integrate YetoPay Pay By Bank payment system into your application
             </p>
             {/* <div className="flex flex-wrap gap-3">
@@ -158,7 +158,7 @@ export default function ApiDocsPage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar Navigation */}
           <div className="lg:col-span-1">
@@ -261,7 +261,7 @@ function ApiSidebar() {
     <Card className="sticky top-24 border-2 border-gray-100 dark:border-gray-800 shadow-lg">
       <CardHeader className="border-b border-gray-100 dark:border-gray-800">
         <CardTitle className="text-lg flex items-center gap-2">
-          <Book className="w-5 h-5 text-green-600" />
+          <Book className="w-5 h-5 text-amber-600" />
           Navigation
         </CardTitle>
       </CardHeader>
@@ -278,7 +278,7 @@ function ApiSidebar() {
                 transition-all duration-200 text-left group
                 ${
                   isActive
-                    ? "bg-green-50 dark:bg-green-900/20 border-l-4 border-green-600 shadow-sm"
+                    ? "bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-600 shadow-sm"
                     : "hover:bg-gray-50 dark:hover:bg-gray-800 border-l-4 border-transparent"
                 }
               `}
@@ -286,21 +286,21 @@ function ApiSidebar() {
               <Icon 
                 className={`w-4 h-4 transition-colors ${
                   isActive 
-                    ? "text-green-600 dark:text-green-400" 
-                    : "text-gray-500 dark:text-gray-400 group-hover:text-green-600 dark:group-hover:text-green-400"
+                    ? "text-amber-600 dark:text-amber-400"
+                    : "text-gray-500 dark:text-gray-400 group-hover:text-amber-600 dark:group-hover:text-amber-400"
                 }`} 
               />
               <span 
                 className={`text-sm font-medium transition-colors ${
                   isActive 
-                    ? "text-green-700 dark:text-green-300" 
+                    ? "text-amber-700 dark:text-amber-300"
                     : "text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100"
                 }`}
               >
                 {section.label}
               </span>
               {isActive && (
-                <ChevronRight className="w-4 h-4 ml-auto text-green-600 dark:text-green-400" />
+                <ChevronRight className="w-4 h-4 ml-auto text-amber-600 dark:text-amber-400" />
               )}
             </button>
           );
@@ -321,8 +321,8 @@ function QuickStartSection({
     <Card>
       <CardHeader>
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-            <Zap className="w-5 h-5 text-green-600" />
+          <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+            <Zap className="w-5 h-5 text-amber-600" />
           </div>
           <div>
             <CardTitle>Quick Start</CardTitle>
@@ -401,16 +401,16 @@ function AuthenticationSection({ selectedLanguage, onCopy, copiedCode }: any) {
       <CardContent className="space-y-6">
         {/* Auth Methods */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="border rounded-lg p-4 bg-green-50 border-green-200">
+          {/* <div className="border rounded-lg p-4 bg-amber-50 border-amber-200">
             <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-              <h4 className="font-semibold text-green-900">API Key (Recommended)</h4>
+              <CheckCircle className="w-5 h-5 text-amber-600" />
+              <h4 className="font-semibold text-amber-900">API Key (Recommended)</h4>
             </div>
-            <p className="text-sm text-green-800">
+            <p className="text-sm text-amber-800">
               Server-to-server authentication with HMAC signatures
             </p>
-          </div>
-          <div className="border rounded-lg p-4">
+          </div> */}
+          {/* <div className="border rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
               <Lock className="w-5 h-5 text-gray-600" />
               <h4 className="font-semibold">Session Auth</h4>
@@ -418,7 +418,7 @@ function AuthenticationSection({ selectedLanguage, onCopy, copiedCode }: any) {
             <p className="text-sm text-gray-600">
               Cookie-based authentication for dashboard UI
             </p>
-          </div>
+          </div> */}
         </div>
 
         {/* Required Headers */}
@@ -567,7 +567,7 @@ function EndpointsSection({ selectedLanguage, onCopy, copiedCode }: any) {
                       onClick={() => setSelectedEndpoint(endpoint.id)}
                       className={`w-full flex items-center gap-3 p-3 transition-all ${
                         selectedEndpoint === endpoint.id
-                          ? "bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500"
+                          ? "bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500"
                           : "hover:bg-gray-50 dark:hover:bg-gray-800 border-l-4 border-transparent"
                       }`}
                     >
@@ -1127,7 +1127,7 @@ function TestingSection() {
 function StepCard({ number, title, description }: any) {
   return (
     <div className="flex gap-4">
-      <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center font-bold flex-shrink-0">
+      <div className="w-8 h-8 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold flex-shrink-0">
         {number}
       </div>
       <div>
@@ -1158,7 +1158,7 @@ function LanguageSelector({ selected, onChange }: any) {
             flex items-center gap-2
             ${
               selected === lang.id
-                ? "bg-white dark:bg-gray-700 text-green-600 dark:text-green-400 shadow-md scale-105 z-10"
+                ? "bg-white dark:bg-gray-700 text-amber-600 dark:text-amber-400 shadow-md scale-105 z-10"
                 : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50"
             }
           `}
@@ -1166,7 +1166,7 @@ function LanguageSelector({ selected, onChange }: any) {
           <span className="text-base">{lang.icon}</span>
           <span>{lang.label}</span>
           {selected === lang.id && (
-            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-1.5 h-1.5 bg-green-600 dark:bg-green-400 rounded-full" />
+            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-1.5 h-1.5 bg-amber-600 dark:bg-amber-400 rounded-full" />
           )}
         </button>
       ))}
@@ -1196,7 +1196,7 @@ function EventBadge({ event, color }: any) {
 
 function ToolCard({ name, description }: any) {
   return (
-    <div className="border rounded-lg p-3 hover:border-green-500 transition-colors cursor-pointer">
+    <div className="border rounded-lg p-3 hover:border-amber-500 transition-colors cursor-pointer">
       <h4 className="font-semibold mb-1">{name}</h4>
       <p className="text-sm text-gray-600">{description}</p>
     </div>
