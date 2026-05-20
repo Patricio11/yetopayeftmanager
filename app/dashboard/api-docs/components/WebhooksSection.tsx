@@ -1,5 +1,4 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Webhook, Shield, CheckCircle, AlertCircle } from "lucide-react";
 import { CodeBlock } from "./CodeBlock";
 
@@ -197,31 +196,12 @@ export function WebhooksSection({ selectedLanguage, onCopy, copiedCode }: Webhoo
           <p className="text-gray-600 mb-4">
             Always verify webhook signatures to ensure the request came from YetoPay.
           </p>
-          
-          {/* SDK Method */}
-          <div className="mb-4">
-            <h4 className="font-medium mb-2 flex items-center gap-2">
-              <Badge className="bg-amber-600">Recommended</Badge>
-              Using SDK
-            </h4>
-            <CodeBlock
-              language="typescript"
-              code={getSDKVerification()}
-              onCopy={() => onCopy(getSDKVerification(), "SDK verification")}
-              copied={copiedCode === "SDK verification"}
-            />
-          </div>
-
-          {/* Manual Verification */}
-          <div>
-            <h4 className="font-medium mb-2">Without SDK ({selectedLanguage})</h4>
-            <CodeBlock
-              language={selectedLanguage}
-              code={getWebhookVerification(selectedLanguage)}
-              onCopy={() => onCopy(getWebhookVerification(selectedLanguage), "Webhook verification")}
-              copied={copiedCode === "Webhook verification"}
-            />
-          </div>
+          <CodeBlock
+            language={selectedLanguage}
+            code={getWebhookVerification(selectedLanguage)}
+            onCopy={() => onCopy(getWebhookVerification(selectedLanguage), "Webhook verification")}
+            copied={copiedCode === "Webhook verification"}
+          />
         </div>
 
         {/* Handling Events */}
@@ -335,30 +315,6 @@ function getWebhookPayload() {
   "timestamp": "2024-12-02T10:05:00Z",
   "merchantId": "a7f8c910-2b3d-4e5f-6g7h-8i9j0k1l2m3n"
 }`;
-}
-
-function getSDKVerification() {
-  return `import { YetoPayClient } from '@yetopay/sdk';
-
-const client = new YetoPayClient({ apiKey: 'your-key' });
-
-app.post('/webhooks/payment', (req, res) => {
-  const signature = req.headers['x-webhook-signature'];
-  const payload = JSON.stringify(req.body);
-  const secret = process.env.WEBHOOK_SECRET;
-
-  const isValid = client.verifyWebhookSignature(payload, signature, secret);
-
-  if (!isValid) {
-    return res.status(401).send('Invalid signature');
-  }
-
-  // Process webhook...
-  const event = req.body;
-  console.log('Event:', event.type);
-  
-  res.status(200).send('OK');
-});`;
 }
 
 function getWebhookVerification(lang: string) {

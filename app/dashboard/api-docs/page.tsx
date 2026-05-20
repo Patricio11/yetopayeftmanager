@@ -23,8 +23,7 @@ import {
   XCircle,
   Clock,
   Webhook,
-  Layers,
-  Package
+  Layers
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { IntegrationFlows } from "./components/IntegrationFlows";
