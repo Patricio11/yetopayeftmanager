@@ -540,6 +540,7 @@ function SettingsTab({ partner, onUpdate }: { partner: Partner; onUpdate: () => 
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
   const [name, setName] = useState(partner.name || '');
+  const [email, setEmail] = useState(partner.email || '');
   const [companyName, setCompanyName] = useState(partner.companyName || '');
   const [phone, setPhone] = useState(partner.phone || '');
   const [kycStatus, setKycStatus] = useState(partner.kycStatus || 'pending');
@@ -553,7 +554,7 @@ function SettingsTab({ partner, onUpdate }: { partner: Partner; onUpdate: () => 
       const res = await fetch(`/api/admin/partners/${partner.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, companyName, phone, kycStatus, isActive, accountMode }),
+        body: JSON.stringify({ name, email: email.toLowerCase(), companyName, phone, kycStatus, isActive, accountMode }),
       });
       const data = await res.json();
       if (data.success) {
@@ -607,8 +608,8 @@ function SettingsTab({ partner, onUpdate }: { partner: Partner; onUpdate: () => 
           </div>
           <div>
             <Label>Email</Label>
-            <Input value={partner.email} disabled className="mt-1 opacity-60" />
-            <p className="text-xs text-slate-500 mt-1">Email cannot be changed from here</p>
+            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value.toLowerCase())} className="mt-1" />
+            <p className="text-xs text-slate-500 mt-1">Changing the email will affect login credentials</p>
           </div>
         </div>
       </Card>

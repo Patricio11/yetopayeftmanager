@@ -83,8 +83,9 @@ export default function RegisterPage() {
 
     try {
       // Sign up with Better Auth
+      const normalizedEmail = formData.email.trim().toLowerCase();
       const { data, error } = await authClient.signUp.email({
-        email: formData.email,
+        email: normalizedEmail,
         password: formData.password,
         name: formData.fullName,
         image: undefined,

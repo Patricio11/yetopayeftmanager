@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const validatedData = createPartnerSchema.parse(body);
+    validatedData.email = validatedData.email.toLowerCase();
 
     const partnerId = crypto.randomUUID();
 

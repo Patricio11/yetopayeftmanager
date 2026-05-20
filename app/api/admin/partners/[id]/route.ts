@@ -100,6 +100,7 @@ export async function PATCH(
   try {
     const body = await request.json();
     const updates = updatePartnerSchema.parse(body);
+    if (updates.email) updates.email = updates.email.toLowerCase();
 
     const partner = await db.query.users.findFirst({
       where: and(eq(users.id, id), eq(users.role, 'partner')),

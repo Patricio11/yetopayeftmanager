@@ -18,7 +18,10 @@ const acceptInvitationSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { token, email, password } = acceptInvitationSchema.parse(body);
+    const parsed = acceptInvitationSchema.parse(body);
+    const token = parsed.token;
+    const email = parsed.email.toLowerCase();
+    const password = parsed.password;
 
     // Find valid invitation
     const invitation = await db.query.verifications.findFirst({

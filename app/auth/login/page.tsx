@@ -51,7 +51,7 @@ export default function LoginPage() {
     try {
       // Sign in with Better Auth
       const { data, error } = await authClient.signIn.email({
-        email: formData.email,
+        email: formData.email.trim().toLowerCase(),
         password: formData.password,
         rememberMe: formData.remember,
       });

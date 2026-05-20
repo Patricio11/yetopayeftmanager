@@ -142,6 +142,7 @@ export async function PATCH(
   try {
     const body = await request.json();
     const updates = updateMerchantSchema.parse(body);
+    if (updates.email) updates.email = updates.email.toLowerCase();
 
     const merchant = await db.query.users.findFirst({
       where: eq(users.id, id),
