@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/authorization';
 import { db } from '@/lib/db';
 import { users, verifications } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import crypto from 'crypto';
 import { writeAuditLog } from '@/lib/audit';
@@ -12,21 +12,46 @@ const createMerchantSchema = z.object({
   name: z.string().min(1),
   companyName: z.string().min(1),
   companyLogoUrl: z.string().url().optional(),
-  partnerId: z.string().optional(), // Assign merchant to a partner
+  partnerId: z.string().optional(),
 });
 
-/**
- * GET /api/admin/merchants
- * List all merchants (admin only)
- */
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin();
   if (!auth.authorized) return auth.response;
 
   try {
+    const partner = db.$with('partner').as(
+      db.select({
+        id: users.id,
+        name: users.name,
+        companyName: users.companyName,
+        email: users.email,
+      }).from(users).where(eq(users.role, 'partner'))
+    );
+
     const merchants = await db
-      .select()
+      .with(partner)
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        fullName: users.fullName,
+        phone: users.phone,
+        companyName: users.companyName,
+        isActive: users.isActive,
+        emailVerified: users.emailVerified,
+        kycStatus: users.kycStatus,
+        accountMode: users.accountMode,
+        balance: users.balance,
+        withdrawableBalance: users.withdrawableBalance,
+        partnerId: users.partnerId,
+        partnerName: partner.companyName,
+        partnerEmail: partner.email,
+        lastLogin: users.lastLogin,
+        createdAt: users.createdAt,
+      })
       .from(users)
+      .leftJoin(partner, eq(users.partnerId, partner.id))
       .where(eq(users.role, 'merchant'));
 
     return NextResponse.json({
