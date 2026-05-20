@@ -1,10 +1,11 @@
 import { requireAuth } from "@/lib/auth-server";
+import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { eftTransactions } from "@/lib/db/schema";
 import { eq, desc, count, sum, and, gte, lte, sql } from "drizzle-orm";
-import { 
-  CreditCard, TrendingUp, DollarSign, Clock, 
-  Plus, ArrowUpRight, CheckCircle, XCircle, Zap, Activity 
+import {
+  CreditCard, TrendingUp, DollarSign, Clock,
+  Plus, ArrowUpRight, CheckCircle, XCircle, Zap, Activity
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,9 @@ import { format, subDays } from "date-fns";
 
 export default async function DashboardPage() {
   const session = await requireAuth();
+  if ((session.user as any).role === "partner") {
+    redirect("/dashboard/partner");
+  }
   const userId = session.user.id;
 
   // Fetch statistics

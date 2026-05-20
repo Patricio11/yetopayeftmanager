@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Lock, Eye, EyeOff, ArrowRight, AlertCircle, CheckCircle, Shield } from 'lucide-react';
+import { Lock, Eye, EyeOff, ArrowRight, AlertCircle, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,6 +14,8 @@ function AcceptInvitationContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token') || '';
   const email = searchParams.get('email') || '';
+  const role = searchParams.get('role') || 'merchant';
+  const roleLabel = role === 'partner' ? 'partner' : 'merchant';
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -112,7 +114,7 @@ function AcceptInvitationContent() {
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Set Up Your Account</h1>
             <p className="text-slate-600 dark:text-slate-400">
-              Create a password to activate your merchant account
+              Create a password to activate your {roleLabel} account
             </p>
             {email && (
               <p className="mt-2 text-sm text-amber-600 dark:text-amber-400 font-medium">{email}</p>

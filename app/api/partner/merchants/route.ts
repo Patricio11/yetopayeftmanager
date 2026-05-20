@@ -106,6 +106,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const validatedData = createMerchantSchema.parse(body);
+    validatedData.email = validatedData.email.toLowerCase();
 
     // Get partner's company name
     const partner = await db.query.users.findFirst({

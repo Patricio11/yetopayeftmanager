@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   Building2, Search, Plus, Mail, Copy, CheckCircle, XCircle,
-  Clock, AlertCircle, X, Users,
+  Clock, AlertCircle, X, Users, ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -226,6 +226,8 @@ function InviteMerchantModal({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [inviteLink, setInviteLink] = useState("");
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [showLink, setShowLink] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -237,11 +239,13 @@ function InviteMerchantModal({
       const res = await fetch("/api/partner/merchants", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, companyName }),
+        body: JSON.stringify({ name, email: email.toLowerCase(), companyName }),
       });
       const json = await res.json();
       if (json.success) {
-        setInviteLink(json.data?.inviteLink || "");
+        setInviteLink(json.invitation?.link || "");
+        setInviteEmail(email);
+        setShowLink(false);
         onSuccess();
       } else {
         setError(json.error || "Failed to invite merchant");
@@ -269,34 +273,39 @@ function InviteMerchantModal({
           </button>
         </div>
 
-        {inviteLink ? (
+        {inviteEmail ? (
           <div className="p-6 space-y-4">
-            <div className="text-center">
-              <CheckCircle className="w-12 h-12 text-amber-500 mx-auto mb-3" />
-              <h3 className="text-lg font-semibold text-slate-900">Invitation Sent</h3>
-              <p className="text-sm text-slate-500 mt-1">
-                Share this link with the merchant to complete registration
-              </p>
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Mail className="w-5 h-5 text-green-600" />
+                <p className="text-sm font-medium text-green-700">Invitation email sent to {inviteEmail}</p>
+              </div>
+              <p className="text-xs text-green-600">The merchant will receive an email with a link to set up their password. The link expires in 7 days.</p>
             </div>
-            <div className="bg-slate-50 rounded-lg p-3 flex items-center gap-2">
-              <input
-                readOnly
-                value={inviteLink}
-                className="flex-1 bg-transparent text-sm text-slate-700 outline-none truncate"
-              />
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleCopy}
-                className="shrink-0"
-              >
-                {copied ? (
-                  <><CheckCircle className="w-3.5 h-3.5 mr-1" /> Copied</>
-                ) : (
-                  <><Copy className="w-3.5 h-3.5 mr-1" /> Copy</>
+            {inviteLink && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setShowLink(!showLink)}
+                  className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 transition-colors"
+                >
+                  <ChevronDown className={`w-3 h-3 transition-transform ${showLink ? "rotate-180" : ""}`} />
+                  {showLink ? "Hide invitation link" : "Show invitation link (backup)"}
+                </button>
+                {showLink && (
+                  <div className="bg-slate-50 rounded-lg p-3 flex items-center gap-2">
+                    <input
+                      readOnly
+                      value={inviteLink}
+                      className="flex-1 bg-transparent text-sm text-slate-700 outline-none truncate"
+                    />
+                    <Button size="sm" variant="outline" onClick={handleCopy} className="shrink-0">
+                      {copied ? <><CheckCircle className="w-3.5 h-3.5 mr-1" /> Copied</> : <><Copy className="w-3.5 h-3.5 mr-1" /> Copy</>}
+                    </Button>
+                  </div>
                 )}
-              </Button>
-            </div>
+              </>
+            )}
             <div className="flex justify-end">
               <Button variant="outline" onClick={onClose}>Done</Button>
             </div>
