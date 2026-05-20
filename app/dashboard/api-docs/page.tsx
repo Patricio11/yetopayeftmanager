@@ -87,9 +87,9 @@ export default function ApiDocsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
           <div className="max-w-4xl">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-pink-600 rounded-xl flex items-center justify-center">
+              {/* <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-pink-600 rounded-xl flex items-center justify-center">
                 <Book className="w-6 h-6 text-white" />
-              </div>
+              </div> */}
               <h1 className="text-2xl sm:text-4xl font-bold text-slate-900">API Documentation</h1>
             </div>
             <p className="text-xl text-slate-600 mb-6">
