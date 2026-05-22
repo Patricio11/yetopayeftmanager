@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
+import {
   Book,
   Code,
   Key,
@@ -23,7 +23,10 @@ import {
   XCircle,
   Clock,
   Webhook,
-  Layers
+  Layers,
+  CreditCard,
+  Landmark,
+  ArrowRight
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { IntegrationFlows } from "./components/IntegrationFlows";
@@ -92,7 +95,7 @@ export default function ApiDocsPage() {
               <h1 className="text-2xl sm:text-4xl font-bold text-slate-900">API Documentation</h1>
             </div>
             <p className="text-xl text-slate-600 mb-6">
-              Everything you need to integrate YetoPay Pay By Bank payment system into your application
+              Everything you need to integrate YetoPay into your application — accept EFT and Card payments through a single API
             </p>
             {/* <div className="flex flex-wrap gap-3">
               <Button 
@@ -174,9 +177,14 @@ export default function ApiDocsPage() {
               />
             </section>
 
+            {/* Payment Methods */}
+            <section id="payment-methods">
+              <PaymentMethodsSection />
+            </section>
+
             {/* Quick Start */}
             <section id="quick-start">
-              <QuickStartSection 
+              <QuickStartSection
                 selectedLanguage={selectedLanguage}
                 onLanguageChange={setSelectedLanguage}
                 onCopy={handleCopy}
@@ -233,6 +241,7 @@ function ApiSidebar() {
 
   const sections = [
     { id: "integration-flows", label: "Integration Flows", icon: Layers },
+    { id: "payment-methods", label: "Payment Methods", icon: CreditCard },
     { id: "quick-start", label: "Quick Start", icon: Zap },
     { id: "authentication", label: "Authentication", icon: Key },
     { id: "endpoints", label: "API Endpoints", icon: Globe },
@@ -325,7 +334,7 @@ function QuickStartSection({
           </div>
           <div>
             <CardTitle>Quick Start</CardTitle>
-            <CardDescription>Get started with YetoPay Pay By Bank API in minutes</CardDescription>
+            <CardDescription>Get started with YetoPay API in minutes — EFT &amp; Card payments</CardDescription>
           </div>
         </div>
       </CardHeader>
@@ -353,10 +362,10 @@ function QuickStartSection({
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
           <Code className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
           <div className="text-sm text-blue-900">
-            <p className="font-medium mb-1">No SDK Required</p>
+            <p className="font-medium mb-1">No SDK Required — One API for EFT &amp; Card</p>
             <p className="text-blue-800">
-              Our API uses standard HTTP requests. Simply copy the code example below for your language 
-              and start integrating immediately. No additional packages needed!
+              Our API uses standard HTTP requests. Create a payment link once, and the customer chooses EFT or Card on the payment page.
+              Simply copy the code example below for your language and start accepting payments in minutes!
             </p>
           </div>
         </div>
@@ -600,10 +609,11 @@ function EndpointDetailFull({ endpointId, language, onCopy, copiedCode }: any) {
   const details: Record<string, { title: string; description: string; params?: any[]; queryParams?: any[]; bodyParams?: any[]; responseExample: string; curlExample: string }> = {
     "create-payment": {
       title: "Create Payment Link",
-      description: "Create a new payment link. Returns a URL to redirect your customer to.",
+      description: "Create a new payment link. Returns a URL that takes the customer to a page where they can choose to pay via EFT or Card.",
       bodyParams: [
         { name: "amount", type: "number", required: true, desc: "Payment amount in ZAR (min: 1)" },
         { name: "reference", type: "string", required: true, desc: "Your unique internal reference" },
+        { name: "paymentMethod", type: "string", required: false, desc: "Default method: \"eft_direct\" (EFT) or \"card_callpay\" (Card). Customer can switch on the payment page." },
         { name: "description", type: "string", required: false, desc: "Payment description shown to customer" },
         { name: "customerName", type: "string", required: false, desc: "Customer's name" },
         { name: "customerEmail", type: "string", required: false, desc: "Customer's email" },
@@ -622,6 +632,7 @@ function EndpointDetailFull({ endpointId, language, onCopy, copiedCode }: any) {
     "token": "abc123...",
     "reference": "INV-001",
     "amount": 250.00,
+    "paymentMethod": "eft_direct",
     "expiresAt": "2024-12-02T15:00:00Z",
     "status": "not_started",
     "createdAt": "2024-12-01T15:00:00Z"
@@ -652,6 +663,7 @@ function EndpointDetailFull({ endpointId, language, onCopy, copiedCode }: any) {
       "amount": 250.00,
       "reference": "INV-001",
       "status": "completed",
+      "paymentMethod": "eft_direct",
       "createdAt": "2024-12-01T15:00:00Z"
     }
   ],
@@ -676,7 +688,7 @@ function EndpointDetailFull({ endpointId, language, onCopy, copiedCode }: any) {
       ],
       responseExample: `{
   "success": true,
-  "data": [ { "id": "...", "amount": "250.00", "status": "completed", ... } ],
+  "data": [ { "id": "...", "amount": "250.00", "status": "completed", "paymentMethod": "eft_direct", ... } ],
   "pagination": { "total": 85, "limit": 50, "offset": 0, "hasMore": true }
 }`,
       curlExample: `curl -G /api/merchant/transactions \\
@@ -699,6 +711,7 @@ function EndpointDetailFull({ endpointId, language, onCopy, copiedCode }: any) {
     "amount": "250.00",
     "reference": "INV-2024-001",
     "description": "Order #1234",
+    "paymentMethod": "eft_direct",
     "customerEmail": "customer@example.com",
     "customerName": "Jane Doe",
     "failureReason": null,
@@ -1032,6 +1045,127 @@ function ParamTable({ params }: { params: any[] }) {
 
 // Old WebhooksSection removed - now using WebhooksSectionComponent from components folder
 
+// Payment Methods Section
+function PaymentMethodsSection() {
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 bg-gradient-to-br from-amber-100 to-pink-100 rounded-lg flex items-center justify-center">
+            <CreditCard className="w-5 h-5 text-amber-600" />
+          </div>
+          <div>
+            <CardTitle>Payment Methods</CardTitle>
+            <CardDescription>YetoPay supports multiple payment methods through a single API</CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
+          <Code className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-blue-900">
+            <p className="font-medium mb-1">One API, Multiple Payment Methods</p>
+            <p className="text-blue-800">
+              You create a single payment link and the customer chooses their preferred method on the payment page.
+              No changes to your integration needed — the same API handles EFT and Card payments.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* EFT */}
+          <div className="border-2 border-emerald-200 bg-emerald-50/50 rounded-xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
+                <Landmark className="w-6 h-6 text-emerald-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg text-emerald-900">EFT / Pay By Bank</h3>
+                <Badge className="bg-emerald-600 text-white text-xs">eft_direct</Badge>
+              </div>
+            </div>
+            <ul className="space-y-2 text-sm text-emerald-800">
+              <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" /> Direct bank-to-bank transfer</li>
+              <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" /> Lower transaction fees</li>
+              <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" /> Supports all major SA banks</li>
+              <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" /> Real-time payment confirmation</li>
+            </ul>
+          </div>
+
+          {/* Card */}
+          <div className="border-2 border-violet-200 bg-violet-50/50 rounded-xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-violet-100 rounded-lg flex items-center justify-center">
+                <CreditCard className="w-6 h-6 text-violet-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg text-violet-900">Card Payment</h3>
+                <Badge className="bg-violet-600 text-white text-xs">card_callpay</Badge>
+              </div>
+            </div>
+            <ul className="space-y-2 text-sm text-violet-800">
+              <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-violet-600 flex-shrink-0" /> Visa, Mastercard accepted</li>
+              <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-violet-600 flex-shrink-0" /> Hosted payment page (no PCI scope)</li>
+              <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-violet-600 flex-shrink-0" /> 3D Secure supported</li>
+              <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-violet-600 flex-shrink-0" /> Instant confirmation via webhook</li>
+            </ul>
+          </div>
+        </div>
+
+        {/* How it works */}
+        <div>
+          <h3 className="font-semibold text-lg mb-3">How It Works</h3>
+          <div className="flex items-center gap-2 text-sm overflow-x-auto pb-2">
+            {[
+              "1. You create a payment link",
+              "2. Customer opens the link",
+              "3. Customer picks EFT or Card",
+              "4. Payment is processed",
+              "5. Webhook fires with paymentMethod"
+            ].map((step, i, arr) => (
+              <div key={step} className="flex items-center gap-2 flex-shrink-0">
+                <span className="bg-gradient-to-r from-amber-500 to-pink-600 text-white rounded-full px-3 py-1.5 font-medium text-xs">{step}</span>
+                {i < arr.length - 1 && <ArrowRight className="w-4 h-4 text-slate-400" />}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* paymentMethod field */}
+        <div>
+          <h3 className="font-semibold text-lg mb-3">The paymentMethod Field</h3>
+          <div className="border rounded-lg overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 dark:bg-gray-800">
+                <tr>
+                  <th className="text-left p-3 font-semibold text-xs">Value</th>
+                  <th className="text-left p-3 font-semibold text-xs">Method</th>
+                  <th className="text-left p-3 font-semibold text-xs">Description</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                <tr>
+                  <td className="p-3"><code className="text-emerald-600 text-xs font-mono bg-emerald-50 px-2 py-0.5 rounded">eft_direct</code></td>
+                  <td className="p-3 text-xs font-medium">EFT / Bank Transfer</td>
+                  <td className="p-3 text-xs text-gray-600">Customer pays via their bank. Default method.</td>
+                </tr>
+                <tr>
+                  <td className="p-3"><code className="text-violet-600 text-xs font-mono bg-violet-50 px-2 py-0.5 rounded">card_callpay</code></td>
+                  <td className="p-3 text-xs font-medium">Card (Visa/Mastercard)</td>
+                  <td className="p-3 text-xs text-gray-600">Customer pays via credit/debit card through CallPay.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-gray-500 mt-2">
+            This field appears in payment link responses, transaction details, and webhook payloads. Use it to reconcile which method the customer used.
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 // Errors Section
 function ErrorsSection() {
   const errors = [
@@ -1224,6 +1358,7 @@ const requestBody = JSON.stringify({
   amount: 250.00,
   reference: 'INV-001',
   description: 'Order payment',
+  // paymentMethod: 'eft_direct',  // or 'card_callpay' — optional, customer chooses on payment page
   successUrl: 'https://your-site.com/payment/success',
   failureUrl: 'https://your-site.com/payment/failure',
   cancelledUrl: 'https://your-site.com/payment/cancelled',
@@ -1275,6 +1410,7 @@ request_body = json.dumps({
     'amount': 250.00,
     'reference': 'INV-001',
     'description': 'Order payment',
+    # 'paymentMethod': 'eft_direct',  # or 'card_callpay' — optional, customer chooses on payment page
     'successUrl': 'https://your-site.com/payment/success',
     'failureUrl': 'https://your-site.com/payment/failure',
     'cancelledUrl': 'https://your-site.com/payment/cancelled',
@@ -1321,6 +1457,7 @@ $requestBody = json_encode([
     'amount' => 250.00,
     'reference' => 'INV-001',
     'description' => 'Order payment',
+    // 'paymentMethod' => 'eft_direct',  // or 'card_callpay' — optional, customer chooses on payment page
     'successUrl' => 'https://your-site.com/payment/success',
     'failureUrl' => 'https://your-site.com/payment/failure',
     'cancelledUrl' => 'https://your-site.com/payment/cancelled',
@@ -1352,7 +1489,7 @@ $paymentUrl = $data['data']['paymentUrl'];
 // Step 4: Redirect your customer
 header("Location: {$paymentUrl}");
 exit;`,
-    curl: `# Create a payment link
+    curl: `# Create a payment link (supports EFT and Card payments)
 curl -X POST https://your-domain.com/api/payment-links \\
   -H "Authorization: Bearer yp_live_abc123..." \\
   -H "X-Merchant-ID: your-merchant-id" \\
@@ -1368,7 +1505,8 @@ curl -X POST https://your-domain.com/api/payment-links \\
     "cancelledUrl": "https://your-site.com/payment/cancelled"
   }'
 
-# Response contains paymentUrl — redirect your customer to it`
+# Response contains paymentUrl — redirect your customer to it
+# Customer chooses EFT or Card on the payment page`
   };
 
   return codes[lang as keyof typeof codes];
@@ -1390,6 +1528,7 @@ function getEndpointCode(lang: string, type: string) {
     "token": "abc123def456...",
     "reference": "INV-001",
     "amount": 250.00,
+    "paymentMethod": "eft_direct",
     "expiresAt": "2024-12-02T15:00:00Z",
     "status": "not_started",
     "createdAt": "2024-12-01T15:00:00Z"
@@ -1405,6 +1544,7 @@ function getWebhookPayload() {
   "reference": "INV-001",
   "amount": 250.00,
   "status": "completed",
+  "paymentMethod": "eft_direct",
   "timestamp": "2024-12-01T15:30:00Z",
   "customer_email": "customer@example.com",
   "metadata": {

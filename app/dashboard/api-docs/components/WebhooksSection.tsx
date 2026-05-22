@@ -134,7 +134,7 @@ export function WebhooksSection({ selectedLanguage, onCopy, copiedCode }: Webhoo
                 </tr>
                 <tr>
                   <td className="p-3"><code className="text-amber-600">payment.completed</code></td>
-                  <td className="p-3">Pay By Bank payment successfully completed</td>
+                  <td className="p-3">Payment successfully completed (EFT or Card)</td>
                 </tr>
                 <tr>
                   <td className="p-3"><code className="text-red-600">payment.failed</code></td>
@@ -305,6 +305,7 @@ function getWebhookPayload() {
     "reference": "ORDER-12345",
     "amount": 100.50,
     "status": "completed",
+    "paymentMethod": "eft_direct",
     "bankName": "FNB",
     "metadata": {
       "orderId": "12345"
@@ -402,35 +403,32 @@ function getWebhookHandler() {
   // 1. Verify signature
   const signature = req.headers['x-webhook-signature'];
   const payload = JSON.stringify(req.body);
-  
+
   if (!verifySignature(payload, signature, process.env.WEBHOOK_SECRET)) {
     return res.status(401).send('Invalid signature');
   }
-  
+
   // 2. Get event data
   const event = req.body;
-  
-  // 3. Handle different event types
+  const { paymentMethod } = event.data; // "eft_direct" or "card_callpay"
+
+  // 3. Handle different event types (same handler for EFT and Card)
   switch (event.type) {
     case 'payment.completed':
-      // Update order status
-      // Send confirmation email
-      // Fulfill order
+      // Works the same for both EFT and Card payments
+      console.log(\`Payment completed via \${paymentMethod}\`);
       handlePaymentCompleted(event.data);
       break;
-      
+
     case 'payment.failed':
-      // Update order status
-      // Send notification
       handlePaymentFailed(event.data);
       break;
-      
+
     case 'payment.cancelled':
-      // Update order status
       handlePaymentCancelled(event.data);
       break;
   }
-  
+
   // 4. Always return 200 OK quickly
   res.status(200).send('OK');
 });`;
