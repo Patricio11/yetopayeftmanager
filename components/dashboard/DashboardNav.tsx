@@ -192,6 +192,7 @@ export function DashboardNav({ userRole, accountMode }: DashboardNavProps) {
       { title: "Merchants", href: "/dashboard/admin/merchants", icon: Store },
       { title: "Partners", href: "/dashboard/admin/partners", icon: Users },
       { title: "Users", href: "/dashboard/admin/users", icon: Users },
+      { title: "Services", href: "/dashboard/admin/services", icon: Zap },
       { title: "Banks", href: "/dashboard/banks", icon: Building2 },
       { title: "Recon", href: "/dashboard/admin/recon", icon: BarChart3 },
       { title: "KYC", href: "/dashboard/admin/kyc", icon: ShieldCheck },

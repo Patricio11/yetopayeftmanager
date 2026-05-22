@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Key, Lock, Building2, Bell, CreditCard } from "lucide-react";
+import { User, Key, Lock, Building2, Bell, CreditCard, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 import { ProfileSettings } from "./components/ProfileSettings";
@@ -12,6 +12,7 @@ import { ApiKeysSettings } from "./components/ApiKeysSettings";
 import { CompanySettings } from "./components/CompanySettings";
 import { NotificationSettings } from "./components/NotificationSettings";
 import { EftSuperTab } from "./components/EftSuperTab";
+import { PaymentMethodsSettings } from "./components/PaymentMethodsSettings";
 
 function SettingsContent() {
   const { toast } = useToast();
@@ -68,7 +69,7 @@ function SettingsContent() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-2">
+        <TabsList className="grid w-full grid-cols-3 md:grid-cols-7 gap-2">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="w-4 h-4" />
             <span className="hidden sm:inline">Profile</span>
@@ -88,6 +89,10 @@ function SettingsContent() {
           <TabsTrigger value="notifications" className="flex items-center gap-2">
             <Bell className="w-4 h-4" />
             <span className="hidden sm:inline">Notifications</span>
+          </TabsTrigger>
+          <TabsTrigger value="services" className="flex items-center gap-2">
+            <Zap className="w-4 h-4" />
+            <span className="hidden sm:inline">Services</span>
           </TabsTrigger>
           <TabsTrigger value="eft" className="flex items-center gap-2">
             <CreditCard className="w-4 h-4" />
@@ -113,6 +118,10 @@ function SettingsContent() {
 
         <TabsContent value="notifications">
           <NotificationSettings />
+        </TabsContent>
+
+        <TabsContent value="services">
+          <PaymentMethodsSettings />
         </TabsContent>
 
         <TabsContent value="eft">

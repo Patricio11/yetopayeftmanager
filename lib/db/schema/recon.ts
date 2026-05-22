@@ -7,7 +7,10 @@ import { eftTransactions } from "./eft";
 // Optionally override fee values; otherwise system defaults apply.
 export const eftMerchantFees = pgTable("eft_merchant_fees", {
   id: uuid("id").defaultRandom().primaryKey(),
-  merchantId: text("merchant_id").notNull().references(() => users.id, { onDelete: "cascade" }).unique(),
+  merchantId: text("merchant_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+
+  // Service this fee config applies to (multi-service support)
+  serviceName: text("service_name").default("eft_direct"),
 
   // Which fee type this merchant uses: "fixed", "percentage", or "volume"
   feeType: text("fee_type", { enum: ["fixed", "percentage", "volume"] }).notNull().default("fixed"),
@@ -15,7 +18,7 @@ export const eftMerchantFees = pgTable("eft_merchant_fees", {
   // Optional custom fee values (null = use system default)
   fixedFeeValue: numeric("fixed_fee_value", { precision: 10, scale: 4 }),
   percentageFeeValue: numeric("percentage_fee_value", { precision: 10, scale: 4 }),
-  volumeFeeValue: numeric("volume_fee_value", { precision: 10, scale: 4 }), // Percentage of total transaction volume
+  volumeFeeValue: numeric("volume_fee_value", { precision: 10, scale: 4 }),
 
   // VAT override (null = use system default)
   vatEnabled: boolean("vat_enabled"),
@@ -29,6 +32,7 @@ export const eftMerchantFees = pgTable("eft_merchant_fees", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => ({
   merchantIdx: index("eft_merchant_fees_merchant_idx").on(table.merchantId),
+  merchantServiceUniq: uniqueIndex("eft_merchant_fees_merchant_service_uniq").on(table.merchantId, table.serviceName),
 }));
 
 // ─── Invoices ───────────────────────────────────────────────────────────────
@@ -108,10 +112,13 @@ export const eftInvoiceItems = pgTable("eft_invoice_items", {
 export const eftSystemFees = pgTable("eft_system_fees", {
   id: uuid("id").defaultRandom().primaryKey(),
 
+  // Service this fee config applies to (multi-service support)
+  serviceName: text("service_name").default("eft_direct"),
+
   // Both fee values are always set at system level
   fixedFeeValue: numeric("fixed_fee_value", { precision: 10, scale: 4 }).notNull().default("5.00"),
   percentageFeeValue: numeric("percentage_fee_value", { precision: 10, scale: 4 }).notNull().default("2.50"),
-  volumeFeeValue: numeric("volume_fee_value", { precision: 10, scale: 4 }).notNull().default("2.00"), // Default volume fee percentage (e.g. 2% of total volume)
+  volumeFeeValue: numeric("volume_fee_value", { precision: 10, scale: 4 }).notNull().default("2.00"),
 
   // VAT defaults
   vatEnabled: boolean("vat_enabled").default(true),
@@ -119,7 +126,9 @@ export const eftSystemFees = pgTable("eft_system_fees", {
 
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   updatedBy: text("updated_by").references(() => users.id),
-});
+}, (table) => ({
+  serviceNameUniq: uniqueIndex("eft_system_fees_service_uniq").on(table.serviceName),
+}));
 
 // ─── Type Exports ───────────────────────────────────────────────────────────
 export type EftMerchantFee = typeof eftMerchantFees.$inferSelect;

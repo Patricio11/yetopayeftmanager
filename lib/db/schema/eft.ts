@@ -70,6 +70,11 @@ export const eftTransactions = pgTable("eft_transactions", {
 
   // Demo mode
   isDemo: boolean("is_demo").default(false),
+
+  // Multi-service support
+  paymentMethod: text("payment_method").default("eft_direct"), // service code: 'eft_direct', 'card_callpay', etc.
+  providerTransactionId: text("provider_transaction_id"), // external provider's transaction ID
+  providerData: jsonb("provider_data").$type<Record<string, any>>(),
 }, (table) => ({
   merchantIdx: index("eft_transaction_merchant_idx").on(table.merchantId),
   statusIdx: index("eft_transaction_status_idx").on(table.status),

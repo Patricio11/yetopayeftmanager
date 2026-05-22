@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { eftTransactions, eftBanks, eftBankAccounts, users, platformSettings } from "@/lib/db/schema";
+import { eftTransactions, eftBanks, eftBankAccounts, users, platformSettings, userServices, paymentServices } from "@/lib/db/schema";
 import { verifyPaymentToken } from "@/lib/security/payment-token";
 import { eq, and, asc, inArray } from "drizzle-orm";
 
@@ -134,6 +134,28 @@ export async function GET(
       .where(inArray(platformSettings.settingKey, ['eft_tc_enabled', 'eft_tc_title', 'eft_tc_content']));
     const tc = Object.fromEntries(tcRows.map(r => [r.settingKey, r.settingValue ?? '']));
 
+    // Fetch merchant's enabled payment services
+    const merchantServiceRows = await db
+      .select()
+      .from(userServices)
+      .where(and(eq(userServices.userId, merchantId), eq(userServices.isEnabled, true)));
+
+    const enabledServiceCodes = merchantServiceRows
+      .map((ms) => ms.serviceName)
+      .filter((name) => name !== "yetopay" && name !== "YETOPAY");
+
+    let availableServices: { code: string; name: string; category: string; icon: string | null }[] = [];
+    if (enabledServiceCodes.length > 0) {
+      const allPlatformServices = await db
+        .select({ code: paymentServices.code, name: paymentServices.name, category: paymentServices.category, icon: paymentServices.icon, isActive: paymentServices.isActive })
+        .from(paymentServices)
+        .where(eq(paymentServices.isActive, true));
+
+      availableServices = allPlatformServices
+        .filter((ps) => enabledServiceCodes.includes(ps.code))
+        .map(({ code, name, category, icon }) => ({ code, name, category, icon }));
+    }
+
     // Construct response payload
     const responsePayload = {
       success: true,
@@ -176,8 +198,9 @@ export async function GET(
         showTerms: tc['eft_tc_enabled'] === 'true',
         termsTitle: tc['eft_tc_title'] || 'Terms & Conditions',
         termsContent: tc['eft_tc_content'] || '',
-        step: "init", // Initial step for frontend
-        token, // Include token for subsequent requests
+        availableServices,
+        step: "init",
+        token,
       },
     };
 

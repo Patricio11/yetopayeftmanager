@@ -5,12 +5,15 @@ interface PageProps {
   params: Promise<{
     token: string;
   }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export default async function PaymentPage({ params }: PageProps) {
+export default async function PaymentPage({ params, searchParams }: PageProps) {
   try {
     // Await params in Next.js 15
     const { token: urlToken } = await params;
+    const resolvedSearchParams = await searchParams;
+    const cardStatus = (resolvedSearchParams?.card_status as string) || null;
     
     // Call our new transaction init endpoint
     const response = await fetch(
@@ -63,7 +66,7 @@ export default async function PaymentPage({ params }: PageProps) {
     }
 
     // Extract data from response
-    const { sessionId, paymentDetails, merchant, banks, token, isDemo, fnbVerifyResult, showSaveCredentials, showTerms, termsTitle, termsContent } = data.data;
+    const { sessionId, paymentDetails, merchant, banks, token, isDemo, fnbVerifyResult, showSaveCredentials, showTerms, termsTitle, termsContent, availableServices } = data.data;
 
     // Transform data to match component props
     const transaction = {
@@ -90,6 +93,8 @@ export default async function PaymentPage({ params }: PageProps) {
         showTerms={showTerms}
         termsTitle={termsTitle}
         termsContent={termsContent}
+        availableServices={availableServices || []}
+        cardStatus={cardStatus}
       />
     );
   } catch (error: any) {
