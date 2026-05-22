@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ExternalLink, AlertCircle } from "lucide-react";
+import { ExternalLink, Info, CheckCircle, XCircle, Ban, Bell } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export function EftUrlSettings() {
@@ -45,12 +44,12 @@ export function EftUrlSettings() {
       });
       const data = await res.json();
       if (data.success) {
-        toast({ title: "Saved", description: "Pay By Bank URL settings updated successfully." });
+        toast({ title: "Saved", description: "Redirect URL settings updated successfully." });
       } else {
         toast({ title: "Error", description: data.error || "Failed to save", variant: "destructive" });
       }
     } catch {
-      toast({ title: "Error", description: "Failed to save Pay By Bank settings", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to save settings", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -58,22 +57,22 @@ export function EftUrlSettings() {
 
   if (fetching) {
     return (
-      <Card>
-        <CardHeader>
-          <div className="h-5 w-36 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
-          <div className="h-4 w-80 bg-slate-200 dark:bg-slate-700 animate-pulse rounded mt-2" />
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="space-y-2">
-              <div className="h-4 w-32 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
-              <div className="h-10 w-full bg-slate-200 dark:bg-slate-700 animate-pulse rounded-md" />
-              <div className="h-3 w-64 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
-            </div>
-          ))}
-          <div className="h-10 w-32 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-md" />
-        </CardContent>
-      </Card>
+      <div className="space-y-6">
+        <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 p-6">
+          <div className="space-y-2 mb-6">
+            <div className="h-5 w-36 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+            <div className="h-4 w-80 bg-slate-100 dark:bg-slate-700/50 animate-pulse rounded" />
+          </div>
+          <div className="space-y-5">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="space-y-2">
+                <div className="h-4 w-32 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+                <div className="h-10 w-full bg-slate-100 dark:bg-slate-700/50 animate-pulse rounded-lg" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -84,8 +83,9 @@ export function EftUrlSettings() {
       value: notifyUrl,
       setter: setNotifyUrl,
       placeholder: "https://your-domain.com/api/eft/notify",
-      description: "Legacy notification URL. Receives a POST with transaction status updates. Used if set per-transaction or as a default fallback.",
-      color: "text-purple-600",
+      description: "Receives a POST with transaction status updates. Used if set per-transaction or as a default fallback.",
+      icon: Bell,
+      iconBg: "from-violet-500 to-purple-600",
     },
     {
       id: "successUrl",
@@ -93,8 +93,9 @@ export function EftUrlSettings() {
       value: successUrl,
       setter: setSuccessUrl,
       placeholder: "https://your-domain.com/payment/success",
-      description: "Customer is redirected here after a successful Pay By Bank payment.",
-      color: "text-amber-500",
+      description: "Customer is redirected here after a successful payment.",
+      icon: CheckCircle,
+      iconBg: "from-emerald-500 to-teal-600",
     },
     {
       id: "failureUrl",
@@ -102,8 +103,9 @@ export function EftUrlSettings() {
       value: failureUrl,
       setter: setFailureUrl,
       placeholder: "https://your-domain.com/payment/failed",
-      description: "Customer is redirected here if the Pay By Bank payment fails.",
-      color: "text-red-600",
+      description: "Customer is redirected here if the payment fails.",
+      icon: XCircle,
+      iconBg: "from-red-500 to-rose-600",
     },
     {
       id: "cancelledUrl",
@@ -111,61 +113,69 @@ export function EftUrlSettings() {
       value: cancelledUrl,
       setter: setCancelledUrl,
       placeholder: "https://your-domain.com/payment/cancelled",
-      description: "Customer is redirected here if they cancel the Pay By Bank payment.",
-      color: "text-amber-600",
+      description: "Customer is redirected here if they cancel the payment.",
+      icon: Ban,
+      iconBg: "from-amber-500 to-orange-600",
     },
   ];
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ExternalLink className="w-5 h-5 text-blue-600" />
-            Default Pay By Bank URLs
-          </CardTitle>
-          <CardDescription>
-            Set default callback and redirect URLs for your Pay By Bank payment transactions. These are used as fallbacks when URLs are not provided per-transaction via the API.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {urlFields.map((field) => (
-            <div key={field.id} className="space-y-2">
-              <Label htmlFor={field.id} className={`flex items-center gap-2 font-medium ${field.color}`}>
-                {field.label}
-              </Label>
-              <Input
-                id={field.id}
-                type="url"
-                placeholder={field.placeholder}
-                value={field.value}
-                onChange={(e) => field.setter(e.target.value)}
-              />
-              <p className="text-xs text-gray-500">{field.description}</p>
+      <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 overflow-hidden">
+        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/50">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white">
+              <ExternalLink className="w-4.5 h-4.5" />
             </div>
-          ))}
-
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
-            <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-blue-900">
-              <p className="font-medium mb-1">How these URLs work</p>
-              <p className="text-blue-800">
-                When creating a payment link via the API, you can pass these URLs per-transaction. If not provided,
-                these default URLs will be used. The <strong>Notify URL</strong> receives
-                server-to-server POST callbacks. The <strong>Success</strong>, <strong>Failure</strong>, and <strong>Cancelled</strong> URLs
-                are where the customer&apos;s browser is redirected after the payment flow.
-                For event-based webhooks, use the <strong>Webhooks</strong> section instead.
-              </p>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Default Redirect URLs</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Configure where customers are sent after payment</p>
             </div>
           </div>
+        </div>
 
-          <div className="flex justify-end gap-3 pt-2">
-            <Button onClick={handleSave} disabled={loading}>
-              {loading ? "Saving..." : "Save EFT Settings"}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+        <div className="p-6 space-y-5">
+          {urlFields.map((field) => {
+            const Icon = field.icon;
+            return (
+              <div key={field.id} className="space-y-2">
+                <Label htmlFor={field.id} className="flex items-center gap-2 text-slate-700 dark:text-slate-300 text-sm">
+                  <div className={`w-5 h-5 rounded bg-gradient-to-br ${field.iconBg} flex items-center justify-center text-white`}>
+                    <Icon className="w-3 h-3" />
+                  </div>
+                  {field.label}
+                </Label>
+                <Input
+                  id={field.id}
+                  type="url"
+                  placeholder={field.placeholder}
+                  value={field.value}
+                  onChange={(e) => field.setter(e.target.value)}
+                />
+                <p className="text-xs text-slate-400 dark:text-slate-500">{field.description}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 flex gap-3">
+        <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+        <div className="text-sm text-blue-800 dark:text-blue-300">
+          <p className="font-medium mb-1">How these URLs work</p>
+          <p className="text-blue-700 dark:text-blue-400/80">
+            When creating a payment link via the API, you can pass these URLs per-transaction. If not provided,
+            these default URLs will be used. The <strong>Notify URL</strong> receives
+            server-to-server POST callbacks. For event-based webhooks, use the <strong>Webhooks</strong> section instead.
+          </p>
+        </div>
+      </div>
+
+      <div className="flex justify-end">
+        <Button size="sm" onClick={handleSave} disabled={loading} className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0">
+          {loading ? "Saving..." : "Save URL Settings"}
+        </Button>
+      </div>
     </div>
   );
 }

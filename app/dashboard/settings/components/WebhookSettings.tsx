@@ -1,22 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import {
-  Copy,
-  Trash2,
-  Plus,
-  Check,
-  AlertCircle,
-  Shield,
-  Webhook,
-  RefreshCw,
-  ExternalLink,
-  Activity,
+  Copy, Trash2, Plus, Check, AlertCircle, Shield,
+  Webhook, RefreshCw, ExternalLink, Activity, X, Code,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -25,22 +17,19 @@ export function WebhookSettings() {
   const [webhooks, setWebhooks] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedWebhook, setSelectedWebhook] = useState<any>(null);
   const [showDeliveries, setShowDeliveries] = useState(false);
   const [deliveries, setDeliveries] = useState<any[]>([]);
 
-  // Secret modal state
   const [secretModalOpen, setSecretModalOpen] = useState(false);
   const [secretModalValue, setSecretModalValue] = useState("");
   const [secretCopied, setSecretCopied] = useState(false);
 
-  // Form state
   const [url, setUrl] = useState("");
   const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
   const [isActive, setIsActive] = useState(true);
 
   const availableEvents = [
-    { value: '*', label: 'All Events (Wildcard)', description: 'Subscribe to all current and future events - recommended for simplicity', highlight: true },
+    { value: '*', label: 'All Events (Wildcard)', description: 'Subscribe to all current and future events', highlight: true },
     { value: 'payment.completed', label: 'Payment Completed', description: 'When a payment is successfully completed' },
     { value: 'payment.failed', label: 'Payment Failed', description: 'When a payment fails' },
     { value: 'payment.cancelled', label: 'Payment Cancelled', description: 'When a payment is cancelled by user or system' },
@@ -49,18 +38,14 @@ export function WebhookSettings() {
     { value: 'transaction.updated', label: 'Transaction Updated', description: 'When a transaction is updated' },
   ];
 
-  useEffect(() => {
-    fetchWebhooks();
-  }, []);
+  useEffect(() => { fetchWebhooks(); }, []);
 
   const fetchWebhooks = async () => {
     try {
       setIsLoading(true);
       const response = await fetch('/api/webhooks');
       const data = await response.json();
-      if (data.success) {
-        setWebhooks(data.data.webhooks);
-      }
+      if (data.success) setWebhooks(data.data.webhooks);
     } catch (error) {
       console.error('Error fetching webhooks:', error);
     } finally {
@@ -73,7 +58,6 @@ export function WebhookSettings() {
       toast({ title: "Error", description: "URL and at least one event are required", variant: "destructive" });
       return;
     }
-
     try {
       const response = await fetch('/api/webhooks', {
         method: 'POST',
@@ -81,7 +65,6 @@ export function WebhookSettings() {
         body: JSON.stringify({ url, events: selectedEvents, isActive }),
       });
       const data = await response.json();
-
       if (data.success) {
         toast({ title: "Success", description: "Webhook created successfully. Save your secret key!" });
         setSecretModalValue(data.data.webhook.secret);
@@ -171,207 +154,215 @@ export function WebhookSettings() {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="space-y-2">
-              <div className="h-5 w-40 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
-              <div className="h-4 w-64 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
-            </div>
-            <div className="h-9 w-32 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-md" />
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {[...Array(2)].map((_, i) => (
-            <div key={i} className="p-4 border rounded-lg space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="h-6 w-6 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
-                  <div className="h-4 w-48 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
-                </div>
-                <div className="h-6 w-16 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-full" />
+      <div className="space-y-4">
+        <div className="flex items-center justify-between mb-2">
+          <div className="h-5 w-40 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+          <div className="h-9 w-32 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-lg" />
+        </div>
+        {[...Array(2)].map((_, i) => (
+          <div key={i} className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 p-5 animate-pulse">
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-slate-200 dark:bg-slate-700 rounded-lg" />
+                <div className="h-4 w-48 bg-slate-200 dark:bg-slate-700 rounded" />
               </div>
               <div className="flex gap-2">
                 {[...Array(3)].map((_, j) => (
-                  <div key={j} className="h-5 w-24 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-full" />
+                  <div key={j} className="h-5 w-24 bg-slate-100 dark:bg-slate-700/50 rounded-full" />
                 ))}
               </div>
             </div>
-          ))}
-        </CardContent>
-      </Card>
+          </div>
+        ))}
+      </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Webhook className="w-5 h-5" />
-                Webhook Endpoints
-              </CardTitle>
-              <CardDescription>
-                Subscribe to events and receive real-time notifications
-              </CardDescription>
-            </div>
-            <Button onClick={() => setShowCreateModal(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Webhook
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {webhooks.length === 0 ? (
-            <div className="text-center py-8">
-              <Webhook className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-600 mb-4">No webhooks configured</p>
-              <Button onClick={() => setShowCreateModal(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                Create Your First Webhook
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {webhooks.map((webhook) => (
-                <div key={webhook.id} className="border rounded-lg p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <p className="font-medium">{webhook.url}</p>
-                        <Badge variant={webhook.isActive ? "default" : "secondary"}>
+      {/* Create button */}
+      <div className="flex justify-end">
+        <Button size="sm" onClick={() => setShowCreateModal(true)} className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0">
+          <Plus className="w-4 h-4 mr-2" />
+          Add Webhook
+        </Button>
+      </div>
+
+      {/* Webhooks list */}
+      {webhooks.length === 0 ? (
+        <div className="text-center py-12 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50">
+          <Webhook className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+          <p className="text-slate-500 dark:text-slate-400 font-medium">No webhooks configured</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500 mt-1 mb-4">Create your first webhook to receive real-time event notifications</p>
+          <Button size="sm" onClick={() => setShowCreateModal(true)} variant="outline">
+            <Plus className="w-4 h-4 mr-2" />
+            Create Your First Webhook
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {webhooks.map((webhook) => (
+            <div key={webhook.id} className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 overflow-hidden">
+              <div className="p-5">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white">
+                      <Webhook className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-slate-900 dark:text-white text-sm">{webhook.url}</p>
+                        <Badge
+                          variant="outline"
+                          className={webhook.isActive
+                            ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
+                            : "bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700"
+                          }
+                        >
                           {webhook.isActive ? "Active" : "Inactive"}
                         </Badge>
                       </div>
-                      <p className="text-sm text-gray-600 mb-2">
-                        Secret: <code className="bg-gray-100 px-2 py-1 rounded text-gray-400">whsec_&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</code>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                        Secret: <code className="bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded text-slate-400 dark:text-slate-500">whsec_&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</code>
                       </p>
-                      <div className="flex flex-wrap gap-2">
-                        {(webhook.events as string[]).map((event) => (
-                          <Badge key={event} variant="outline" className="text-xs">
-                            {event}
-                          </Badge>
-                        ))}
-                      </div>
                     </div>
                   </div>
-
-                  <div className="flex gap-2 pt-3 border-t">
-                    <Button size="sm" variant="outline" onClick={() => handleTestWebhook(webhook.id)}>
-                      <Activity className="w-4 h-4 mr-1" />
-                      Test
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => viewDeliveries(webhook.id)}>
-                      <ExternalLink className="w-4 h-4 mr-1" />
-                      View Logs
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => handleRegenerateSecret(webhook.id)}>
-                      <RefreshCw className="w-4 h-4 mr-1" />
-                      Regenerate Secret
-                    </Button>
-                    <Button size="sm" variant="destructive" onClick={() => handleDeleteWebhook(webhook.id)}>
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Delete
-                    </Button>
-                  </div>
                 </div>
-              ))}
+
+                <div className="flex flex-wrap gap-1.5 ml-12">
+                  {(webhook.events as string[]).map((event) => (
+                    <Badge key={event} variant="outline" className="text-xs bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400">
+                      {event}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              <div className="px-5 py-3 bg-slate-50/50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-700/50 flex flex-wrap gap-2">
+                <Button size="sm" variant="ghost" onClick={() => handleTestWebhook(webhook.id)} className="text-xs h-8">
+                  <Activity className="w-3.5 h-3.5 mr-1" />
+                  Test
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => viewDeliveries(webhook.id)} className="text-xs h-8">
+                  <ExternalLink className="w-3.5 h-3.5 mr-1" />
+                  View Logs
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => handleRegenerateSecret(webhook.id)} className="text-xs h-8">
+                  <RefreshCw className="w-3.5 h-3.5 mr-1" />
+                  Regenerate Secret
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => handleDeleteWebhook(webhook.id)} className="text-xs h-8 text-red-600 dark:text-red-400 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20">
+                  <Trash2 className="w-3.5 h-3.5 mr-1" />
+                  Delete
+                </Button>
+              </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          ))}
+        </div>
+      )}
 
       {/* Create Webhook Modal */}
       {showCreateModal && (
-        <Card className="border-2 border-blue-500">
-          <CardHeader>
-            <CardTitle>Create New Webhook</CardTitle>
-            <CardDescription>Configure a new webhook endpoint</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="webhook-url">Endpoint URL</Label>
-              <Input id="webhook-url" type="url" placeholder="https://your-domain.com/webhooks/payment" value={url} onChange={(e) => setUrl(e.target.value)} />
-              <p className="text-xs text-gray-600">The URL where webhook events will be sent</p>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Events to Subscribe</Label>
-              <div className="space-y-2">
-                {availableEvents.map((event) => (
-                  <div
-                    key={event.value}
-                    className={`flex items-start gap-3 p-3 border rounded-lg ${event.highlight ? 'bg-blue-50 border-blue-300 dark:bg-blue-900/20 dark:border-blue-700' : ''}`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedEvents.includes(event.value)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          if (event.value === '*') {
-                            setSelectedEvents(['*']);
-                          } else {
-                            const newEvents = selectedEvents.filter(ev => ev !== '*');
-                            setSelectedEvents([...newEvents, event.value]);
-                          }
-                        } else {
-                          setSelectedEvents(selectedEvents.filter(ev => ev !== event.value));
-                        }
-                      }}
-                      className="mt-1"
-                    />
-                    <div className="flex-1">
-                      <p className={`font-medium text-sm ${event.highlight ? 'text-blue-700 dark:text-blue-300' : ''}`}>{event.label}</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">{event.description}</p>
-                      {event.highlight && (
-                        <p className="text-xs text-blue-600 dark:text-blue-400 mt-1 font-medium">
-                          Recommended: Automatically receive all events without managing individual subscriptions
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-3 border rounded-lg">
-              <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-lg border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/50 flex items-center justify-between">
               <div>
-                <p className="font-medium text-sm">Active</p>
-                <p className="text-xs text-gray-600">Start receiving events immediately</p>
+                <h3 className="text-base font-semibold text-slate-900 dark:text-white">Create New Webhook</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Configure a new webhook endpoint</p>
+              </div>
+              <button onClick={() => setShowCreateModal(false)} className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                <X className="w-5 h-5 text-slate-400" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="webhook-url" className="text-slate-700 dark:text-slate-300 text-sm">Endpoint URL</Label>
+                <Input id="webhook-url" type="url" placeholder="https://your-domain.com/webhooks/payment" value={url} onChange={(e) => setUrl(e.target.value)} />
+                <p className="text-xs text-slate-400 dark:text-slate-500">The URL where webhook events will be sent</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-slate-700 dark:text-slate-300 text-sm">Events to Subscribe</Label>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {availableEvents.map((event) => (
+                    <label
+                      key={event.value}
+                      className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
+                        event.highlight
+                          ? "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
+                          : selectedEvents.includes(event.value)
+                            ? "border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-900/10"
+                            : "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedEvents.includes(event.value)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            if (event.value === '*') {
+                              setSelectedEvents(['*']);
+                            } else {
+                              setSelectedEvents([...selectedEvents.filter(ev => ev !== '*'), event.value]);
+                            }
+                          } else {
+                            setSelectedEvents(selectedEvents.filter(ev => ev !== event.value));
+                          }
+                        }}
+                        className="mt-1 rounded"
+                      />
+                      <div className="flex-1">
+                        <p className={`font-medium text-sm ${event.highlight ? "text-blue-700 dark:text-blue-300" : "text-slate-900 dark:text-white"}`}>
+                          {event.label}
+                        </p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{event.description}</p>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-3 border border-slate-200 dark:border-slate-700 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">Active</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Start receiving events immediately</p>
+                </div>
+                <Switch checked={isActive} onCheckedChange={setIsActive} />
               </div>
             </div>
 
-            <div className="flex gap-3 pt-4">
-              <Button variant="outline" onClick={() => setShowCreateModal(false)}>Cancel</Button>
-              <Button onClick={handleCreateWebhook}>Create Webhook</Button>
+            <div className="px-6 py-4 bg-slate-50/50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-700/50 flex justify-end gap-3">
+              <Button variant="outline" size="sm" onClick={() => setShowCreateModal(false)}>Cancel</Button>
+              <Button size="sm" onClick={handleCreateWebhook} className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0">
+                Create Webhook
+              </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {/* Webhook Secret Modal */}
       {secretModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="w-5 h-5 text-amber-600" />
-                Webhook Secret
-              </CardTitle>
-              <CardDescription>Copy and store this secret securely. It will not be shown again.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-lg border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 shadow-2xl overflow-hidden">
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/50">
+              <div className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                <h3 className="text-base font-semibold text-slate-900 dark:text-white">Webhook Secret</h3>
+              </div>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Copy and store this secret securely. It will not be shown again.</p>
+            </div>
+
+            <div className="p-6 space-y-4">
               <div className="space-y-2">
-                <Label>Secret Key</Label>
+                <Label className="text-slate-700 dark:text-slate-300 text-sm">Secret Key</Label>
                 <div className="flex gap-2">
-                  <Input value={secretModalValue} readOnly className="font-mono text-sm" />
+                  <Input value={secretModalValue} readOnly className="font-mono text-sm bg-slate-50 dark:bg-slate-800" />
                   <Button
                     variant="outline"
-                    size="sm"
+                    size="icon"
+                    className="shrink-0"
                     onClick={() => {
                       navigator.clipboard.writeText(secretModalValue);
                       setSecretCopied(true);
@@ -383,11 +374,11 @@ export function WebhookSettings() {
                 </div>
               </div>
 
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex gap-3">
-                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-red-900">
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 flex gap-3">
+                <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-red-900 dark:text-red-300">
                   <p className="font-medium mb-1">Save this secret now</p>
-                  <p className="text-red-800">
+                  <p className="text-red-800 dark:text-red-400/80">
                     This is the only time you will see this secret. Store it in a secure
                     location like a password manager or environment variables.
                   </p>
@@ -395,113 +386,120 @@ export function WebhookSettings() {
               </div>
 
               <div className="flex justify-end pt-2">
-                <Button onClick={() => setSecretModalOpen(false)}>Done</Button>
+                <Button size="sm" onClick={() => setSecretModalOpen(false)}>Done</Button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Deliveries Modal */}
       {showDeliveries && (
-        <Card className="border-2 border-green-500">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Webhook Deliveries</CardTitle>
-              <Button variant="outline" onClick={() => setShowDeliveries(false)}>Close</Button>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-lg border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 shadow-2xl overflow-hidden max-h-[80vh]">
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/50 flex items-center justify-between">
+              <h3 className="text-base font-semibold text-slate-900 dark:text-white">Webhook Deliveries</h3>
+              <button onClick={() => setShowDeliveries(false)} className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                <X className="w-5 h-5 text-slate-400" />
+              </button>
             </div>
-          </CardHeader>
-          <CardContent>
-            {deliveries.length === 0 ? (
-              <p className="text-center text-gray-600 py-4">No deliveries yet</p>
-            ) : (
-              <div className="space-y-2">
-                {deliveries.map((delivery) => (
-                  <div key={delivery.id} className="border rounded p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <Badge variant={delivery.success ? "default" : "destructive"}>
-                        {delivery.success ? "Success" : "Failed"}
-                      </Badge>
-                      <span className="text-xs text-gray-600">{new Date(delivery.createdAt).toLocaleString()}</span>
+
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              {deliveries.length === 0 ? (
+                <p className="text-center text-slate-500 dark:text-slate-400 py-8">No deliveries yet</p>
+              ) : (
+                <div className="space-y-2">
+                  {deliveries.map((delivery) => (
+                    <div key={delivery.id} className="border border-slate-200 dark:border-slate-700 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <Badge
+                          variant="outline"
+                          className={delivery.success
+                            ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
+                            : "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800"
+                          }
+                        >
+                          {delivery.success ? "Success" : "Failed"}
+                        </Badge>
+                        <span className="text-xs text-slate-400 dark:text-slate-500">{new Date(delivery.createdAt).toLocaleString()}</span>
+                      </div>
+                      <p className="text-sm font-medium text-slate-900 dark:text-white">{delivery.event}</p>
+                      {delivery.statusCode && <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Status: {delivery.statusCode}</p>}
+                      {delivery.errorMessage && <p className="text-xs text-red-600 dark:text-red-400 mt-1">{delivery.errorMessage}</p>}
                     </div>
-                    <p className="text-sm font-medium">{delivery.event}</p>
-                    {delivery.statusCode && <p className="text-xs text-gray-600">Status: {delivery.statusCode}</p>}
-                    {delivery.errorMessage && <p className="text-xs text-red-600 mt-1">{delivery.errorMessage}</p>}
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* Documentation */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="w-5 h-5" />
-            Webhook Security
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      {/* Webhook Security Documentation */}
+      <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 overflow-hidden">
+        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/50">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white">
+              <Code className="w-4.5 h-4.5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Webhook Security</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Verify webhook signatures to ensure requests come from YetoPay</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6 space-y-5">
           <div>
-            <h4 className="font-medium mb-2">Verifying Webhook Signatures</h4>
-            <p className="text-sm text-gray-600 mb-3">
-              All webhook requests include an <code className="bg-gray-100 px-1 rounded">X-Webhook-Signature</code> header.
-              Verify this signature to ensure the request came from YetoPay.
+            <h4 className="text-sm font-medium text-slate-900 dark:text-white mb-2">Verifying Webhook Signatures</h4>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
+              All webhook requests include an <code className="bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded text-xs text-slate-600 dark:text-slate-300">X-Webhook-Signature</code> header.
             </p>
-            <div className="bg-gray-900 text-gray-100 p-4 rounded-lg text-xs overflow-x-auto">
+            <div className="bg-slate-900 dark:bg-slate-950 text-slate-100 p-4 rounded-lg text-xs overflow-x-auto font-mono">
               <pre>{`const crypto = require('crypto');
 
 function verifySignature(payload, signature, secret) {
-  const expectedSignature = crypto
+  const expected = crypto
     .createHmac('sha256', secret)
     .update(payload)
     .digest('hex');
-
   return crypto.timingSafeEqual(
     Buffer.from(signature),
-    Buffer.from(expectedSignature)
+    Buffer.from(expected)
   );
-}
-
-// In your webhook handler
-app.post('/webhooks/payment', (req, res) => {
-  const signature = req.headers['x-webhook-signature'];
-  const payload = JSON.stringify(req.body);
-
-  if (!verifySignature(payload, signature, YOUR_SECRET)) {
-    return res.status(401).send('Invalid signature');
-  }
-
-  // Process webhook...
-  res.status(200).send('OK');
-});`}</pre>
+}`}</pre>
             </div>
           </div>
 
           <div>
-            <h4 className="font-medium mb-2">Webhook Headers</h4>
-            <ul className="text-sm text-gray-600 space-y-1">
-              <li>&bull; <code className="bg-gray-100 px-1 rounded">X-Webhook-Signature</code> - HMAC signature</li>
-              <li>&bull; <code className="bg-gray-100 px-1 rounded">X-Webhook-Timestamp</code> - Unix timestamp</li>
-              <li>&bull; <code className="bg-gray-100 px-1 rounded">X-Webhook-ID</code> - Unique event ID</li>
-              <li>&bull; <code className="bg-gray-100 px-1 rounded">X-Webhook-Event</code> - Event type</li>
-            </ul>
+            <h4 className="text-sm font-medium text-slate-900 dark:text-white mb-2">Webhook Headers</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {[
+                { header: "X-Webhook-Signature", desc: "HMAC signature" },
+                { header: "X-Webhook-Timestamp", desc: "Unix timestamp" },
+                { header: "X-Webhook-ID", desc: "Unique event ID" },
+                { header: "X-Webhook-Event", desc: "Event type" },
+              ].map(({ header, desc }) => (
+                <div key={header} className="flex items-center gap-2 text-sm">
+                  <code className="bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded text-xs text-slate-600 dark:text-slate-300 shrink-0">{header}</code>
+                  <span className="text-slate-500 dark:text-slate-400 text-xs">{desc}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div>
-            <h4 className="font-medium mb-2">Best Practices</h4>
-            <ul className="text-sm text-gray-600 space-y-1">
-              <li>Always verify webhook signatures</li>
-              <li>Return 200 OK quickly (process async)</li>
-              <li>Use HTTPS endpoints only</li>
-              <li>Implement idempotency (check event IDs)</li>
-              <li>Handle retries gracefully</li>
+            <h4 className="text-sm font-medium text-slate-900 dark:text-white mb-2">Best Practices</h4>
+            <ul className="text-sm text-slate-500 dark:text-slate-400 space-y-1.5">
+              <li className="flex items-start gap-2"><span className="w-1 h-1 rounded-full bg-slate-400 mt-2 shrink-0" />Always verify webhook signatures</li>
+              <li className="flex items-start gap-2"><span className="w-1 h-1 rounded-full bg-slate-400 mt-2 shrink-0" />Return 200 OK quickly (process async)</li>
+              <li className="flex items-start gap-2"><span className="w-1 h-1 rounded-full bg-slate-400 mt-2 shrink-0" />Use HTTPS endpoints only</li>
+              <li className="flex items-start gap-2"><span className="w-1 h-1 rounded-full bg-slate-400 mt-2 shrink-0" />Implement idempotency (check event IDs)</li>
+              <li className="flex items-start gap-2"><span className="w-1 h-1 rounded-full bg-slate-400 mt-2 shrink-0" />Handle retries gracefully</li>
             </ul>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

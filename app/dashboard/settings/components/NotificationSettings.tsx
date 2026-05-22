@@ -1,13 +1,44 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserPlus } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Bell, CheckCircle, AlertTriangle, BarChart3, Shield, UserPlus } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import { useToast } from "@/hooks/use-toast";
+
+const NOTIFICATION_OPTIONS = [
+  {
+    key: "payment_completed" as const,
+    label: "Payment Notifications",
+    description: "Receive notifications when payments are completed",
+    icon: CheckCircle,
+    iconBg: "from-emerald-500 to-teal-600",
+  },
+  {
+    key: "payment_failed" as const,
+    label: "Failed Payment Alerts",
+    description: "Get notified when payments fail",
+    icon: AlertTriangle,
+    iconBg: "from-red-500 to-rose-600",
+  },
+  {
+    key: "weekly_summary" as const,
+    label: "Weekly Summary",
+    description: "Receive weekly transaction summaries",
+    icon: BarChart3,
+    iconBg: "from-blue-500 to-indigo-600",
+  },
+  {
+    key: "security_alerts" as const,
+    label: "Security Alerts",
+    description: "Important security notifications",
+    icon: Shield,
+    iconBg: "from-violet-500 to-purple-600",
+  },
+];
 
 export function NotificationSettings() {
   const { toast } = useToast();
@@ -22,7 +53,6 @@ export function NotificationSettings() {
     security_alerts: true,
   });
 
-  // Admin-only: registration notification emails
   const [registrationEmails, setRegistrationEmails] = useState("");
   const [adminLoading, setAdminLoading] = useState(false);
   const [adminFetching, setAdminFetching] = useState(true);
@@ -101,121 +131,125 @@ export function NotificationSettings() {
 
   if (fetching) {
     return (
-      <Card>
-        <CardHeader>
-          <div className="h-5 w-44 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
-          <div className="h-4 w-56 bg-slate-200 dark:bg-slate-700 animate-pulse rounded mt-2" />
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="space-y-2">
-                <div className="h-4 w-36 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
-                <div className="h-3 w-56 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+      <div className="space-y-6">
+        <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 p-6">
+          <div className="space-y-2 mb-6">
+            <div className="h-5 w-44 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+            <div className="h-4 w-56 bg-slate-100 dark:bg-slate-700/50 animate-pulse rounded" />
+          </div>
+          <div className="space-y-3">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="flex items-center justify-between p-4 border border-slate-100 dark:border-slate-700 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-lg" />
+                  <div className="space-y-1.5">
+                    <div className="h-4 w-36 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+                    <div className="h-3 w-52 bg-slate-100 dark:bg-slate-700/50 animate-pulse rounded" />
+                  </div>
+                </div>
+                <div className="h-6 w-10 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-full" />
               </div>
-              <div className="h-4 w-4 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
-            </div>
-          ))}
-          <div className="h-10 w-40 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-md mt-2" />
-        </CardContent>
-      </Card>
+            ))}
+          </div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <>
-    <Card>
-      <CardHeader>
-        <CardTitle>Notification Preferences</CardTitle>
-        <CardDescription>Manage how you receive notifications</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div>
-              <p className="font-medium">Payment Notifications</p>
-              <p className="text-sm text-gray-600">Receive notifications when payments are completed</p>
+    <div className="space-y-6">
+      {/* Notification Preferences */}
+      <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 overflow-hidden">
+        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/50">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-pink-600 flex items-center justify-center text-white">
+              <Bell className="w-4.5 h-4.5" />
             </div>
-            <input type="checkbox" checked={prefs.payment_completed} onChange={() => togglePref("payment_completed")} className="w-4 h-4" />
-          </div>
-
-          <div className="flex items-center justify-between p-4 border rounded-lg">
             <div>
-              <p className="font-medium">Failed Payment Alerts</p>
-              <p className="text-sm text-gray-600">Get notified when payments fail</p>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Notification Preferences</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Choose how you want to be notified</p>
             </div>
-            <input type="checkbox" checked={prefs.payment_failed} onChange={() => togglePref("payment_failed")} className="w-4 h-4" />
-          </div>
-
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div>
-              <p className="font-medium">Weekly Summary</p>
-              <p className="text-sm text-gray-600">Receive weekly transaction summaries</p>
-            </div>
-            <input type="checkbox" checked={prefs.weekly_summary} onChange={() => togglePref("weekly_summary")} className="w-4 h-4" />
-          </div>
-
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div>
-              <p className="font-medium">Security Alerts</p>
-              <p className="text-sm text-gray-600">Important security notifications</p>
-            </div>
-            <input type="checkbox" checked={prefs.security_alerts} onChange={() => togglePref("security_alerts")} className="w-4 h-4" />
           </div>
         </div>
 
-        <div className="flex justify-end gap-3">
-          <Button variant="outline" onClick={() => window.location.reload()}>Cancel</Button>
-          <Button onClick={handleSave} disabled={loading}>
+        <div className="p-6 space-y-3">
+          {NOTIFICATION_OPTIONS.map(({ key, label, description, icon: Icon, iconBg }) => (
+            <div
+              key={key}
+              className={`flex items-center justify-between p-4 rounded-lg border transition-all ${
+                prefs[key]
+                  ? "border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                  : "border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/30"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${iconBg} flex items-center justify-center text-white opacity-${prefs[key] ? "100" : "40"} transition-opacity`}>
+                  <Icon className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">{label}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{description}</p>
+                </div>
+              </div>
+              <Switch checked={prefs[key]} onCheckedChange={() => togglePref(key)} />
+            </div>
+          ))}
+        </div>
+
+        <div className="px-6 py-4 bg-slate-50/50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-700/50 flex justify-end gap-3">
+          <Button variant="outline" size="sm" onClick={() => window.location.reload()}>Cancel</Button>
+          <Button size="sm" onClick={handleSave} disabled={loading} className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0">
             {loading ? "Saving..." : "Save Preferences"}
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
 
-    {isAdmin && (
-      <Card className="mt-6">
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-              <UserPlus className="w-5 h-5 text-green-600 dark:text-green-400" />
-            </div>
-            <div>
-              <CardTitle>User Registration Notifications</CardTitle>
-              <CardDescription>Get notified when new users register and verify their email</CardDescription>
+      {/* Admin: Registration notification emails */}
+      {isAdmin && (
+        <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 overflow-hidden">
+          <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/50">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white">
+                <UserPlus className="w-4.5 h-4.5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">User Registration Notifications</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Get notified when new users register and verify their email</p>
+              </div>
             </div>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {adminFetching ? (
-            <div className="space-y-2">
-              <div className="h-4 w-48 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
-              <div className="h-10 w-full bg-slate-200 dark:bg-slate-700 animate-pulse rounded-md" />
-            </div>
-          ) : (
-            <>
+
+          <div className="p-6">
+            {adminFetching ? (
               <div className="space-y-2">
-                <Label htmlFor="registration-emails">Notification Email Addresses</Label>
-                <Input
-                  id="registration-emails"
-                  placeholder="admin@yetopay.co.za, ops@yetopay.co.za"
-                  value={registrationEmails}
-                  onChange={e => setRegistrationEmails(e.target.value)}
-                />
-                <p className="text-xs text-gray-500 dark:text-slate-400">
-                  Comma-separated emails. These addresses receive notifications when a new user registers and when they verify their email.
-                </p>
+                <div className="h-4 w-48 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+                <div className="h-10 w-full bg-slate-100 dark:bg-slate-700/50 animate-pulse rounded-lg" />
               </div>
-              <div className="flex justify-end">
-                <Button onClick={handleSaveRegistrationEmails} disabled={adminLoading}>
-                  {adminLoading ? "Saving..." : "Save Notification Emails"}
-                </Button>
+            ) : (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="registration-emails" className="text-slate-700 dark:text-slate-300 text-sm">Notification Email Addresses</Label>
+                  <Input
+                    id="registration-emails"
+                    placeholder="admin@yetopay.co.za, ops@yetopay.co.za"
+                    value={registrationEmails}
+                    onChange={e => setRegistrationEmails(e.target.value)}
+                  />
+                  <p className="text-xs text-slate-400 dark:text-slate-500">
+                    Comma-separated emails. These addresses receive notifications when a new user registers and when they verify their email.
+                  </p>
+                </div>
               </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
-    )}
-    </>
+            )}
+          </div>
+
+          <div className="px-6 py-4 bg-slate-50/50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-700/50 flex justify-end">
+            <Button size="sm" onClick={handleSaveRegistrationEmails} disabled={adminLoading} className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0">
+              {adminLoading ? "Saving..." : "Save Notification Emails"}
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

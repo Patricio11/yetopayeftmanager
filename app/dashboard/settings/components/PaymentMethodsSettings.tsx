@@ -3,8 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   Building2, CreditCard, QrCode, Ticket, Coins, Wallet,
-  CheckCircle, XCircle, Zap, Loader2, Info,
+  CheckCircle, Zap, Loader2, Info,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 
 interface MerchantService {
@@ -108,13 +109,14 @@ export function PaymentMethodsSettings() {
     return (
       <div className="space-y-4">
         {[...Array(2)].map((_, i) => (
-          <div key={i} className="bg-white border border-gray-200 rounded-xl p-6 animate-pulse">
+          <div key={i} className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 p-5 animate-pulse">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gray-200 rounded-xl" />
+              <div className="w-12 h-12 bg-slate-200 dark:bg-slate-700 rounded-xl" />
               <div className="flex-1 space-y-2">
-                <div className="h-5 w-40 bg-gray-200 rounded" />
-                <div className="h-3 w-64 bg-gray-200 rounded" />
+                <div className="h-5 w-40 bg-slate-200 dark:bg-slate-700 rounded" />
+                <div className="h-3 w-64 bg-slate-100 dark:bg-slate-700/50 rounded" />
               </div>
+              <div className="h-6 w-10 bg-slate-200 dark:bg-slate-700 rounded-full" />
             </div>
           </div>
         ))}
@@ -124,21 +126,21 @@ export function PaymentMethodsSettings() {
 
   if (services.length === 0) {
     return (
-      <div className="text-center py-16 bg-white border border-gray-200 rounded-xl">
-        <Zap className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-        <p className="text-gray-500 font-medium">No payment methods available</p>
-        <p className="text-sm text-gray-400 mt-1">Contact your administrator to enable payment services</p>
+      <div className="text-center py-16 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50">
+        <Zap className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+        <p className="text-slate-500 dark:text-slate-400 font-medium">No payment methods available</p>
+        <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">Contact your administrator to enable payment services</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
-        <Info className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-        <div className="text-sm text-blue-800">
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 flex gap-3">
+        <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+        <div className="text-sm text-blue-800 dark:text-blue-300">
           <p className="font-medium">Payment Methods</p>
-          <p className="mt-1">
+          <p className="mt-1 text-blue-700 dark:text-blue-400/80">
             Enable or disable payment methods for your customers. Your payment page will automatically
             show all enabled methods. Fees are set by your administrator.
           </p>
@@ -153,32 +155,32 @@ export function PaymentMethodsSettings() {
         return (
           <div
             key={service.code}
-            className={`bg-white border rounded-xl overflow-hidden transition-all ${
+            className={`border rounded-xl overflow-hidden transition-all ${
               service.isEnabled
-                ? "border-emerald-200 shadow-sm"
-                : "border-gray-200"
+                ? "border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-800/50 shadow-sm"
+                : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/30"
             }`}
           >
             <div className="p-5">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white`}>
+                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white shadow-sm`}>
                     <Icon className="w-6 h-6" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-gray-900">{service.name}</h3>
+                      <h3 className="font-semibold text-slate-900 dark:text-white">{service.name}</h3>
                       {service.isEnabled && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
                           <CheckCircle className="w-3 h-3" />Active
                         </span>
                       )}
                     </div>
                     {service.description && (
-                      <p className="text-sm text-gray-500 mt-0.5">{service.description}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{service.description}</p>
                     )}
                     {service.fee && (
-                      <p className="text-xs text-gray-400 mt-1">
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
                         Fee: {formatFee(service.fee)}
                         {service.fee.vatEnabled && " + VAT"}
                       </p>
@@ -186,25 +188,14 @@ export function PaymentMethodsSettings() {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => toggleService(service)}
-                  disabled={isToggling}
-                  className={`shrink-0 relative w-14 h-8 rounded-full transition-colors ${
-                    service.isEnabled
-                      ? "bg-emerald-500"
-                      : "bg-gray-300"
-                  } ${isToggling ? "opacity-50" : ""}`}
-                >
-                  {isToggling ? (
-                    <Loader2 className="w-4 h-4 animate-spin absolute top-2 left-5 text-white" />
-                  ) : (
-                    <span
-                      className={`absolute top-1 w-6 h-6 rounded-full bg-white shadow-sm transition-transform ${
-                        service.isEnabled ? "left-7" : "left-1"
-                      }`}
-                    />
-                  )}
-                </button>
+                {isToggling ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
+                ) : (
+                  <Switch
+                    checked={service.isEnabled}
+                    onCheckedChange={() => toggleService(service)}
+                  />
+                )}
               </div>
             </div>
           </div>

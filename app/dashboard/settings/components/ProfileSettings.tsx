@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { User, Mail, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export function ProfileSettings() {
@@ -52,56 +52,95 @@ export function ProfileSettings() {
 
   if (fetching) {
     return (
-      <Card>
-        <CardHeader>
-          <div className="h-5 w-40 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
-          <div className="h-4 w-64 bg-slate-200 dark:bg-slate-700 animate-pulse rounded mt-2" />
-        </CardHeader>
-        <CardContent className="space-y-6">
+      <div className="space-y-6">
+        <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 p-6">
+          <div className="space-y-2 mb-6">
+            <div className="h-5 w-40 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+            <div className="h-4 w-64 bg-slate-100 dark:bg-slate-700/50 animate-pulse rounded" />
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="space-y-2">
                 <div className="h-4 w-20 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
-                <div className="h-10 w-full bg-slate-200 dark:bg-slate-700 animate-pulse rounded-md" />
+                <div className="h-10 w-full bg-slate-100 dark:bg-slate-700/50 animate-pulse rounded-lg" />
               </div>
             ))}
           </div>
-          <div className="h-10 w-32 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-md" />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Profile Information</CardTitle>
-        <CardDescription>Update your personal information and contact details</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
-            <Input id="name" placeholder="John Merchant" value={name} onChange={e => setName(e.target.value)} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email Address</Label>
-            <Input id="email" type="email" value={email} disabled className="bg-gray-50" />
-            <p className="text-xs text-gray-500">Email cannot be changed here</p>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number</Label>
-            <Input id="phone" type="tel" placeholder="+27 12 345 6789" value={phone} onChange={e => setPhone(e.target.value)} />
+    <div className="space-y-6">
+      <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 overflow-hidden">
+        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/50">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-pink-600 flex items-center justify-center text-white">
+              <User className="w-4.5 h-4.5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Personal Information</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Update your name and contact details</p>
+            </div>
           </div>
         </div>
 
-        <div className="flex justify-end gap-3">
-          <Button variant="outline" onClick={() => window.location.reload()}>Cancel</Button>
-          <Button onClick={handleSave} disabled={loading}>
+        <div className="p-6 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-slate-700 dark:text-slate-300 text-sm">Full Name</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input
+                  id="name"
+                  placeholder="John Merchant"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-slate-700 dark:text-slate-300 text-sm">Email Address</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  disabled
+                  className="pl-10 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+                />
+              </div>
+              <p className="text-xs text-slate-400 dark:text-slate-500">Email cannot be changed here</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone" className="text-slate-700 dark:text-slate-300 text-sm">Phone Number</Label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="+27 12 345 6789"
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="px-6 py-4 bg-slate-50/50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-700/50 flex justify-end gap-3">
+          <Button variant="outline" size="sm" onClick={() => window.location.reload()}>Cancel</Button>
+          <Button size="sm" onClick={handleSave} disabled={loading} className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0">
             {loading ? "Saving..." : "Save Changes"}
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

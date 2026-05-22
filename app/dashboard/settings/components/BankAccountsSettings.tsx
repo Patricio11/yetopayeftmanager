@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CreditCard, Plus, Pencil, Trash2, Star } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { CreditCard, Plus, Pencil, Trash2, Star, Landmark } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface BankAccount {
@@ -45,7 +45,6 @@ export function BankAccountsSettings() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<BankAccount | null>(null);
 
-  // Form state
   const [selectedBankId, setSelectedBankId] = useState("");
   const [accountHolderName, setAccountHolderName] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
@@ -83,10 +82,7 @@ export function BankAccountsSettings() {
     setEditingAccount(null);
   };
 
-  const openAddDialog = () => {
-    resetForm();
-    setDialogOpen(true);
-  };
+  const openAddDialog = () => { resetForm(); setDialogOpen(true); };
 
   const openEditDialog = (account: BankAccount) => {
     setEditingAccount(account);
@@ -103,9 +99,7 @@ export function BankAccountsSettings() {
   const handleBankChange = (bankId: string) => {
     setSelectedBankId(bankId);
     const bank = banks.find(b => b.id === bankId);
-    if (bank?.branchCode) {
-      setBranchCode(bank.branchCode);
-    }
+    if (bank?.branchCode) setBranchCode(bank.branchCode);
   };
 
   const handleSave = async () => {
@@ -142,10 +136,7 @@ export function BankAccountsSettings() {
 
       const data = await res.json();
       if (data.success) {
-        toast({
-          title: editingAccount ? "Account updated" : "Account added",
-          description: data.message,
-        });
+        toast({ title: editingAccount ? "Account updated" : "Account added", description: data.message });
         setDialogOpen(false);
         resetForm();
         fetchData();
@@ -201,136 +192,116 @@ export function BankAccountsSettings() {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="space-y-2">
-              <div className="h-5 w-32 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
-              <div className="h-4 w-64 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+      <div className="space-y-4">
+        <div className="flex items-center justify-between mb-2">
+          <div className="h-5 w-32 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
+          <div className="h-9 w-28 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-lg" />
+        </div>
+        {[...Array(2)].map((_, i) => (
+          <div key={i} className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 p-5 animate-pulse">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-lg" />
+              <div className="flex-1 space-y-2">
+                <div className="h-5 w-32 bg-slate-200 dark:bg-slate-700 rounded" />
+                <div className="h-3 w-48 bg-slate-100 dark:bg-slate-700/50 rounded" />
+              </div>
             </div>
-            <div className="h-9 w-28 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-md" />
           </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {[...Array(2)].map((_, i) => (
-            <div key={i} className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-lg" />
-                <div className="space-y-2">
-                  <div className="h-4 w-32 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
-                  <div className="h-3 w-24 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="h-6 w-16 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-full" />
-                <div className="h-8 w-8 bg-slate-200 dark:bg-slate-700 animate-pulse rounded" />
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+        ))}
+      </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="w-5 h-5" />
-                Bank Accounts
-              </CardTitle>
-              <CardDescription>
-                Manage your bank accounts for receiving Pay By Bank payments
-              </CardDescription>
-            </div>
-            <Button onClick={openAddDialog}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Account
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {accounts.length === 0 ? (
-            <div className="text-center py-8">
-              <CreditCard className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-600 mb-4">No bank accounts configured</p>
-              <Button onClick={openAddDialog}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Your First Bank Account
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {accounts.map((account) => (
-                <div key={account.id} className="border rounded-lg p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="flex items-center gap-2">
-                          {account.bankColor && (
-                            <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: account.bankColor }} />
-                          )}
-                          <p className="font-semibold">{account.bankName || "Unknown Bank"}</p>
-                        </div>
+      {/* Add button */}
+      <div className="flex justify-end">
+        <Button size="sm" onClick={openAddDialog} className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0">
+          <Plus className="w-4 h-4 mr-2" />
+          Add Account
+        </Button>
+      </div>
+
+      {accounts.length === 0 ? (
+        <div className="text-center py-12 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50">
+          <Landmark className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+          <p className="text-slate-500 dark:text-slate-400 font-medium">No bank accounts configured</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500 mt-1 mb-4">Add your first bank account to start receiving payments</p>
+          <Button size="sm" onClick={openAddDialog} variant="outline">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Your First Bank Account
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {accounts.map((account) => (
+            <div key={account.id} className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 overflow-hidden">
+              <div className="p-5">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: (account.bankColor || "#F59E0B") + "20" }}>
+                      {account.bankColor ? (
+                        <span className="w-5 h-5 rounded-full" style={{ backgroundColor: account.bankColor }} />
+                      ) : (
+                        <Landmark className="w-5 h-5 text-amber-500" />
+                      )}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-slate-900 dark:text-white">{account.bankName || "Unknown Bank"}</p>
                         {account.isPrimary && (
-                          <Badge className="bg-blue-50 text-blue-700 border-blue-200" variant="outline">
+                          <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800">
                             <Star className="w-3 h-3 mr-1" />
                             Primary
                           </Badge>
                         )}
                         {account.isVerified && (
-                          <Badge className="bg-amber-50 text-amber-600 border-amber-200" variant="outline">
+                          <Badge variant="outline" className="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800">
                             Verified
                           </Badge>
                         )}
                       </div>
-
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm text-gray-600">
-                        <div>
-                          <p className="text-xs text-gray-400">Account Holder</p>
-                          <p className="font-medium text-gray-900">{account.accountHolderName}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-400">Account Number</p>
-                          <p className="font-mono font-medium text-gray-900">{maskAccountNumber(account.accountNumber)}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-400">Account Type</p>
-                          <p className="capitalize font-medium text-gray-900">{account.accountType || "Cheque"}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-400">Branch Code</p>
-                          <p className="font-mono font-medium text-gray-900">{account.branchCode || "-"}</p>
-                        </div>
-                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{account.accountHolderName}</p>
                     </div>
                   </div>
+                </div>
 
-                  <div className="flex gap-2 pt-3 mt-3 border-t">
-                    {!account.isPrimary && (
-                      <Button size="sm" variant="outline" onClick={() => handleSetPrimary(account.id)}>
-                        <Star className="w-4 h-4 mr-1" />
-                        Set Primary
-                      </Button>
-                    )}
-                    <Button size="sm" variant="outline" onClick={() => openEditDialog(account)}>
-                      <Pencil className="w-4 h-4 mr-1" />
-                      Edit
-                    </Button>
-                    <Button size="sm" variant="destructive" onClick={() => handleDelete(account.id)}>
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Delete
-                    </Button>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 ml-13 pl-13">
+                  <div>
+                    <p className="text-[11px] text-slate-400 dark:text-slate-500 uppercase tracking-wider">Account Number</p>
+                    <p className="font-mono text-sm font-medium text-slate-900 dark:text-white mt-0.5">{maskAccountNumber(account.accountNumber)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] text-slate-400 dark:text-slate-500 uppercase tracking-wider">Account Type</p>
+                    <p className="capitalize text-sm font-medium text-slate-900 dark:text-white mt-0.5">{account.accountType || "Cheque"}</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] text-slate-400 dark:text-slate-500 uppercase tracking-wider">Branch Code</p>
+                    <p className="font-mono text-sm font-medium text-slate-900 dark:text-white mt-0.5">{account.branchCode || "-"}</p>
                   </div>
                 </div>
-              ))}
+              </div>
+
+              <div className="px-5 py-3 bg-slate-50/50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-700/50 flex gap-2">
+                {!account.isPrimary && (
+                  <Button size="sm" variant="ghost" onClick={() => handleSetPrimary(account.id)} className="text-xs h-8">
+                    <Star className="w-3.5 h-3.5 mr-1" />
+                    Set Primary
+                  </Button>
+                )}
+                <Button size="sm" variant="ghost" onClick={() => openEditDialog(account)} className="text-xs h-8">
+                  <Pencil className="w-3.5 h-3.5 mr-1" />
+                  Edit
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => handleDelete(account.id)} className="text-xs h-8 text-red-600 dark:text-red-400 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20">
+                  <Trash2 className="w-3.5 h-3.5 mr-1" />
+                  Delete
+                </Button>
+              </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          ))}
+        </div>
+      )}
 
       {/* Add/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) { setDialogOpen(false); resetForm(); } else { setDialogOpen(true); } }}>
@@ -338,13 +309,13 @@ export function BankAccountsSettings() {
           <DialogHeader>
             <DialogTitle>{editingAccount ? "Edit Bank Account" : "Add Bank Account"}</DialogTitle>
             <DialogDescription>
-              {editingAccount ? "Update your bank account details" : "Link a bank account for receiving Pay By Bank payments"}
+              {editingAccount ? "Update your bank account details" : "Link a bank account for receiving payments"}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label>Bank</Label>
+              <Label className="text-slate-700 dark:text-slate-300 text-sm">Bank</Label>
               <Select value={selectedBankId} onValueChange={handleBankChange}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a bank" />
@@ -365,23 +336,23 @@ export function BankAccountsSettings() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="holder-name">Account Holder Name</Label>
+              <Label htmlFor="holder-name" className="text-slate-700 dark:text-slate-300 text-sm">Account Holder Name</Label>
               <Input id="holder-name" placeholder="John Doe" value={accountHolderName} onChange={(e) => setAccountHolderName(e.target.value)} />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="acc-number">Account Number</Label>
+              <Label htmlFor="acc-number" className="text-slate-700 dark:text-slate-300 text-sm">Account Number</Label>
               <Input id="acc-number" placeholder="62123456789" value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="acc-name">Account Name (optional)</Label>
+              <Label htmlFor="acc-name" className="text-slate-700 dark:text-slate-300 text-sm">Account Name (optional)</Label>
               <Input id="acc-name" placeholder="e.g., Business Account" value={accountName} onChange={(e) => setAccountName(e.target.value)} />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Account Type</Label>
+                <Label className="text-slate-700 dark:text-slate-300 text-sm">Account Type</Label>
                 <Select value={accountType} onValueChange={setAccountType}>
                   <SelectTrigger className="w-full">
                     <SelectValue />
@@ -397,21 +368,21 @@ export function BankAccountsSettings() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="branch-code">Branch Code</Label>
+                <Label htmlFor="branch-code" className="text-slate-700 dark:text-slate-300 text-sm">Branch Code</Label>
                 <Input id="branch-code" placeholder="250655" value={branchCode} onChange={(e) => setBranchCode(e.target.value)} />
-                <p className="text-xs text-gray-500">Auto-filled from bank</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500">Auto-filled from bank</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 p-3 border rounded-lg">
-              <input type="checkbox" id="is-primary" checked={isPrimary} onChange={(e) => setIsPrimary(e.target.checked)} />
-              <Label htmlFor="is-primary" className="cursor-pointer">Set as primary account</Label>
+            <div className="flex items-center justify-between p-3 border border-slate-200 dark:border-slate-700 rounded-lg">
+              <Label htmlFor="is-primary" className="cursor-pointer text-sm text-slate-700 dark:text-slate-300">Set as primary account</Label>
+              <Switch id="is-primary" checked={isPrimary} onCheckedChange={setIsPrimary} />
             </div>
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setDialogOpen(false); resetForm(); }}>Cancel</Button>
-            <Button onClick={handleSave} disabled={saving}>
+            <Button variant="outline" size="sm" onClick={() => { setDialogOpen(false); resetForm(); }}>Cancel</Button>
+            <Button size="sm" onClick={handleSave} disabled={saving} className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0">
               {saving ? "Saving..." : editingAccount ? "Update Account" : "Add Account"}
             </Button>
           </DialogFooter>
