@@ -303,6 +303,7 @@ credit_card, eft, snapscan, zapper, capitec_pay, ott_voucher, onevoucher, bluvou
 - [x] Merchant transactions API — added `paymentMethod` filter parameter
 - [x] Merchant analytics API — added `paymentMethodBreakdown` with per-method stats (count, revenue, success rate)
 - [ ] Update partner fee calculations for multi-service (deferred — partners not yet earning on card)
+- [x] API documentation updated to v2.0.0 (`docs/API_REFERENCE.md`) — multi-method support, `paymentMethod` field, migration guide, updated code examples (Node.js, Python, PHP)
 
 ### Phase 8: Future — Direct Card Processing
 **Goal:** Build own card gateway (like EFT direct), bypassing CallPay.
