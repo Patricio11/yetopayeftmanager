@@ -93,6 +93,7 @@ export const eftInvoices = pgTable("eft_invoices", {
 export const eftInvoiceItems = pgTable("eft_invoice_items", {
   id: uuid("id").defaultRandom().primaryKey(),
   invoiceId: uuid("invoice_id").notNull().references(() => eftInvoices.id, { onDelete: "cascade" }),
+  serviceName: text("service_name"),
 
   description: text("description").notNull(),
   quantity: integer("quantity").notNull().default(1),

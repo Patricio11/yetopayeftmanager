@@ -292,16 +292,17 @@ credit_card, eft, snapscan, zapper, capitec_pay, ott_voucher, onevoucher, bluvou
 - [x] Unified result screens for card returns (success/pending/error)
 - [x] Mobile-first responsive design (matches existing payment page styling)
 
-### Phase 7: Reconciliation & Reporting Updates
+### Phase 7: Reconciliation & Reporting Updates ✅ COMPLETE
 **Goal:** Extend billing and reporting for multi-service.
 
-- [ ] Update invoice generation to calc fees per service
-  - Line items grouped by service
-  - Each service billed at its fee rate
-- [ ] Update admin recon dashboard — filter by payment method
-- [ ] Update merchant transaction list — paymentMethod column + filter
-- [ ] Update analytics dashboards — breakdown by payment method
-- [ ] Update partner fee calculations for multi-service (if partners earn on card too)
+- [x] Schema: added `serviceName` column to `eft_invoice_items` table
+- [x] Invoice generation groups transactions by `paymentMethod`, resolves per-service fees, creates separate line items per service with correct fee calculations
+- [x] Admin recon fees API (`GET/PATCH /api/admin/recon/fees`) — service-aware via `?serviceName` param, backward compatible
+- [x] Admin merchant fees API (`GET/PUT/DELETE /api/admin/recon/merchant-fees/[id]`) — service-aware via `?serviceName` param and body field
+- [x] Merchant transaction list — added "Method" column with color-coded badges (EFT blue, Card purple), payment method filter dropdown, CSV export includes method
+- [x] Merchant transactions API — added `paymentMethod` filter parameter
+- [x] Merchant analytics API — added `paymentMethodBreakdown` with per-method stats (count, revenue, success rate)
+- [ ] Update partner fee calculations for multi-service (deferred — partners not yet earning on card)
 
 ### Phase 8: Future — Direct Card Processing
 **Goal:** Build own card gateway (like EFT direct), bypassing CallPay.

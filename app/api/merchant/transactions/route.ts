@@ -7,6 +7,7 @@ import { z } from 'zod';
 
 const querySchema = z.object({
   status: z.enum(['not_started', 'initiated', 'completed', 'failed', 'cancelled', 'aborted', 'expired']).optional(),
+  paymentMethod: z.string().optional(),
   limit: z.coerce.number().min(1).max(100).default(50),
   offset: z.coerce.number().min(0).default(0),
   from: z.string().optional(), // ISO date string
@@ -26,6 +27,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = request.nextUrl;
     const query = querySchema.parse({
       status: searchParams.get('status'),
+      paymentMethod: searchParams.get('paymentMethod'),
       limit: searchParams.get('limit'),
       offset: searchParams.get('offset'),
       from: searchParams.get('from'),
@@ -41,6 +43,11 @@ export async function GET(request: NextRequest) {
     // Filter by status
     if (query.status) {
       conditions.push(eq(eftTransactions.status, query.status));
+    }
+
+    // Filter by payment method
+    if (query.paymentMethod) {
+      conditions.push(eq(eftTransactions.paymentMethod, query.paymentMethod));
     }
 
     // Filter by date range

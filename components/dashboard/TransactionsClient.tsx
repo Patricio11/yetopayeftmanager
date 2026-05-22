@@ -36,6 +36,8 @@ import {
   Eye,
   Pencil,
   Send,
+  CreditCard,
+  Landmark,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -59,6 +61,7 @@ type Transaction = {
     description: string | null;
     statusReason: string | null;
     failureReason: string | null;
+    paymentMethod: string | null;
     updatedBy: string | null;
     notifyUrl: string | null;
     successUrl: string | null;
@@ -190,7 +193,7 @@ export function TransactionsClient({
     };
 
     const headers = [
-      "Date", "Completed At", "Reference", "Bank", "Amount", "Status",
+      "Date", "Completed At", "Reference", "Bank", "Method", "Amount", "Status",
       "Failure Reason", "Customer", "Email", "Description",
       ...(isAdmin ? ["Merchant"] : []),
     ];
@@ -200,6 +203,7 @@ export function TransactionsClient({
       esc(t.transaction.completedAt ? format(new Date(t.transaction.completedAt), "yyyy-MM-dd HH:mm:ss") : "-"),
       esc(t.transaction.reference),
       esc(t.bank?.bankName || "-"),
+      esc(t.transaction.paymentMethod === 'card_callpay' ? 'Card' : t.transaction.paymentMethod === 'eft_direct' ? 'EFT' : (t.transaction.paymentMethod || '-')),
       `R ${parseFloat(t.transaction.amount).toFixed(2)}`,
       esc(t.transaction.status || "-"),
       esc(getFailureReason(t.transaction)),
@@ -447,6 +451,25 @@ export function TransactionsClient({
                     </Select>
                   </div>
 
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 block">
+                      Method
+                    </label>
+                    <Select
+                      value={searchParams.get("paymentMethod") || "all"}
+                      onValueChange={(value) => updateFilters("paymentMethod", value)}
+                    >
+                      <SelectTrigger className="cursor-pointer">
+                        <SelectValue placeholder="All Methods" />
+                      </SelectTrigger>
+                      <SelectContent className="cursor-pointer">
+                        <SelectItem value="all" className="cursor-pointer">All Methods</SelectItem>
+                        <SelectItem value="eft_direct" className="cursor-pointer">Pay by Bank</SelectItem>
+                        <SelectItem value="card_callpay" className="cursor-pointer">Card Payment</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
                   {isAdmin && (
                     <div>
                       <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 block">
@@ -556,6 +579,7 @@ export function TransactionsClient({
                   <TableHead className="pl-0">Date</TableHead>
                   <TableHead>Reference</TableHead>
                   <TableHead>Bank</TableHead>
+                  <TableHead>Method</TableHead>
                   {isAdmin && <TableHead>Merchant</TableHead>}
                   <TableHead>Amount</TableHead>
                   <TableHead>Status</TableHead>
@@ -566,7 +590,7 @@ export function TransactionsClient({
                 {sortedTransactions.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={isAdmin ? 7 : 6}
+                      colSpan={isAdmin ? 8 : 7}
                       className="text-center py-12 text-slate-500 dark:text-slate-400"
                     >
                       <div className="flex flex-col items-center gap-4">
@@ -603,6 +627,23 @@ export function TransactionsClient({
                         <div className="text-sm font-medium text-slate-700 dark:text-slate-300">
                           {item.bank?.bankName || "-"}
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                          item.transaction.paymentMethod === 'card_callpay'
+                            ? 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400'
+                            : item.transaction.paymentMethod === 'eft_direct'
+                            ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'
+                            : 'bg-slate-100 dark:bg-slate-900/20 text-slate-700 dark:text-slate-400'
+                        }`}>
+                          {item.transaction.paymentMethod === 'card_callpay' ? (
+                            <><CreditCard className="w-3 h-3" /> Card</>
+                          ) : item.transaction.paymentMethod === 'eft_direct' ? (
+                            <><Landmark className="w-3 h-3" /> EFT</>
+                          ) : (
+                            item.transaction.paymentMethod || '-'
+                          )}
+                        </span>
                       </TableCell>
                       {isAdmin && (
                         <TableCell>

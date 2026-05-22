@@ -17,6 +17,7 @@ export default async function TransactionsPage({
   const status = params.status as string | undefined;
   const merchantId = params.merchantId as string | undefined;
   const bankId = params.bankId as string | undefined;
+  const paymentMethod = params.paymentMethod as string | undefined;
   const fromDate = params.from as string | undefined;
   const toDate = params.to as string | undefined;
   const search = params.search as string | undefined;
@@ -63,6 +64,11 @@ export default async function TransactionsPage({
   // Bank filter
   if (bankId && bankId !== "all") {
     conditions.push(eq(eftTransactions.eftBankId, bankId));
+  }
+
+  // Payment method filter
+  if (paymentMethod && paymentMethod !== "all") {
+    conditions.push(eq(eftTransactions.paymentMethod, paymentMethod));
   }
 
   // Fetch transactions with merchant info and bank info

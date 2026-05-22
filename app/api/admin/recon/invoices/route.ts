@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/authorization";
 import { db } from "@/lib/db";
 import { eftInvoices, eftInvoiceItems, eftMerchantFees, eftSystemFees, eftTransactions, users } from "@/lib/db/schema";
-import { eq, and, gte, lte, sql, desc, count } from "drizzle-orm";
+import { eq, and, gte, lte, sql, desc, count, inArray } from "drizzle-orm";
 import { writeAuditLog } from "@/lib/audit";
 
 // GET /api/admin/recon/invoices — list all invoices (admin only)
@@ -120,13 +120,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 1. Fetch completed transactions for this merchant in the period
+    // 1. Fetch completed transactions for this merchant in the period (include paymentMethod)
     const transactions = await db
       .select({
         id: eftTransactions.id,
         amount: eftTransactions.amount,
         reference: eftTransactions.reference,
         completedAt: eftTransactions.completedAt,
+        paymentMethod: eftTransactions.paymentMethod,
       })
       .from(eftTransactions)
       .where(
@@ -145,65 +146,140 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Get fee config: merchant feeType + resolve the actual fee value
-    // System defaults (always loaded as fallback)
-    const sysRows = await db.select().from(eftSystemFees).limit(1);
-    const sys = sysRows[0] || {
+    // 2. Group transactions by paymentMethod (service)
+    const serviceGroups = new Map<string, typeof transactions>();
+    for (const txn of transactions) {
+      const service = txn.paymentMethod || "eft_direct";
+      if (!serviceGroups.has(service)) {
+        serviceGroups.set(service, []);
+      }
+      serviceGroups.get(service)!.push(txn);
+    }
+
+    const serviceNames = Array.from(serviceGroups.keys());
+
+    // 3. Load fee configs for ALL services involved
+    // System defaults per service
+    const sysRows = await db
+      .select()
+      .from(eftSystemFees)
+      .where(inArray(eftSystemFees.serviceName, serviceNames));
+
+    const sysDefaults = {
       fixedFeeValue: "5.00",
       percentageFeeValue: "2.50",
+      volumeFeeValue: "2.00",
       vatEnabled: true,
       vatRate: "15.00",
     };
 
-    // Merchant-specific config (may or may not exist)
-    const merchantFee = await db.query.eftMerchantFees.findFirst({
-      where: eq(eftMerchantFees.merchantId, merchantId),
-    });
-
-    // Determine fee type: merchant setting or default to "fixed"
-    const feeType = (merchantFee?.isActive && merchantFee?.feeType) || "fixed";
-
-    // Determine fee value: merchant custom > system default
-    let feeValue: string;
-    if (feeType === "fixed") {
-      feeValue = (merchantFee?.isActive && merchantFee?.fixedFeeValue) || sys.fixedFeeValue;
-    } else if (feeType === "percentage") {
-      feeValue = (merchantFee?.isActive && merchantFee?.percentageFeeValue) || sys.percentageFeeValue;
-    } else {
-      // volume: percentage of total transaction volume
-      feeValue = (merchantFee?.isActive && merchantFee?.volumeFeeValue) || sys.volumeFeeValue || "2.00";
+    // Index system fees by serviceName for quick lookup
+    const sysFeeMap = new Map<string, typeof sysRows[0]>();
+    for (const row of sysRows) {
+      sysFeeMap.set(row.serviceName || "eft_direct", row);
     }
 
-    // VAT: merchant override > system default
-    const vatEnabled = (merchantFee?.isActive && merchantFee?.vatEnabled !== null)
-      ? merchantFee.vatEnabled!
-      : (sys.vatEnabled ?? true);
-    const vatRateStr = (merchantFee?.isActive && merchantFee?.vatRate !== null)
-      ? merchantFee.vatRate!
-      : (sys.vatRate || "15.00");
+    // Merchant-specific configs per service
+    const merchantFeeRows = await db
+      .select()
+      .from(eftMerchantFees)
+      .where(
+        and(
+          eq(eftMerchantFees.merchantId, merchantId),
+          inArray(eftMerchantFees.serviceName, serviceNames)
+        )
+      );
 
-    const feeConfig = { feeType, feeValue, vatEnabled, vatRate: vatRateStr };
-
-    // 3. Calculate totals
-    const txnCount = transactions.length;
-    const txnVolume = transactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
-    const feeVal = parseFloat(feeConfig.feeValue);
-
-    let subtotal: number;
-    if (feeConfig.feeType === "fixed") {
-      subtotal = txnCount * feeVal;
-    } else if (feeConfig.feeType === "percentage") {
-      subtotal = txnVolume * (feeVal / 100);
-    } else {
-      // volume: percentage of total transaction volume
-      subtotal = txnVolume * (feeVal / 100);
+    const merchantFeeMap = new Map<string, typeof merchantFeeRows[0]>();
+    for (const row of merchantFeeRows) {
+      merchantFeeMap.set(row.serviceName || "eft_direct", row);
     }
 
-    const vatRate = parseFloat(feeConfig.vatRate);
-    const vatAmount = feeConfig.vatEnabled ? subtotal * (vatRate / 100) : 0;
+    // 4. Calculate fees per service group
+    type ServiceResult = {
+      serviceName: string;
+      feeType: string;
+      feeValue: string;
+      vatEnabled: boolean;
+      vatRate: string;
+      txnCount: number;
+      txnVolume: number;
+      subtotal: number;
+      vatAmount: number;
+      total: number;
+    };
+
+    const serviceResults: ServiceResult[] = [];
+
+    for (const [serviceName, txns] of serviceGroups) {
+      const sys = sysFeeMap.get(serviceName) || null;
+      const merchantFee = merchantFeeMap.get(serviceName) || null;
+
+      // Determine fee type: merchant setting > default "fixed"
+      const feeType = (merchantFee?.isActive && merchantFee?.feeType) || "fixed";
+
+      // Determine fee value: merchant custom > system default > hardcoded default
+      let feeValue: string;
+      if (feeType === "fixed") {
+        feeValue = (merchantFee?.isActive && merchantFee?.fixedFeeValue) || sys?.fixedFeeValue || sysDefaults.fixedFeeValue;
+      } else if (feeType === "percentage") {
+        feeValue = (merchantFee?.isActive && merchantFee?.percentageFeeValue) || sys?.percentageFeeValue || sysDefaults.percentageFeeValue;
+      } else {
+        feeValue = (merchantFee?.isActive && merchantFee?.volumeFeeValue) || sys?.volumeFeeValue || sysDefaults.volumeFeeValue;
+      }
+
+      // VAT: merchant override > system default > hardcoded default
+      const vatEnabled = (merchantFee?.isActive && merchantFee?.vatEnabled !== null)
+        ? merchantFee.vatEnabled!
+        : (sys?.vatEnabled ?? sysDefaults.vatEnabled);
+      const vatRateStr = (merchantFee?.isActive && merchantFee?.vatRate !== null)
+        ? merchantFee.vatRate!
+        : (sys?.vatRate || sysDefaults.vatRate);
+
+      const txnCount = txns.length;
+      const txnVolume = txns.reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      const feeVal = parseFloat(feeValue);
+
+      let subtotal: number;
+      if (feeType === "fixed") {
+        subtotal = txnCount * feeVal;
+      } else if (feeType === "percentage") {
+        subtotal = txnVolume * (feeVal / 100);
+      } else {
+        subtotal = txnVolume * (feeVal / 100);
+      }
+
+      const vatRate = parseFloat(vatRateStr);
+      const vatAmount = vatEnabled ? subtotal * (vatRate / 100) : 0;
+      const total = subtotal + vatAmount;
+
+      serviceResults.push({
+        serviceName,
+        feeType,
+        feeValue,
+        vatEnabled,
+        vatRate: vatRateStr,
+        txnCount,
+        txnVolume,
+        subtotal,
+        vatAmount,
+        total,
+      });
+    }
+
+    // 5. Aggregate totals across all services
+    const totalTxnCount = serviceResults.reduce((sum, s) => sum + s.txnCount, 0);
+    const totalTxnVolume = serviceResults.reduce((sum, s) => sum + s.txnVolume, 0);
+    const subtotal = serviceResults.reduce((sum, s) => sum + s.subtotal, 0);
+    const vatAmount = serviceResults.reduce((sum, s) => sum + s.vatAmount, 0);
     const totalAmount = subtotal + vatAmount;
 
-    // 4. Generate invoice number
+    // Invoice-level feeType/feeValue snapshot: use the service with the most transactions
+    // (ties broken alphabetically by serviceName)
+    const primaryService = serviceResults
+      .sort((a, b) => b.txnCount - a.txnCount || a.serviceName.localeCompare(b.serviceName))[0];
+
+    // 6. Generate invoice number
     const year = new Date().getFullYear();
     const month = String(new Date().getMonth() + 1).padStart(2, "0");
     const [{ seqCount }] = await db
@@ -212,7 +288,7 @@ export async function POST(request: NextRequest) {
     const seq = String(seqCount + 1).padStart(4, "0");
     const invoiceNumber = `INV-${year}${month}-${seq}`;
 
-    // 5. Create invoice
+    // 7. Create invoice
     const [invoice] = await db.insert(eftInvoices).values({
       invoiceNumber,
       merchantId,
@@ -221,48 +297,59 @@ export async function POST(request: NextRequest) {
       subtotalAmount: subtotal.toFixed(2),
       vatAmount: vatAmount.toFixed(2),
       totalAmount: totalAmount.toFixed(2),
-      transactionCount: txnCount,
-      transactionVolume: txnVolume.toFixed(2),
-      feeType: feeConfig.feeType as "fixed" | "percentage" | "volume",
-      feeValue: feeConfig.feeValue,
-      vatRate: feeConfig.vatRate,
-      vatEnabled: feeConfig.vatEnabled,
+      transactionCount: totalTxnCount,
+      transactionVolume: totalTxnVolume.toFixed(2),
+      feeType: primaryService.feeType as "fixed" | "percentage" | "volume",
+      feeValue: primaryService.feeValue,
+      vatRate: primaryService.vatRate,
+      vatEnabled: primaryService.vatEnabled,
       status: "draft",
       dueDate: dueDate ? new Date(dueDate) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Default: 30 days
       notes: notes || null,
       createdBy: auth.session.user.id,
     }).returning();
 
-    // 6. Create line item(s)
-    let feeDescription: string;
-    let lineQuantity: number;
-    let lineUnitAmount: string;
-
-    if (feeConfig.feeType === "fixed") {
-      feeDescription = `EFT Transaction Fees (R${feeVal.toFixed(2)} per transaction)`;
-      lineQuantity = txnCount;
-      lineUnitAmount = feeVal.toFixed(4);
-    } else if (feeConfig.feeType === "percentage") {
-      feeDescription = `EFT Transaction Fees (${feeVal}% of transaction volume)`;
-      lineQuantity = 1;
-      lineUnitAmount = txnVolume.toFixed(4);
-    } else {
-      feeDescription = `EFT Volume-Based Fee (${feeVal}% of total volume R${txnVolume.toFixed(2)}, ${txnCount} transactions)`;
-      lineQuantity = 1;
-      lineUnitAmount = txnVolume.toFixed(4);
-    }
-
+    // 8. Create line items — one per service
     const periodLabel = `${startDate.toLocaleDateString("en-ZA", { month: "long", year: "numeric" })}`;
 
-    await db.insert(eftInvoiceItems).values({
-      invoiceId: invoice.id,
-      description: `${feeDescription} — ${periodLabel}`,
-      quantity: lineQuantity,
-      unitAmount: lineUnitAmount,
-      totalAmount: subtotal.toFixed(2),
+    const lineItemValues = serviceResults.map((svc) => {
+      const feeVal = parseFloat(svc.feeValue);
+      let feeDescription: string;
+      let lineQuantity: number;
+      let lineUnitAmount: string;
+
+      // Human-readable service label
+      const serviceLabel = svc.serviceName === "eft_direct" ? "EFT"
+        : svc.serviceName === "card_callpay" ? "Card (Callpay)"
+        : svc.serviceName.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
+      if (svc.feeType === "fixed") {
+        feeDescription = `${serviceLabel} Transaction Fees (R${feeVal.toFixed(2)} per transaction)`;
+        lineQuantity = svc.txnCount;
+        lineUnitAmount = feeVal.toFixed(4);
+      } else if (svc.feeType === "percentage") {
+        feeDescription = `${serviceLabel} Transaction Fees (${feeVal}% of transaction volume)`;
+        lineQuantity = 1;
+        lineUnitAmount = svc.txnVolume.toFixed(4);
+      } else {
+        feeDescription = `${serviceLabel} Volume-Based Fee (${feeVal}% of total volume R${svc.txnVolume.toFixed(2)}, ${svc.txnCount} transactions)`;
+        lineQuantity = 1;
+        lineUnitAmount = svc.txnVolume.toFixed(4);
+      }
+
+      return {
+        invoiceId: invoice.id,
+        serviceName: svc.serviceName,
+        description: `${feeDescription} — ${periodLabel}`,
+        quantity: lineQuantity,
+        unitAmount: lineUnitAmount,
+        totalAmount: svc.subtotal.toFixed(2),
+      };
     });
 
-    writeAuditLog({ userId: auth.session.user.id, action: "create", resource: "invoice", resourceId: invoice.id, changes: { after: { invoiceNumber, merchantId, periodStart, periodEnd, totalAmount: totalAmount.toFixed(2), feeType: feeConfig.feeType, transactionCount: txnCount } }, request });
+    await db.insert(eftInvoiceItems).values(lineItemValues);
+
+    writeAuditLog({ userId: auth.session.user.id, action: "create", resource: "invoice", resourceId: invoice.id, changes: { after: { invoiceNumber, merchantId, periodStart, periodEnd, totalAmount: totalAmount.toFixed(2), feeType: primaryService.feeType, transactionCount: totalTxnCount, services: serviceNames } }, request });
 
     // Fetch merchant info for response
     const merchant = await db.query.users.findFirst({

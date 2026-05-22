@@ -50,6 +50,7 @@ export async function GET(req: NextRequest) {
       bankPerformance,
       topFailureReasons,
       allTimeStats,
+      paymentMethodBreakdown,
     ] = await Promise.all([
       // 1. Current period KPIs
       db.select({
@@ -145,6 +146,19 @@ export async function GET(req: NextRequest) {
       })
         .from(eftTransactions)
         .where(baseWhere),
+
+      // 8. Payment method breakdown
+      db.select({
+        paymentMethod: eftTransactions.paymentMethod,
+        totalCount: count(),
+        completedCount: sql<number>`COUNT(CASE WHEN ${eftTransactions.status} = 'completed' THEN 1 END)::int`,
+        failedCount: sql<number>`COUNT(CASE WHEN ${eftTransactions.status} IN ('failed','cancelled','aborted','expired') THEN 1 END)::int`,
+        revenue: sql<string>`COALESCE(SUM(CASE WHEN ${eftTransactions.status} = 'completed' THEN CAST(${eftTransactions.amount} AS NUMERIC) ELSE 0 END), 0)`,
+        volume: sql<string>`COALESCE(SUM(CAST(${eftTransactions.amount} AS NUMERIC)), 0)`,
+      })
+        .from(eftTransactions)
+        .where(and(baseWhere, gte(eftTransactions.createdAt, from), lte(eftTransactions.createdAt, to)))
+        .groupBy(eftTransactions.paymentMethod),
     ]);
 
     const current = currentPeriodStats[0];
@@ -220,6 +234,16 @@ export async function GET(req: NextRequest) {
           reason: f.reason,
           count: f.count,
         })),
+        paymentMethodBreakdown: paymentMethodBreakdown.map(m => ({
+          method: m.paymentMethod || 'eft_direct',
+          label: (m.paymentMethod || 'eft_direct') === 'card_callpay' ? 'Card Payment' : 'Pay by Bank (EFT)',
+          totalCount: m.totalCount,
+          completedCount: m.completedCount,
+          failedCount: m.failedCount,
+          successRate: m.totalCount > 0 ? Math.round((m.completedCount / m.totalCount) * 1000) / 10 : 0,
+          revenue: parseFloat(m.revenue),
+          volume: parseFloat(m.volume),
+        })).sort((a, b) => b.totalCount - a.totalCount),
       },
     });
   } catch (error: any) {
