@@ -72,7 +72,7 @@ The master definition of what services exist. Admin manages this. `user_services
 ```
 payment_services
 ├── id: uuid (PK)
-├── code: text (unique)          — 'eft_direct', 'card_callpay', 'card_direct', etc.
+├── code: text (unique)          — 'eft_direct', 'card', 'card_direct', etc.
 ├── name: text                   — 'Pay by Bank (EFT)', 'Card Payments'
 ├── description: text            — Short description for dashboards
 ├── category: text               — 'eft', 'card', 'voucher', 'qr', 'crypto', 'wallet'
@@ -91,7 +91,7 @@ payment_services
 | code | name | category | provider | isActive |
 |------|------|----------|----------|----------|
 | `eft_direct` | Pay by Bank (EFT) | eft | internal | true |
-| `card_callpay` | Card Payments | card | callpay | false (until configured) |
+| `card` | Card Payments | card | callpay | false (until configured) |
 
 ---
 
@@ -101,7 +101,7 @@ payment_services
 
 | New Column | Type | Description |
 |------------|------|-------------|
-| `paymentMethod` | text | Service code: `eft_direct`, `card_callpay`, etc. Default `eft_direct` |
+| `paymentMethod` | text | Service code: `eft_direct`, `card`, etc. Default `eft_direct` |
 | `providerTransactionId` | text | External provider's transaction ID (CallPay `gateway_transaction_id`) |
 | `providerData` | jsonb | Provider-specific response data |
 
@@ -192,7 +192,7 @@ credit_card, eft, snapscan, zapper, capitec_pay, ott_voucher, onevoucher, bluvou
 - [x] Add `paymentMethod`, `providerTransactionId`, `providerData` columns to `eft_transactions`
 - [x] Add `serviceName` column to `eft_system_fees` (default `eft_direct`, add unique constraint)
 - [x] Add `serviceName` column to `eft_merchant_fees` (default `eft_direct`, change unique to merchantId+serviceName)
-- [x] Write seed script (`lib/db/seed-services.ts`) for `eft_direct` and `card_callpay`
+- [x] Write seed script (`lib/db/seed-services.ts`) for `eft_direct` and `card`
 - [x] Seed existing merchants with `eft_direct` in `user_services`
 - [x] Backfill `serviceName = 'eft_direct'` on existing fee rows
 - [x] Backfill `paymentMethod = 'eft_direct'` on existing transactions
@@ -253,7 +253,7 @@ credit_card, eft, snapscan, zapper, capitec_pay, ott_voucher, onevoucher, bluvou
 - [x] API: `POST /api/pay/[token]/initiate-card` — create CallPay payment key
   - Verifies payment token (expiry, revocation)
   - Creates payment key via CallPay API
-  - Sets transaction to `paymentMethod: "card_callpay"`, `status: "initiated"`
+  - Sets transaction to `paymentMethod: "card"`, `status: "initiated"`
   - Returns `redirectUrl` for frontend redirect
 
 ### Phase 6: Payment Page — Multi-Method Support ✅ COMPLETE
@@ -312,7 +312,7 @@ credit_card, eft, snapscan, zapper, capitec_pay, ott_voucher, onevoucher, bluvou
 - [ ] Direct card gateway integration
 - [ ] Card tokenization
 - [ ] 3D Secure flow
-- [ ] `card_direct` service in registry — replaces or supplements `card_callpay`
+- [ ] `card_direct` service in registry — replaces or supplements `card`
 
 ---
 

@@ -45,9 +45,9 @@ async function seedServices() {
   console.log('   ✅ eft_direct — Pay by Bank (EFT)');
 
   await db.insert(paymentServices).values({
-    code: 'card_callpay',
+    code: 'card',
     name: 'Card Payments',
-    description: 'Accept Visa, Mastercard, and other card payments via CallPay integration.',
+    description: 'Accept Visa, Mastercard, and other card payments via secure hosted payment page.',
     category: 'card',
     provider: 'callpay',
     providerConfig: {},
@@ -57,7 +57,20 @@ async function seedServices() {
     displayOrder: 2,
     metadata: { currencies: ['ZAR'], integration: 'hosted_redirect' },
   }).onConflictDoNothing();
-  console.log('   ✅ card_callpay — Card Payments (inactive until configured)');
+  console.log('   ✅ card — Card Payments (inactive until configured)');
+
+  // 1b. Migrate card_callpay → card in all tables (safe to re-run)
+  console.log('\n📋 Migrating card_callpay → card in existing records...');
+  // Delete the old service row if the new 'card' row already exists
+  await db.execute(sql`DELETE FROM payment_services WHERE code = 'card_callpay' AND EXISTS (SELECT 1 FROM payment_services WHERE code = 'card')`);
+  // If only the old row exists (no new 'card' row yet), rename it
+  await db.execute(sql`UPDATE payment_services SET code = 'card' WHERE code = 'card_callpay'`);
+  // Update references in all related tables
+  await db.execute(sql`UPDATE user_services SET service_name = 'card' WHERE service_name = 'card_callpay'`);
+  await db.execute(sql`UPDATE eft_system_fees SET service_name = 'card' WHERE service_name = 'card_callpay'`);
+  await db.execute(sql`UPDATE eft_merchant_fees SET service_name = 'card' WHERE service_name = 'card_callpay'`);
+  await db.execute(sql`UPDATE eft_transactions SET payment_method = 'card' WHERE payment_method = 'card_callpay'`);
+  console.log('   ✅ Migrated card_callpay → card across all tables');
 
   // 2. Backfill serviceName on eft_system_fees
   console.log('\n📋 Backfilling eft_system_fees.service_name...');

@@ -320,7 +320,7 @@ export async function POST(request: NextRequest) {
 
       // Human-readable service label
       const serviceLabel = svc.serviceName === "eft_direct" ? "EFT"
-        : svc.serviceName === "card_callpay" ? "Card (Callpay)"
+        : svc.serviceName === "card" ? "Card"
         : svc.serviceName.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
       if (svc.feeType === "fixed") {

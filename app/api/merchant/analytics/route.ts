@@ -236,7 +236,7 @@ export async function GET(req: NextRequest) {
         })),
         paymentMethodBreakdown: paymentMethodBreakdown.map(m => ({
           method: m.paymentMethod || 'eft_direct',
-          label: (m.paymentMethod || 'eft_direct') === 'card_callpay' ? 'Card Payment' : 'Pay by Bank (EFT)',
+          label: (m.paymentMethod || 'eft_direct') === 'card' ? 'Card Payment' : 'Pay by Bank (EFT)',
           totalCount: m.totalCount,
           completedCount: m.completedCount,
           failedCount: m.failedCount,

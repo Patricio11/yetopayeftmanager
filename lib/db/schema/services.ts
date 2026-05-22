@@ -4,7 +4,7 @@ import { pgTable, uuid, text, timestamp, boolean, jsonb, integer, index, uniqueI
 export const paymentServices = pgTable("payment_services", {
   id: uuid("id").defaultRandom().primaryKey(),
 
-  code: text("code").notNull().unique(), // 'eft_direct', 'card_callpay', etc.
+  code: text("code").notNull().unique(), // 'eft_direct', 'card', etc.
   name: text("name").notNull(),
   description: text("description"),
   category: text("category").notNull(), // 'eft', 'card', 'voucher', 'qr', 'crypto', 'wallet'

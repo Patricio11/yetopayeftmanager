@@ -203,7 +203,7 @@ export function TransactionsClient({
       esc(t.transaction.completedAt ? format(new Date(t.transaction.completedAt), "yyyy-MM-dd HH:mm:ss") : "-"),
       esc(t.transaction.reference),
       esc(t.bank?.bankName || "-"),
-      esc(t.transaction.paymentMethod === 'card_callpay' ? 'Card' : t.transaction.paymentMethod === 'eft_direct' ? 'EFT' : (t.transaction.paymentMethod || '-')),
+      esc(t.transaction.paymentMethod === 'card' ? 'Card' : t.transaction.paymentMethod === 'eft_direct' ? 'EFT' : (t.transaction.paymentMethod || '-')),
       `R ${parseFloat(t.transaction.amount).toFixed(2)}`,
       esc(t.transaction.status || "-"),
       esc(getFailureReason(t.transaction)),
@@ -465,7 +465,7 @@ export function TransactionsClient({
                       <SelectContent className="cursor-pointer">
                         <SelectItem value="all" className="cursor-pointer">All Methods</SelectItem>
                         <SelectItem value="eft_direct" className="cursor-pointer">Pay by Bank</SelectItem>
-                        <SelectItem value="card_callpay" className="cursor-pointer">Card Payment</SelectItem>
+                        <SelectItem value="card" className="cursor-pointer">Card Payment</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -630,13 +630,13 @@ export function TransactionsClient({
                       </TableCell>
                       <TableCell>
                         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                          item.transaction.paymentMethod === 'card_callpay'
+                          item.transaction.paymentMethod === 'card'
                             ? 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400'
                             : item.transaction.paymentMethod === 'eft_direct'
                             ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'
                             : 'bg-slate-100 dark:bg-slate-900/20 text-slate-700 dark:text-slate-400'
                         }`}>
-                          {item.transaction.paymentMethod === 'card_callpay' ? (
+                          {item.transaction.paymentMethod === 'card' ? (
                             <><CreditCard className="w-3 h-3" /> Card</>
                           ) : item.transaction.paymentMethod === 'eft_direct' ? (
                             <><Landmark className="w-3 h-3" /> EFT</>

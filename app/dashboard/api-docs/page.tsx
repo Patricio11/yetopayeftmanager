@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "@/lib/auth-client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -33,12 +34,35 @@ import { IntegrationFlows } from "./components/IntegrationFlows";
 import { WebhooksSection as WebhooksSectionComponent } from "./components/WebhooksSection";
 import { CodeBlock as CodeBlockComponent } from "./components/CodeBlock";
 
+interface MerchantService {
+  id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  category: string;
+  icon: string | null;
+  isEnabled: boolean;
+}
+
 export default function ApiDocsPage() {
   const { toast } = useToast();
+  const { data: session } = useSession();
   const [selectedLanguage, setSelectedLanguage] = useState<"node" | "python" | "php" | "curl">("node");
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [activeHeroButton, setActiveHeroButton] = useState<string | null>(null);
   const [integrationFlow, setIntegrationFlow] = useState<"sdk" | "direct">("sdk");
+  const [services, setServices] = useState<MerchantService[]>([]);
+
+  const isAdmin = (session?.user as any)?.role === "admin";
+
+  useEffect(() => {
+    fetch("/api/merchant/services")
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) setServices(data.data);
+      })
+      .catch(() => {});
+  }, []);
 
   const handleCopy = (code: string, label: string) => {
     navigator.clipboard.writeText(code);
@@ -179,7 +203,7 @@ export default function ApiDocsPage() {
 
             {/* Payment Methods */}
             <section id="payment-methods">
-              <PaymentMethodsSection />
+              <PaymentMethodsSection services={services} isAdmin={isAdmin} />
             </section>
 
             {/* Quick Start */}
@@ -613,7 +637,7 @@ function EndpointDetailFull({ endpointId, language, onCopy, copiedCode }: any) {
       bodyParams: [
         { name: "amount", type: "number", required: true, desc: "Payment amount in ZAR (min: 1)" },
         { name: "reference", type: "string", required: true, desc: "Your unique internal reference" },
-        { name: "paymentMethod", type: "string", required: false, desc: "Default method: \"eft_direct\" (EFT) or \"card_callpay\" (Card). Customer can switch on the payment page." },
+        { name: "paymentMethod", type: "string", required: false, desc: "Default method: \"eft_direct\" (EFT) or \"card\" (Card). Customer can switch on the payment page." },
         { name: "description", type: "string", required: false, desc: "Payment description shown to customer" },
         { name: "customerName", type: "string", required: false, desc: "Customer's name" },
         { name: "customerEmail", type: "string", required: false, desc: "Customer's email" },
@@ -1045,8 +1069,59 @@ function ParamTable({ params }: { params: any[] }) {
 
 // Old WebhooksSection removed - now using WebhooksSectionComponent from components folder
 
+// Static metadata for known payment methods
+const METHOD_META: Record<string, {
+  icon: typeof Landmark;
+  color: string;
+  border: string;
+  bg: string;
+  text: string;
+  badge: string;
+  features: string[];
+}> = {
+  eft_direct: {
+    icon: Landmark,
+    color: "emerald",
+    border: "border-emerald-200",
+    bg: "bg-emerald-50/50",
+    text: "text-emerald-800",
+    badge: "bg-emerald-600 text-white",
+    features: [
+      "Direct bank-to-bank transfer",
+      "Lower transaction fees",
+      "Supports all major SA banks",
+      "Real-time payment confirmation",
+    ],
+  },
+  card: {
+    icon: CreditCard,
+    color: "violet",
+    border: "border-violet-200",
+    bg: "bg-violet-50/50",
+    text: "text-violet-800",
+    badge: "bg-violet-600 text-white",
+    features: [
+      "Visa, Mastercard accepted",
+      "Hosted payment page (no PCI scope)",
+      "3D Secure supported",
+      "Instant confirmation via webhook",
+    ],
+  },
+};
+
+const ICON_COLORS: Record<string, { bg: string; text: string }> = {
+  emerald: { bg: "bg-emerald-100", text: "text-emerald-600" },
+  violet: { bg: "bg-violet-100", text: "text-violet-600" },
+  blue: { bg: "bg-blue-100", text: "text-blue-600" },
+  amber: { bg: "bg-amber-100", text: "text-amber-600" },
+};
+
 // Payment Methods Section
-function PaymentMethodsSection() {
+function PaymentMethodsSection({ services, isAdmin }: { services: MerchantService[]; isAdmin: boolean }) {
+  const visibleServices = isAdmin
+    ? services
+    : services.filter(s => s.isEnabled);
+
   return (
     <Card>
       <CardHeader>
@@ -1056,111 +1131,127 @@ function PaymentMethodsSection() {
           </div>
           <div>
             <CardTitle>Payment Methods</CardTitle>
-            <CardDescription>YetoPay supports multiple payment methods through a single API</CardDescription>
+            <CardDescription>
+              {isAdmin
+                ? "All payment methods available on the platform"
+                : "Payment methods enabled for your account"}
+            </CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
-          <Code className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-blue-900">
-            <p className="font-medium mb-1">One API, Multiple Payment Methods</p>
-            <p className="text-blue-800">
-              You create a single payment link and the customer chooses their preferred method on the payment page.
-              No changes to your integration needed — the same API handles EFT and Card payments.
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* EFT */}
-          <div className="border-2 border-emerald-200 bg-emerald-50/50 rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
-                <Landmark className="w-6 h-6 text-emerald-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg text-emerald-900">EFT / Pay By Bank</h3>
-                <Badge className="bg-emerald-600 text-white text-xs">eft_direct</Badge>
-              </div>
+        {visibleServices.length > 1 && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
+            <Code className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-blue-900">
+              <p className="font-medium mb-1">One API, Multiple Payment Methods</p>
+              <p className="text-blue-800">
+                You create a single payment link and the customer chooses their preferred method on the payment page.
+                No changes to your integration needed — the same API handles all payment methods.
+              </p>
             </div>
-            <ul className="space-y-2 text-sm text-emerald-800">
-              <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" /> Direct bank-to-bank transfer</li>
-              <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" /> Lower transaction fees</li>
-              <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" /> Supports all major SA banks</li>
-              <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" /> Real-time payment confirmation</li>
-            </ul>
           </div>
+        )}
 
-          {/* Card */}
-          <div className="border-2 border-violet-200 bg-violet-50/50 rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-violet-100 rounded-lg flex items-center justify-center">
-                <CreditCard className="w-6 h-6 text-violet-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg text-violet-900">Card Payment</h3>
-                <Badge className="bg-violet-600 text-white text-xs">card_callpay</Badge>
-              </div>
-            </div>
-            <ul className="space-y-2 text-sm text-violet-800">
-              <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-violet-600 flex-shrink-0" /> Visa, Mastercard accepted</li>
-              <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-violet-600 flex-shrink-0" /> Hosted payment page (no PCI scope)</li>
-              <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-violet-600 flex-shrink-0" /> 3D Secure supported</li>
-              <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-violet-600 flex-shrink-0" /> Instant confirmation via webhook</li>
-            </ul>
+        {visibleServices.length === 0 ? (
+          <div className="text-center py-8 text-sm text-gray-500">
+            No payment methods are currently enabled for your account. Contact support to get started.
           </div>
-        </div>
+        ) : (
+          <div className={`grid grid-cols-1 ${visibleServices.length > 1 ? "md:grid-cols-2" : ""} gap-4`}>
+            {visibleServices.map(service => {
+              const meta = METHOD_META[service.code];
+              const iconColor = ICON_COLORS[meta?.color || "blue"] || ICON_COLORS.blue;
+              const Icon = meta?.icon || Globe;
+              return (
+                <div key={service.id} className={`border-2 ${meta?.border || "border-gray-200"} ${meta?.bg || "bg-gray-50/50"} rounded-xl p-6`}>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className={`w-12 h-12 ${iconColor.bg} rounded-lg flex items-center justify-center`}>
+                      <Icon className={`w-6 h-6 ${iconColor.text}`} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-lg">{service.name}</h3>
+                        {isAdmin && !service.isEnabled && (
+                          <Badge variant="outline" className="text-xs text-gray-500">Inactive</Badge>
+                        )}
+                      </div>
+                      <Badge className={`${meta?.badge || "bg-gray-600 text-white"} text-xs`}>{service.code}</Badge>
+                    </div>
+                  </div>
+                  {meta?.features ? (
+                    <ul className={`space-y-2 text-sm ${meta.text}`}>
+                      {meta.features.map(f => (
+                        <li key={f} className="flex items-center gap-2">
+                          <CheckCircle className={`w-4 h-4 ${iconColor.text} flex-shrink-0`} /> {f}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-gray-600">{service.description}</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* How it works */}
-        <div>
-          <h3 className="font-semibold text-lg mb-3">How It Works</h3>
-          <div className="flex items-center gap-2 text-sm overflow-x-auto pb-2">
-            {[
-              "1. You create a payment link",
-              "2. Customer opens the link",
-              "3. Customer picks EFT or Card",
-              "4. Payment is processed",
-              "5. Webhook fires with paymentMethod"
-            ].map((step, i, arr) => (
-              <div key={step} className="flex items-center gap-2 flex-shrink-0">
-                <span className="bg-gradient-to-r from-amber-500 to-pink-600 text-white rounded-full px-3 py-1.5 font-medium text-xs">{step}</span>
-                {i < arr.length - 1 && <ArrowRight className="w-4 h-4 text-slate-400" />}
-              </div>
-            ))}
+        {visibleServices.length > 0 && (
+          <div>
+            <h3 className="font-semibold text-lg mb-3">How It Works</h3>
+            <div className="flex items-center gap-2 text-sm overflow-x-auto pb-2">
+              {[
+                "1. You create a payment link",
+                "2. Customer opens the link",
+                visibleServices.length > 1 ? "3. Customer picks a method" : "3. Customer confirms payment",
+                "4. Payment is processed",
+                "5. Webhook fires with paymentMethod"
+              ].map((step, i, arr) => (
+                <div key={step} className="flex items-center gap-2 flex-shrink-0">
+                  <span className="bg-gradient-to-r from-amber-500 to-pink-600 text-white rounded-full px-3 py-1.5 font-medium text-xs">{step}</span>
+                  {i < arr.length - 1 && <ArrowRight className="w-4 h-4 text-slate-400" />}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* paymentMethod field */}
-        <div>
-          <h3 className="font-semibold text-lg mb-3">The paymentMethod Field</h3>
-          <div className="border rounded-lg overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 dark:bg-gray-800">
-                <tr>
-                  <th className="text-left p-3 font-semibold text-xs">Value</th>
-                  <th className="text-left p-3 font-semibold text-xs">Method</th>
-                  <th className="text-left p-3 font-semibold text-xs">Description</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                <tr>
-                  <td className="p-3"><code className="text-emerald-600 text-xs font-mono bg-emerald-50 px-2 py-0.5 rounded">eft_direct</code></td>
-                  <td className="p-3 text-xs font-medium">EFT / Bank Transfer</td>
-                  <td className="p-3 text-xs text-gray-600">Customer pays via their bank. Default method.</td>
-                </tr>
-                <tr>
-                  <td className="p-3"><code className="text-violet-600 text-xs font-mono bg-violet-50 px-2 py-0.5 rounded">card_callpay</code></td>
-                  <td className="p-3 text-xs font-medium">Card (Visa/Mastercard)</td>
-                  <td className="p-3 text-xs text-gray-600">Customer pays via credit/debit card through CallPay.</td>
-                </tr>
-              </tbody>
-            </table>
+        {visibleServices.length > 0 && (
+          <div>
+            <h3 className="font-semibold text-lg mb-3">The paymentMethod Field</h3>
+            <div className="border rounded-lg overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 dark:bg-gray-800">
+                  <tr>
+                    <th className="text-left p-3 font-semibold text-xs">Value</th>
+                    <th className="text-left p-3 font-semibold text-xs">Method</th>
+                    <th className="text-left p-3 font-semibold text-xs">Description</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {visibleServices.map(service => {
+                    const meta = METHOD_META[service.code];
+                    const codeColor = meta?.color === "emerald" ? "text-emerald-600 bg-emerald-50"
+                      : meta?.color === "violet" ? "text-violet-600 bg-violet-50"
+                      : "text-blue-600 bg-blue-50";
+                    return (
+                      <tr key={service.code}>
+                        <td className="p-3"><code className={`${codeColor} text-xs font-mono px-2 py-0.5 rounded`}>{service.code}</code></td>
+                        <td className="p-3 text-xs font-medium">{service.name}</td>
+                        <td className="p-3 text-xs text-gray-600">{service.description || "—"}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              This field appears in payment link responses, transaction details, and webhook payloads. Use it to reconcile which method the customer used.
+            </p>
           </div>
-          <p className="text-xs text-gray-500 mt-2">
-            This field appears in payment link responses, transaction details, and webhook payloads. Use it to reconcile which method the customer used.
-          </p>
-        </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -1358,7 +1449,7 @@ const requestBody = JSON.stringify({
   amount: 250.00,
   reference: 'INV-001',
   description: 'Order payment',
-  // paymentMethod: 'eft_direct',  // or 'card_callpay' — optional, customer chooses on payment page
+  // paymentMethod: 'eft_direct',  // or 'card' — optional, customer chooses on payment page
   successUrl: 'https://your-site.com/payment/success',
   failureUrl: 'https://your-site.com/payment/failure',
   cancelledUrl: 'https://your-site.com/payment/cancelled',
@@ -1410,7 +1501,7 @@ request_body = json.dumps({
     'amount': 250.00,
     'reference': 'INV-001',
     'description': 'Order payment',
-    # 'paymentMethod': 'eft_direct',  # or 'card_callpay' — optional, customer chooses on payment page
+    # 'paymentMethod': 'eft_direct',  # or 'card' — optional, customer chooses on payment page
     'successUrl': 'https://your-site.com/payment/success',
     'failureUrl': 'https://your-site.com/payment/failure',
     'cancelledUrl': 'https://your-site.com/payment/cancelled',
@@ -1457,7 +1548,7 @@ $requestBody = json_encode([
     'amount' => 250.00,
     'reference' => 'INV-001',
     'description' => 'Order payment',
-    // 'paymentMethod' => 'eft_direct',  // or 'card_callpay' — optional, customer chooses on payment page
+    // 'paymentMethod' => 'eft_direct',  // or 'card' — optional, customer chooses on payment page
     'successUrl' => 'https://your-site.com/payment/success',
     'failureUrl' => 'https://your-site.com/payment/failure',
     'cancelledUrl' => 'https://your-site.com/payment/cancelled',

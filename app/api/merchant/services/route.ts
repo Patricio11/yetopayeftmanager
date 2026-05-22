@@ -9,13 +9,21 @@ export async function GET() {
   if (!auth.authorized) return auth.response;
 
   const userId = auth.session.user.id;
+  const isAdmin = (auth.session.user as any).role === "admin";
 
   try {
-    const allServices = await db
+    const query = db
       .select()
       .from(paymentServices)
-      .where(eq(paymentServices.isActive, true))
       .orderBy(asc(paymentServices.displayOrder));
+
+    const allServices = isAdmin
+      ? await query
+      : await db
+          .select()
+          .from(paymentServices)
+          .where(eq(paymentServices.isActive, true))
+          .orderBy(asc(paymentServices.displayOrder));
 
     const merchantServices = await db
       .select()

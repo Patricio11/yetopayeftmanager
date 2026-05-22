@@ -57,7 +57,7 @@ That's it. Your integration is the same regardless of which method the customer 
 | Method | Code | Description |
 |--------|------|-------------|
 | Pay by Bank (EFT) | `eft_direct` | Customer pays directly from their bank account (FNB, Standard Bank, ABSA, Nedbank, Capitec) |
-| Card Payments | `card_callpay` | Credit/debit card via secure hosted payment page |
+| Card Payments | `card` | Credit/debit card via secure hosted payment page |
 
 > **Note:** Payment methods are enabled per merchant by your administrator. If only one method is enabled, customers go straight to that flow. If multiple methods are enabled, customers see a payment method picker.
 
@@ -374,7 +374,7 @@ GET /api/payment-links?limit=50&offset=0&status=completed&from=2024-12-01
 #### List Transactions
 
 ```http
-GET /api/merchant/transactions?status=completed&paymentMethod=card_callpay&limit=20
+GET /api/merchant/transactions?status=completed&paymentMethod=card&limit=20
 ```
 
 **Query Parameters:**
@@ -382,7 +382,7 @@ GET /api/merchant/transactions?status=completed&paymentMethod=card_callpay&limit
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `status` | string | No | Filter by status |
-| `paymentMethod` | string | No | Filter by payment method: `eft_direct`, `card_callpay` |
+| `paymentMethod` | string | No | Filter by payment method: `eft_direct`, `card` |
 | `limit` | number | No | Results per page (default: 50, max: 100) |
 | `offset` | number | No | Pagination offset |
 | `from` | string | No | Start date (ISO 8601) |
@@ -398,7 +398,7 @@ GET /api/merchant/transactions?status=completed&paymentMethod=card_callpay&limit
       "amount": "250.00",
       "reference": "INV-2024-001",
       "status": "completed",
-      "paymentMethod": "card_callpay",
+      "paymentMethod": "card",
       "customerEmail": "customer@example.com",
       "customerName": "Jane Customer",
       "createdAt": "2024-12-01T15:00:00Z",
@@ -420,7 +420,7 @@ GET /api/merchant/transactions?status=completed&paymentMethod=card_callpay&limit
 | `paymentMethod` value | Meaning |
 |-----------------------|---------|
 | `eft_direct` | Customer paid via EFT (Pay by Bank) |
-| `card_callpay` | Customer paid via credit/debit card |
+| `card` | Customer paid via credit/debit card |
 | `null` | Legacy transaction (before multi-method support) — treat as EFT |
 
 ---
@@ -549,7 +549,7 @@ When a payment status changes, YetoPay sends a POST request to the `notifyUrl` y
   "reference": "INV-2024-001",
   "amount": 250.00,
   "status": "completed",
-  "payment_method": "card_callpay",
+  "payment_method": "card",
   "timestamp": "2024-12-01T15:30:00Z",
   "gateway_result": "success",
   "message": "Payment completed successfully"
@@ -562,7 +562,7 @@ When a payment status changes, YetoPay sends a POST request to the `notifyUrl` y
 | `reference` | string | Your reference from the payment link |
 | `amount` | number | Payment amount in ZAR |
 | `status` | string | `completed`, `failed`, `cancelled`, or `aborted` |
-| `payment_method` | string | `eft_direct` or `card_callpay`. May be absent for legacy transactions. |
+| `payment_method` | string | `eft_direct` or `card`. May be absent for legacy transactions. |
 | `timestamp` | string | ISO 8601 timestamp |
 | `gateway_result` | string | Result from the payment gateway |
 | `message` | string | Human-readable status message |
@@ -930,7 +930,7 @@ app.post('/webhooks/yetopay', (req, res) => {
     // Optional: track payment method in your system
     db.orders.update({ reference }, {
       status: 'paid',
-      paymentMethod: method === 'card_callpay' ? 'card' : 'eft',
+      paymentMethod: method === 'card' ? 'card' : 'eft',
     });
   }
 
@@ -942,7 +942,7 @@ If you want to filter transactions by method:
 
 ```bash
 # Get only card payments
-GET /api/merchant/transactions?paymentMethod=card_callpay&status=completed
+GET /api/merchant/transactions?paymentMethod=card&status=completed
 
 # Get only EFT payments
 GET /api/merchant/transactions?paymentMethod=eft_direct&status=completed

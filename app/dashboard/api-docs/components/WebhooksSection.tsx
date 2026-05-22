@@ -410,7 +410,7 @@ function getWebhookHandler() {
 
   // 2. Get event data
   const event = req.body;
-  const { paymentMethod } = event.data; // "eft_direct" or "card_callpay"
+  const { paymentMethod } = event.data; // "eft_direct" or "card"
 
   // 3. Handle different event types (same handler for EFT and Card)
   switch (event.type) {

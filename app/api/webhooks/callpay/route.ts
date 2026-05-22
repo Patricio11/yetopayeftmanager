@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       request.headers.get("x-real-ip") ||
       "";
 
-    const providerInfo = await getProviderConfig("card_callpay");
+    const providerInfo = await getProviderConfig("card");
     if (!providerInfo) {
       console.error("CallPay webhook received but service not configured");
       return NextResponse.json({ error: "Service not configured" }, { status: 503 });

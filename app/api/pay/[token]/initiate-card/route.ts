@@ -44,7 +44,7 @@ export async function POST(
       return NextResponse.json({ error: "Payment already completed" }, { status: 400 });
     }
 
-    const providerInfo = await getProviderConfig("card_callpay");
+    const providerInfo = await getProviderConfig("card");
     if (!providerInfo) {
       return NextResponse.json({ error: "Card payments not available" }, { status: 503 });
     }
@@ -65,7 +65,7 @@ export async function POST(
     await db
       .update(eftTransactions)
       .set({
-        paymentMethod: "card_callpay",
+        paymentMethod: "card",
         status: "initiated",
         providerData: {
           payment_key: paymentKeyResponse.key,
