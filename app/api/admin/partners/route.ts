@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/authorization';
 import { db } from '@/lib/db';
-import { users, verifications } from '@/lib/db/schema';
+import { users, verifications, userServices } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import crypto from 'crypto';
@@ -13,6 +13,7 @@ const createPartnerSchema = z.object({
   name: z.string().min(1),
   companyName: z.string().min(1),
   companyLogoUrl: z.string().url().optional(),
+  services: z.array(z.string()).min(1, "At least one service must be selected"),
 });
 
 /**
@@ -73,6 +74,18 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date(),
       })
       .returning();
+
+    // Assign selected services
+    if (validatedData.services.length > 0) {
+      await db.insert(userServices).values(
+        validatedData.services.map(code => ({
+          id: crypto.randomUUID(),
+          userId: partnerId,
+          serviceName: code,
+          isEnabled: true,
+        }))
+      ).onConflictDoNothing();
+    }
 
     // Generate a secure invitation token (48 bytes = 96 chars hex)
     const invitationToken = crypto.randomBytes(48).toString('hex');

@@ -3,9 +3,10 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   Building2, Search, Plus, Mail, Copy, CheckCircle, XCircle,
-  Clock, AlertCircle, X, Users, ChevronDown,
+  Clock, AlertCircle, X, Users, ChevronDown, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { useRouter } from "next/navigation";
 
 interface Merchant {
@@ -229,6 +230,23 @@ function InviteMerchantModal({
   const [inviteEmail, setInviteEmail] = useState("");
   const [showLink, setShowLink] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [availableServices, setAvailableServices] = useState<any[]>([]);
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [loadingServices, setLoadingServices] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/merchant/services")
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          const enabled = data.data.filter((s: any) => s.isEnabled);
+          setAvailableServices(enabled);
+          setSelectedServices(enabled.map((s: any) => s.code));
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoadingServices(false));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -239,7 +257,7 @@ function InviteMerchantModal({
       const res = await fetch("/api/partner/merchants", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email: email.toLowerCase(), companyName }),
+        body: JSON.stringify({ name, email: email.toLowerCase(), companyName, services: selectedServices }),
       });
       const json = await res.json();
       if (json.success) {
@@ -354,11 +372,45 @@ function InviteMerchantModal({
               />
             </div>
 
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Payment Services</label>
+              <p className="text-xs text-slate-400 mb-2">Select which payment methods this merchant can use</p>
+              {loadingServices ? (
+                <div className="flex items-center gap-2 text-xs text-slate-400 py-2"><Loader2 className="w-4 h-4 animate-spin" /> Loading services...</div>
+              ) : availableServices.length === 0 ? (
+                <p className="text-xs text-slate-400 py-2">No services available</p>
+              ) : (
+                <div className="space-y-2">
+                  {availableServices.map((svc: any) => (
+                    <div key={svc.id} className="flex items-center justify-between p-3 border border-slate-200 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${selectedServices.includes(svc.code) ? 'bg-amber-100' : 'bg-slate-100'}`}>
+                          {svc.category === 'card' ? <span className="text-sm">💳</span> : <span className="text-sm">🏦</span>}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-slate-700">{svc.name}</p>
+                          <p className="text-xs text-slate-400">{svc.code}</p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={selectedServices.includes(svc.code)}
+                        onCheckedChange={(checked) => {
+                          setSelectedServices(prev =>
+                            checked ? [...prev, svc.code] : prev.filter(c => c !== svc.code)
+                          );
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="flex justify-end gap-3 pt-2">
               <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
               <Button
                 type="submit"
-                disabled={submitting}
+                disabled={submitting || selectedServices.length === 0}
                 className="bg-amber-500 hover:bg-amber-600 text-white"
               >
                 {submitting ? "Sending..." : "Send Invitation"}

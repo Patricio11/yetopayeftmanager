@@ -5,13 +5,14 @@ import Link from 'next/link';
 import {
   Search, Plus, Building2, CheckCircle, XCircle, Clock, RefreshCw,
   Copy, ChevronRight, Eye, Users, ArrowUpDown, Filter,
-  Mail, Wallet, Shield, Activity, MoreHorizontal, ExternalLink,
+  Mail, Wallet, Shield, Activity, MoreHorizontal, ExternalLink, Loader2,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 
 interface Merchant {
@@ -52,6 +53,9 @@ export default function AdminMerchantsPage() {
   const [creating, setCreating] = useState(false);
   const [inviteLink, setInviteLink] = useState('');
   const [form, setForm] = useState({ name: '', email: '', companyName: '' });
+  const [availableServices, setAvailableServices] = useState<any[]>([]);
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [loadingServices, setLoadingServices] = useState(true);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -95,6 +99,20 @@ export default function AdminMerchantsPage() {
   }, []);
 
   useEffect(() => { fetchMerchants(); }, [fetchMerchants]);
+
+  useEffect(() => {
+    fetch('/api/admin/services')
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          const active = data.data.filter((s: any) => s.isActive);
+          setAvailableServices(active);
+          setSelectedServices(active.map((s: any) => s.code));
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoadingServices(false));
+  }, []);
 
   const uniquePartners = Array.from(
     new Map(
@@ -143,13 +161,14 @@ export default function AdminMerchantsPage() {
     try {
       const res = await fetch('/api/admin/merchants', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, services: selectedServices }),
       });
       const data = await res.json();
       if (data.success) {
         toast({ title: 'Success', description: 'Merchant created' });
         setInviteLink(data.invitation?.link || '');
         setForm({ name: '', email: '', companyName: '' });
+        setSelectedServices(availableServices.map((s: any) => s.code));
         fetchMerchants();
       } else {
         toast({ title: 'Error', description: data.error || 'Failed', variant: 'destructive' });
@@ -512,9 +531,42 @@ export default function AdminMerchantsPage() {
                   <Label className="text-xs font-medium text-slate-600 dark:text-slate-400">Company Name</Label>
                   <Input value={form.companyName} onChange={(e) => setForm({ ...form, companyName: e.target.value })} required placeholder="Company (Pty) Ltd" className="mt-1" />
                 </div>
+                <div>
+                  <Label className="text-xs font-medium text-slate-600 dark:text-slate-400">Payment Services</Label>
+                  <p className="text-xs text-slate-400 mb-2">Select which payment methods this merchant can use</p>
+                  {loadingServices ? (
+                    <div className="flex items-center gap-2 text-xs text-slate-400 py-2"><Loader2 className="w-4 h-4 animate-spin" /> Loading services...</div>
+                  ) : availableServices.length === 0 ? (
+                    <p className="text-xs text-slate-400 py-2">No services available</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {availableServices.map((svc: any) => (
+                        <div key={svc.id} className="flex items-center justify-between p-3 border border-slate-200 dark:border-slate-700 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${selectedServices.includes(svc.code) ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-slate-100 dark:bg-slate-700'}`}>
+                              {svc.category === 'card' ? <span className="text-sm">💳</span> : <span className="text-sm">🏦</span>}
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{svc.name}</p>
+                              <p className="text-xs text-slate-400">{svc.code}</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={selectedServices.includes(svc.code)}
+                            onCheckedChange={(checked) => {
+                              setSelectedServices(prev =>
+                                checked ? [...prev, svc.code] : prev.filter(c => c !== svc.code)
+                              );
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <div className="flex gap-3 pt-2">
                   <Button type="button" variant="outline" onClick={() => setShowCreate(false)} className="flex-1">Cancel</Button>
-                  <Button type="submit" disabled={creating} className="flex-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white">
+                  <Button type="submit" disabled={creating || selectedServices.length === 0} className="flex-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white">
                     {creating ? 'Creating...' : 'Create & Invite'}
                   </Button>
                 </div>

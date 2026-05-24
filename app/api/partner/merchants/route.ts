@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requirePartner } from '@/lib/auth/authorization';
 import { db } from '@/lib/db';
-import { users, verifications } from '@/lib/db/schema';
+import { users, verifications, userServices } from '@/lib/db/schema';
 import { eq, and, count, sql, ilike, or } from 'drizzle-orm';
 import { z } from 'zod';
 import crypto from 'crypto';
@@ -12,6 +12,7 @@ const createMerchantSchema = z.object({
   email: z.string().email(),
   name: z.string().min(1),
   companyName: z.string().min(1),
+  services: z.array(z.string()).min(1, "At least one service must be selected"),
 });
 
 /**
@@ -114,6 +115,20 @@ export async function POST(request: NextRequest) {
     });
     const partnerCompanyName = partner?.companyName || partner?.name || 'Partner';
 
+    // Validate: partner can only assign services they have enabled
+    const partnerServices = await db
+      .select({ serviceName: userServices.serviceName })
+      .from(userServices)
+      .where(and(eq(userServices.userId, partnerId), eq(userServices.isEnabled, true)));
+    const partnerServiceCodes = partnerServices.map(s => s.serviceName);
+    const invalidServices = validatedData.services.filter(s => !partnerServiceCodes.includes(s));
+    if (invalidServices.length > 0) {
+      return NextResponse.json(
+        { success: false, message: `You cannot assign services you don't have enabled: ${invalidServices.join(', ')}` },
+        { status: 403 }
+      );
+    }
+
     const merchantId = crypto.randomUUID();
 
     const [merchant] = await db
@@ -131,6 +146,18 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date(),
       })
       .returning();
+
+    // Assign selected services to merchant
+    if (validatedData.services.length > 0) {
+      await db.insert(userServices).values(
+        validatedData.services.map(code => ({
+          id: crypto.randomUUID(),
+          userId: merchantId,
+          serviceName: code,
+          isEnabled: true,
+        }))
+      ).onConflictDoNothing();
+    }
 
     // Generate invitation token
     const invitationToken = crypto.randomBytes(48).toString('hex');

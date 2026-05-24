@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Search, Plus, Users, CheckCircle, XCircle, RefreshCw, Copy, ChevronRight, Percent, Mail, Send, ChevronDown, Eye } from 'lucide-react';
+import { Search, Plus, Users, CheckCircle, XCircle, RefreshCw, Copy, ChevronRight, Percent, Mail, Send, ChevronDown, Eye, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { Switch } from '@/components/ui/switch';
 
 interface Partner {
   id: string;
@@ -37,6 +38,9 @@ export default function AdminPartnersPage() {
   const [showLink, setShowLink] = useState(false);
   const [resendingId, setResendingId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', email: '', companyName: '' });
+  const [availableServices, setAvailableServices] = useState<any[]>([]);
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [loadingServices, setLoadingServices] = useState(true);
 
   const handleImpersonate = async (userId: string, name: string) => {
     try {
@@ -69,6 +73,20 @@ export default function AdminPartnersPage() {
 
   useEffect(() => { fetchPartners(); }, [fetchPartners]);
 
+  useEffect(() => {
+    fetch('/api/admin/services')
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          const active = data.data.filter((s: any) => s.isActive);
+          setAvailableServices(active);
+          setSelectedServices(active.map((s: any) => s.code));
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoadingServices(false));
+  }, []);
+
   const filtered = partners.filter(p => {
     const s = search.toLowerCase();
     return !search || p.name?.toLowerCase().includes(s) || p.email?.toLowerCase().includes(s) || p.companyName?.toLowerCase().includes(s);
@@ -87,7 +105,7 @@ export default function AdminPartnersPage() {
     try {
       const res = await fetch('/api/admin/partners', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, services: selectedServices }),
       });
       const data = await res.json();
       if (data.success) {
@@ -96,6 +114,7 @@ export default function AdminPartnersPage() {
         setInviteEmail(form.email);
         setShowLink(false);
         setForm({ name: '', email: '', companyName: '' });
+        setSelectedServices(availableServices.map((s: any) => s.code));
         fetchPartners();
       } else {
         toast({ title: 'Error', description: data.error || 'Failed to create partner', variant: 'destructive' });
@@ -285,9 +304,42 @@ export default function AdminPartnersPage() {
                 <div><Label>Name</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required placeholder="Jane Doe" /></div>
                 <div><Label>Email</Label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required placeholder="jane@partner.com" /></div>
                 <div><Label>Company Name</Label><Input value={form.companyName} onChange={(e) => setForm({ ...form, companyName: e.target.value })} required placeholder="Partner Co (Pty) Ltd" /></div>
+                <div>
+                  <Label>Payment Services</Label>
+                  <p className="text-xs text-slate-400 mb-2">Select which payment methods this partner can offer</p>
+                  {loadingServices ? (
+                    <div className="flex items-center gap-2 text-xs text-slate-400 py-2"><Loader2 className="w-4 h-4 animate-spin" /> Loading services...</div>
+                  ) : availableServices.length === 0 ? (
+                    <p className="text-xs text-slate-400 py-2">No services available</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {availableServices.map((svc: any) => (
+                        <div key={svc.id} className="flex items-center justify-between p-3 border border-slate-200 dark:border-slate-700 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${selectedServices.includes(svc.code) ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-slate-100 dark:bg-slate-700'}`}>
+                              {svc.category === 'card' ? <span className="text-sm">💳</span> : <span className="text-sm">🏦</span>}
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{svc.name}</p>
+                              <p className="text-xs text-slate-400">{svc.code}</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={selectedServices.includes(svc.code)}
+                            onCheckedChange={(checked) => {
+                              setSelectedServices(prev =>
+                                checked ? [...prev, svc.code] : prev.filter(c => c !== svc.code)
+                              );
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <div className="flex gap-3 pt-2">
                   <Button type="button" variant="outline" onClick={() => setShowCreate(false)} className="flex-1">Cancel</Button>
-                  <Button type="submit" disabled={creating} className="flex-1 bg-gradient-to-r from-amber-500 to-pink-600 text-white">{creating ? 'Creating...' : 'Create & Invite'}</Button>
+                  <Button type="submit" disabled={creating || selectedServices.length === 0} className="flex-1 bg-gradient-to-r from-amber-500 to-pink-600 text-white">{creating ? 'Creating...' : 'Create & Invite'}</Button>
                 </div>
               </form>
             )}
