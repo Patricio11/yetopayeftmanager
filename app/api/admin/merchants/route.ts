@@ -6,6 +6,7 @@ import { eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import crypto from 'crypto';
 import { writeAuditLog } from '@/lib/audit';
+import { sendMerchantInvitationEmail } from '@/lib/email';
 
 const createMerchantSchema = z.object({
   email: z.string().email(),
@@ -128,6 +129,11 @@ export async function POST(request: NextRequest) {
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     const invitationLink = `${appUrl}/auth/accept-invitation?token=${invitationToken}&email=${encodeURIComponent(validatedData.email)}`;
+
+    // Send invitation email (fire-and-forget)
+    sendMerchantInvitationEmail(validatedData.email, invitationLink).catch((err) =>
+      console.error('Failed to send merchant invitation email:', err)
+    );
 
     writeAuditLog({ userId: auth.session.user.id, action: "create", resource: "merchant", resourceId: merchantId, changes: { after: { email: validatedData.email, name: validatedData.name, companyName: validatedData.companyName } }, request });
 

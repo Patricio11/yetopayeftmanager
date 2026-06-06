@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   Search, Plus, Building2, CheckCircle, XCircle, Clock, RefreshCw,
   Copy, ChevronRight, Eye, Users, ArrowUpDown, Filter,
-  Mail, Wallet, Shield, Activity, MoreHorizontal, ExternalLink, Loader2,
+  Mail, Wallet, Shield, Activity, MoreHorizontal, ExternalLink, Loader2, ChevronDown,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -52,6 +52,8 @@ export default function AdminMerchantsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
   const [inviteLink, setInviteLink] = useState('');
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [showLink, setShowLink] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', companyName: '' });
   const [availableServices, setAvailableServices] = useState<any[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
@@ -165,8 +167,10 @@ export default function AdminMerchantsPage() {
       });
       const data = await res.json();
       if (data.success) {
-        toast({ title: 'Success', description: 'Merchant created' });
+        toast({ title: 'Success', description: 'Merchant created and invitation email sent' });
         setInviteLink(data.invitation?.link || '');
+        setInviteEmail(form.email);
+        setShowLink(false);
         setForm({ name: '', email: '', companyName: '' });
         setSelectedServices(availableServices.map((s: any) => s.code));
         fetchMerchants();
@@ -508,13 +512,27 @@ export default function AdminMerchantsPage() {
             <p className="text-sm text-slate-500 mb-5">Send an invitation to set up their account</p>
             {inviteLink ? (
               <div>
-                <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-lg mb-4">
-                  <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400 mb-2">Merchant created! Send this invitation link:</p>
-                  <div className="flex gap-2">
-                    <Input value={inviteLink} readOnly className="text-xs" />
-                    <Button size="sm" onClick={() => { navigator.clipboard.writeText(inviteLink); toast({ title: 'Copied!' }); }}><Copy className="w-4 h-4" /></Button>
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg mb-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Mail className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    <p className="text-sm font-medium text-green-700 dark:text-green-400">Invitation email sent to {inviteEmail}</p>
                   </div>
+                  <p className="text-xs text-green-600 dark:text-green-500">The merchant will receive an email with a link to set up their password. The link expires in 7 days.</p>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setShowLink(!showLink)}
+                  className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 mb-3 transition-colors"
+                >
+                  <ChevronDown className={`w-3 h-3 transition-transform ${showLink ? 'rotate-180' : ''}`} />
+                  {showLink ? 'Hide invitation link' : 'Show invitation link (backup)'}
+                </button>
+                {showLink && (
+                  <div className="flex gap-2 mb-4">
+                    <Input value={inviteLink} readOnly className="text-xs" />
+                    <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(inviteLink); toast({ title: 'Copied!' }); }}><Copy className="w-4 h-4" /></Button>
+                  </div>
+                )}
                 <Button onClick={() => setShowCreate(false)} className="w-full">Done</Button>
               </div>
             ) : (

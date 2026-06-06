@@ -236,6 +236,40 @@ export async function sendPartnerInvitationEmail(email: string, invitationLink: 
   });
 }
 
+export async function sendMerchantInvitationEmail(email: string, invitationLink: string) {
+  await transporter.sendMail({
+    from,
+    to: email,
+    subject: "You've been invited to join YetoPay as a Merchant",
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%); padding: 32px; text-align: center;">
+          <h1 style="color: white; margin: 0;">YetoPay</h1>
+          <p style="color: #ddd6fe; margin: 8px 0 0;">Merchant Invitation</p>
+        </div>
+        <div style="padding: 32px; background: #ffffff;">
+          <h2 style="color: #1f2937;">You're invited to become a Merchant</h2>
+          <p style="color: #4b5563; line-height: 1.6;">
+            You've been invited to join YetoPay as a merchant. Accept the invitation
+            to set up your account and start accepting payments.
+          </p>
+          <div style="text-align: center; margin: 32px 0;">
+            <a href="${invitationLink}" style="background-color: #F9B233; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+              Accept Invitation
+            </a>
+          </div>
+          <p style="color: #9ca3af; font-size: 14px;">
+            This invitation link will expire in 7 days. If you didn't expect this email, you can safely ignore it.
+          </p>
+        </div>
+        <div style="padding: 16px; text-align: center; color: #9ca3af; font-size: 12px;">
+          &copy; ${new Date().getFullYear()} YetoPay. All rights reserved.
+        </div>
+      </div>
+    `,
+  });
+}
+
 export async function sendMerchantInvitedByPartnerEmail(
   email: string,
   invitationLink: string,
