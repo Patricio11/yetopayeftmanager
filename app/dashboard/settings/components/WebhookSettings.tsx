@@ -9,6 +9,8 @@ import { Switch } from "@/components/ui/switch";
 import {
   Copy, Trash2, Plus, Check, AlertCircle, Shield,
   Webhook, RefreshCw, ExternalLink, Activity, X, Code,
+  ChevronDown, ChevronRight, Clock, Loader2, Zap,
+  CheckCircle, XCircle, ArrowUpDown,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -17,16 +19,25 @@ export function WebhookSettings() {
   const [webhooks, setWebhooks] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showDeliveries, setShowDeliveries] = useState(false);
+  const [showLogsModal, setShowLogsModal] = useState(false);
+  const [logsWebhookId, setLogsWebhookId] = useState<string | null>(null);
+  const [logsWebhookUrl, setLogsWebhookUrl] = useState("");
   const [deliveries, setDeliveries] = useState<any[]>([]);
+  const [deliveryStats, setDeliveryStats] = useState<any>(null);
+  const [loadingDeliveries, setLoadingDeliveries] = useState(false);
+  const [expandedDelivery, setExpandedDelivery] = useState<string | null>(null);
 
   const [secretModalOpen, setSecretModalOpen] = useState(false);
   const [secretModalValue, setSecretModalValue] = useState("");
   const [secretCopied, setSecretCopied] = useState(false);
 
+  const [testingId, setTestingId] = useState<string | null>(null);
+  const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
+
   const [url, setUrl] = useState("");
   const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
   const [isActive, setIsActive] = useState(true);
+  const [creating, setCreating] = useState(false);
 
   const availableEvents = [
     { value: '*', label: 'All Events (Wildcard)', description: 'Subscribe to all current and future events', highlight: true },
@@ -58,6 +69,7 @@ export function WebhookSettings() {
       toast({ title: "Error", description: "URL and at least one event are required", variant: "destructive" });
       return;
     }
+    setCreating(true);
     try {
       const response = await fetch('/api/webhooks', {
         method: 'POST',
@@ -80,16 +92,18 @@ export function WebhookSettings() {
       }
     } catch {
       toast({ title: "Error", description: "Failed to create webhook", variant: "destructive" });
+    } finally {
+      setCreating(false);
     }
   };
 
   const handleDeleteWebhook = async (webhookId: string) => {
-    if (!confirm('Are you sure you want to delete this webhook?')) return;
+    if (!confirm('Are you sure you want to delete this webhook? This cannot be undone.')) return;
     try {
       const response = await fetch(`/api/webhooks?id=${webhookId}`, { method: 'DELETE' });
       const data = await response.json();
       if (data.success) {
-        toast({ title: "Success", description: "Webhook deleted successfully" });
+        toast({ title: "Deleted", description: "Webhook deleted successfully" });
         fetchWebhooks();
       } else {
         toast({ title: "Error", description: data.message, variant: "destructive" });
@@ -100,6 +114,7 @@ export function WebhookSettings() {
   };
 
   const handleTestWebhook = async (webhookId: string) => {
+    setTestingId(webhookId);
     try {
       const response = await fetch('/api/webhooks/test', {
         method: 'POST',
@@ -108,17 +123,24 @@ export function WebhookSettings() {
       });
       const data = await response.json();
       if (data.success && data.data.test.success) {
-        toast({ title: "Success", description: `Webhook test successful! Response time: ${data.data.test.responseTime}ms` });
+        toast({ title: "Test Passed", description: `Endpoint responded in ${data.data.test.responseTime}ms` });
       } else {
-        toast({ title: "Test Failed", description: data.data.test.errorMessage || "Webhook endpoint returned an error", variant: "destructive" });
+        toast({
+          title: "Test Failed",
+          description: data.data?.test?.errorMessage || data.message || "Webhook endpoint returned an error",
+          variant: "destructive",
+        });
       }
     } catch {
       toast({ title: "Error", description: "Failed to test webhook", variant: "destructive" });
+    } finally {
+      setTestingId(null);
     }
   };
 
   const handleRegenerateSecret = async (webhookId: string) => {
-    if (!confirm('Are you sure? This will invalidate the current secret.')) return;
+    if (!confirm('Are you sure? The current secret will be invalidated immediately. You will need to update your server with the new secret.')) return;
+    setRegeneratingId(webhookId);
     try {
       const response = await fetch('/api/webhooks/regenerate-secret', {
         method: 'POST',
@@ -130,25 +152,51 @@ export function WebhookSettings() {
         setSecretModalValue(data.data.secret);
         setSecretCopied(false);
         setSecretModalOpen(true);
-        toast({ title: "Success", description: "Secret regenerated successfully" });
+        toast({ title: "Secret Regenerated", description: "Copy and save your new secret now" });
       } else {
         toast({ title: "Error", description: data.message, variant: "destructive" });
       }
     } catch {
       toast({ title: "Error", description: "Failed to regenerate secret", variant: "destructive" });
+    } finally {
+      setRegeneratingId(null);
     }
   };
 
-  const viewDeliveries = async (webhookId: string) => {
+  const viewDeliveries = async (webhookId: string, webhookUrl: string) => {
+    setLogsWebhookId(webhookId);
+    setLogsWebhookUrl(webhookUrl);
+    setShowLogsModal(true);
+    setLoadingDeliveries(true);
+    setExpandedDelivery(null);
     try {
-      const response = await fetch(`/api/webhooks/deliveries?webhookId=${webhookId}&limit=20`);
+      const response = await fetch(`/api/webhooks/deliveries?webhookId=${webhookId}&limit=50`);
       const data = await response.json();
       if (data.success) {
         setDeliveries(data.data.deliveries);
-        setShowDeliveries(true);
+        setDeliveryStats(data.data.stats);
       }
     } catch {
       toast({ title: "Error", description: "Failed to fetch deliveries", variant: "destructive" });
+    } finally {
+      setLoadingDeliveries(false);
+    }
+  };
+
+  const refreshDeliveries = async () => {
+    if (!logsWebhookId) return;
+    setLoadingDeliveries(true);
+    try {
+      const response = await fetch(`/api/webhooks/deliveries?webhookId=${logsWebhookId}&limit=50`);
+      const data = await response.json();
+      if (data.success) {
+        setDeliveries(data.data.deliveries);
+        setDeliveryStats(data.data.stats);
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to refresh", variant: "destructive" });
+    } finally {
+      setLoadingDeliveries(false);
     }
   };
 
@@ -211,12 +259,12 @@ export function WebhookSettings() {
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <p className="font-medium text-slate-900 dark:text-white text-sm">{webhook.url}</p>
+                        <p className="font-medium text-slate-900 dark:text-white text-sm break-all">{webhook.url}</p>
                         <Badge
                           variant="outline"
                           className={webhook.isActive
-                            ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
-                            : "bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700"
+                            ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 shrink-0"
+                            : "bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 shrink-0"
                           }
                         >
                           {webhook.isActive ? "Active" : "Inactive"}
@@ -229,30 +277,66 @@ export function WebhookSettings() {
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-1.5 ml-12">
+                <div className="flex flex-wrap gap-1.5 ml-12 mb-1">
                   {(webhook.events as string[]).map((event) => (
                     <Badge key={event} variant="outline" className="text-xs bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400">
                       {event}
                     </Badge>
                   ))}
                 </div>
+
+                {webhook.createdAt && (
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500 ml-12 mt-2">
+                    Created {new Date(webhook.createdAt).toLocaleDateString("en-ZA", { year: "numeric", month: "short", day: "numeric" })}
+                  </p>
+                )}
               </div>
 
-              <div className="px-5 py-3 bg-slate-50/50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-700/50 flex flex-wrap gap-2">
-                <Button size="sm" variant="ghost" onClick={() => handleTestWebhook(webhook.id)} className="text-xs h-8">
-                  <Activity className="w-3.5 h-3.5 mr-1" />
-                  Test
+              <div className="px-5 py-3 bg-slate-50/50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-700/50 flex flex-wrap gap-1">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => handleTestWebhook(webhook.id)}
+                  disabled={testingId === webhook.id}
+                  className="text-xs h-8 gap-1.5"
+                >
+                  {testingId === webhook.id ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Zap className="w-3.5 h-3.5" />
+                  )}
+                  {testingId === webhook.id ? "Testing..." : "Test"}
                 </Button>
-                <Button size="sm" variant="ghost" onClick={() => viewDeliveries(webhook.id)} className="text-xs h-8">
-                  <ExternalLink className="w-3.5 h-3.5 mr-1" />
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => viewDeliveries(webhook.id, webhook.url)}
+                  className="text-xs h-8 gap-1.5"
+                >
+                  <Activity className="w-3.5 h-3.5" />
                   View Logs
                 </Button>
-                <Button size="sm" variant="ghost" onClick={() => handleRegenerateSecret(webhook.id)} className="text-xs h-8">
-                  <RefreshCw className="w-3.5 h-3.5 mr-1" />
-                  Regenerate Secret
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => handleRegenerateSecret(webhook.id)}
+                  disabled={regeneratingId === webhook.id}
+                  className="text-xs h-8 gap-1.5"
+                >
+                  {regeneratingId === webhook.id ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-3.5 h-3.5" />
+                  )}
+                  {regeneratingId === webhook.id ? "Regenerating..." : "Regenerate Secret"}
                 </Button>
-                <Button size="sm" variant="ghost" onClick={() => handleDeleteWebhook(webhook.id)} className="text-xs h-8 text-red-600 dark:text-red-400 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20">
-                  <Trash2 className="w-3.5 h-3.5 mr-1" />
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => handleDeleteWebhook(webhook.id)}
+                  className="text-xs h-8 gap-1.5 text-red-600 dark:text-red-400 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
                   Delete
                 </Button>
               </div>
@@ -334,8 +418,8 @@ export function WebhookSettings() {
 
             <div className="px-6 py-4 bg-slate-50/50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-700/50 flex justify-end gap-3">
               <Button variant="outline" size="sm" onClick={() => setShowCreateModal(false)}>Cancel</Button>
-              <Button size="sm" onClick={handleCreateWebhook} className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0">
-                Create Webhook
+              <Button size="sm" onClick={handleCreateWebhook} disabled={creating} className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0">
+                {creating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating...</> : "Create Webhook"}
               </Button>
             </div>
           </div>
@@ -393,39 +477,161 @@ export function WebhookSettings() {
         </div>
       )}
 
-      {/* Deliveries Modal */}
-      {showDeliveries && (
+      {/* Webhook Logs Modal */}
+      {showLogsModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="w-full max-w-lg border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 shadow-2xl overflow-hidden max-h-[80vh]">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/50 flex items-center justify-between">
-              <h3 className="text-base font-semibold text-slate-900 dark:text-white">Webhook Deliveries</h3>
-              <button onClick={() => setShowDeliveries(false)} className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                <X className="w-5 h-5 text-slate-400" />
-              </button>
+          <div className="w-full max-w-3xl border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 shadow-2xl overflow-hidden max-h-[85vh] flex flex-col">
+            {/* Header */}
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/50 flex items-center justify-between shrink-0">
+              <div>
+                <h3 className="text-base font-semibold text-slate-900 dark:text-white">Webhook Delivery Logs</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate max-w-md">{logsWebhookUrl}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant="ghost" onClick={refreshDeliveries} disabled={loadingDeliveries} className="h-8 gap-1.5">
+                  <RefreshCw className={`w-3.5 h-3.5 ${loadingDeliveries ? "animate-spin" : ""}`} />
+                  Refresh
+                </Button>
+                <button onClick={() => setShowLogsModal(false)} className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                  <X className="w-5 h-5 text-slate-400" />
+                </button>
+              </div>
             </div>
 
-            <div className="p-6 overflow-y-auto max-h-[60vh]">
-              {deliveries.length === 0 ? (
-                <p className="text-center text-slate-500 dark:text-slate-400 py-8">No deliveries yet</p>
+            {/* Stats */}
+            {deliveryStats && !loadingDeliveries && deliveries.length > 0 && (
+              <div className="px-6 py-3 bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-700/50 shrink-0">
+                <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-slate-400" />
+                    <span className="text-xs text-slate-600 dark:text-slate-400">Total: <span className="font-semibold text-slate-900 dark:text-white">{deliveryStats.total}</span></span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span className="text-xs text-slate-600 dark:text-slate-400">Delivered: <span className="font-semibold text-emerald-600 dark:text-emerald-400">{deliveryStats.successful}</span></span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-red-500" />
+                    <span className="text-xs text-slate-600 dark:text-slate-400">Failed: <span className="font-semibold text-red-600 dark:text-red-400">{deliveryStats.failed}</span></span>
+                  </div>
+                  <span className="text-xs text-slate-400 dark:text-slate-500">Success rate: {deliveryStats.successRate}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto">
+              {loadingDeliveries ? (
+                <div className="flex flex-col items-center justify-center py-16">
+                  <Loader2 className="w-8 h-8 text-slate-400 animate-spin mb-3" />
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Loading delivery logs...</p>
+                </div>
+              ) : deliveries.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16">
+                  <Activity className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-3" />
+                  <p className="text-slate-500 dark:text-slate-400 font-medium">No deliveries yet</p>
+                  <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">Logs will appear here when events are sent to your endpoint</p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="mt-4 gap-1.5"
+                    onClick={() => {
+                      if (logsWebhookId) {
+                        setShowLogsModal(false);
+                        handleTestWebhook(logsWebhookId);
+                      }
+                    }}
+                  >
+                    <Zap className="w-3.5 h-3.5" />
+                    Send Test Event
+                  </Button>
+                </div>
               ) : (
-                <div className="space-y-2">
+                <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
                   {deliveries.map((delivery) => (
-                    <div key={delivery.id} className="border border-slate-200 dark:border-slate-700 rounded-lg p-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <Badge
-                          variant="outline"
-                          className={delivery.success
-                            ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
-                            : "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800"
-                          }
-                        >
-                          {delivery.success ? "Success" : "Failed"}
-                        </Badge>
-                        <span className="text-xs text-slate-400 dark:text-slate-500">{new Date(delivery.createdAt).toLocaleString()}</span>
-                      </div>
-                      <p className="text-sm font-medium text-slate-900 dark:text-white">{delivery.event}</p>
-                      {delivery.statusCode && <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Status: {delivery.statusCode}</p>}
-                      {delivery.errorMessage && <p className="text-xs text-red-600 dark:text-red-400 mt-1">{delivery.errorMessage}</p>}
+                    <div key={delivery.id}>
+                      {/* Row */}
+                      <button
+                        onClick={() => setExpandedDelivery(expandedDelivery === delivery.id ? null : delivery.id)}
+                        className="w-full px-6 py-3.5 flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left"
+                      >
+                        {/* Status icon */}
+                        {delivery.success ? (
+                          <CheckCircle className="w-4.5 h-4.5 text-emerald-500 shrink-0" />
+                        ) : (
+                          <XCircle className="w-4.5 h-4.5 text-red-500 shrink-0" />
+                        )}
+
+                        {/* Event */}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-slate-900 dark:text-white">{delivery.event}</p>
+                          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                            {new Date(delivery.createdAt).toLocaleString("en-ZA", {
+                              year: "numeric", month: "short", day: "numeric",
+                              hour: "2-digit", minute: "2-digit", second: "2-digit",
+                            })}
+                          </p>
+                        </div>
+
+                        {/* Status code */}
+                        <div className="flex items-center gap-3 shrink-0">
+                          {delivery.statusCode && (
+                            <Badge
+                              variant="outline"
+                              className={`text-xs font-mono ${
+                                delivery.statusCode >= 200 && delivery.statusCode < 300
+                                  ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
+                                  : delivery.statusCode >= 400
+                                    ? "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800"
+                                    : "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800"
+                              }`}
+                            >
+                              {delivery.statusCode}
+                            </Badge>
+                          )}
+                          {delivery.attemptNumber && delivery.attemptNumber > 1 && (
+                            <span className="text-xs text-slate-400 dark:text-slate-500">Attempt #{delivery.attemptNumber}</span>
+                          )}
+                          <ChevronRight className={`w-4 h-4 text-slate-400 transition-transform ${expandedDelivery === delivery.id ? "rotate-90" : ""}`} />
+                        </div>
+                      </button>
+
+                      {/* Expanded details */}
+                      {expandedDelivery === delivery.id && (
+                        <div className="px-6 pb-4 bg-slate-50/50 dark:bg-slate-800/30">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Request payload */}
+                            <div>
+                              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Request Payload</p>
+                              <div className="bg-slate-900 dark:bg-slate-950 rounded-lg p-3 overflow-x-auto">
+                                <pre className="text-xs text-slate-300 font-mono whitespace-pre-wrap break-all">
+                                  {delivery.payload ? JSON.stringify(delivery.payload, null, 2) : "No payload recorded"}
+                                </pre>
+                              </div>
+                            </div>
+
+                            {/* Response */}
+                            <div>
+                              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Response</p>
+                              <div className="bg-slate-900 dark:bg-slate-950 rounded-lg p-3 overflow-x-auto">
+                                <pre className="text-xs text-slate-300 font-mono whitespace-pre-wrap break-all">
+                                  {delivery.response ? JSON.stringify(delivery.response, null, 2) : delivery.errorMessage || "No response recorded"}
+                                </pre>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Extra info */}
+                          <div className="flex flex-wrap gap-4 mt-3 text-xs text-slate-500 dark:text-slate-400">
+                            {delivery.deliveredAt && (
+                              <span>Delivered: {new Date(delivery.deliveredAt).toLocaleString("en-ZA")}</span>
+                            )}
+                            {delivery.nextRetryAt && (
+                              <span className="text-amber-600 dark:text-amber-400">Next retry: {new Date(delivery.nextRetryAt).toLocaleString("en-ZA")}</span>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
