@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Key, Copy, Trash2, Plus, Check, AlertCircle, Shield } from "lucide-react";
+import { Key, Copy, Trash2, Plus, Check, AlertCircle, Shield, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useSession } from "@/lib/auth-client";
 
-function CreateApiKeyModal({ onClose }: { onClose: () => void }) {
+function CreateApiKeyModal({ onClose, merchantId }: { onClose: () => void; merchantId: string }) {
   const { toast } = useToast();
   const [step, setStep] = useState<"form" | "success">("form");
   const [keyName, setKeyName] = useState("");
@@ -105,6 +106,16 @@ function CreateApiKeyModal({ onClose }: { onClose: () => void }) {
 
               <div className="space-y-4">
                 <div className="space-y-2">
+                  <Label className="text-slate-700 dark:text-slate-300 text-sm">Merchant ID</Label>
+                  <div className="flex gap-2">
+                    <Input value={merchantId} readOnly className="font-mono text-sm bg-slate-50 dark:bg-slate-800" />
+                    <Button variant="outline" size="icon" onClick={() => handleCopy(merchantId, "Merchant ID")} className="shrink-0">
+                      <Copy className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
                   <Label className="text-slate-700 dark:text-slate-300 text-sm">API Key</Label>
                   <div className="flex gap-2">
                     <Input value={generatedKey.apiKey} readOnly className="font-mono text-sm bg-slate-50 dark:bg-slate-800" />
@@ -149,6 +160,8 @@ function CreateApiKeyModal({ onClose }: { onClose: () => void }) {
 
 export function ApiKeysSettings() {
   const { toast } = useToast();
+  const { data: session } = useSession();
+  const merchantId = session?.user?.id || "";
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [apiKeys, setApiKeys] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -212,6 +225,28 @@ export function ApiKeysSettings() {
 
   return (
     <div className="space-y-6">
+      {/* Merchant ID */}
+      {merchantId && (
+        <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 p-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white">
+                <User className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Your Merchant ID</p>
+                <code className="text-sm font-mono text-slate-900 dark:text-white">{merchantId}</code>
+              </div>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(merchantId); toast({ title: "Copied!", description: "Merchant ID copied to clipboard." }); }} className="gap-1.5">
+              <Copy className="w-3.5 h-3.5" />
+              Copy
+            </Button>
+          </div>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-2 ml-12">Use this in the <code className="text-xs bg-slate-100 dark:bg-slate-700 px-1 py-0.5 rounded">X-Merchant-ID</code> header for all API requests</p>
+        </div>
+      )}
+
       {/* Info banner */}
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 flex gap-3">
         <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
@@ -288,7 +323,7 @@ export function ApiKeysSettings() {
       )}
 
       {showCreateModal && (
-        <CreateApiKeyModal onClose={() => { setShowCreateModal(false); fetchApiKeys(); }} />
+        <CreateApiKeyModal merchantId={merchantId} onClose={() => { setShowCreateModal(false); fetchApiKeys(); }} />
       )}
 
       {/* Documentation CTA */}

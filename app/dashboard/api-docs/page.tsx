@@ -218,10 +218,11 @@ export default function ApiDocsPage() {
 
             {/* Authentication */}
             <section id="authentication">
-              <AuthenticationSection 
+              <AuthenticationSection
                 selectedLanguage={selectedLanguage}
                 onCopy={handleCopy}
                 copiedCode={copiedCode}
+                merchantId={session?.user?.id}
               />
             </section>
 
@@ -416,7 +417,7 @@ function QuickStartSection({
 }
 
 // Authentication Section
-function AuthenticationSection({ selectedLanguage, onCopy, copiedCode }: any) {
+function AuthenticationSection({ selectedLanguage, onCopy, copiedCode, merchantId }: any) {
   return (
     <Card>
       <CardHeader>
@@ -463,7 +464,20 @@ function AuthenticationSection({ selectedLanguage, onCopy, copiedCode }: any) {
             </div>
             <div className="flex items-start gap-2">
               <span className="text-blue-600">X-Merchant-ID:</span>
-              <span className="text-gray-700">your-merchant-uuid</span>
+              {merchantId ? (
+                <span className="text-gray-700 flex items-center gap-2">
+                  {merchantId}
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(merchantId); onCopy(merchantId, "Merchant ID"); }}
+                    className="text-blue-500 hover:text-blue-700 transition-colors"
+                    title="Copy Merchant ID"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                  </button>
+                </span>
+              ) : (
+                <span className="text-gray-700">your-merchant-uuid</span>
+              )}
             </div>
             <div className="flex items-start gap-2">
               <span className="text-blue-600">X-Timestamp:</span>
