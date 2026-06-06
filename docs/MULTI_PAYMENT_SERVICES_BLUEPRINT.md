@@ -441,7 +441,7 @@ All phases are independently deployable. No big-bang migration.
 2. **Phases 2-4** — admin + merchant can manage services. EFT auto-enabled for all. Existing fee endpoints still work.
 3. **Phase 5** — CallPay backend ready. Admin configures credentials. No user-facing change yet.
 4. **Phase 6** — Payment page update. Merchants who enable card see multi-method page. Others unchanged.
-5. **Phase 7** — Reporting catches up. Multi-service invoicing.
+5. **Phase 7** — Reporting catches up. Multi-service invoicing..
 
 ---
 
