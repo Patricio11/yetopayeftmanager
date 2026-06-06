@@ -136,10 +136,13 @@ export async function POST(request: NextRequest) {
         },
       },
     }, { status: 201 });
-  } catch (error) {
-    console.error("Error creating webhook:", error);
+  } catch (error: any) {
+    console.error("Error creating webhook:", error?.message || error);
+    const message = error?.message?.includes('CREDENTIAL_ENCRYPTION_KEY')
+      ? "Server encryption key not configured. Contact admin."
+      : "Failed to create webhook";
     return NextResponse.json(
-      { success: false, message: "Failed to create webhook" },
+      { success: false, message },
       { status: 500 }
     );
   }
