@@ -178,7 +178,7 @@ class YetoPayClient {
     this.apiKey = apiKey;
     this.apiSecret = apiSecret;
     this.merchantId = merchantId;
-    this.baseUrl = 'https://your-domain.com';
+    this.baseUrl = 'https://www.yetopay.co.za';
   }
   
   // Generate HMAC signature
@@ -262,7 +262,7 @@ class YetoPayClient:
         self.api_key = api_key
         self.api_secret = api_secret
         self.merchant_id = merchant_id
-        self.base_url = 'https://your-domain.com'
+        self.base_url = 'https://www.yetopay.co.za'
     
     def generate_signature(self, timestamp, request_body):
         """Generate HMAC-SHA256 signature"""
@@ -339,7 +339,7 @@ class YetoPayClient {
         $this->apiKey = $apiKey;
         $this->apiSecret = $apiSecret;
         $this->merchantId = $merchantId;
-        $this->baseUrl = 'https://your-domain.com';
+        $this->baseUrl = 'https://www.yetopay.co.za';
     }
     
     private function generateSignature($timestamp, $requestBody) {
@@ -418,7 +418,7 @@ echo 'Payment URL: ' . $payment['data']['paymentUrl'];
 
 2. **Use HTTPS in production**
    ```javascript
-   const baseUrl = 'https://your-domain.com'; // ✅
+   const baseUrl = 'https://www.yetopay.co.za'; // ✅
    ```
 
 3. **Validate timestamp on server**

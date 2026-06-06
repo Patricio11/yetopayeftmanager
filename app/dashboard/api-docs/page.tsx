@@ -1463,7 +1463,7 @@ const signature = crypto
   .digest('hex');
 
 // Step 3: Send request
-const response = await fetch('https://your-domain.com/api/payment-links', {
+const response = await fetch('https://www.yetopay.co.za/api/payment-links', {
   method: 'POST',
   headers: {
     'Authorization': \`Bearer \${apiKey}\`,
@@ -1517,7 +1517,7 @@ signature = hmac.new(
 
 # Step 3: Send request
 response = requests.post(
-    'https://your-domain.com/api/payment-links',
+    'https://www.yetopay.co.za/api/payment-links',
     headers={
         'Authorization': f'Bearer {api_key}',
         'X-Merchant-ID': merchant_id,
@@ -1559,7 +1559,7 @@ $payload = $merchantId . $timestamp . $requestBody;
 $signature = hash_hmac('sha256', $payload, $secretHash);
 
 // Step 3: Send request
-$ch = curl_init('https://your-domain.com/api/payment-links');
+$ch = curl_init('https://www.yetopay.co.za/api/payment-links');
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $requestBody);
@@ -1581,7 +1581,7 @@ $paymentUrl = $data['data']['paymentUrl'];
 header("Location: {$paymentUrl}");
 exit;`,
     curl: `# Create a payment link (supports EFT and Card payments)
-curl -X POST https://your-domain.com/api/payment-links \\
+curl -X POST https://www.yetopay.co.za/api/payment-links \\
   -H "Authorization: Bearer yp_live_abc123..." \\
   -H "X-Merchant-ID: your-merchant-id" \\
   -H "X-Timestamp: 1638360000" \\
@@ -1615,7 +1615,7 @@ function getEndpointCode(lang: string, type: string) {
   "message": "Payment link created successfully",
   "data": {
     "transactionId": "550e8400-e29b-41d4-a716-446655440000",
-    "paymentUrl": "https://your-domain.com/pay/abc123...",
+    "paymentUrl": "https://www.yetopay.co.za/pay/abc123...",
     "token": "abc123def456...",
     "reference": "INV-001",
     "amount": 250.00,

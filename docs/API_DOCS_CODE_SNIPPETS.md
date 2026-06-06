@@ -456,7 +456,7 @@ console.log('Test payment URL:', payment.paymentUrl);
 ```bash
 # From Settings → Webhooks → Test button
 # Or manually:
-curl -X POST https://your-domain.com/webhooks/payment \
+curl -X POST https://your-website.com/webhooks/payment \
   -H "X-Webhook-Signature: <signature>" \
   -H "X-Webhook-Timestamp: $(date +%s)" \
   -H "X-Webhook-ID: test-event-id" \

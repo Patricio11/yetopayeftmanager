@@ -1,7 +1,7 @@
 # YetoPay API Reference
 
 **Version:** 2.0.0  
-**Base URL:** `https://your-domain.com` or `http://localhost:3000`  
+**Base URL:** `https://www.yetopay.co.za` or `http://localhost:3000`  
 **Protocol:** HTTPS (Production) / HTTP (Development)
 
 ---
@@ -83,7 +83,7 @@ BODY='{"amount":250.00,"reference":"INV-001","successUrl":"https://yoursite.com/
 
 SIGNATURE=$(echo -n "${MERCHANT_ID}${TIMESTAMP}${BODY}" | openssl dgst -sha256 -hmac "${API_SECRET}" | awk '{print $2}')
 
-curl -X POST https://your-domain.com/api/payment-links \
+curl -X POST https://www.yetopay.co.za/api/payment-links \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer ${API_KEY}" \
   -H "X-Merchant-ID: ${MERCHANT_ID}" \
@@ -98,7 +98,7 @@ curl -X POST https://your-domain.com/api/payment-links \
 {
   "success": true,
   "data": {
-    "paymentUrl": "https://your-domain.com/pay/abc123xyz...",
+    "paymentUrl": "https://www.yetopay.co.za/pay/abc123xyz...",
     "transactionId": "550e8400-e29b-41d4-a716-446655440000",
     "reference": "INV-001",
     "amount": 250.00,
@@ -262,10 +262,10 @@ This is the primary endpoint for your integration. Create a payment link, then r
   "description": "Payment for services rendered",
   "customerEmail": "customer@example.com",
   "customerName": "Jane Customer",
-  "notifyUrl": "https://your-domain.com/webhooks/yetopay",
-  "successUrl": "https://your-domain.com/payment/success",
-  "failureUrl": "https://your-domain.com/payment/failed",
-  "cancelledUrl": "https://your-domain.com/payment/cancelled",
+  "notifyUrl": "https://your-website.com/webhooks/yetopay",
+  "successUrl": "https://your-website.com/payment/success",
+  "failureUrl": "https://your-website.com/payment/failed",
+  "cancelledUrl": "https://your-website.com/payment/cancelled",
   "expiresInHours": 48,
   "metadata": {
     "orderId": "ORD-12345"
@@ -296,7 +296,7 @@ This is the primary endpoint for your integration. Create a payment link, then r
   "message": "Payment link created successfully",
   "data": {
     "transactionId": "550e8400-e29b-41d4-a716-446655440000",
-    "paymentUrl": "https://your-domain.com/pay/abc123xyz789...",
+    "paymentUrl": "https://www.yetopay.co.za/pay/abc123xyz789...",
     "token": "abc123xyz789...",
     "reference": "INV-2024-001",
     "amount": 250.00,
@@ -351,8 +351,8 @@ GET /api/payment-links?limit=50&offset=0&status=completed&from=2024-12-01
       "status": "completed",
       "createdAt": "2024-12-01T15:00:00Z",
       "completedAt": "2024-12-01T15:30:00Z",
-      "notifyUrl": "https://your-domain.com/webhooks/yetopay",
-      "successUrl": "https://your-domain.com/payment/success",
+      "notifyUrl": "https://your-website.com/webhooks/yetopay",
+      "successUrl": "https://your-website.com/payment/success",
       "metadata": {
         "orderId": "ORD-12345"
       }
@@ -666,7 +666,7 @@ const API_KEY = process.env.YETOPAY_API_KEY;
 const API_SECRET = process.env.YETOPAY_API_SECRET;
 const MERCHANT_ID = process.env.YETOPAY_MERCHANT_ID;
 const WEBHOOK_SECRET = process.env.YETOPAY_WEBHOOK_SECRET;
-const API_BASE = process.env.YETOPAY_API_URL || 'https://your-domain.com';
+const API_BASE = process.env.YETOPAY_API_URL || 'https://www.yetopay.co.za';
 
 // Helper: generate auth headers
 function getAuthHeaders(body) {
@@ -765,7 +765,7 @@ API_KEY = os.environ['YETOPAY_API_KEY']
 API_SECRET = os.environ['YETOPAY_API_SECRET']
 MERCHANT_ID = os.environ['YETOPAY_MERCHANT_ID']
 WEBHOOK_SECRET = os.environ['YETOPAY_WEBHOOK_SECRET']
-API_BASE = os.environ.get('YETOPAY_API_URL', 'https://your-domain.com')
+API_BASE = os.environ.get('YETOPAY_API_URL', 'https://www.yetopay.co.za')
 
 
 def get_auth_headers(body_dict):

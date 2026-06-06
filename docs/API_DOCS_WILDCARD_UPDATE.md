@@ -253,7 +253,7 @@ Webhooks Section
 **Wildcard Subscription**:
 ```json
 {
-  "url": "https://your-domain.com/webhooks",
+  "url": "https://your-website.com/webhooks",
   "events": ["*"],
   "isActive": true
 }
@@ -262,7 +262,7 @@ Webhooks Section
 **Specific Events**:
 ```json
 {
-  "url": "https://your-domain.com/webhooks",
+  "url": "https://your-website.com/webhooks",
   "events": [
     "payment.completed",
     "payment.failed"

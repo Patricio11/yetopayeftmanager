@@ -204,7 +204,7 @@ Content-Type: application/json
   "amount": 100.00,
   "reference": "Invoice #12345",
   "customerEmail": "customer@example.com",
-  "notifyUrl": "https://your-domain.com/webhooks/payment",
+  "notifyUrl": "https://your-website.com/webhooks/payment",
   "expiresInHours": 24
 }
 ```

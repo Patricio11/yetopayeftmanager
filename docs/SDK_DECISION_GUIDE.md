@@ -33,7 +33,7 @@ const signature = crypto
   .update(payload)
   .digest('hex');
 
-const response = await fetch('https://your-domain.com/api/payment-links', {
+const response = await fetch('https://www.yetopay.co.za/api/payment-links', {
   method: 'POST',
   headers: {
     'Authorization': `Bearer ${apiKey}`,

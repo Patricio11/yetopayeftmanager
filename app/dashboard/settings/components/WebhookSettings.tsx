@@ -278,7 +278,7 @@ export function WebhookSettings() {
             <div className="p-6 space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="webhook-url" className="text-slate-700 dark:text-slate-300 text-sm">Endpoint URL</Label>
-                <Input id="webhook-url" type="url" placeholder="https://your-domain.com/webhooks/payment" value={url} onChange={(e) => setUrl(e.target.value)} />
+                <Input id="webhook-url" type="url" placeholder="https://your-website.com/webhooks/payment" value={url} onChange={(e) => setUrl(e.target.value)} />
                 <p className="text-xs text-slate-400 dark:text-slate-500">The URL where webhook events will be sent</p>
               </div>
 

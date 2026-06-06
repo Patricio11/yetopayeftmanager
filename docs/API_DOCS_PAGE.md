@@ -409,7 +409,7 @@ import requests
 
 #### cURL Example
 ```bash
-curl -X POST https://your-domain.com/api/payment-links \
+curl -X POST https://www.yetopay.co.za/api/payment-links \
   -H "Authorization: Bearer yp_live_..." \
   # Complete working example
 ```

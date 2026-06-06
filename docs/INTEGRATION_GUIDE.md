@@ -28,7 +28,7 @@
 
 ```javascript
 // 1. Login to get session
-const login = await fetch('https://your-domain.com/api/auth/sign-in/email', {
+const login = await fetch('https://www.yetopay.co.za/api/auth/sign-in/email', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
@@ -38,7 +38,7 @@ const login = await fetch('https://your-domain.com/api/auth/sign-in/email', {
 });
 
 // 2. Create payment link
-const payment = await fetch('https://your-domain.com/api/payment-links', {
+const payment = await fetch('https://www.yetopay.co.za/api/payment-links', {
   method: 'POST',
   headers: { 
     'Content-Type': 'application/json',
@@ -454,7 +454,7 @@ https://abc123.ngrok.io/webhooks/payment
 ### Contact
 
 - **Email**: support@yetopayeft.com
-- **Portal**: https://your-domain.com/dashboard
+- **Portal**: https://www.yetopay.co.za/dashboard
 - **Status**: https://status.yetopayeft.com
 
 ### Common Issues
