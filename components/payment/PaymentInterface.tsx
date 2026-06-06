@@ -116,15 +116,26 @@ export default function PaymentInterface({
     if (!redirectUrl) return;
 
     const timer = setTimeout(() => {
+      const navigate = (href: string) => {
+        try {
+          if (window.top && window.self !== window.top) {
+            window.top.location.href = href;
+          } else {
+            window.location.href = href;
+          }
+        } catch {
+          window.location.href = href;
+        }
+      };
       try {
         const url = new URL(redirectUrl);
         url.searchParams.set('status', cardStatus === 'success' ? 'success' : cardStatus === 'cancelled' ? 'cancelled' : 'failed');
         url.searchParams.set('reference', transaction.reference);
         url.searchParams.set('amount', transaction.amount);
         url.searchParams.set('payment_method', 'card');
-        window.location.href = url.toString();
+        navigate(url.toString());
       } catch {
-        window.location.href = redirectUrl;
+        navigate(redirectUrl);
       }
     }, 4000);
     return () => clearTimeout(timer);
@@ -138,7 +149,15 @@ export default function PaymentInterface({
       const res = await fetch(`/api/pay/${token}/initiate-card`, { method: 'POST' });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to initiate card payment');
-      window.location.href = data.redirectUrl;
+      try {
+        if (window.top && window.self !== window.top) {
+          window.top.location.href = data.redirectUrl;
+        } else {
+          window.location.href = data.redirectUrl;
+        }
+      } catch {
+        window.location.href = data.redirectUrl;
+      }
     } catch (err: any) {
       setCardError(err.message);
       setCardLoading(false);

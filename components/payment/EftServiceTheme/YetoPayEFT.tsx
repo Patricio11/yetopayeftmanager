@@ -322,8 +322,17 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     });
 
     // Short delay to show UI then redirect (4 seconds)
-    setTimeout(() => { 
-      window.location.href = redirectUrl; 
+    // Use top-level navigation to break out of iframe if embedded
+    setTimeout(() => {
+      try {
+        if (window.top && window.self !== window.top) {
+          window.top.location.href = redirectUrl;
+        } else {
+          window.location.href = redirectUrl;
+        }
+      } catch {
+        window.location.href = redirectUrl;
+      }
     }, 4000);
   };
 
