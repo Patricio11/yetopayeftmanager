@@ -299,15 +299,18 @@ export function ApiKeysSettings() {
                     <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400 mt-3 ml-12">
                       <Badge
                         variant="outline"
-                        className={key.status === "active"
+                        className={key.isActive
                           ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
                           : "bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700"
                         }
                       >
-                        {key.status}
+                        {key.isActive ? "active" : "revoked"}
                       </Badge>
-                      <span>Created: {key.created}</span>
-                      <span>Last used: {key.lastUsed}</span>
+                      <span>Created: {key.createdAt ? new Date(key.createdAt).toLocaleDateString("en-ZA") : "—"}</span>
+                      <span>Last used: {key.lastUsedAt ? new Date(key.lastUsedAt).toLocaleDateString("en-ZA") : "Never"}</span>
+                      {key.expiresAt && (
+                        <span>Expires: {new Date(key.expiresAt).toLocaleDateString("en-ZA")}</span>
+                      )}
                     </div>
                   </div>
 
