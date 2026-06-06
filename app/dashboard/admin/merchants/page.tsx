@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   Search, Plus, Building2, CheckCircle, XCircle, Clock, RefreshCw,
   Copy, ChevronRight, Eye, Users, ArrowUpDown, Filter,
-  Mail, Wallet, Shield, Activity, MoreHorizontal, ExternalLink, Loader2, ChevronDown,
+  Mail, Wallet, Shield, Activity, MoreHorizontal, ExternalLink, Loader2, ChevronDown, Send,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -59,6 +59,7 @@ export default function AdminMerchantsPage() {
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [loadingServices, setLoadingServices] = useState(true);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [resendingId, setResendingId] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -193,6 +194,21 @@ export default function AdminMerchantsPage() {
     } catch {
       toast({ title: 'Error', description: 'Failed', variant: 'destructive' });
     }
+  };
+
+  const resendInvitation = async (id: string, email: string) => {
+    setResendingId(id);
+    try {
+      const res = await fetch(`/api/admin/merchants/${id}/resend-invitation`, { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        toast({ title: 'Invitation Resent', description: `Invitation email sent to ${email}` });
+      } else {
+        toast({ title: 'Error', description: data.error || 'Failed to resend', variant: 'destructive' });
+      }
+    } catch {
+      toast({ title: 'Error', description: 'Failed to resend invitation', variant: 'destructive' });
+    } finally { setResendingId(null); }
   };
 
   const toggleSort = (field: SortField) => {
@@ -452,6 +468,16 @@ export default function AdminMerchantsPage() {
                           <Eye className="w-4 h-4" />
                           Impersonate
                         </button>
+                        {!m.isActive && !m.emailVerified && (
+                          <button
+                            onClick={() => { resendInvitation(m.id, m.email); setOpenMenu(null); }}
+                            disabled={resendingId === m.id}
+                            className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors disabled:opacity-50"
+                          >
+                            <Send className="w-4 h-4" />
+                            {resendingId === m.id ? 'Sending...' : 'Resend Invitation'}
+                          </button>
+                        )}
                         <div className="my-1.5 border-t border-slate-100 dark:border-slate-700/50" />
                         <button
                           onClick={() => { toggleStatus(m.id, m.isActive); setOpenMenu(null); }}
@@ -511,21 +537,26 @@ export default function AdminMerchantsPage() {
             <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-1">Create New Merchant</h2>
             <p className="text-sm text-slate-500 mb-5">Send an invitation to set up their account</p>
             {inviteLink ? (
-              <div>
-                <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg mb-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Mail className="w-5 h-5 text-green-600 dark:text-green-400" />
-                    <p className="text-sm font-medium text-green-700 dark:text-green-400">Invitation email sent to {inviteEmail}</p>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-200 dark:shadow-emerald-900/40">
+                  <CheckCircle className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Merchant Created!</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Invitation has been sent successfully</p>
+                <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-xl mb-4 text-left">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <Mail className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">Email sent to {inviteEmail}</p>
                   </div>
-                  <p className="text-xs text-green-600 dark:text-green-500">The merchant will receive an email with a link to set up their password. The link expires in 7 days.</p>
+                  <p className="text-xs text-emerald-600 dark:text-emerald-500">They&apos;ll receive a link to set up their password. Expires in 7 days.</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowLink(!showLink)}
-                  className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 mb-3 transition-colors"
+                  className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 mx-auto mb-3 transition-colors"
                 >
                   <ChevronDown className={`w-3 h-3 transition-transform ${showLink ? 'rotate-180' : ''}`} />
-                  {showLink ? 'Hide invitation link' : 'Show invitation link (backup)'}
+                  {showLink ? 'Hide backup link' : 'Show backup link'}
                 </button>
                 {showLink && (
                   <div className="flex gap-2 mb-4">
@@ -533,7 +564,7 @@ export default function AdminMerchantsPage() {
                     <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(inviteLink); toast({ title: 'Copied!' }); }}><Copy className="w-4 h-4" /></Button>
                   </div>
                 )}
-                <Button onClick={() => setShowCreate(false)} className="w-full">Done</Button>
+                <Button onClick={() => setShowCreate(false)} className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white">Done</Button>
               </div>
             ) : (
               <form onSubmit={handleCreate} className="space-y-4">

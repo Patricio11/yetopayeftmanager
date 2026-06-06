@@ -3,11 +3,12 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   Building2, Search, Plus, Mail, Copy, CheckCircle, XCircle,
-  Clock, AlertCircle, X, Users, ChevronDown, Loader2,
+  Clock, AlertCircle, X, Users, ChevronDown, Loader2, Send,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 interface Merchant {
   id: string;
@@ -15,6 +16,8 @@ interface Merchant {
   email: string;
   companyName: string | null;
   status: string;
+  isActive?: boolean;
+  emailVerified?: boolean;
   kycStatus: string | null;
   lastActivity: string | null;
   createdAt: string;
@@ -36,11 +39,13 @@ const statusBadge = (status: string) => {
 
 export default function PartnerMerchantsPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [merchants, setMerchants] = useState<Merchant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [resendingId, setResendingId] = useState<string | null>(null);
 
   const fetchMerchants = useCallback(async () => {
     setLoading(true);
@@ -62,6 +67,22 @@ export default function PartnerMerchantsPage() {
   useEffect(() => {
     fetchMerchants();
   }, [fetchMerchants]);
+
+  const resendInvitation = async (e: React.MouseEvent, id: string, email: string) => {
+    e.stopPropagation();
+    setResendingId(id);
+    try {
+      const res = await fetch(`/api/partner/merchants/${id}/resend-invitation`, { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        toast({ title: 'Invitation Resent', description: `Invitation email sent to ${email}` });
+      } else {
+        toast({ title: 'Error', description: data.error || 'Failed to resend', variant: 'destructive' });
+      }
+    } catch {
+      toast({ title: 'Error', description: 'Failed to resend invitation', variant: 'destructive' });
+    } finally { setResendingId(null); }
+  };
 
   const filtered = merchants.filter((m) => {
     if (!search) return true;
@@ -193,6 +214,20 @@ export default function PartnerMerchantsPage() {
                       </div>
                     )}
                   </div>
+                  {!merchant.isActive && !merchant.emailVerified && (
+                    <div className="pt-3 mt-3 border-t border-slate-100">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => resendInvitation(e, merchant.id, merchant.email)}
+                        disabled={resendingId === merchant.id}
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 gap-1.5 w-full justify-center"
+                      >
+                        <Send className="w-3.5 h-3.5" />
+                        {resendingId === merchant.id ? 'Sending...' : 'Resend Invitation'}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -292,26 +327,31 @@ function InviteMerchantModal({
         </div>
 
         {inviteEmail ? (
-          <div className="p-6 space-y-4">
-            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <Mail className="w-5 h-5 text-green-600" />
-                <p className="text-sm font-medium text-green-700">Invitation email sent to {inviteEmail}</p>
+          <div className="p-6 text-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-200">
+              <CheckCircle className="w-8 h-8 text-white" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 mb-1">Merchant Invited!</h3>
+            <p className="text-sm text-slate-500 mb-4">Invitation has been sent successfully</p>
+            <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl mb-4 text-left">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Mail className="w-4 h-4 text-emerald-600" />
+                <p className="text-sm font-medium text-emerald-700">Email sent to {inviteEmail}</p>
               </div>
-              <p className="text-xs text-green-600">The merchant will receive an email with a link to set up their password. The link expires in 7 days.</p>
+              <p className="text-xs text-emerald-600">They&apos;ll receive a link to set up their password. Expires in 7 days.</p>
             </div>
             {inviteLink && (
               <>
                 <button
                   type="button"
                   onClick={() => setShowLink(!showLink)}
-                  className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 transition-colors"
+                  className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 mx-auto mb-3 transition-colors"
                 >
                   <ChevronDown className={`w-3 h-3 transition-transform ${showLink ? "rotate-180" : ""}`} />
-                  {showLink ? "Hide invitation link" : "Show invitation link (backup)"}
+                  {showLink ? "Hide backup link" : "Show backup link"}
                 </button>
                 {showLink && (
-                  <div className="bg-slate-50 rounded-lg p-3 flex items-center gap-2">
+                  <div className="bg-slate-50 rounded-lg p-3 flex items-center gap-2 mb-4">
                     <input
                       readOnly
                       value={inviteLink}
@@ -324,9 +364,7 @@ function InviteMerchantModal({
                 )}
               </>
             )}
-            <div className="flex justify-end">
-              <Button variant="outline" onClick={onClose}>Done</Button>
-            </div>
+            <Button onClick={onClose} className="w-full bg-amber-500 hover:bg-amber-600 text-white">Done</Button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
