@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { eftTransactions, eftBanks, eftBankAccounts, users, platformSettings, userServices, paymentServices } from "@/lib/db/schema";
+import { eftTransactions, eftBanks, eftBankAccounts, users, platformSettings, userServices, paymentServices, merchantDisabledBanks } from "@/lib/db/schema";
 import { verifyPaymentToken } from "@/lib/security/payment-token";
 import { eq, and, asc, inArray } from "drizzle-orm";
 
@@ -112,14 +112,24 @@ export async function GET(
     }
 
     // Fetch enabled EFT banks ordered by displayOrder
-    const enabledBanks = await db.query.eftBanks.findMany({
-      where: eq(eftBanks.enabled, true),
-      orderBy: [asc(eftBanks.displayOrder)],
-    });
+    const [enabledBanks, disabledBankRows] = await Promise.all([
+      db.query.eftBanks.findMany({
+        where: eq(eftBanks.enabled, true),
+        orderBy: [asc(eftBanks.displayOrder)],
+      }),
+      db
+        .select({ bankId: merchantDisabledBanks.bankId })
+        .from(merchantDisabledBanks)
+        .where(eq(merchantDisabledBanks.merchantId, merchantId)),
+    ]);
+
+    // Filter out banks disabled for this merchant
+    const disabledBankIds = new Set(disabledBankRows.map(r => r.bankId));
+    const merchantBanks = enabledBanks.filter(bank => !disabledBankIds.has(bank.id));
 
     // Map banks to frontend format (include per-bank EFT service URL if set)
     const defaultEftUrl = process.env.NEXT_PUBLIC_EFT_SERVICE_URL || 'http://localhost:8080/v1/eft';
-    const mappedBanks = enabledBanks.map(bank => ({
+    const mappedBanks = merchantBanks.map(bank => ({
       code: bank.code,
       name: bank.bankName,
       color: bank.color,

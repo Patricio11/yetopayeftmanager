@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, numeric, timestamp, boolean, jsonb, integer, index } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, numeric, timestamp, boolean, jsonb, integer, index, uniqueIndex } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
 // EFT Banks
@@ -159,7 +159,19 @@ export const eftSettings = pgTable("eft_settings", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Per-merchant bank overrides (disabled banks)
+export const merchantDisabledBanks = pgTable("merchant_disabled_banks", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  merchantId: text("merchant_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  bankId: uuid("bank_id").notNull().references(() => eftBanks.id, { onDelete: "cascade" }),
+  disabledAt: timestamp("disabled_at").defaultNow().notNull(),
+}, (table) => ({
+  merchantIdx: index("merchant_disabled_banks_merchant_idx").on(table.merchantId),
+  uniqueMerchantBank: uniqueIndex("merchant_disabled_banks_unique_idx").on(table.merchantId, table.bankId),
+}));
+
 // Type exports
+export type MerchantDisabledBank = typeof merchantDisabledBanks.$inferSelect;
 export type EftBank = typeof eftBanks.$inferSelect;
 export type NewEftBank = typeof eftBanks.$inferInsert;
 export type EftTransaction = typeof eftTransactions.$inferSelect;

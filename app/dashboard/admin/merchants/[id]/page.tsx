@@ -16,7 +16,7 @@ import { Card } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 
-type Tab = 'overview' | 'transactions' | 'team' | 'banking' | 'billing' | 'settings';
+type Tab = 'overview' | 'transactions' | 'team' | 'eft' | 'billing' | 'settings';
 
 export default function MerchantDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -64,7 +64,7 @@ export default function MerchantDetailPage() {
     { key: 'overview', label: 'Overview', icon: Building2 },
     { key: 'transactions', label: 'Transactions', icon: Activity },
     { key: 'team', label: 'Team', icon: Users },
-    { key: 'banking', label: 'Banking', icon: Landmark },
+    { key: 'eft', label: 'EFT (Pay by Bank)', icon: Landmark },
     { key: 'billing', label: 'Billing', icon: Receipt },
     { key: 'settings', label: 'Settings', icon: Shield },
   ];
@@ -143,7 +143,7 @@ export default function MerchantDetailPage() {
       {activeTab === 'overview' && <OverviewTab merchant={merchant} onUpdate={fetchMerchant} />}
       {activeTab === 'transactions' && <TransactionsTab merchantId={id} />}
       {activeTab === 'team' && <TeamTab merchantId={id} />}
-      {activeTab === 'banking' && <BankingTab merchantId={id} />}
+      {activeTab === 'eft' && <EftBanksTab merchantId={id} />}
       {activeTab === 'billing' && <BillingTab merchantId={id} />}
       {activeTab === 'settings' && <SettingsTab merchant={merchant} onUpdate={fetchMerchant} />}
     </div>
@@ -397,9 +397,14 @@ function TeamTab({ merchantId }: { merchantId: string }) {
   );
 }
 
-function BankingTab({ merchantId }: { merchantId: string }) {
+function EftBanksTab({ merchantId }: { merchantId: string }) {
+  const { toast } = useToast();
   const [accounts, setAccounts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [accountsLoading, setAccountsLoading] = useState(true);
+  const [banks, setBanks] = useState<any[]>([]);
+  const [banksLoading, setBanksLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [disabledIds, setDisabledIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     (async () => {
@@ -407,77 +412,225 @@ function BankingTab({ merchantId }: { merchantId: string }) {
         const res = await fetch(`/api/admin/merchants/${merchantId}/banking`);
         const data = await res.json();
         if (data.success) setAccounts(data.data || []);
-      } catch { /* ignore */ } finally { setLoading(false); }
+      } catch { /* ignore */ } finally { setAccountsLoading(false); }
     })();
   }, [merchantId]);
 
+  const fetchBanks = useCallback(async () => {
+    setBanksLoading(true);
+    try {
+      const res = await fetch(`/api/admin/merchants/${merchantId}/eft-banks`);
+      const data = await res.json();
+      if (data.success) {
+        setBanks(data.data);
+        const disabled = new Set<string>(
+          data.data.filter((b: any) => !b.merchantEnabled).map((b: any) => b.id)
+        );
+        setDisabledIds(disabled);
+      }
+    } catch { /* ignore */ } finally { setBanksLoading(false); }
+  }, [merchantId]);
+
+  useEffect(() => { fetchBanks(); }, [fetchBanks]);
+
+  const toggleBank = (bankId: string) => {
+    setDisabledIds(prev => {
+      const next = new Set(prev);
+      if (next.has(bankId)) next.delete(bankId);
+      else next.add(bankId);
+      return next;
+    });
+  };
+
+  const enableAll = () => setDisabledIds(new Set());
+  const disableAll = () => setDisabledIds(new Set(banks.map(b => b.id)));
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/admin/merchants/${merchantId}/eft-banks`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ disabledBankIds: Array.from(disabledIds) }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast({ title: 'Saved', description: 'Merchant bank settings updated' });
+      } else {
+        toast({ title: 'Error', description: data.message, variant: 'destructive' });
+      }
+    } catch {
+      toast({ title: 'Error', description: 'Failed to save', variant: 'destructive' });
+    } finally { setSaving(false); }
+  };
+
+  const enabledCount = banks.filter(b => !disabledIds.has(b.id)).length;
+  const globalDisabledCount = banks.filter(b => !b.globalEnabled).length;
+
   return (
-    <Card className="bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50 overflow-hidden">
-      <div className="p-4 border-b border-slate-100 dark:border-slate-700/50">
-        <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2"><Landmark className="w-5 h-5 text-amber-500" />Bank Accounts</h3>
-      </div>
-      {loading ? (
-        <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
-          {[...Array(2)].map((_, i) => (
-            <div key={i} className="p-4 animate-pulse">
-              <div className="flex items-center justify-between mb-3">
+    <div className="space-y-6">
+      {/* Merchant Bank Accounts */}
+      <Card className="bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50 overflow-hidden">
+        <div className="p-4 border-b border-slate-100 dark:border-slate-700/50">
+          <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+            <CreditCard className="w-5 h-5 text-amber-500" />
+            Merchant Bank Accounts
+          </h3>
+          <p className="text-sm text-slate-500 mt-1">Bank accounts this merchant receives payments into</p>
+        </div>
+        {accountsLoading ? (
+          <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
+            {[...Array(2)].map((_, i) => (
+              <div key={i} className="p-4 animate-pulse">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-xl" />
+                    <div className="space-y-2">
+                      <div className="h-4 w-28 bg-slate-200 dark:bg-slate-700 rounded" />
+                      <div className="h-3 w-36 bg-slate-200 dark:bg-slate-700 rounded" />
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="h-5 w-16 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                    <div className="h-5 w-16 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : accounts.length === 0 ? (
+          <div className="p-12 text-center text-slate-500">No bank accounts found</div>
+        ) : (
+          <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
+            {accounts.map((a) => (
+              <div key={a.id} className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm" style={{ backgroundColor: a.bankColor || '#059669' }}>
+                      {(a.bankName || a.bankCode || '?')[0]}
+                    </div>
+                    <div>
+                      <p className="font-medium text-slate-900 dark:text-white">{a.bankName || a.bankCode}</p>
+                      <p className="text-sm text-slate-500">{a.accountHolderName}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {a.isPrimary && <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Primary</span>}
+                    {a.isVerified
+                      ? <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"><CheckCircle className="w-3 h-3 inline mr-1" />Verified</span>
+                      : <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">Unverified</span>}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 pl-13">
+                  <div><p className="text-xs text-slate-500">Account No.</p><p className="text-sm font-mono text-slate-900 dark:text-white">••••{a.accountNumber?.slice(-4)}</p></div>
+                  <div><p className="text-xs text-slate-500">Type</p><p className="text-sm text-slate-900 dark:text-white capitalize">{a.accountType || '—'}</p></div>
+                  <div><p className="text-xs text-slate-500">Branch</p><p className="text-sm text-slate-900 dark:text-white">{a.branchCode || '—'}</p></div>
+                  <div><p className="text-xs text-slate-500">Added</p><p className="text-sm text-slate-900 dark:text-white">{new Date(a.createdAt).toLocaleDateString()}</p></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+
+      {/* Payment Page Banks (admin-only enable/disable) */}
+      <Card className="bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50 overflow-hidden">
+        <div className="p-6 border-b border-slate-100 dark:border-slate-700/50">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                <Landmark className="w-5 h-5 text-amber-500" />
+                Payment Page Banks
+              </h3>
+              <p className="text-sm text-slate-500 mt-1">
+                Control which banks appear on this merchant&apos;s payment page. All banks are enabled by default.
+              </p>
+            </div>
+            {!banksLoading && (
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-slate-500">
+                  {enabledCount}/{banks.length} enabled
+                </span>
+                <Button variant="outline" size="sm" onClick={enableAll}>Enable All</Button>
+                <Button variant="outline" size="sm" onClick={disableAll}>Disable All</Button>
+              </div>
+            )}
+          </div>
+          {!banksLoading && globalDisabledCount > 0 && (
+            <div className="mt-3 flex items-center gap-2 text-xs text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400 rounded-lg px-3 py-2">
+              <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+              {globalDisabledCount} bank{globalDisabledCount > 1 ? 's are' : ' is'} globally disabled and won&apos;t appear regardless of this setting.
+            </div>
+          )}
+        </div>
+
+        {banksLoading ? (
+          <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="flex items-center justify-between p-4 animate-pulse">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-xl" />
                   <div className="space-y-2">
                     <div className="h-4 w-28 bg-slate-200 dark:bg-slate-700 rounded" />
-                    <div className="h-3 w-36 bg-slate-200 dark:bg-slate-700 rounded" />
+                    <div className="h-3 w-20 bg-slate-200 dark:bg-slate-700 rounded" />
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <div className="h-5 w-16 bg-slate-200 dark:bg-slate-700 rounded-full" />
-                  <div className="h-5 w-16 bg-slate-200 dark:bg-slate-700 rounded-full" />
-                </div>
+                <div className="h-6 w-11 bg-slate-200 dark:bg-slate-700 rounded-full" />
               </div>
-              <div className="grid grid-cols-4 gap-4 pl-13">
-                {[...Array(4)].map((_, j) => (
-                  <div key={j} className="space-y-1">
-                    <div className="h-3 w-16 bg-slate-200 dark:bg-slate-700 rounded" />
-                    <div className="h-4 w-20 bg-slate-200 dark:bg-slate-700 rounded" />
+            ))}
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
+            {banks.map((bank) => {
+              const isEnabled = !disabledIds.has(bank.id);
+              const isGloballyDisabled = !bank.globalEnabled;
+              return (
+                <div
+                  key={bank.id}
+                  className={`flex items-center justify-between p-4 transition-colors ${
+                    isGloballyDisabled ? 'opacity-50' : ''
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-sm"
+                      style={{ backgroundColor: bank.color || '#6B7280' }}
+                    >
+                      {bank.bankName[0]}
+                    </div>
+                    <div>
+                      <p className="font-medium text-slate-900 dark:text-white">{bank.bankName}</p>
+                      <p className="text-xs text-slate-500">Code: {bank.code}{bank.branchCode ? ` · Branch: ${bank.branchCode}` : ''}</p>
+                    </div>
+                    {isGloballyDisabled && (
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400">
+                        Globally Disabled
+                      </span>
+                    )}
                   </div>
-                ))}
-              </div>
-            </div>
-          ))}
+                  <Switch
+                    checked={isEnabled}
+                    onCheckedChange={() => toggleBank(bank.id)}
+                    disabled={isGloballyDisabled}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <div className="p-4 border-t border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-900/30">
+          <Button
+            onClick={handleSave}
+            disabled={saving || banksLoading}
+            className="w-full bg-gradient-to-r from-amber-500 to-pink-600 text-white gap-2"
+          >
+            <Save className="w-4 h-4" />
+            {saving ? 'Saving...' : 'Save Bank Settings'}
+          </Button>
         </div>
-      ) : accounts.length === 0 ? (
-        <div className="p-12 text-center text-slate-500">No bank accounts found</div>
-      ) : (
-        <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
-          {accounts.map((a) => (
-            <div key={a.id} className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm" style={{ backgroundColor: a.bankColor || '#059669' }}>
-                    {(a.bankName || a.bankCode || '?')[0]}
-                  </div>
-                  <div>
-                    <p className="font-medium text-slate-900 dark:text-white">{a.bankName || a.bankCode}</p>
-                    <p className="text-sm text-slate-500">{a.accountHolderName}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {a.isPrimary && <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Primary</span>}
-                  {a.isVerified
-                    ? <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"><CheckCircle className="w-3 h-3 inline mr-1" />Verified</span>
-                    : <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">Unverified</span>}
-                </div>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 pl-13">
-                <div><p className="text-xs text-slate-500">Account No.</p><p className="text-sm font-mono text-slate-900 dark:text-white">••••{a.accountNumber?.slice(-4)}</p></div>
-                <div><p className="text-xs text-slate-500">Type</p><p className="text-sm text-slate-900 dark:text-white capitalize">{a.accountType || '—'}</p></div>
-                <div><p className="text-xs text-slate-500">Branch</p><p className="text-sm text-slate-900 dark:text-white">{a.branchCode || '—'}</p></div>
-                <div><p className="text-xs text-slate-500">Added</p><p className="text-sm text-slate-900 dark:text-white">{new Date(a.createdAt).toLocaleDateString()}</p></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </Card>
+      </Card>
+    </div>
   );
 }
 
