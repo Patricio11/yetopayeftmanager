@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/authorization';
 import { db } from '@/lib/db';
-import { users, eftTransactions, eftBankAccounts, apiKeys, webhookConfigurations, merchantTeamMembers } from '@/lib/db/schema';
+import { users, eftTransactions, eftBankAccounts, settlementBanks, apiKeys, webhookConfigurations, merchantTeamMembers } from '@/lib/db/schema';
 import { eq, and, count, sum, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { writeAuditLog } from '@/lib/audit';
@@ -67,10 +67,34 @@ export async function GET(
       .from(webhookConfigurations)
       .where(eq(webhookConfigurations.merchantId, id));
 
+    // Get primary bank account from eftBankAccounts (joined with settlement bank)
+    const [primaryBank] = await db
+      .select({
+        accountHolderName: eftBankAccounts.accountHolderName,
+        accountNumber: eftBankAccounts.accountNumber,
+        accountType: eftBankAccounts.accountType,
+        branchCode: eftBankAccounts.branchCode,
+        bankCode: eftBankAccounts.bankCode,
+        bankName: settlementBanks.bankName,
+        bankFullName: settlementBanks.fullName,
+      })
+      .from(eftBankAccounts)
+      .leftJoin(settlementBanks, eq(eftBankAccounts.settlementBankId, settlementBanks.id))
+      .where(and(eq(eftBankAccounts.merchantId, id), eq(eftBankAccounts.isPrimary, true)));
+
+    const bankAccountData = primaryBank ? {
+      account_holder: primaryBank.accountHolderName,
+      account_number: primaryBank.accountNumber,
+      account_type: primaryBank.accountType,
+      bank_name: primaryBank.bankFullName || primaryBank.bankName,
+      branch_code: primaryBank.branchCode,
+    } : merchant.bankAccount;
+
     return NextResponse.json({
       success: true,
       data: {
         ...merchant,
+        bankAccount: bankAccountData,
         stats: {
           transactions: {
             total: txStats?.total || 0,
