@@ -1575,7 +1575,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
                 type="submit"
                 // button remains enabled even when not agreed; tooltip handles guidance
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-amber-500 to-pink-600 text-white py-3 px-6 rounded-lg font-medium hover:from-amber-600 hover:to-pink-700 focus:ring-4 focus:ring-amber-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                className="w-full bg-gradient-to-r from-amber-500 to-pink-600 text-white py-3 px-6 rounded-lg font-medium hover:from-amber-600 hover:to-pink-700 focus:ring-4 focus:ring-amber-200 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
                 {isLoading ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" /> : (apiResponse.submit_message || 'Continue')}
               </button>
@@ -1646,7 +1646,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
         <button
           type="submit"
           disabled={isLoading || !selectedValue}
-          className="w-full bg-gradient-to-r from-amber-500 to-pink-600 text-white py-3 px-6 rounded-lg font-medium hover:from-amber-600 hover:to-pink-700 focus:ring-4 focus:ring-amber-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+          className="w-full bg-gradient-to-r from-amber-500 to-pink-600 text-white py-3 px-6 rounded-lg font-medium hover:from-amber-600 hover:to-pink-700 focus:ring-4 focus:ring-amber-200 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
         >
           {isLoading ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" /> : (apiResponse.submit_message || 'Continue')}
         </button>
