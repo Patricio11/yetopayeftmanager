@@ -1,17 +1,18 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Trash2, 
-  Star, 
-  Clock, 
-  Users, 
-  CreditCard, 
+import {
+  Trash2,
+  Star,
+  Clock,
+  Users,
+  CreditCard,
   TrendingUp,
   Search,
   Filter,
   RefreshCw
 } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface Token {
   id: string;
@@ -41,6 +42,7 @@ export default function TokensPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -68,10 +70,6 @@ export default function TokensPage() {
   }, [page]);
 
   const handleDelete = async (tokenId: string) => {
-    if (!confirm('Are you sure you want to delete this saved credential? The customer will need to save their credentials again.')) {
-      return;
-    }
-
     try {
       setDeleting(tokenId);
       const response = await fetch(`/api/admin/tokens?tokenId=${tokenId}`, {
@@ -90,12 +88,9 @@ export default function TokensPage() {
             totalTokens: stats.totalTokens - 1,
           });
         }
-      } else {
-        alert('Failed to delete token: ' + data.error);
       }
     } catch (error) {
       console.error('Failed to delete token:', error);
-      alert('Failed to delete token');
     } finally {
       setDeleting(null);
     }
@@ -307,7 +302,7 @@ export default function TokensPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <button
-                          onClick={() => handleDelete(token.id)}
+                          onClick={() => setConfirmDeleteId(token.id)}
                           disabled={deleting === token.id}
                           className="inline-flex items-center px-3 py-1.5 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 transition-colors"
                         >
@@ -369,6 +364,16 @@ export default function TokensPage() {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={!!confirmDeleteId}
+        onOpenChange={(open) => { if (!open) setConfirmDeleteId(null); }}
+        title="Delete Saved Credential"
+        description="Are you sure you want to delete this saved credential? The customer will need to save their credentials again."
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={() => { if (confirmDeleteId) { handleDelete(confirmDeleteId); setConfirmDeleteId(null); } }}
+      />
     </div>
   );
 }

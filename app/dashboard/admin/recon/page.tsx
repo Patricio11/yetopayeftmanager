@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { GenerateInvoiceDialog } from "@/components/dashboard/recon/generate-invoice-dialog";
 import { ViewInvoiceDialog } from "@/components/dashboard/recon/view-invoice-dialog";
@@ -87,6 +88,7 @@ export default function ReconPage() {
   const [showGenerate, setShowGenerate] = useState(false);
   const [showFeeSettings, setShowFeeSettings] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -133,7 +135,6 @@ export default function ReconPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this draft invoice?")) return;
     try {
       const res = await fetch(`/api/admin/recon/invoices/${id}`, { method: "DELETE" });
       const data = await res.json();
@@ -307,7 +308,7 @@ export default function ReconPage() {
                         {inv.status === "draft" && (
                           <>
                             <Button variant="ghost" size="sm" onClick={() => handleStatusChange(inv.id, "sent")}><Send className="w-4 h-4 text-blue-600" /></Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleDelete(inv.id)}><Trash2 className="w-4 h-4 text-red-500" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => setConfirmDeleteId(inv.id)}><Trash2 className="w-4 h-4 text-red-500" /></Button>
                           </>
                         )}
                         {inv.status === "sent" && (
@@ -336,6 +337,16 @@ export default function ReconPage() {
       {selectedInvoice && (
         <ViewInvoiceDialog invoice={selectedInvoice} onClose={() => setSelectedInvoice(null)} onStatusChange={(s) => { handleStatusChange(selectedInvoice.id, s); setSelectedInvoice(null); }} />
       )}
+
+      <ConfirmDialog
+        open={!!confirmDeleteId}
+        onOpenChange={(open) => { if (!open) setConfirmDeleteId(null); }}
+        title="Delete Invoice"
+        description="Are you sure you want to delete this draft invoice? This cannot be undone."
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={() => { if (confirmDeleteId) { handleDelete(confirmDeleteId); setConfirmDeleteId(null); } }}
+      />
     </div>
   );
 }

@@ -12,6 +12,7 @@ import {
   ChevronDown, ChevronRight, Clock, Loader2, Zap,
   CheckCircle, XCircle, ArrowUpDown,
 } from "lucide-react";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/hooks/use-toast";
 
 export function WebhookSettings() {
@@ -33,6 +34,9 @@ export function WebhookSettings() {
 
   const [testingId, setTestingId] = useState<string | null>(null);
   const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
+
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [confirmRegenId, setConfirmRegenId] = useState<string | null>(null);
 
   const [url, setUrl] = useState("");
   const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
@@ -98,7 +102,6 @@ export function WebhookSettings() {
   };
 
   const handleDeleteWebhook = async (webhookId: string) => {
-    if (!confirm('Are you sure you want to delete this webhook? This cannot be undone.')) return;
     try {
       const response = await fetch(`/api/webhooks?id=${webhookId}`, { method: 'DELETE' });
       const data = await response.json();
@@ -139,7 +142,6 @@ export function WebhookSettings() {
   };
 
   const handleRegenerateSecret = async (webhookId: string) => {
-    if (!confirm('Are you sure? The current secret will be invalidated immediately. You will need to update your server with the new secret.')) return;
     setRegeneratingId(webhookId);
     try {
       const response = await fetch('/api/webhooks/regenerate-secret', {
@@ -319,7 +321,7 @@ export function WebhookSettings() {
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() => handleRegenerateSecret(webhook.id)}
+                  onClick={() => setConfirmRegenId(webhook.id)}
                   disabled={regeneratingId === webhook.id}
                   className="text-xs h-8 gap-1.5"
                 >
@@ -333,7 +335,7 @@ export function WebhookSettings() {
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() => handleDeleteWebhook(webhook.id)}
+                  onClick={() => setConfirmDeleteId(webhook.id)}
                   className="text-xs h-8 gap-1.5 text-red-600 dark:text-red-400 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -706,6 +708,25 @@ function verifySignature(payload, signature, secret) {
           </div>
         </div>
       </div>
+      <ConfirmDialog
+        open={!!confirmDeleteId}
+        onOpenChange={(open) => { if (!open) setConfirmDeleteId(null); }}
+        title="Delete Webhook"
+        description="Are you sure you want to delete this webhook? This cannot be undone."
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={() => { if (confirmDeleteId) { handleDeleteWebhook(confirmDeleteId); setConfirmDeleteId(null); } }}
+      />
+
+      <ConfirmDialog
+        open={!!confirmRegenId}
+        onOpenChange={(open) => { if (!open) setConfirmRegenId(null); }}
+        title="Regenerate Secret"
+        description="The current secret will be invalidated immediately. You will need to update your server with the new secret."
+        confirmLabel="Regenerate"
+        variant="warning"
+        onConfirm={() => { if (confirmRegenId) { handleRegenerateSecret(confirmRegenId); setConfirmRegenId(null); } }}
+      />
     </div>
   );
 }

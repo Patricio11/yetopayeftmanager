@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useToast } from '@/hooks/use-toast';
 
 type Tab = 'overview' | 'transactions' | 'team' | 'eft' | 'billing' | 'settings';
@@ -709,6 +710,7 @@ function BillingTab({ merchantId }: { merchantId: string }) {
   const [useCustomVat, setUseCustomVat] = useState(false);
   const [vatEnabled, setVatEnabled] = useState(true);
   const [vatRate, setVatRate] = useState('15.00');
+  const [confirmResetBilling, setConfirmResetBilling] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -766,7 +768,6 @@ function BillingTab({ merchantId }: { merchantId: string }) {
   };
 
   const handleReset = async () => {
-    if (!confirm('Remove custom billing config? System defaults will apply.')) return;
     setSaving(true);
     try {
       const res = await fetch(`/api/admin/recon/merchant-fees/${merchantId}`, { method: 'DELETE' });
@@ -996,7 +997,7 @@ function BillingTab({ merchantId }: { merchantId: string }) {
             <Save className="w-4 h-4" />{saving ? 'Saving...' : 'Save Billing Config'}
           </Button>
           {merchantFee && (
-            <Button variant="outline" onClick={handleReset} disabled={saving}
+            <Button variant="outline" onClick={() => setConfirmResetBilling(true)} disabled={saving}
               className="text-red-600 border-red-200 hover:bg-red-50">
               Reset
             </Button>
@@ -1021,6 +1022,16 @@ function BillingTab({ merchantId }: { merchantId: string }) {
           </p>
         </div>
       </Card>
+
+      <ConfirmDialog
+        open={confirmResetBilling}
+        onOpenChange={setConfirmResetBilling}
+        title="Reset Billing Config"
+        description="Remove custom billing configuration? System defaults will apply to this merchant."
+        confirmLabel="Reset"
+        variant="warning"
+        onConfirm={() => { setConfirmResetBilling(false); handleReset(); }}
+      />
     </div>
   );
 }

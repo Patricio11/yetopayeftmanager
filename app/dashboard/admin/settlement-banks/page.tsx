@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/hooks/use-toast";
 
 interface SettlementBank {
@@ -28,6 +29,7 @@ export default function SettlementBanksPage() {
   const [editing, setEditing] = useState<SettlementBank | null>(null);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState<SettlementBank | null>(null);
 
   const [bankName, setBankName] = useState("");
   const [fullName, setFullName] = useState("");
@@ -102,7 +104,6 @@ export default function SettlementBanksPage() {
   };
 
   const handleDelete = async (bank: SettlementBank) => {
-    if (!confirm(`Delete ${bank.bankName}? This cannot be undone.`)) return;
     try {
       const res = await fetch(`/api/admin/settlement-banks/${bank.id}`, { method: "DELETE" });
       const data = await res.json();
@@ -207,7 +208,7 @@ export default function SettlementBanksPage() {
                       <Button variant="ghost" size="sm" onClick={() => openEdit(bank)}>
                         <Pencil className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => handleDelete(bank)}>
+                      <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => setConfirmDelete(bank)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -296,6 +297,16 @@ export default function SettlementBanksPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={!!confirmDelete}
+        onOpenChange={(open) => { if (!open) setConfirmDelete(null); }}
+        title="Delete Settlement Bank"
+        description={`Are you sure you want to delete ${confirmDelete?.bankName}? This cannot be undone.`}
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={() => { if (confirmDelete) { handleDelete(confirmDelete); setConfirmDelete(null); } }}
+      />
     </div>
   );
 }

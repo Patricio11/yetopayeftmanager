@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Key, Copy, Trash2, Plus, Check, AlertCircle, Shield, User } from "lucide-react";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useSession } from "@/lib/auth-client";
 
@@ -165,6 +166,7 @@ export function ApiKeysSettings() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [apiKeys, setApiKeys] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [confirmRevokeId, setConfirmRevokeId] = useState<string | null>(null);
 
   const fetchApiKeys = async () => {
     try {
@@ -186,7 +188,6 @@ export function ApiKeysSettings() {
   };
 
   const handleRevoke = async (id: string) => {
-    if (!confirm("Are you sure you want to revoke this API key? This cannot be undone.")) return;
     try {
       const res = await fetch(`/api/merchant/api-keys/${id}`, { method: "DELETE" });
       const data = await res.json();
@@ -314,7 +315,7 @@ export function ApiKeysSettings() {
                     </div>
                   </div>
 
-                  <Button variant="ghost" size="sm" onClick={() => handleRevoke(key.id)} className="text-red-600 dark:text-red-400 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20">
+                  <Button variant="ghost" size="sm" onClick={() => setConfirmRevokeId(key.id)} className="text-red-600 dark:text-red-400 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20">
                     <Trash2 className="w-4 h-4 mr-1" />
                     Revoke
                   </Button>
@@ -346,6 +347,16 @@ export function ApiKeysSettings() {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={!!confirmRevokeId}
+        onOpenChange={(open) => { if (!open) setConfirmRevokeId(null); }}
+        title="Revoke API Key"
+        description="Are you sure you want to revoke this API key? This cannot be undone and any integrations using this key will stop working."
+        confirmLabel="Revoke"
+        variant="danger"
+        onConfirm={() => { if (confirmRevokeId) { handleRevoke(confirmRevokeId); setConfirmRevokeId(null); } }}
+      />
     </div>
   );
 }

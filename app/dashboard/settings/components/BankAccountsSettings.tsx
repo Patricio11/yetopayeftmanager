@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Switch } from "@/components/ui/switch";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { CreditCard, Plus, Pencil, Trash2, Star, Landmark, ChevronsUpDown, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -112,6 +113,7 @@ export function BankAccountsSettings() {
   const [branchCode, setBranchCode] = useState("");
   const [isPrimary, setIsPrimary] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   const fetchData = async () => {
     try {
@@ -210,7 +212,6 @@ export function BankAccountsSettings() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this bank account?")) return;
     try {
       const res = await fetch(`/api/merchant/bank-accounts/${id}`, { method: "DELETE" });
       const data = await res.json();
@@ -352,7 +353,7 @@ export function BankAccountsSettings() {
                   <Pencil className="w-3.5 h-3.5 mr-1" />
                   Edit
                 </Button>
-                <Button size="sm" variant="ghost" onClick={() => handleDelete(account.id)} className="text-xs h-8 text-red-600 dark:text-red-400 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20">
+                <Button size="sm" variant="ghost" onClick={() => setConfirmDelete(account.id)} className="text-xs h-8 text-red-600 dark:text-red-400 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20">
                   <Trash2 className="w-3.5 h-3.5 mr-1" />
                   Delete
                 </Button>
@@ -435,6 +436,16 @@ export function BankAccountsSettings() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={!!confirmDelete}
+        onOpenChange={(open) => { if (!open) setConfirmDelete(null); }}
+        title="Delete Bank Account"
+        description="Are you sure you want to delete this bank account? This action cannot be undone."
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={() => { if (confirmDelete) { handleDelete(confirmDelete); setConfirmDelete(null); } }}
+      />
     </div>
   );
 }
