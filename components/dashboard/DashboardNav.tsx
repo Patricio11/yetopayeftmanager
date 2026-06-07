@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import {
   Home, Receipt, Settings, LogOut, Zap, Building2, CreditCard, Book,
   Users, Store, BarChart3, FileText, ChevronDown, ShieldCheck, MoreHorizontal,
-  Menu, X,
+  Menu, X, Mail,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/lib/auth-client";
@@ -196,6 +196,7 @@ export function DashboardNav({ userRole, accountMode }: DashboardNavProps) {
       { title: "Banks", href: "/dashboard/banks", icon: Building2 },
       { title: "Recon", href: "/dashboard/admin/recon", icon: BarChart3 },
       { title: "KYC", href: "/dashboard/admin/kyc", icon: ShieldCheck },
+      { title: "Broadcasts", href: "/dashboard/admin/broadcasts", icon: Mail },
     ],
   };
 

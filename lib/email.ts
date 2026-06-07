@@ -613,6 +613,46 @@ export async function sendKycRequestChangesEmail(email: string, companyName: str
   });
 }
 
+// ─── Broadcast Email Template ────────────────────────────────────────────────
+
+export async function sendBroadcastEmail(
+  to: string,
+  subject: string,
+  content: string,
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const paragraphs = content
+    .split(/\n{2,}/)
+    .map(p => p.trim())
+    .filter(Boolean)
+    .map(p => `<p style="color: #374151; line-height: 1.7; margin: 0 0 16px;">${p.replace(/\n/g, "<br>")}</p>`)
+    .join("");
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f9fafb;">
+      <div style="background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%); padding: 40px 32px; text-align: center;">
+        <h1 style="color: white; margin: 0; font-size: 28px; letter-spacing: -0.5px;">YetoPay</h1>
+      </div>
+      <div style="padding: 40px 32px; background: #ffffff;">
+        <h2 style="color: #111827; margin: 0 0 24px; font-size: 20px;">${subject}</h2>
+        ${paragraphs}
+      </div>
+      <div style="padding: 24px 32px; background: #f9fafb; text-align: center;">
+        <a href="${appUrl}/dashboard"
+          style="display: inline-block; background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%); color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">
+          Go to Dashboard
+        </a>
+      </div>
+      <div style="padding: 20px 32px; text-align: center; color: #9ca3af; font-size: 12px; line-height: 1.5;">
+        <p style="margin: 0;">You received this email because you are a registered user on YetoPay.</p>
+        <p style="margin: 8px 0 0;">&copy; ${new Date().getFullYear()} YetoPay. All rights reserved.</p>
+      </div>
+    </div>
+  `;
+
+  await transporter.sendMail({ from, to, subject, html });
+}
+
 export async function sendAdminKycActionEmail(
   action: string,
   userData: { name: string; email: string; companyName: string },
