@@ -74,6 +74,7 @@ export default function KycPage() {
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
   const [kycStatus, setKycStatus] = useState("pending");
   const [adminNote, setAdminNote] = useState<string | null>(null);
+  const [rejectionReason, setRejectionReason] = useState<string | null>(null);
   const [requirements, setRequirements] = useState<Requirement[]>([]);
   const [files, setFiles] = useState<Record<string, File | null>>({});
   const [uploaded, setUploaded] = useState<Record<string, ExistingDoc>>({});
@@ -124,6 +125,7 @@ export default function KycPage() {
       if (data.success) {
         setKycStatus(data.data.kycStatus || "pending");
         setAdminNote(data.data.vettingAdminNote || null);
+        setRejectionReason(data.data.vettingRejectionReason || null);
         setRequirements(data.requirements || []);
 
         const existing = data.data.kycData || {};
@@ -310,6 +312,7 @@ export default function KycPage() {
             <XCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold text-red-800 dark:text-red-300">Previous application was not approved</p>
+              {rejectionReason && <p className="text-sm text-red-700 dark:text-red-400 mt-1">{rejectionReason}</p>}
               <p className="text-sm text-red-700 dark:text-red-400 mt-1">Please review and resubmit your information.</p>
             </div>
           </div>

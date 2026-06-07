@@ -22,6 +22,8 @@ export async function GET() {
       name: users.name,
       phone: users.phone,
       bankAccount: users.bankAccount,
+      vettingAdminNote: users.vettingAdminNote,
+      vettingRejectionReason: users.vettingRejectionReason,
     })
     .from(users)
     .where(eq(users.id, session.user.id))
@@ -59,6 +61,8 @@ export async function GET() {
       name: user.name,
       phone: user.phone,
       bankAccount: user.bankAccount,
+      vettingAdminNote: user.vettingAdminNote,
+      vettingRejectionReason: user.vettingRejectionReason,
     },
     requirements: filtered.map((r) => ({
       id: r.id,

@@ -3,10 +3,10 @@ import { requireAdmin } from "@/lib/auth/authorization";
 import { db } from "@/lib/db";
 import { onboardingRequirements } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import path from "path";
-import fs from "fs/promises";
+import { supabaseStorage, getPublicUrl } from "@/lib/supabase-storage";
+import crypto from "crypto";
 
-const TEMPLATE_DIR = path.join(process.cwd(), "public", "uploads", "templates");
+const BUCKET = process.env.SUPABASE_DOCUMENTS_BUCKET || "documents";
 const MAX_SIZE = 10 * 1024 * 1024;
 const ALLOWED_TYPES = [
   "application/pdf",
@@ -26,6 +26,13 @@ export async function POST(
   if (!auth.authorized) return auth.response;
 
   const { id } = await params;
+
+  if (!supabaseStorage) {
+    return NextResponse.json(
+      { error: "Storage not configured. Contact admin." },
+      { status: 500 }
+    );
+  }
 
   try {
     const [existing] = await db
@@ -52,22 +59,39 @@ export async function POST(
       return NextResponse.json({ error: "File type not allowed" }, { status: 400 });
     }
 
-    await fs.mkdir(TEMPLATE_DIR, { recursive: true });
+    // Delete old template from storage if exists
+    if (existing.templateUrl?.includes(`/storage/v1/object/public/${BUCKET}/`)) {
+      const oldPath = existing.templateUrl.split(`/storage/v1/object/public/${BUCKET}/`)[1];
+      if (oldPath) {
+        await supabaseStorage.storage.from(BUCKET).remove([oldPath]);
+      }
+    }
 
-    const timestamp = Date.now();
-    const random = Math.random().toString(36).substring(2, 10);
-    const ext = path.extname(file.name) || ".pdf";
-    const sanitized = file.name
-      .replace(/\.[^.]+$/, "")
+    const dotIndex = file.name.lastIndexOf(".");
+    const ext = dotIndex >= 0 ? file.name.slice(dotIndex) : ".pdf";
+    const sanitized = (dotIndex >= 0 ? file.name.slice(0, dotIndex) : file.name)
       .replace(/[^a-zA-Z0-9-_]/g, "-")
       .replace(/-+/g, "-")
       .substring(0, 60) || "template";
-    const storedName = `${sanitized}-${timestamp}-${random}${ext}`;
+    const unique = `${Date.now()}-${crypto.randomBytes(4).toString("hex")}`;
+    const storedName = `${sanitized}-${unique}${ext}`;
+    const filePath = `templates/${storedName}`;
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    await fs.writeFile(path.join(TEMPLATE_DIR, storedName), buffer);
 
-    const templateUrl = `/uploads/templates/${storedName}`;
+    const { error: uploadError } = await supabaseStorage.storage
+      .from(BUCKET)
+      .upload(filePath, buffer, {
+        contentType: file.type,
+        upsert: true,
+      });
+
+    if (uploadError) {
+      console.error("Supabase template upload error:", uploadError);
+      return NextResponse.json({ error: "Failed to upload template" }, { status: 500 });
+    }
+
+    const templateUrl = getPublicUrl(BUCKET, filePath);
 
     const [updated] = await db
       .update(onboardingRequirements)
@@ -97,6 +121,13 @@ export async function DELETE(
 
   const { id } = await params;
 
+  if (!supabaseStorage) {
+    return NextResponse.json(
+      { error: "Storage not configured. Contact admin." },
+      { status: 500 }
+    );
+  }
+
   try {
     const [existing] = await db
       .select()
@@ -109,6 +140,14 @@ export async function DELETE(
 
     if (!existing.templateUrl) {
       return NextResponse.json({ error: "No template to remove" }, { status: 400 });
+    }
+
+    // Delete from Supabase Storage
+    if (existing.templateUrl.includes(`/storage/v1/object/public/${BUCKET}/`)) {
+      const oldPath = existing.templateUrl.split(`/storage/v1/object/public/${BUCKET}/`)[1];
+      if (oldPath) {
+        await supabaseStorage.storage.from(BUCKET).remove([oldPath]);
+      }
     }
 
     const [updated] = await db

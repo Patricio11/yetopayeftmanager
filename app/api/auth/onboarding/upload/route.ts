@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth-server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { supabaseStorage, getPublicUrl } from "@/lib/supabase-storage";
 import crypto from "crypto";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -14,9 +13,12 @@ const ALLOWED_TYPES = [
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ];
 
+const BUCKET = process.env.SUPABASE_DOCUMENTS_BUCKET || "documents";
+
 function sanitizeFileName(name: string): string {
-  const ext = path.extname(name);
-  const base = path.basename(name, ext)
+  const dotIndex = name.lastIndexOf(".");
+  const ext = dotIndex >= 0 ? name.slice(dotIndex) : "";
+  const base = (dotIndex >= 0 ? name.slice(0, dotIndex) : name)
     .replace(/[^a-zA-Z0-9-_]/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "")
@@ -30,6 +32,13 @@ export async function POST(request: NextRequest) {
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (!supabaseStorage) {
+    return NextResponse.json(
+      { error: "Storage not configured. Contact admin." },
+      { status: 500 }
+    );
   }
 
   const formData = await request.formData();
@@ -50,24 +59,37 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const storedName = sanitizeFileName(file.name);
-  const uploadDir = path.join(process.cwd(), "public", "uploads", "onboarding", session.user.id);
-  await mkdir(uploadDir, { recursive: true });
+  try {
+    const storedName = sanitizeFileName(file.name);
+    const filePath = `onboarding/${session.user.id}/${storedName}`;
+    const buffer = Buffer.from(await file.arrayBuffer());
 
-  const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(path.join(uploadDir, storedName), buffer);
+    const { error: uploadError } = await supabaseStorage.storage
+      .from(BUCKET)
+      .upload(filePath, buffer, {
+        contentType: file.type,
+        upsert: true,
+      });
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  const url = `${appUrl}/uploads/onboarding/${session.user.id}/${storedName}`;
+    if (uploadError) {
+      console.error("Supabase upload error:", uploadError);
+      return NextResponse.json({ error: "Failed to upload file" }, { status: 500 });
+    }
 
-  return NextResponse.json({
-    success: true,
-    data: {
-      originalName: file.name,
-      storedName,
-      url,
-      mimeType: file.type,
-      sizeBytes: file.size,
-    },
-  });
+    const url = getPublicUrl(BUCKET, filePath);
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        originalName: file.name,
+        storedName,
+        url,
+        mimeType: file.type,
+        sizeBytes: file.size,
+      },
+    });
+  } catch (error) {
+    console.error("Error uploading document:", error);
+    return NextResponse.json({ error: "Failed to upload file" }, { status: 500 });
+  }
 }
