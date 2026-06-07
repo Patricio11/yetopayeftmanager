@@ -50,8 +50,8 @@ export function CompanySettings() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      toast({ title: "Error", description: "Logo must be under 2MB", variant: "destructive" });
+    if (file.size > 1 * 1024 * 1024) {
+      toast({ title: "Error", description: "Logo must be under 1MB", variant: "destructive" });
       return;
     }
 
@@ -194,7 +194,7 @@ export function CompanySettings() {
             <div className="flex-1 space-y-3">
               <div>
                 <p className="text-sm font-medium text-slate-900 dark:text-white">Upload your company logo</p>
-                <p className="text-xs text-slate-500 mt-0.5">JPEG, PNG, or WebP. Max 2MB. Recommended: 200x200px or larger.</p>
+                <p className="text-xs text-slate-500 mt-0.5">JPEG, PNG, or WebP. Max 1MB. Recommended: 200x200px or larger.</p>
               </div>
               <div className="flex items-center gap-2">
                 <input

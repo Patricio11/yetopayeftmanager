@@ -3,18 +3,9 @@ import { authenticateMerchant } from "@/lib/auth/merchant-auth";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { writeFile, mkdir, unlink } from "fs/promises";
-import path from "path";
-import crypto from "crypto";
 
-const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
-
-function sanitizeFileName(name: string): string {
-  const ext = path.extname(name).toLowerCase();
-  const unique = `${Date.now()}-${crypto.randomBytes(4).toString("hex")}`;
-  return `logo-${unique}${ext}`;
-}
 
 export async function POST(request: NextRequest) {
   const auth = await authenticateMerchant(request, "settings.write");
@@ -33,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
-        { success: false, error: "File too large (max 2MB)" },
+        { success: false, error: "File too large (max 1MB)" },
         { status: 400 }
       );
     }
@@ -45,30 +36,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const storedName = sanitizeFileName(file.name);
-    const uploadDir = path.join(process.cwd(), "public", "uploads", "logos", auth.merchantId);
-    await mkdir(uploadDir, { recursive: true });
-
+    // Convert to base64 data URL and store in database
     const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(path.join(uploadDir, storedName), buffer);
+    const base64 = buffer.toString("base64");
+    const logoUrl = `data:${file.type};base64,${base64}`;
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    const logoUrl = `${appUrl}/uploads/logos/${auth.merchantId}/${storedName}`;
-
-    // Delete old logo file if it exists
-    const currentUser = await db.query.users.findFirst({
-      where: eq(users.id, auth.merchantId),
-      columns: { companyLogoUrl: true },
-    });
-    if (currentUser?.companyLogoUrl) {
-      try {
-        const oldUrl = new URL(currentUser.companyLogoUrl);
-        const oldPath = path.join(process.cwd(), "public", oldUrl.pathname);
-        await unlink(oldPath);
-      } catch { /* old file may not exist */ }
-    }
-
-    // Update user record
     await db
       .update(users)
       .set({ companyLogoUrl: logoUrl, updatedAt: new Date() })
@@ -92,19 +64,6 @@ export async function DELETE(request: NextRequest) {
   if (!auth.success) return auth.response;
 
   try {
-    const currentUser = await db.query.users.findFirst({
-      where: eq(users.id, auth.merchantId),
-      columns: { companyLogoUrl: true },
-    });
-
-    if (currentUser?.companyLogoUrl) {
-      try {
-        const oldUrl = new URL(currentUser.companyLogoUrl);
-        const oldPath = path.join(process.cwd(), "public", oldUrl.pathname);
-        await unlink(oldPath);
-      } catch { /* file may not exist */ }
-    }
-
     await db
       .update(users)
       .set({ companyLogoUrl: null, updatedAt: new Date() })
