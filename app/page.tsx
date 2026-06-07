@@ -5,6 +5,7 @@ import {
   Building2, BarChart3, Lock, CheckCircle, ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import YetoPayLogo from '@/components/brand/YetoPayLogo';
 
 const stats = [
   { value: '6+', label: 'Major Banks', suffix: '' },
@@ -73,9 +74,7 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 border-b border-slate-200/60 dark:border-white/5 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <span className="font-extrabold tracking-tight yp-gradient-text" style={{ fontSize: '2rem' }}>
-              YetoPay
-            </span>
+            <YetoPayLogo size="md" />
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600 dark:text-slate-400">
             <a href="#features" className="hover:text-slate-900 dark:hover:text-white transition-colors">Features</a>
@@ -353,9 +352,7 @@ export default function LandingPage() {
             {/* Brand */}
             <div className="col-span-2 md:col-span-1">
               <Link href="/" className="flex items-center gap-2.5">
-                <span className="font-extrabold tracking-tight yp-gradient-text" style={{ fontSize: '2rem' }}>
-                  YetoPay
-                </span>
+                <YetoPayLogo size="md" />
               </Link>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-4 leading-relaxed">
                 Modern Pay By Bank payment solutions for South African businesses.

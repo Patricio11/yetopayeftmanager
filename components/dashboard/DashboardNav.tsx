@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import YetoPayLogo from "@/components/brand/YetoPayLogo";
 import {
   Home, Receipt, Settings, LogOut, Zap, Building2, CreditCard, Book,
   Users, Store, BarChart3, FileText, ChevronDown, ShieldCheck, MoreHorizontal,
@@ -241,9 +242,7 @@ export function DashboardNav({ userRole, accountMode }: DashboardNavProps) {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/dashboard" className="flex items-center group cursor-pointer">
-            <span className="font-extrabold tracking-tight yp-gradient-text" style={{ fontSize: '2rem' }}>
-              YetoPay
-            </span>
+            <YetoPayLogo size="md" />
           </Link>
 
           {/* Desktop Navigation */}
@@ -311,9 +310,7 @@ export function DashboardNav({ userRole, accountMode }: DashboardNavProps) {
           <div className="fixed inset-y-0 right-0 w-80 max-w-[85vw] bg-white dark:bg-slate-900 z-50 lg:hidden shadow-2xl overflow-y-auto animate-in slide-in-from-right duration-200">
             <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
               <div className="flex items-center gap-2">
-                <span className="font-extrabold tracking-tight yp-gradient-text" style={{ fontSize: '1.5rem' }}>
-                  YetoPay
-                </span>
+                <YetoPayLogo size="sm" />
                 {accountMode === 'demo' && (
                   <span className="px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-300 rounded-full">
                     DEMO

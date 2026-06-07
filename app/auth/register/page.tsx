@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import YetoPayLogo from '@/components/brand/YetoPayLogo';
 import { Mail, Lock, Eye, EyeOff, User, Building, ArrowRight, AlertCircle, CheckCircle, Phone, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -162,7 +163,7 @@ export default function RegisterPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-2 mb-6">
             
-            <span className="font-extrabold yp-gradient-text" style={{ fontSize: '2rem' }}>YetoPay</span>
+            <YetoPayLogo size="lg" />
           </Link>
         </div>
 

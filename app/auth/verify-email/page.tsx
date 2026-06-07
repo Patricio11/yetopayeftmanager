@@ -3,6 +3,7 @@
 import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import YetoPayLogo from '@/components/brand/YetoPayLogo';
 import { Mail, ArrowLeft, AlertCircle, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -78,7 +79,7 @@ function VerifyEmailContent() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-2 mb-6">
             
-            <span className="font-extrabold yp-gradient-text" style={{ fontSize: '2rem' }}>YetoPay</span>
+            <YetoPayLogo size="lg" />
           </Link>
         </div>
 

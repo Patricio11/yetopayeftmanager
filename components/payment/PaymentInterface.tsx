@@ -5,8 +5,9 @@ import Image from 'next/image';
 import YetoPayEFT from './EftServiceTheme/YetoPayEFT';
 import {
   CreditCard, Landmark, ChevronRight, ChevronLeft,
-  CheckCircle, X, AlertTriangle, Shield, HelpCircle,
+  CheckCircle, X, AlertTriangle, Shield,
 } from 'lucide-react';
+import YetoPayLogo from '@/components/brand/YetoPayLogo';
 
 interface AvailableService {
   code: string;
@@ -375,16 +376,10 @@ export default function PaymentInterface({
             DEMO MODE — This is a test transaction. No real payment will be processed.
           </div>
         )}
-        <div className="bg-gradient-to-r from-amber-500 to-pink-600 text-white">
-          <div className="container mx-auto px-4 py-6">
-            <div className="flex items-center justify-between">
-              <h1 className="font-extrabold yp-gradient-text" style={{ fontSize: '2rem' }}>YetoPay</h1>
-              <HelpCircle size={20} className="cursor-pointer hover:text-amber-200 transition-colors" />
-            </div>
-          </div>
-        </div>
-
         <div className="container mx-auto px-4 py-8">
+          <div className="max-w-md mx-auto mb-6">
+            <YetoPayLogo size="lg" />
+          </div>
           <div className="max-w-md mx-auto">
             <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
               <div className="flex items-center justify-between">

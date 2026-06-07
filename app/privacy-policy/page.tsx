@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Shield, ArrowLeft } from 'lucide-react';
+import YetoPayLogo from '@/components/brand/YetoPayLogo';
 
 export const metadata = {
   title: 'Privacy Policy | YetoPay',
@@ -12,8 +13,8 @@ export default function PrivacyPolicyPage() {
       {/* Header */}
       <header className="border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="font-extrabold text-2xl yp-gradient-text">
-            YetoPay
+          <Link href="/" className="flex items-center">
+            <YetoPayLogo size="md" />
           </Link>
           <Link
             href="/"
