@@ -35,8 +35,6 @@ export default function AdminSettingsPage() {
 
   // T&C settings
   const [tcEnabled, setTcEnabled] = useState(false);
-  const [tcTitle, setTcTitle] = useState('');
-  const [tcContent, setTcContent] = useState('');
 
   // Alert settings
   const [alertEmails, setAlertEmails] = useState('');
@@ -57,8 +55,6 @@ export default function AdminSettingsPage() {
       if (data.success) {
         const s = data.settings;
         setTcEnabled(s.eft_tc_enabled === 'true');
-        setTcTitle(s.eft_tc_title || '');
-        setTcContent(s.eft_tc_content || '');
         setAlertEmails(s.alert_emails || '');
         setAlertSmsNumbers(s.alert_sms_numbers || '');
         setAlertSlackWebhook(s.alert_slack_webhook_url || '');
@@ -101,8 +97,6 @@ export default function AdminSettingsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           eft_tc_enabled: tcEnabled,
-          eft_tc_title: tcTitle,
-          eft_tc_content: tcContent,
           alert_emails: alertEmails,
           alert_sms_numbers: alertSmsNumbers,
           alert_slack_webhook_url: alertSlackWebhook,
@@ -225,7 +219,7 @@ export default function AdminSettingsPage() {
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <Label htmlFor="tc-enabled" className="font-medium">Enable T&C globally</Label>
+            <Label htmlFor="tc-enabled" className="font-medium">Show T&C on Pay by Bank login</Label>
             <button
               id="tc-enabled"
               role="switch"
@@ -241,28 +235,23 @@ export default function AdminSettingsPage() {
             </button>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="tc-title">Title</Label>
-            <Input
-              id="tc-title"
-              placeholder="Terms & Conditions"
-              value={tcTitle}
-              onChange={e => setTcTitle(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="tc-content">Content (Markdown supported)</Label>
-            <textarea
-              id="tc-content"
-              className="w-full min-h-[200px] rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-mono"
-              placeholder="# Terms&#10;&#10;**Bold text**, *italic text*, - list items"
-              value={tcContent}
-              onChange={e => setTcContent(e.target.value)}
-            />
-            <p className="text-xs text-slate-400">
-              Supports: <code># heading</code>, <code>**bold**</code>, <code>*italic*</code>, <code>- list items</code>
-            </p>
+          <div className="flex gap-4 text-sm">
+            <a
+              href="/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-amber-600 hover:text-amber-700 underline underline-offset-2"
+            >
+              View Privacy Policy
+            </a>
+            <a
+              href="/terms-and-conditions"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-amber-600 hover:text-amber-700 underline underline-offset-2"
+            >
+              View Terms &amp; Conditions
+            </a>
           </div>
         </div>
       </Card>

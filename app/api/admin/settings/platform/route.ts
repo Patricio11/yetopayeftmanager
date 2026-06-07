@@ -5,8 +5,6 @@ import { platformSettings } from '@/lib/db/schema';
 
 const ALLOWED_KEYS = [
   'eft_tc_enabled',
-  'eft_tc_title',
-  'eft_tc_content',
   'alert_emails',
   'alert_sms_numbers',
   'alert_slack_webhook_url',
@@ -46,10 +44,8 @@ export async function PATCH(request: NextRequest) {
 
     const updates: { key: string; value: string }[] = [];
 
-    // T&C settings
+    // T&C toggle
     if (body.eft_tc_enabled !== undefined) updates.push({ key: 'eft_tc_enabled', value: body.eft_tc_enabled ? 'true' : 'false' });
-    if (body.eft_tc_title !== undefined) updates.push({ key: 'eft_tc_title', value: body.eft_tc_title });
-    if (body.eft_tc_content !== undefined) updates.push({ key: 'eft_tc_content', value: body.eft_tc_content });
 
     // Monitoring/alert settings
     if (body.alert_emails !== undefined) updates.push({ key: 'alert_emails', value: body.alert_emails });

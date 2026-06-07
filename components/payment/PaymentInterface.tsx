@@ -52,8 +52,6 @@ interface PaymentInterfaceProps {
   fnbVerifyResult?: boolean;
   showSaveCredentials?: boolean;
   showTerms?: boolean;
-  termsTitle?: string;
-  termsContent?: string;
   availableServices?: AvailableService[];
   cardStatus?: string | null;
 }
@@ -69,8 +67,6 @@ export default function PaymentInterface({
   fnbVerifyResult,
   showSaveCredentials,
   showTerms,
-  termsTitle,
-  termsContent,
   availableServices = [],
   cardStatus = null,
 }: PaymentInterfaceProps) {
@@ -363,8 +359,6 @@ export default function PaymentInterface({
           fnbVerifyResult,
           showSaveCredentials,
           showTerms,
-          termsTitle,
-          termsContent,
         }}
       />
     </div>

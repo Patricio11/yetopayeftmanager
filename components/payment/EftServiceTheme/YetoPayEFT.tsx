@@ -108,8 +108,6 @@ interface YetoPayEFTProps {
     fnbVerifyResult?: boolean;
     showSaveCredentials?: boolean;
     showTerms?: boolean;
-    termsTitle?: string;
-    termsContent?: string;
   };
 }
 
@@ -143,10 +141,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   // T&C modal + agreement state
   const [showTerms, setShowTerms] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  // T&C config from merchant settings
   const [termsEnabled, setTermsEnabled] = useState(false);
-  const [termsTitle, setTermsTitle] = useState('Terms & Conditions');
-  const [termsContent, setTermsContent] = useState('');
   // Save credentials enabled (per-merchant setting)
   const [saveCredentialsEnabled, setSaveCredentialsEnabled] = useState(false);
 
@@ -383,8 +378,6 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
         });
         setBanks(initialData.banks);
         if (initialData.showTerms !== undefined) setTermsEnabled(!!initialData.showTerms);
-        if (initialData.termsTitle) setTermsTitle(initialData.termsTitle);
-        if (initialData.termsContent !== undefined) setTermsContent(initialData.termsContent);
         if (initialData.showSaveCredentials !== undefined) setSaveCredentialsEnabled(!!initialData.showSaveCredentials);
         
         // Generate JWT token for EFT service (skip for demo mode)
@@ -2144,9 +2137,9 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
             </div>
             <p className="text-xs text-gray-400">
               By continuing you agree to YetoPay&apos;s{' '}
-              <button className="text-amber-500 hover:underline" onClick={() => setShowTerms(true)}>
+              <a href="/terms-and-conditions" target="_blank" rel="noopener noreferrer" className="text-amber-500 hover:underline">
                 T&amp;Cs
-              </button>
+              </a>
             </p>
           </div>
         </div>
@@ -2157,8 +2150,6 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
         open={showTerms}
         onClose={() => setShowTerms(false)}
         onAgree={() => { setAgreedToTerms(true); setTcTooltipVisible(false); clearTcTooltipTimer(); }}
-        title={termsTitle}
-        content={termsContent}
       />
 
       {/* Cancel confirm modal */}

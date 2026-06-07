@@ -390,15 +390,22 @@ export default function LandingPage() {
               </ul>
             </div>
 
-            {/* Support */}
+            {/* Legal */}
             <div>
-              <h4 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wider mb-4">Support</h4>
+              <h4 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wider mb-4">Legal</h4>
               <ul className="space-y-3">
-                {['Help Centre', 'API Docs', 'Status Page', 'Terms of Service'].map((item) => (
-                  <li key={item}>
-                    <a href="#" className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">{item}</a>
-                  </li>
-                ))}
+                <li>
+                  <a href="/privacy-policy" className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Privacy Policy</a>
+                </li>
+                <li>
+                  <a href="/terms-and-conditions" className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Terms &amp; Conditions</a>
+                </li>
+                <li>
+                  <a href="#" className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Help Centre</a>
+                </li>
+                <li>
+                  <a href="#" className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">API Docs</a>
+                </li>
               </ul>
             </div>
           </div>

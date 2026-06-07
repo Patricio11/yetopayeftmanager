@@ -66,7 +66,7 @@ export default async function PaymentPage({ params, searchParams }: PageProps) {
     }
 
     // Extract data from response
-    const { sessionId, paymentDetails, merchant, banks, token, isDemo, enableReceipt, fnbVerifyResult, showSaveCredentials, showTerms, termsTitle, termsContent, availableServices } = data.data;
+    const { sessionId, paymentDetails, merchant, banks, token, isDemo, enableReceipt, fnbVerifyResult, showSaveCredentials, showTerms, availableServices } = data.data;
 
     // Transform data to match component props
     const transaction = {
@@ -92,8 +92,6 @@ export default async function PaymentPage({ params, searchParams }: PageProps) {
         fnbVerifyResult={fnbVerifyResult}
         showSaveCredentials={showSaveCredentials}
         showTerms={showTerms}
-        termsTitle={termsTitle}
-        termsContent={termsContent}
         availableServices={availableServices || []}
         cardStatus={cardStatus}
       />

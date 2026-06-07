@@ -137,11 +137,11 @@ export async function GET(
       eftServiceUrl: bank.eftServiceUrl || defaultEftUrl,
     }));
 
-    // Fetch global T&C content from platform settings
+    // Fetch global T&C toggle from platform settings
     const tcRows = await db
       .select()
       .from(platformSettings)
-      .where(inArray(platformSettings.settingKey, ['eft_tc_enabled', 'eft_tc_title', 'eft_tc_content']));
+      .where(inArray(platformSettings.settingKey, ['eft_tc_enabled']));
     const tc = Object.fromEntries(tcRows.map(r => [r.settingKey, r.settingValue ?? '']));
 
     // Fetch merchant's enabled payment services
@@ -207,8 +207,6 @@ export async function GET(
         fnbVerifyResult: !!(merchant.eftSettings as any)?.fnbVerifyResult,
         showSaveCredentials: !!(merchant.eftSettings as any)?.saveCredentialsEnabled,
         showTerms: tc['eft_tc_enabled'] === 'true',
-        termsTitle: tc['eft_tc_title'] || 'Terms & Conditions',
-        termsContent: tc['eft_tc_content'] || '',
         availableServices,
         step: "init",
         token,
