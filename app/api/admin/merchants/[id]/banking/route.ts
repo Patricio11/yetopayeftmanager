@@ -34,6 +34,7 @@ export async function GET(
         updatedAt: eftBankAccounts.updatedAt,
         settlementBankId: eftBankAccounts.settlementBankId,
         bankName: settlementBanks.bankName,
+        bankFullName: settlementBanks.fullName,
         bankColor: settlementBanks.color,
       })
       .from(eftBankAccounts)

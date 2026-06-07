@@ -116,6 +116,7 @@ export const paymentTokens = pgTable("payment_tokens", {
 export const settlementBanks = pgTable("settlement_banks", {
   id: uuid("id").defaultRandom().primaryKey(),
   bankName: text("bank_name").notNull(),
+  fullName: text("full_name"),
   code: text("code").notNull().unique(),
   color: text("color"),
   branchCode: text("branch_code"),

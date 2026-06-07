@@ -41,6 +41,7 @@ export async function GET(request: NextRequest) {
         eftBanksId: eftBankAccounts.eftBanksId,
         settlementBankId: eftBankAccounts.settlementBankId,
         bankName: settlementBanks.bankName,
+        bankFullName: settlementBanks.fullName,
         bankColor: settlementBanks.color,
       })
       .from(eftBankAccounts)

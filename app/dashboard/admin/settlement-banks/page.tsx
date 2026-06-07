@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 interface SettlementBank {
   id: string;
   bankName: string;
+  fullName: string | null;
   code: string;
   color: string | null;
   branchCode: string | null;
@@ -29,6 +30,7 @@ export default function SettlementBanksPage() {
   const [search, setSearch] = useState("");
 
   const [bankName, setBankName] = useState("");
+  const [fullName, setFullName] = useState("");
   const [code, setCode] = useState("");
   const [color, setColor] = useState("#0066B3");
   const [branchCode, setBranchCode] = useState("");
@@ -50,6 +52,7 @@ export default function SettlementBanksPage() {
 
   const resetForm = () => {
     setBankName("");
+    setFullName("");
     setCode("");
     setColor("#0066B3");
     setBranchCode("");
@@ -62,6 +65,7 @@ export default function SettlementBanksPage() {
   const openEdit = (bank: SettlementBank) => {
     setEditing(bank);
     setBankName(bank.bankName);
+    setFullName(bank.fullName || "");
     setCode(bank.code);
     setColor(bank.color || "#0066B3");
     setBranchCode(bank.branchCode || "");
@@ -76,7 +80,7 @@ export default function SettlementBanksPage() {
     }
     setSaving(true);
     try {
-      const payload = { bankName, code: code.toLowerCase().replace(/\s+/g, "_"), color, branchCode: branchCode || undefined, enabled };
+      const payload = { bankName, fullName: fullName || undefined, code: code.toLowerCase().replace(/\s+/g, "_"), color, branchCode: branchCode || undefined, enabled };
       const url = editing ? `/api/admin/settlement-banks/${editing.id}` : "/api/admin/settlement-banks";
       const method = editing ? "PATCH" : "POST";
 
@@ -187,7 +191,10 @@ export default function SettlementBanksPage() {
                       >
                         <Landmark className="w-4 h-4 text-white" />
                       </div>
-                      <span className="font-medium text-slate-900 dark:text-white">{bank.bankName}</span>
+                      <div>
+                        <span className="font-medium text-slate-900 dark:text-white">{bank.bankName}</span>
+                        {bank.fullName && <p className="text-xs text-slate-400">{bank.fullName}</p>}
+                      </div>
                     </div>
                   </td>
                   <td className="px-4 py-3 text-sm text-slate-500 font-mono">{bank.code}</td>
@@ -233,7 +240,12 @@ export default function SettlementBanksPage() {
           <div className="space-y-4 py-2">
             <div className="space-y-2">
               <Label>Bank Name</Label>
-              <Input value={bankName} onChange={e => setBankName(e.target.value)} placeholder="e.g. Capitec Bank" />
+              <Input value={bankName} onChange={e => setBankName(e.target.value)} placeholder="e.g. FNB" />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Full Name <span className="text-slate-400 font-normal">(optional)</span></Label>
+              <Input value={fullName} onChange={e => setFullName(e.target.value)} placeholder="e.g. First National Bank" />
             </div>
 
             <div className="grid grid-cols-2 gap-4">

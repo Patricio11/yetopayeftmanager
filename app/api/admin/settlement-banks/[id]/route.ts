@@ -18,6 +18,7 @@ export async function PATCH(
     const updates: Record<string, any> = { updatedAt: new Date() };
 
     if (body.bankName !== undefined) updates.bankName = body.bankName;
+    if (body.fullName !== undefined) updates.fullName = body.fullName;
     if (body.code !== undefined) updates.code = body.code;
     if (body.color !== undefined) updates.color = body.color;
     if (body.branchCode !== undefined) updates.branchCode = body.branchCode;

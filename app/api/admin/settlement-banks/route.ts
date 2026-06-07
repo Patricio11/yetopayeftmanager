@@ -7,6 +7,7 @@ import { z } from "zod";
 
 const createBankSchema = z.object({
   bankName: z.string().min(1),
+  fullName: z.string().optional(),
   code: z.string().min(1),
   color: z.string().optional(),
   branchCode: z.string().optional(),

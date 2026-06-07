@@ -1,15 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Switch } from "@/components/ui/switch";
-import { CreditCard, Plus, Pencil, Trash2, Star, Landmark } from "lucide-react";
+import { CreditCard, Plus, Pencil, Trash2, Star, Landmark, ChevronsUpDown, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 interface BankAccount {
   id: string;
@@ -36,6 +39,61 @@ interface Bank {
   code: string;
   color: string | null;
   branchCode: string | null;
+}
+
+function BankCombobox({ banks, value, onChange }: { banks: Bank[]; value: string; onChange: (id: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const selected = banks.find(b => b.id === value);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between font-normal"
+        >
+          {selected ? (
+            <div className="flex items-center gap-2 truncate">
+              {selected.color && (
+                <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: selected.color }} />
+              )}
+              <span className="truncate">{selected.bankName}</span>
+            </div>
+          ) : (
+            <span className="text-muted-foreground">Select a bank...</span>
+          )}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+        <Command>
+          <CommandInput placeholder="Search banks..." />
+          <CommandList>
+            <CommandEmpty>No bank found.</CommandEmpty>
+            <CommandGroup>
+              {banks.map((bank) => (
+                <CommandItem
+                  key={bank.id}
+                  value={bank.bankName}
+                  onSelect={() => { onChange(bank.id); setOpen(false); }}
+                >
+                  <div className="flex items-center gap-2 flex-1">
+                    {bank.color && (
+                      <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: bank.color }} />
+                    )}
+                    <span>{bank.bankName}</span>
+                  </div>
+                  <Check className={cn("ml-auto h-4 w-4", value === bank.id ? "opacity-100" : "opacity-0")} />
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
 }
 
 export function BankAccountsSettings() {
@@ -304,7 +362,7 @@ export function BankAccountsSettings() {
         </div>
       )}
 
-      {/* Add/Edit Dialog */}
+      {/* Add/Edit Dialog – uses BankCombobox defined below */}
       <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) { setDialogOpen(false); resetForm(); } else { setDialogOpen(true); } }}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
@@ -317,23 +375,11 @@ export function BankAccountsSettings() {
           <div className="space-y-4 py-2">
             <div className="space-y-2">
               <Label className="text-slate-700 dark:text-slate-300 text-sm">Bank</Label>
-              <Select value={selectedBankId} onValueChange={handleBankChange}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a bank" />
-                </SelectTrigger>
-                <SelectContent>
-                  {banks.map((bank) => (
-                    <SelectItem key={bank.id} value={bank.id}>
-                      <div className="flex items-center gap-2">
-                        {bank.color && (
-                          <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: bank.color }} />
-                        )}
-                        {bank.bankName}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <BankCombobox
+                banks={banks}
+                value={selectedBankId}
+                onChange={handleBankChange}
+              />
             </div>
 
             <div className="space-y-2">
