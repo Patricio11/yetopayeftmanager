@@ -48,6 +48,7 @@ interface PaymentInterfaceProps {
   token: string;
   merchantBankAccount: any;
   isDemo?: boolean;
+  enableReceipt?: boolean;
   fnbVerifyResult?: boolean;
   showSaveCredentials?: boolean;
   showTerms?: boolean;
@@ -64,6 +65,7 @@ export default function PaymentInterface({
   token,
   merchantBankAccount,
   isDemo,
+  enableReceipt,
   fnbVerifyResult,
   showSaveCredentials,
   showTerms,
@@ -357,6 +359,7 @@ export default function PaymentInterface({
           },
           token,
           isDemo,
+          enableReceipt,
           fnbVerifyResult,
           showSaveCredentials,
           showTerms,

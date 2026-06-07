@@ -104,6 +104,7 @@ interface YetoPayEFTProps {
     };
     token: string;
     isDemo?: boolean;
+    enableReceipt?: boolean;
     fnbVerifyResult?: boolean;
     showSaveCredentials?: boolean;
     showTerms?: boolean;
@@ -254,7 +255,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     setTransactionResult({
       status: uiStatus,
       message,
-      enableReceipt: uiStatus === 'completed' ? raw?.enable_receipt === true : false,
+      enableReceipt: uiStatus === 'completed' ? (raw?.enable_receipt === true || initialData?.enableReceipt === true) : false,
       receipt: uiStatus === 'completed' ? raw?.receipt : undefined,
     });
     setCurrentStep(uiStatus);

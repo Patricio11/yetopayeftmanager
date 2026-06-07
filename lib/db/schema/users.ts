@@ -81,6 +81,7 @@ export const users = pgTable("user", {
     cancelledUrl?: string;
     fnbVerifyResult?: boolean;
     showTermsAndConditions?: boolean;
+    enableReceipt?: boolean;
   }>().default({}),
 
   // Metadata

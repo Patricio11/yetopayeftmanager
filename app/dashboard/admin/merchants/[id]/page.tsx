@@ -64,7 +64,7 @@ export default function MerchantDetailPage() {
     { key: 'overview', label: 'Overview', icon: Building2 },
     { key: 'transactions', label: 'Transactions', icon: Activity },
     { key: 'team', label: 'Team', icon: Users },
-    { key: 'eft', label: 'EFT (Pay by Bank)', icon: Landmark },
+    { key: 'eft', label: 'Pay by Bank', icon: Landmark },
     { key: 'billing', label: 'Billing', icon: Receipt },
     { key: 'settings', label: 'Settings', icon: Shield },
   ];
@@ -405,6 +405,8 @@ function EftBanksTab({ merchantId }: { merchantId: string }) {
   const [banksLoading, setBanksLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [disabledIds, setDisabledIds] = useState<Set<string>>(new Set());
+  const [enableReceipt, setEnableReceipt] = useState(false);
+  const [receiptSaving, setReceiptSaving] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -414,7 +416,38 @@ function EftBanksTab({ merchantId }: { merchantId: string }) {
         if (data.success) setAccounts(data.data || []);
       } catch { /* ignore */ } finally { setAccountsLoading(false); }
     })();
+    (async () => {
+      try {
+        const res = await fetch(`/api/admin/merchants/${merchantId}`);
+        const data = await res.json();
+        if (data.success) {
+          setEnableReceipt(!!(data.data.eftSettings as any)?.enableReceipt);
+        }
+      } catch { /* ignore */ }
+    })();
   }, [merchantId]);
+
+  const handleReceiptToggle = async (checked: boolean) => {
+    setEnableReceipt(checked);
+    setReceiptSaving(true);
+    try {
+      const res = await fetch(`/api/admin/merchants/${merchantId}/eft-settings`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enableReceipt: checked }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast({ title: 'Saved', description: `Receipt ${checked ? 'enabled' : 'disabled'} for this merchant` });
+      } else {
+        setEnableReceipt(!checked);
+        toast({ title: 'Error', description: data.error || 'Failed to save', variant: 'destructive' });
+      }
+    } catch {
+      setEnableReceipt(!checked);
+      toast({ title: 'Error', description: 'Failed to save setting', variant: 'destructive' });
+    } finally { setReceiptSaving(false); }
+  };
 
   const fetchBanks = useCallback(async () => {
     setBanksLoading(true);
@@ -628,6 +661,30 @@ function EftBanksTab({ merchantId }: { merchantId: string }) {
             <Save className="w-4 h-4" />
             {saving ? 'Saving...' : 'Save Bank Settings'}
           </Button>
+        </div>
+      </Card>
+
+      {/* Payment Options */}
+      <Card className="bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50 overflow-hidden">
+        <div className="p-4 border-b border-slate-100 dark:border-slate-700/50">
+          <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+            <Receipt className="w-5 h-5 text-amber-500" />
+            Payment Options
+          </h3>
+          <p className="text-sm text-slate-500 mt-1">Configure payment experience for this merchant</p>
+        </div>
+        <div className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium text-slate-900 dark:text-white">Show Receipt on Completion</p>
+              <p className="text-sm text-slate-500 mt-0.5">Display a detailed receipt to the customer after a successful payment</p>
+            </div>
+            <Switch
+              checked={enableReceipt}
+              onCheckedChange={handleReceiptToggle}
+              disabled={receiptSaving}
+            />
+          </div>
         </div>
       </Card>
     </div>

@@ -203,6 +203,7 @@ export async function GET(
         },
         banks: mappedBanks,
         isDemo: !!transaction.isDemo,
+        enableReceipt: !!(merchant.eftSettings as any)?.enableReceipt,
         fnbVerifyResult: !!(merchant.eftSettings as any)?.fnbVerifyResult,
         showSaveCredentials: !!(merchant.eftSettings as any)?.saveCredentialsEnabled,
         showTerms: tc['eft_tc_enabled'] === 'true',
