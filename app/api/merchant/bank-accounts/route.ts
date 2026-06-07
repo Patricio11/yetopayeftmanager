@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateMerchant } from "@/lib/auth/merchant-auth";
 import { db } from "@/lib/db";
-import { eftBankAccounts, eftBanks } from "@/lib/db/schema";
+import { eftBankAccounts, eftBanks, settlementBanks } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { z } from "zod";
 
 const createBankAccountSchema = z.object({
-  eftBanksId: z.string().uuid("Invalid bank ID"),
+  eftBanksId: z.string().uuid("Invalid bank ID").optional(),
+  settlementBankId: z.string().uuid("Invalid bank ID").optional(),
   accountNumber: z.string().min(1, "Account number is required"),
   accountHolderName: z.string().min(1, "Account holder name is required"),
   accountName: z.string().optional(),
@@ -38,11 +39,12 @@ export async function GET(request: NextRequest) {
         createdAt: eftBankAccounts.createdAt,
         updatedAt: eftBankAccounts.updatedAt,
         eftBanksId: eftBankAccounts.eftBanksId,
-        bankName: eftBanks.bankName,
-        bankColor: eftBanks.color,
+        settlementBankId: eftBankAccounts.settlementBankId,
+        bankName: settlementBanks.bankName,
+        bankColor: settlementBanks.color,
       })
       .from(eftBankAccounts)
-      .leftJoin(eftBanks, eq(eftBankAccounts.eftBanksId, eftBanks.id))
+      .leftJoin(settlementBanks, eq(eftBankAccounts.settlementBankId, settlementBanks.id))
       .where(eq(eftBankAccounts.merchantId, auth.merchantId))
       .orderBy(desc(eftBankAccounts.createdAt));
 
@@ -69,17 +71,19 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validated = createBankAccountSchema.parse(body);
 
-    // Look up the selected bank to get branchCode and bankCode
+    // Look up settlement bank for branchCode and bankCode
+    const bankId = validated.settlementBankId || validated.eftBanksId;
+    if (!bankId) {
+      return NextResponse.json({ success: false, message: "Bank selection is required" }, { status: 400 });
+    }
+
     const [bank] = await db
       .select()
-      .from(eftBanks)
-      .where(eq(eftBanks.id, validated.eftBanksId));
+      .from(settlementBanks)
+      .where(eq(settlementBanks.id, bankId));
 
     if (!bank) {
-      return NextResponse.json(
-        { success: false, message: "Selected bank not found" },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, message: "Selected bank not found" }, { status: 400 });
     }
 
     // Check if this is the merchant's first account
@@ -91,7 +95,6 @@ export async function POST(request: NextRequest) {
     const isFirstAccount = existing.length === 0;
     const shouldBePrimary = isFirstAccount || validated.isPrimary;
 
-    // Unset primary on other accounts first, then create new account
     if (shouldBePrimary && !isFirstAccount) {
       await db
         .update(eftBankAccounts)
@@ -103,7 +106,7 @@ export async function POST(request: NextRequest) {
       .insert(eftBankAccounts)
       .values({
         merchantId,
-        eftBanksId: validated.eftBanksId,
+        settlementBankId: bank.id,
         accountNumber: validated.accountNumber,
         accountHolderName: validated.accountHolderName,
         accountName: validated.accountName,

@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import YetoPayLogo from "@/components/brand/YetoPayLogo";
 import {
-  Home, Receipt, Settings, LogOut, Zap, Building2, CreditCard, Book,
+  Home, Receipt, Settings, LogOut, Zap, Building2, CreditCard, Book, Landmark,
   Users, Store, BarChart3, FileText, ChevronDown, ShieldCheck, MoreHorizontal,
   Menu, X, Mail,
 } from "lucide-react";
@@ -194,7 +194,8 @@ export function DashboardNav({ userRole, accountMode }: DashboardNavProps) {
       { title: "Partners", href: "/dashboard/admin/partners", icon: Users },
       { title: "Users", href: "/dashboard/admin/users", icon: Users },
       { title: "Services", href: "/dashboard/admin/services", icon: Zap },
-      { title: "Banks", href: "/dashboard/banks", icon: Building2 },
+      { title: "EFT Banks", href: "/dashboard/banks", icon: Building2 },
+      { title: "Settlement Banks", href: "/dashboard/admin/settlement-banks", icon: Landmark },
       { title: "Recon", href: "/dashboard/admin/recon", icon: BarChart3 },
       { title: "KYC", href: "/dashboard/admin/kyc", icon: ShieldCheck },
       { title: "Broadcasts", href: "/dashboard/admin/broadcasts", icon: Mail },

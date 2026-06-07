@@ -25,6 +25,7 @@ interface BankAccount {
   createdAt: string;
   updatedAt: string;
   eftBanksId: string | null;
+  settlementBankId: string | null;
   bankName: string | null;
   bankColor: string | null;
 }
@@ -58,7 +59,7 @@ export function BankAccountsSettings() {
     try {
       const [accountsRes, banksRes] = await Promise.all([
         fetch("/api/merchant/bank-accounts").then(r => r.json()),
-        fetch("/api/merchant/banks").then(r => r.json()),
+        fetch("/api/merchant/settlement-banks").then(r => r.json()),
       ]);
       if (accountsRes.success) setAccounts(accountsRes.data.accounts);
       if (banksRes.success) setBanks(banksRes.data.banks);
@@ -86,7 +87,7 @@ export function BankAccountsSettings() {
 
   const openEditDialog = (account: BankAccount) => {
     setEditingAccount(account);
-    setSelectedBankId(account.eftBanksId || "");
+    setSelectedBankId(account.settlementBankId || account.eftBanksId || "");
     setAccountHolderName(account.accountHolderName);
     setAccountNumber(account.accountNumber);
     setAccountName(account.accountName || "");
@@ -111,7 +112,7 @@ export function BankAccountsSettings() {
     setSaving(true);
     try {
       const payload = {
-        eftBanksId: selectedBankId || undefined,
+        settlementBankId: selectedBankId || undefined,
         accountHolderName,
         accountNumber,
         accountName: accountName || undefined,

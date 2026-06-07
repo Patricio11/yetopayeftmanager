@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/authorization';
 import { db } from '@/lib/db';
-import { eftBankAccounts, eftBanks } from '@/lib/db/schema';
+import { eftBankAccounts, eftBanks, settlementBanks } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
 /**
@@ -32,11 +32,12 @@ export async function GET(
         isVerified: eftBankAccounts.isVerified,
         createdAt: eftBankAccounts.createdAt,
         updatedAt: eftBankAccounts.updatedAt,
-        bankName: eftBanks.bankName,
-        bankColor: eftBanks.color,
+        settlementBankId: eftBankAccounts.settlementBankId,
+        bankName: settlementBanks.bankName,
+        bankColor: settlementBanks.color,
       })
       .from(eftBankAccounts)
-      .leftJoin(eftBanks, eq(eftBankAccounts.eftBanksId, eftBanks.id))
+      .leftJoin(settlementBanks, eq(eftBankAccounts.settlementBankId, settlementBanks.id))
       .where(eq(eftBankAccounts.merchantId, id));
 
     return NextResponse.json({

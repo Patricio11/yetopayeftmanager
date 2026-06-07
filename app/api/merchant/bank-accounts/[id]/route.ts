@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireMerchant } from "@/lib/auth/authorization";
 import { db } from "@/lib/db";
-import { eftBankAccounts, eftBanks } from "@/lib/db/schema";
+import { eftBankAccounts, settlementBanks } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { z } from "zod";
 
 const updateBankAccountSchema = z.object({
   eftBanksId: z.string().uuid().optional().or(z.literal("").transform(() => undefined)),
+  settlementBankId: z.string().uuid().optional().or(z.literal("").transform(() => undefined)),
   accountNumber: z.string().min(1).optional(),
   accountHolderName: z.string().min(1).optional(),
   accountName: z.string().optional().nullable(),
@@ -46,12 +47,13 @@ export async function PATCH(
 
     const updates: Record<string, any> = { updatedAt: new Date() };
 
-    // If changing bank, look up new bank for branchCode/bankCode
-    if (validated.eftBanksId) {
+    // If changing bank, look up new settlement bank for branchCode/bankCode
+    const newBankId = validated.settlementBankId || validated.eftBanksId;
+    if (newBankId) {
       const [bank] = await db
         .select()
-        .from(eftBanks)
-        .where(eq(eftBanks.id, validated.eftBanksId));
+        .from(settlementBanks)
+        .where(eq(settlementBanks.id, newBankId));
 
       if (!bank) {
         return NextResponse.json(
@@ -59,7 +61,7 @@ export async function PATCH(
           { status: 400 }
         );
       }
-      updates.eftBanksId = validated.eftBanksId;
+      updates.settlementBankId = bank.id;
       updates.branchCode = bank.branchCode;
       updates.bankCode = bank.code;
     }

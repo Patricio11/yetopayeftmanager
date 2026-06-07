@@ -112,11 +112,25 @@ export const paymentTokens = pgTable("payment_tokens", {
   expiresAtIdx: index("payment_token_expires_idx").on(table.expiresAt),
 }));
 
+// Settlement Banks (banks merchants can receive payments to — managed by admin)
+export const settlementBanks = pgTable("settlement_banks", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  bankName: text("bank_name").notNull(),
+  code: text("code").notNull().unique(),
+  color: text("color"),
+  branchCode: text("branch_code"),
+  enabled: boolean("enabled").default(true),
+  displayOrder: integer("display_order").default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // EFT Bank Accounts (Merchant's bank accounts)
 export const eftBankAccounts = pgTable("eft_bank_accounts", {
   id: uuid("id").defaultRandom().primaryKey(),
   merchantId: text("merchant_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   eftBanksId: uuid("eft_banks_id").references(() => eftBanks.id),
+  settlementBankId: uuid("settlement_bank_id").references(() => settlementBanks.id),
   
   // Account details
   accountNumber: text("account_number").notNull(),

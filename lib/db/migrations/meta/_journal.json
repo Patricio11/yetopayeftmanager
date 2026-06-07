@@ -43,6 +43,13 @@
       "when": 1779302423747,
       "tag": "0005_burly_shen",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1780848472290,
+      "tag": "0006_omniscient_tombstone",
+      "breakpoints": true
     }
   ]
 }
