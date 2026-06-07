@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building2, Globe, FileText, MapPin } from "lucide-react";
+import { Building2, Globe, FileText, MapPin, Camera, Trash2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export function CompanySettings() {
@@ -12,6 +13,8 @@ export function CompanySettings() {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [companyName, setCompanyName] = useState("");
+  const [companyLogoUrl, setCompanyLogoUrl] = useState("");
+  const [logoUploading, setLogoUploading] = useState(false);
   const [registrationNumber, setRegistrationNumber] = useState("");
   const [vatNumber, setVatNumber] = useState("");
   const [website, setWebsite] = useState("");
@@ -19,6 +22,7 @@ export function CompanySettings() {
   const [city, setCity] = useState("");
   const [province, setProvince] = useState("");
   const [postalCode, setPostalCode] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetch("/api/merchant/settings")
@@ -27,6 +31,7 @@ export function CompanySettings() {
         if (data.success) {
           const c = data.data.company;
           setCompanyName(c.companyName || "");
+          setCompanyLogoUrl(c.companyLogoUrl || "");
           setRegistrationNumber(c.registrationNumber || "");
           setVatNumber(c.vatNumber || "");
           setWebsite(c.website || "");
@@ -40,6 +45,58 @@ export function CompanySettings() {
       .catch(() => {})
       .finally(() => setFetching(false));
   }, []);
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ title: "Error", description: "Logo must be under 2MB", variant: "destructive" });
+      return;
+    }
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      toast({ title: "Error", description: "Only JPEG, PNG, or WebP allowed", variant: "destructive" });
+      return;
+    }
+
+    setLogoUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/merchant/logo", { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.success) {
+        setCompanyLogoUrl(data.data.logoUrl);
+        toast({ title: "Logo uploaded", description: "Your company logo has been updated." });
+      } else {
+        toast({ title: "Error", description: data.error || "Failed to upload", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to upload logo", variant: "destructive" });
+    } finally {
+      setLogoUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleLogoRemove = async () => {
+    setLogoUploading(true);
+    try {
+      const res = await fetch("/api/merchant/logo", { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        setCompanyLogoUrl("");
+        toast({ title: "Logo removed", description: "Your company logo has been removed." });
+      } else {
+        toast({ title: "Error", description: data.error || "Failed to remove", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to remove logo", variant: "destructive" });
+    } finally {
+      setLogoUploading(false);
+    }
+  };
 
   const handleSave = async () => {
     setLoading(true);
@@ -93,6 +150,90 @@ export function CompanySettings() {
 
   return (
     <div className="space-y-6">
+      {/* Company Logo */}
+      <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 overflow-hidden">
+        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/50">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-pink-600 flex items-center justify-center text-white">
+              <Camera className="w-4.5 h-4.5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Company Logo</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">This logo will appear on your payment page</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <div className="flex items-center gap-6">
+            <div className="relative group">
+              <div className="w-24 h-24 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800">
+                {companyLogoUrl ? (
+                  <Image
+                    src={companyLogoUrl}
+                    alt="Company logo"
+                    width={96}
+                    height={96}
+                    className="w-full h-full object-cover rounded-2xl"
+                    unoptimized
+                  />
+                ) : (
+                  <div className="text-center">
+                    <Building2 className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto" />
+                    <span className="text-[10px] text-slate-400 mt-1 block">No logo</span>
+                  </div>
+                )}
+                {logoUploading && (
+                  <div className="absolute inset-0 bg-white/70 dark:bg-slate-900/70 rounded-2xl flex items-center justify-center">
+                    <Loader2 className="w-6 h-6 text-amber-500 animate-spin" />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex-1 space-y-3">
+              <div>
+                <p className="text-sm font-medium text-slate-900 dark:text-white">Upload your company logo</p>
+                <p className="text-xs text-slate-500 mt-0.5">JPEG, PNG, or WebP. Max 2MB. Recommended: 200x200px or larger.</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={handleLogoUpload}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={logoUploading}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="gap-1.5"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                  {companyLogoUrl ? "Change Logo" : "Upload Logo"}
+                </Button>
+                {companyLogoUrl && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={logoUploading}
+                    onClick={handleLogoRemove}
+                    className="gap-1.5 text-red-600 border-red-200 hover:bg-red-50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/20"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Remove
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Business Details */}
       <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 overflow-hidden">
         <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/50">

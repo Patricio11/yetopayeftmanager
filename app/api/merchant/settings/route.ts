@@ -84,6 +84,7 @@ export async function GET(request: NextRequest) {
         },
         company: {
           companyName: user.companyName,
+          companyLogoUrl: user.companyLogoUrl || "",
           address: user.address || {},
           registrationNumber: (user.metadata as any)?.registrationNumber || "",
           vatNumber: (user.metadata as any)?.vatNumber || "",
