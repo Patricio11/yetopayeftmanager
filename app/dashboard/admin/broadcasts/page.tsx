@@ -261,7 +261,7 @@ export default function AdminBroadcastsPage() {
   // ── List View ──
   if (view === 'list') {
     return (
-      <div className="space-y-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -369,7 +369,7 @@ export default function AdminBroadcastsPage() {
   // ── Create View ──
   if (view === 'create') {
     return (
-      <div className="space-y-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" onClick={() => setView('list')} className="gap-1.5">
             <ArrowLeft className="w-4 h-4" />
@@ -431,7 +431,7 @@ export default function AdminBroadcastsPage() {
   if (view === 'detail' && selectedBroadcast) {
     const b = selectedBroadcast;
     return (
-      <div className="space-y-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" onClick={() => { setView('list'); setEditing(false); }} className="gap-1.5">

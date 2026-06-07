@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import {
-  Shield, Check, Eye, EyeOff, HelpCircle, X, ChevronRight, ChevronLeft,
+  Shield, Check, Eye, EyeOff, X, ChevronRight, ChevronLeft,
   AlertTriangle, CheckCircle, RefreshCcw, Save, Trash2, Clock,
   Landmark, Info, CornerDownLeft,
 } from 'lucide-react';
@@ -2074,29 +2074,11 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
           DEMO MODE — This is a test transaction. No real payment will be processed.
         </div>
       )}
-      <div className="bg-gradient-to-r from-amber-500 to-pink-600 text-white">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <h1 className="font-extrabold yp-gradient-text" style={{ fontSize: '2rem' }}>YetoPay</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <HelpCircle size={20} className="cursor-pointer hover:text-amber-200 transition-colors" />
-              <button
-                onClick={handleCancel}
-                className="cursor-pointer hover:text-amber-200 transition-colors"
-                title="Cancel payment"
-                aria-label="Cancel payment"
-              >
-                <X size={20} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-md mx-auto relative">
+          <div className="mb-6">
+            <h1 className="font-extrabold yp-gradient-text" style={{ fontSize: '2rem' }}>YetoPay</h1>
+          </div>
 
           
 
