@@ -2060,6 +2060,15 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
               </button>
             ))}
           </div>
+          <div className="pt-4 border-t border-gray-100">
+            <button
+              onClick={() => finishAndRedirect('cancelled', 'User does not have any of the available banks')}
+              disabled={isLoading || selectedBank !== null}
+              className="w-full py-3 text-sm text-slate-500 hover:text-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              I don&apos;t use any of these banks
+            </button>
+          </div>
         </div>
       );
       case 'demo-select': return renderDemoOutcomePicker();

@@ -211,13 +211,25 @@ export function TransactionDetailDialog({
           )}
 
           {/* Status Update Info */}
-          {t.statusReason && (
-            <div className="p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-lg">
-              <h4 className="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-1">
-                Status Update Reason
+          {(t.statusReason || (t.metadata as any)?.completion_message) && (
+            <div className={`p-4 rounded-lg border ${
+              t.status === 'cancelled' ? 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700' :
+              t.status === 'failed' ? 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800' :
+              'bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800'
+            }`}>
+              <h4 className={`text-sm font-semibold mb-1 ${
+                t.status === 'cancelled' ? 'text-slate-700 dark:text-slate-300' :
+                t.status === 'failed' ? 'text-red-800 dark:text-red-300' :
+                'text-amber-800 dark:text-amber-300'
+              }`}>
+                {t.status === 'cancelled' ? 'Cancellation Reason' : t.status === 'failed' ? 'Failure Reason' : 'Status Reason'}
               </h4>
-              <p className="text-sm text-amber-700 dark:text-amber-400">
-                {t.statusReason}
+              <p className={`text-sm ${
+                t.status === 'cancelled' ? 'text-slate-600 dark:text-slate-400' :
+                t.status === 'failed' ? 'text-red-700 dark:text-red-400' :
+                'text-amber-700 dark:text-amber-400'
+              }`}>
+                {t.statusReason || (t.metadata as any)?.completion_message}
               </p>
             </div>
           )}

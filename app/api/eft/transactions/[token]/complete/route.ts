@@ -193,6 +193,7 @@ export async function POST(
       .update(eftTransactions)
       .set({
         status: validatedData.status,
+        statusReason: validatedData.message || null,
         completedAt: validatedData.status === "completed" ? new Date() : null,
         updatedAt: new Date(),
         ...(validatedData.deviceFingerprint ? { deviceFingerprint: validatedData.deviceFingerprint } : {}),
