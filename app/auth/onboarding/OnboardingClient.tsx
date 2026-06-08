@@ -524,7 +524,7 @@ function Shell({ children, wide }: { children: React.ReactNode; wide?: boolean }
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 flex flex-col">
       {/* Header */}
-      <header className="border-b border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
+      <header className="border-b border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center">
           <Link href="/" className="flex items-center">
             <YetoPayLogo size="md" />
