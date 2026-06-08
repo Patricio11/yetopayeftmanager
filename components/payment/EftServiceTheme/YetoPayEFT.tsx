@@ -2169,13 +2169,31 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
 
       {/* Cancel confirm modal */}
       {cancelConfirmOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-lg">
-            <h3 className="text-xl font-bold mb-4">Cancel Transaction?</h3>
-            <p className="text-gray-600 mb-6">Do you really want to cancel this transaction? You'll need to return to the merchant's site to continue.</p>
-            <div className="flex justify-between gap-3">
-              <button onClick={() => { setCancelConfirmOpen(false); handleBackToBank(); }} className="flex-1 px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 font-medium text-gray-700">Change Bank</button>
-              <button onClick={handleCancelConfirm} className="flex-1 px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium">{cancelLoading ? "Cancelling..." : "Cancel Payment"}</button>
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900">Cancel Payment?</h3>
+            </div>
+            <p className="text-sm text-slate-500 mb-6 ml-[52px]">You&apos;ll be redirected back to the merchant&apos;s site. You can always start a new payment from there.</p>
+            <div className="flex gap-3 ml-[52px]">
+              <button
+                onClick={() => { setCancelConfirmOpen(false); handleBackToBank(); }}
+                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 font-medium text-sm text-slate-700 transition-colors"
+              >
+                Change Bank
+              </button>
+              <button
+                onClick={handleCancelConfirm}
+                disabled={cancelLoading}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white font-medium text-sm transition-all disabled:opacity-60"
+              >
+                {cancelLoading ? "Cancelling..." : "Cancel Payment"}
+              </button>
             </div>
           </div>
         </div>
