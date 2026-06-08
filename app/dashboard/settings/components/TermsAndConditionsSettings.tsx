@@ -8,7 +8,7 @@ export function TermsAndConditionsSettings() {
     <div className="space-y-6">
       <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-pink-600 flex items-center justify-center text-white">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-green-700 to-green-500 flex items-center justify-center text-white">
             <FileText className="w-4.5 h-4.5" />
           </div>
           <div>

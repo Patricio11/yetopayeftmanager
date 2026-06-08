@@ -85,8 +85,8 @@ function EmailPendingScreen({ email }: { email: string }) {
   return (
     <Shell>
       <div className="text-center max-w-md mx-auto">
-        <div className="w-16 h-16 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mx-auto mb-6">
-          <Mail className="w-8 h-8 text-amber-600" />
+        <div className="w-16 h-16 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-6">
+          <Mail className="w-8 h-8 text-green-700" />
         </div>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Verify your email</h1>
         <p className="text-slate-600 dark:text-slate-400 mb-6">
@@ -138,12 +138,12 @@ function PendingReviewScreen({ companyName }: { companyName: string }) {
                 s.done
                   ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600"
                   : s.active
-                  ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600 ring-2 ring-amber-300"
+                  ? "bg-green-100 dark:bg-green-900/30 text-green-700 ring-2 ring-green-300"
                   : "bg-slate-100 dark:bg-slate-800 text-slate-400"
               }`}>
                 {s.done ? <CheckCircle className="w-4 h-4" /> : s.step}
               </div>
-              <span className={`text-sm ${s.done ? "text-emerald-700 dark:text-emerald-400" : s.active ? "text-amber-700 dark:text-amber-400 font-medium" : "text-slate-400"}`}>
+              <span className={`text-sm ${s.done ? "text-emerald-700 dark:text-emerald-400" : s.active ? "text-green-800 dark:text-green-400 font-medium" : "text-slate-400"}`}>
                 {s.label}
               </span>
             </div>
@@ -173,7 +173,7 @@ function RejectedScreen({ reason }: { reason: string | null }) {
         )}
         <p className="text-sm text-slate-500">
           If you believe this is an error, please contact{" "}
-          <a href="mailto:support@yetopay.co.za" className="text-amber-600 hover:underline">support@yetopay.co.za</a>
+          <a href="mailto:support@yetopay.co.za" className="text-green-700 hover:underline">support@yetopay.co.za</a>
         </p>
       </div>
     </Shell>
@@ -308,7 +308,7 @@ function OnboardingForm({
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center mx-auto mb-4">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-700 to-green-600 flex items-center justify-center mx-auto mb-4">
             <Shield className="w-7 h-7 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Complete your profile</h1>
@@ -319,12 +319,12 @@ function OnboardingForm({
 
         {/* Admin note banner */}
         {adminNote && (
-          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-xl p-4 mb-6">
+          <div className="bg-green-50 dark:bg-green-900/20 border border-green-300 dark:border-green-700 rounded-xl p-4 mb-6">
             <div className="flex gap-3">
-              <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <AlertTriangle className="w-5 h-5 text-green-700 shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">Changes requested by our team</p>
-                <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">{adminNote}</p>
+                <p className="text-sm font-semibold text-green-800 dark:text-green-300">Changes requested by our team</p>
+                <p className="text-sm text-green-800 dark:text-green-400 mt-1">{adminNote}</p>
               </div>
             </div>
           </div>
@@ -340,7 +340,7 @@ function OnboardingForm({
           {/* Company Information */}
           <Card className="p-6 bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700">
             <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-5 flex items-center gap-2">
-              <Building className="w-5 h-5 text-amber-600" />
+              <Building className="w-5 h-5 text-green-700" />
               Company Information
             </h2>
             <div className="space-y-4">
@@ -407,7 +407,7 @@ function OnboardingForm({
           {requirements.length > 0 && (
             <Card className="p-6 bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700">
               <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-amber-600" />
+                <FileText className="w-5 h-5 text-green-700" />
                 Required Documents
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mb-5">
@@ -474,7 +474,7 @@ function OnboardingForm({
                           </button>
                         </div>
                       ) : (
-                        <label className="flex items-center justify-center gap-2 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg py-4 cursor-pointer hover:border-amber-400 dark:hover:border-amber-600 hover:bg-amber-50/50 dark:hover:bg-amber-900/10 transition-colors">
+                        <label className="flex items-center justify-center gap-2 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg py-4 cursor-pointer hover:border-green-400 dark:hover:border-green-700 hover:bg-green-50/50 dark:hover:bg-green-900/10 transition-colors">
                           <Upload className="w-4 h-4 text-slate-400" />
                           <span className="text-sm text-slate-500">Choose file</span>
                           <input
@@ -496,7 +496,7 @@ function OnboardingForm({
           <Button
             type="submit"
             disabled={submitting}
-            className="w-full h-12 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold text-base gap-2 shadow-sm"
+            className="w-full h-12 bg-gradient-to-r from-green-700 to-green-600 hover:from-green-800 hover:to-green-700 text-white font-semibold text-base gap-2 shadow-sm"
           >
             {submitting ? (
               <>
@@ -522,7 +522,7 @@ function OnboardingForm({
 
 function Shell({ children, wide }: { children: React.ReactNode; wide?: boolean }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-green-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 flex flex-col">
       {/* Header */}
       <header className="border-b border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center">

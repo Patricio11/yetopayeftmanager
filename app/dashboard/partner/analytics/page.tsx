@@ -115,15 +115,15 @@ export default function PartnerAnalyticsPage() {
       title: "Total Volume",
       value: formatCurrency(data.totalVolume),
       icon: DollarSign,
-      iconBg: "from-amber-500 to-pink-600",
-      cardBg: "to-amber-50/50",
+      iconBg: "from-green-700 to-green-500",
+      cardBg: "to-green-50/50",
     },
     {
       title: "Success Rate",
       value: `${data.successRate}%`,
       icon: Target,
-      iconBg: "from-pink-500 to-teal-600",
-      cardBg: "to-pink-50/50",
+      iconBg: "from-green-600 to-teal-600",
+      cardBg: "to-emerald-50/50",
     },
     {
       title: "Growth",
@@ -165,14 +165,14 @@ export default function PartnerAnalyticsPage() {
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
-              className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+              className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
             />
             <span className="text-slate-400 text-sm">to</span>
             <input
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
-              className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+              className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
             />
           </div>
         </div>
@@ -241,12 +241,12 @@ export default function PartnerAnalyticsPage() {
                       <div className="flex items-center justify-end gap-2">
                         <div className="w-16 h-2 bg-slate-100 rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-gradient-to-r from-amber-500 to-pink-400 rounded-full"
+                            className="h-full bg-gradient-to-r from-green-700 to-green-400 rounded-full"
                             style={{ width: `${merchant.successRate}%` }}
                           />
                         </div>
                         <span className={`text-sm font-medium ${
-                          merchant.successRate >= 80 ? "text-amber-500" :
+                          merchant.successRate >= 80 ? "text-green-500" :
                           merchant.successRate >= 50 ? "text-yellow-600" : "text-red-600"
                         }`}>
                           {merchant.successRate}%

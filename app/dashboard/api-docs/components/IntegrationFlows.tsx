@@ -43,40 +43,40 @@ export function IntegrationFlows({ selectedFlow, onFlowChange }: IntegrationFlow
             onClick={() => onFlowChange("sdk")}
             className={`border-2 rounded-lg p-6 text-left transition-all ${
               isRedirect
-                ? "border-amber-500 bg-amber-50"
+                ? "border-green-600 bg-green-50"
                 : "border-gray-200 hover:border-gray-300"
             }`}
           >
             <div className="flex items-start gap-4">
               <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                isRedirect ? "bg-amber-100" : "bg-gray-100"
+                isRedirect ? "bg-green-100" : "bg-gray-100"
               }`}>
                 <ExternalLink className={`w-6 h-6 ${
-                  isRedirect ? "text-amber-600" : "text-gray-600"
+                  isRedirect ? "text-green-700" : "text-gray-600"
                 }`} />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <h3 className="font-semibold text-lg">Full-Page Redirect</h3>
-                  <Badge variant="default" className="bg-amber-600">Recommended</Badge>
+                  <Badge variant="default" className="bg-green-700">Recommended</Badge>
                 </div>
                 <p className="text-sm text-gray-600 mb-3">
                   Redirect the customer&apos;s browser to the payment URL. Simplest integration — no extra HTML needed.
                 </p>
                 <div className="space-y-1 text-sm">
-                  <div className="flex items-center gap-2 text-amber-600">
+                  <div className="flex items-center gap-2 text-green-700">
                     <CheckCircle className="w-4 h-4" />
                     <span>Works in all browsers</span>
                   </div>
-                  <div className="flex items-center gap-2 text-amber-600">
+                  <div className="flex items-center gap-2 text-green-700">
                     <CheckCircle className="w-4 h-4" />
                     <span>Mobile-friendly out of the box</span>
                   </div>
-                  <div className="flex items-center gap-2 text-amber-600">
+                  <div className="flex items-center gap-2 text-green-700">
                     <CheckCircle className="w-4 h-4" />
                     <span>Simplest to implement</span>
                   </div>
-                  <div className="flex items-center gap-2 text-amber-600">
+                  <div className="flex items-center gap-2 text-green-700">
                     <CheckCircle className="w-4 h-4" />
                     <span>Return via successUrl / failureUrl</span>
                   </div>
@@ -135,9 +135,9 @@ export function IntegrationFlows({ selectedFlow, onFlowChange }: IntegrationFlow
 
         {/* Redirect Flow Details */}
         {isRedirect && (
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 space-y-5">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-6 space-y-5">
             <div className="flex items-center gap-3">
-              <ExternalLink className="w-6 h-6 text-amber-600" />
+              <ExternalLink className="w-6 h-6 text-green-700" />
               <h4 className="font-semibold text-lg">Full-Page Redirect Flow</h4>
             </div>
 
@@ -145,22 +145,22 @@ export function IntegrationFlows({ selectedFlow, onFlowChange }: IntegrationFlow
             <div className="flex items-center gap-2 text-sm overflow-x-auto pb-2">
               {["1. Checkout click", "2. Backend creates link", "3. Redirect → paymentUrl", "4. Customer pays", "5. Redirect → successUrl"].map((step, i, arr) => (
                 <div key={step} className="flex items-center gap-2 flex-shrink-0">
-                  <span className="bg-amber-600 text-white rounded-full px-3 py-1 font-medium">{step}</span>
-                  {i < arr.length - 1 && <span className="text-amber-600 font-bold">→</span>}
+                  <span className="bg-green-700 text-white rounded-full px-3 py-1 font-medium">{step}</span>
+                  {i < arr.length - 1 && <span className="text-green-700 font-bold">→</span>}
                 </div>
               ))}
             </div>
 
             <div className="space-y-4">
               <div className="flex gap-3">
-                <div className="flex-shrink-0 w-6 h-6 bg-amber-600 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
+                <div className="flex-shrink-0 w-6 h-6 bg-green-700 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
                 <div className="flex-1">
                   <p className="font-medium mb-2">Customer clicks Pay on your site</p>
                   <p className="text-sm text-gray-600">Your frontend sends a request to your own backend.</p>
                 </div>
               </div>
               <div className="flex gap-3">
-                <div className="flex-shrink-0 w-6 h-6 bg-amber-600 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
+                <div className="flex-shrink-0 w-6 h-6 bg-green-700 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
                 <div className="flex-1">
                   <p className="font-medium mb-2">Backend creates a payment link</p>
                   <div className="bg-gray-900 text-gray-100 rounded-lg p-3 font-mono text-xs overflow-x-auto">
@@ -176,7 +176,7 @@ export function IntegrationFlows({ selectedFlow, onFlowChange }: IntegrationFlow
                 </div>
               </div>
               <div className="flex gap-3">
-                <div className="flex-shrink-0 w-6 h-6 bg-amber-600 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
+                <div className="flex-shrink-0 w-6 h-6 bg-green-700 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
                 <div className="flex-1">
                   <p className="font-medium mb-2">Redirect customer to paymentUrl</p>
                   <div className="bg-gray-900 text-gray-100 rounded-lg p-3 font-mono text-xs overflow-x-auto">
@@ -191,14 +191,14 @@ exit;`}</pre>
                 </div>
               </div>
               <div className="flex gap-3">
-                <div className="flex-shrink-0 w-6 h-6 bg-amber-600 text-white rounded-full flex items-center justify-center text-sm font-bold">4</div>
+                <div className="flex-shrink-0 w-6 h-6 bg-green-700 text-white rounded-full flex items-center justify-center text-sm font-bold">4</div>
                 <div className="flex-1">
                   <p className="font-medium mb-2">Customer completes payment on YetoPay page</p>
                   <p className="text-sm text-gray-600">The customer selects EFT or Card on the payment page. YetoPay handles the entire flow. On completion, the customer is redirected to your configured URL.</p>
                 </div>
               </div>
               <div className="flex gap-3">
-                <div className="flex-shrink-0 w-6 h-6 bg-amber-600 text-white rounded-full flex items-center justify-center text-sm font-bold">5</div>
+                <div className="flex-shrink-0 w-6 h-6 bg-green-700 text-white rounded-full flex items-center justify-center text-sm font-bold">5</div>
                 <div className="flex-1">
                   <p className="font-medium mb-2">Handle the redirect on your site</p>
                   <p className="text-sm text-gray-600">Your <code className="bg-gray-100 px-1 rounded text-xs">successUrl</code> receives the customer back. Verify the payment status using your <strong>webhook</strong> (not the URL alone — the URL can be spoofed).</p>
@@ -206,7 +206,7 @@ exit;`}</pre>
               </div>
             </div>
 
-            <div className="bg-white border border-amber-300 rounded-lg p-4 text-sm text-gray-700">
+            <div className="bg-white border border-green-300 rounded-lg p-4 text-sm text-gray-700">
               <strong>Security tip:</strong> Always confirm final payment status via a signed webhook event (<code className="bg-gray-100 px-1 rounded text-xs">payment.completed</code>) before fulfilling the order. Never rely solely on the redirect URL.
             </div>
           </div>

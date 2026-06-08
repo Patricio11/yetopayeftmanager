@@ -64,7 +64,7 @@ export function DashboardCharts({ data }: DashboardChartsProps) {
       <Card className="p-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-slate-200/50 dark:border-slate-700/50 shadow-xl">
         <div className="mb-6">
           <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-amber-500" />
+            <TrendingUp className="w-5 h-5 text-green-600" />
             Revenue Trend (Last 30 Days)
           </h3>
           <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">

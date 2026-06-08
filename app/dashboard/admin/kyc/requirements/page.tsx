@@ -115,7 +115,7 @@ export default function RequirementsPage() {
   const appliesToBadge = (v: string) => {
     const map: Record<string, { label: string; cls: string }> = {
       both: { label: "Both", cls: "bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300" },
-      merchant: { label: "Merchant", cls: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400" },
+      merchant: { label: "Merchant", cls: "bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-400" },
       partner: { label: "Partner", cls: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400" },
     };
     const s = map[v] || map.both;
@@ -134,7 +134,7 @@ export default function RequirementsPage() {
         </div>
         <Button
           onClick={() => { setEditing(null); setShowForm(true); }}
-          className="gap-2 bg-amber-500 hover:bg-amber-600 text-white"
+          className="gap-2 bg-green-500 hover:bg-green-700 text-white"
         >
           <Plus className="w-4 h-4" /> Add Requirement
         </Button>
@@ -143,7 +143,7 @@ export default function RequirementsPage() {
       {/* List */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-6 h-6 animate-spin text-amber-500" />
+          <Loader2 className="w-6 h-6 animate-spin text-green-500" />
         </div>
       ) : requirements.length === 0 ? (
         <div className="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl">
@@ -163,7 +163,7 @@ export default function RequirementsPage() {
               onDragEnd={() => { setDragIdx(null); setOverIdx(null); }}
               className={`group relative flex items-center gap-4 p-4 rounded-xl border transition-all ${
                 overIdx === idx && dragIdx !== idx
-                  ? "border-amber-400 bg-amber-50/50 dark:bg-amber-900/10"
+                  ? "border-green-400 bg-green-50/50 dark:bg-green-900/10"
                   : req.active
                     ? "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600"
                     : "border-slate-200/60 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-800/50 opacity-60"
@@ -302,7 +302,7 @@ function TemplateUploadButton({ reqId, onDone }: { reqId: string; onDone: () => 
       <button
         onClick={() => inputRef.current?.click()}
         disabled={uploading}
-        className="p-2 rounded-lg text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors disabled:opacity-50"
+        className="p-2 rounded-lg text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors disabled:opacity-50"
         title="Upload template"
       >
         {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
@@ -415,7 +415,7 @@ function RequirementForm({
                   onClick={() => setAppliesTo(opt)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all border ${
                     appliesTo === opt
-                      ? "bg-amber-50 border-amber-300 text-amber-700 dark:bg-amber-900/20 dark:border-amber-600 dark:text-amber-400"
+                      ? "bg-green-50 border-green-300 text-green-800 dark:bg-green-900/20 dark:border-green-700 dark:text-green-400"
                       : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300"
                   }`}
                 >
@@ -432,7 +432,7 @@ function RequirementForm({
               type="button"
               onClick={() => setRequired(!required)}
               className={`relative w-11 h-6 rounded-full transition-colors ${
-                required ? "bg-amber-500" : "bg-slate-300 dark:bg-slate-600"
+                required ? "bg-green-500" : "bg-slate-300 dark:bg-slate-600"
               }`}
             >
               <div className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
@@ -449,7 +449,7 @@ function RequirementForm({
             <Button
               type="submit"
               disabled={saving || !name.trim()}
-              className="flex-1 bg-amber-500 hover:bg-amber-600 text-white"
+              className="flex-1 bg-green-500 hover:bg-green-700 text-white"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               {isEdit ? "Update" : "Create"}

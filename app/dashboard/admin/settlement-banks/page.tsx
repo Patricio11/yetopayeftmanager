@@ -154,7 +154,7 @@ export default function SettlementBanksPage() {
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Settlement Banks</h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1">Banks where merchants can receive payments</p>
         </div>
-        <Button onClick={openAdd} className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white">
+        <Button onClick={openAdd} className="bg-gradient-to-r from-green-700 to-green-500 hover:from-green-900 hover:to-green-600 text-white">
           <Plus className="w-4 h-4 mr-2" /> Add Bank
         </Button>
       </div>
@@ -289,7 +289,7 @@ export default function SettlementBanksPage() {
             <Button
               onClick={handleSave}
               disabled={saving}
-              className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white"
+              className="bg-gradient-to-r from-green-700 to-green-500 hover:from-green-900 hover:to-green-600 text-white"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               {editing ? "Save Changes" : "Add Bank"}

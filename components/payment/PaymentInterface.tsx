@@ -166,9 +166,9 @@ export default function PaymentInterface({
   // --- Loading skeleton ---
   if (!isClient) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-pink-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Loading payment interface...</p>
         </div>
       </div>
@@ -217,7 +217,7 @@ export default function PaymentInterface({
           <div>
             <p className="text-sm text-gray-500">Redirecting you back to the merchant...</p>
             <div className="flex justify-center mt-2">
-              <div className="w-6 h-6 border-2 border-gray-300 border-t-amber-500 rounded-full animate-spin"></div>
+              <div className="w-6 h-6 border-2 border-gray-300 border-t-green-600 rounded-full animate-spin"></div>
             </div>
           </div>
         ) : (
@@ -238,7 +238,7 @@ export default function PaymentInterface({
         <div className="grid gap-3">
           <button
             onClick={() => setSelectedMethod('eft')}
-            className="w-full p-4 border border-gray-200 rounded-lg hover:border-amber-500 hover:shadow-md transition-all duration-200 flex items-center justify-between group cursor-pointer"
+            className="w-full p-4 border border-gray-200 rounded-lg hover:border-green-600 hover:shadow-md transition-all duration-200 flex items-center justify-between group cursor-pointer"
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -249,12 +249,12 @@ export default function PaymentInterface({
                 <span className="text-sm text-gray-500">Pay directly from your bank account</span>
               </div>
             </div>
-            <ChevronRight size={20} className="text-gray-400 group-hover:text-amber-500 transition-colors" />
+            <ChevronRight size={20} className="text-gray-400 group-hover:text-green-600 transition-colors" />
           </button>
 
           <button
             onClick={initiateCardPayment}
-            className="w-full p-4 border border-gray-200 rounded-lg hover:border-amber-500 hover:shadow-md transition-all duration-200 flex items-center justify-between group cursor-pointer"
+            className="w-full p-4 border border-gray-200 rounded-lg hover:border-green-600 hover:shadow-md transition-all duration-200 flex items-center justify-between group cursor-pointer"
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -265,7 +265,7 @@ export default function PaymentInterface({
                 <span className="text-sm text-gray-500">Credit or debit card</span>
               </div>
             </div>
-            <ChevronRight size={20} className="text-gray-400 group-hover:text-amber-500 transition-colors" />
+            <ChevronRight size={20} className="text-gray-400 group-hover:text-green-600 transition-colors" />
           </button>
         </div>
       </div>
@@ -296,7 +296,7 @@ export default function PaymentInterface({
             )}
             <button
               onClick={initiateCardPayment}
-              className="px-4 py-2 bg-gradient-to-r from-amber-500 to-pink-600 text-white rounded-lg hover:from-amber-600 hover:to-pink-700 transition-all"
+              className="px-4 py-2 bg-gradient-to-r from-green-700 to-green-500 text-white rounded-lg hover:from-green-800 hover:to-green-600 transition-all"
             >
               Try Again
             </button>
@@ -307,7 +307,7 @@ export default function PaymentInterface({
 
     return renderPageShell(
       <div className="text-center space-y-4 py-8">
-        <div className="w-16 h-16 bg-gradient-to-r from-amber-500 to-pink-600 rounded-full flex items-center justify-center mx-auto">
+        <div className="w-16 h-16 bg-gradient-to-r from-green-700 to-green-500 rounded-full flex items-center justify-center mx-auto">
           <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
         </div>
         <div>
@@ -344,7 +344,7 @@ export default function PaymentInterface({
           banks: banks.map(bank => ({
             code: bank.code,
             name: bank.name,
-            color: bank.color || '#F9B233',
+            color: bank.color || '#16A34A',
             eftServiceUrl: bank.eftServiceUrl,
           })),
           merchantBankAccount: {
@@ -368,7 +368,7 @@ export default function PaymentInterface({
   function renderPageShell(content: React.ReactNode) {
     return (
       <div
-        className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-pink-50 select-none"
+        className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 select-none"
         onContextMenu={(e) => e.preventDefault()}
       >
         {isDemo && (

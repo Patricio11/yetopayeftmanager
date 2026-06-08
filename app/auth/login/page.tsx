@@ -88,12 +88,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4 sm:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4 sm:p-6">
       {/* Notification */}
       {notification && (
         <div className={`fixed top-6 right-6 z-50 p-4 rounded-xl shadow-lg border animate-slide-down ${
           notification.type === 'success' 
-            ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-400' 
+            ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-400' 
             : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-400'
         }`}>
           <div className="flex items-center space-x-2">
@@ -169,7 +169,7 @@ export default function LoginPage() {
                 <Label htmlFor="password" className="text-slate-700 dark:text-slate-300">
                   Password
                 </Label>
-                <Link href="/auth/reset-password" className="text-sm text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300">
+                <Link href="/auth/reset-password" className="text-sm text-green-700 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300">
                   Forgot password?
                 </Link>
               </div>
@@ -209,7 +209,7 @@ export default function LoginPage() {
                 id="remember"
                 checked={formData.remember}
                 onChange={(e) => setFormData({ ...formData, remember: e.target.checked })}
-                className="w-4 h-4 text-amber-600 border-slate-300 rounded focus:ring-amber-500"
+                className="w-4 h-4 text-green-700 border-slate-300 rounded focus:ring-green-600"
               />
               <label htmlFor="remember" className="ml-2 text-sm text-slate-700 dark:text-slate-300">
                 Remember me for 30 days
@@ -220,7 +220,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white py-6 rounded-xl shadow-lg transform hover:scale-[1.02] transition-all duration-200"
+              className="w-full bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white py-6 rounded-xl shadow-lg transform hover:scale-[1.02] transition-all duration-200"
             >
               {isLoading ? (
                 <span className="flex items-center justify-center">
@@ -243,7 +243,7 @@ export default function LoginPage() {
           <div className="mt-8 text-center">
             <p className="text-slate-600 dark:text-slate-400">
               Don't have an account?{' '}
-              <Link href="/auth/register" className="text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium">
+              <Link href="/auth/register" className="text-green-700 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 font-medium">
                 Sign up
               </Link>
             </p>

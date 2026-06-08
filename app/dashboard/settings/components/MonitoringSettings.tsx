@@ -79,7 +79,7 @@ export function MonitoringSettings() {
       {[
         {
           icon: Mail,
-          iconBg: "from-amber-500 to-orange-600",
+          iconBg: "from-green-600 to-green-700",
           title: "Email Alerts",
           subtitle: "Comma-separated list of recipient email addresses",
           value: alertEmails,
@@ -128,7 +128,7 @@ export function MonitoringSettings() {
                 onChange={(e) => setter(e.target.value)}
                 placeholder={placeholder}
                 rows={rows}
-                className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent font-mono resize-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent font-mono resize-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600"
               />
             ) : (
               <input
@@ -136,7 +136,7 @@ export function MonitoringSettings() {
                 value={value}
                 onChange={(e) => setter(e.target.value)}
                 placeholder={placeholder}
-                className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent font-mono bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent font-mono bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600"
               />
             )}
             <p className="text-xs text-slate-400 dark:text-slate-500">{hint}</p>
@@ -146,7 +146,7 @@ export function MonitoringSettings() {
 
       {/* No channels warning */}
       {!alertEmails.trim() && !alertSmsNumbers.trim() && !alertSlackWebhookUrl.trim() && (
-        <div className="flex items-start gap-2 text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
+        <div className="flex items-start gap-2 text-green-800 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4">
           <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
           <p className="text-sm">
             No alert channels configured. Bank failures will still auto-disable the bank, but no
@@ -175,7 +175,7 @@ export function MonitoringSettings() {
           size="sm"
           onClick={handleSave}
           disabled={saving}
-          className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0"
+          className="bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white border-0"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
           {saving ? "Saving..." : "Save Monitoring Settings"}

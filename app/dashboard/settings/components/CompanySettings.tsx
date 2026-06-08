@@ -154,7 +154,7 @@ export function CompanySettings() {
       <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 overflow-hidden">
         <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/50">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-pink-600 flex items-center justify-center text-white">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-green-700 to-green-500 flex items-center justify-center text-white">
               <Camera className="w-4.5 h-4.5" />
             </div>
             <div>
@@ -185,7 +185,7 @@ export function CompanySettings() {
                 )}
                 {logoUploading && (
                   <div className="absolute inset-0 bg-white/70 dark:bg-slate-900/70 rounded-2xl flex items-center justify-center">
-                    <Loader2 className="w-6 h-6 text-amber-500 animate-spin" />
+                    <Loader2 className="w-6 h-6 text-green-600 animate-spin" />
                   </div>
                 )}
               </div>
@@ -319,7 +319,7 @@ export function CompanySettings() {
       {/* Save bar */}
       <div className="flex justify-end gap-3">
         <Button variant="outline" size="sm" onClick={() => window.location.reload()}>Cancel</Button>
-        <Button size="sm" onClick={handleSave} disabled={loading} className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0">
+        <Button size="sm" onClick={handleSave} disabled={loading} className="bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white border-0">
           {loading ? "Saving..." : "Save Changes"}
         </Button>
       </div>

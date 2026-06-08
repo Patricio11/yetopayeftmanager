@@ -115,7 +115,7 @@ export function EftUrlSettings() {
       placeholder: "https://your-website.com/payment/cancelled",
       description: "Customer is redirected here if they cancel the payment.",
       icon: Ban,
-      iconBg: "from-amber-500 to-orange-600",
+      iconBg: "from-green-600 to-green-700",
     },
   ];
 
@@ -172,7 +172,7 @@ export function EftUrlSettings() {
       </div>
 
       <div className="flex justify-end">
-        <Button size="sm" onClick={handleSave} disabled={loading} className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0">
+        <Button size="sm" onClick={handleSave} disabled={loading} className="bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white border-0">
           {loading ? "Saving..." : "Save URL Settings"}
         </Button>
       </div>

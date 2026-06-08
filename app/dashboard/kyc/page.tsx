@@ -233,7 +233,7 @@ export default function KycPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-32">
-        <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-green-600" />
       </div>
     );
   }
@@ -284,7 +284,7 @@ export default function KycPage() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
       {/* Header */}
       <div className="text-center mb-8">
-        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mx-auto mb-4">
+        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-700 to-green-500 flex items-center justify-center mx-auto mb-4">
           <Shield className="w-7 h-7 text-white" />
         </div>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">KYC Verification</h1>
@@ -332,7 +332,7 @@ export default function KycPage() {
                 onClick={() => setStep(s.id)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                   isActive
-                    ? "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-700 shadow-sm"
+                    ? "bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-400 border border-green-200 dark:border-green-700 shadow-sm"
                     : isDone
                     ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700"
                     : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
@@ -352,7 +352,7 @@ export default function KycPage() {
         <div className="max-w-2xl mx-auto space-y-6">
           <Card className="p-6 bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700">
             <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-5 flex items-center gap-2">
-              <Building className="w-5 h-5 text-amber-600" />
+              <Building className="w-5 h-5 text-green-700" />
               Business Details
             </h2>
             <div className="space-y-4">
@@ -418,7 +418,7 @@ export default function KycPage() {
 
           <Card className="p-6 bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700">
             <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-5 flex items-center gap-2">
-              <User className="w-5 h-5 text-amber-600" />
+              <User className="w-5 h-5 text-green-700" />
               Director Information
             </h2>
             <div className="space-y-4">
@@ -445,7 +445,7 @@ export default function KycPage() {
           </Card>
 
           <div className="flex justify-end">
-            <Button onClick={() => setStep(2)} className="gap-2 bg-amber-500 hover:bg-amber-600 text-white">
+            <Button onClick={() => setStep(2)} className="gap-2 bg-green-600 hover:bg-green-700 text-white">
               Next: Contact Details <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
@@ -457,7 +457,7 @@ export default function KycPage() {
         <div className="max-w-2xl mx-auto space-y-6">
           <Card className="p-6 bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700">
             <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-5 flex items-center gap-2">
-              <Phone className="w-5 h-5 text-amber-600" />
+              <Phone className="w-5 h-5 text-green-700" />
               Primary Contact
             </h2>
             <div className="space-y-4">
@@ -478,7 +478,7 @@ export default function KycPage() {
           <Card className="p-6 bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-amber-600" />
+                <CreditCard className="w-5 h-5 text-green-700" />
                 Finance Contact
               </h2>
               <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer">
@@ -493,7 +493,7 @@ export default function KycPage() {
                       update("financePhone", form.primaryPhone);
                     }
                   }}
-                  className="w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500"
+                  className="w-4 h-4 rounded border-slate-300 text-green-600 focus:ring-green-600"
                 />
                 Same as primary
               </label>
@@ -517,7 +517,7 @@ export default function KycPage() {
 
           <Card className="p-6 bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700">
             <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-5 flex items-center gap-2">
-              <Users className="w-5 h-5 text-amber-600" />
+              <Users className="w-5 h-5 text-green-700" />
               Technical Contact
             </h2>
             <div className="space-y-4">
@@ -537,7 +537,7 @@ export default function KycPage() {
 
           <Card className="p-6 bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700">
             <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-5 flex items-center gap-2">
-              <CreditCard className="w-5 h-5 text-amber-600" />
+              <CreditCard className="w-5 h-5 text-green-700" />
               Banking Information
             </h2>
             <div className="space-y-4">
@@ -578,7 +578,7 @@ export default function KycPage() {
             <Button variant="outline" onClick={() => setStep(1)} className="gap-2">
               <ArrowLeft className="w-4 h-4" /> Back
             </Button>
-            <Button onClick={() => setStep(3)} className="gap-2 bg-amber-500 hover:bg-amber-600 text-white">
+            <Button onClick={() => setStep(3)} className="gap-2 bg-green-600 hover:bg-green-700 text-white">
               Next: Upload Documents <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
@@ -591,7 +591,7 @@ export default function KycPage() {
           {requirements.length > 0 ? (
             <Card className="p-6 bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700">
               <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-amber-600" />
+                <FileText className="w-5 h-5 text-green-700" />
                 Required Documents
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mb-5">
@@ -645,7 +645,7 @@ export default function KycPage() {
                           </button>
                         </div>
                       ) : (
-                        <label className="flex items-center justify-center gap-2 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg py-4 cursor-pointer hover:border-amber-400 dark:hover:border-amber-600 hover:bg-amber-50/50 dark:hover:bg-amber-900/10 transition-colors">
+                        <label className="flex items-center justify-center gap-2 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg py-4 cursor-pointer hover:border-green-400 dark:hover:border-green-600 hover:bg-green-50/50 dark:hover:bg-green-900/10 transition-colors">
                           <Upload className="w-4 h-4 text-slate-400" />
                           <span className="text-sm text-slate-500">Choose file</span>
                           <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx" onChange={(e) => handleFile(req.id, e.target.files?.[0] || null)} />
@@ -671,7 +671,7 @@ export default function KycPage() {
             <Button
               onClick={handleSubmit}
               disabled={submitting}
-              className="gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold shadow-sm px-8"
+              className="gap-2 bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white font-semibold shadow-sm px-8"
             >
               {submitting ? (
                 <>

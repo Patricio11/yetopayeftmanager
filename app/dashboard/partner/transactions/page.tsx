@@ -30,7 +30,7 @@ const formatCurrency = (val: number) =>
 const statusBadge = (status: string) => {
   switch (status) {
     case "completed":
-      return "bg-amber-100 text-amber-600 border-amber-200";
+      return "bg-green-100 text-green-700 border-green-200";
     case "failed":
       return "bg-red-100 text-red-700 border-red-200";
     case "pending":
@@ -161,7 +161,7 @@ export default function PartnerTransactionsPage() {
             <select
               value={merchantId}
               onChange={(e) => setMerchantId(e.target.value)}
-              className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent appearance-none bg-white pr-8"
+              className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent appearance-none bg-white pr-8"
             >
               <option value="">All Merchants</option>
               {merchants.map((m) => (
@@ -178,7 +178,7 @@ export default function PartnerTransactionsPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full sm:w-40 px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent appearance-none bg-white pr-8"
+              className="w-full sm:w-40 px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent appearance-none bg-white pr-8"
             >
               <option value="">All Statuses</option>
               <option value="completed">Completed</option>
@@ -198,7 +198,7 @@ export default function PartnerTransactionsPage() {
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
               placeholder="From"
-              className="w-full sm:w-40 px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+              className="w-full sm:w-40 px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent"
             />
           </div>
 
@@ -209,7 +209,7 @@ export default function PartnerTransactionsPage() {
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
               placeholder="To"
-              className="w-full sm:w-40 px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+              className="w-full sm:w-40 px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent"
             />
           </div>
         </div>

@@ -286,8 +286,8 @@ export default function AnalyticsPage() {
           change={k.revenueGrowth}
           subtitle="vs previous period"
           icon={DollarSign}
-          iconBg="from-amber-500 to-pink-600"
-          cardBg="to-amber-50/50"
+          iconBg="from-green-700 to-green-500"
+          cardBg="to-green-50/50"
         />
 
         {/* Transactions */}
@@ -308,8 +308,8 @@ export default function AnalyticsPage() {
           change={k.successRateChange}
           subtitle="vs previous period"
           icon={Target}
-          iconBg="from-pink-500 to-teal-600"
-          cardBg="to-pink-50/50"
+          iconBg="from-emerald-500 to-teal-600"
+          cardBg="to-emerald-50/50"
         />
 
         {/* Avg Transaction */}
@@ -349,7 +349,7 @@ export default function AnalyticsPage() {
         <Card className="border-0 shadow-lg">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-amber-500" /> Revenue Trend
+              <TrendingUp className="w-4 h-4 text-green-600" /> Revenue Trend
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -440,7 +440,7 @@ export default function AnalyticsPage() {
         <Card className="border-0 shadow-lg">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-amber-500" /> Bank Performance
+              <CheckCircle className="w-4 h-4 text-green-600" /> Bank Performance
             </CardTitle>
             <CardDescription>Success rate by bank</CardDescription>
           </CardHeader>
@@ -453,7 +453,7 @@ export default function AnalyticsPage() {
                     <div className="flex-1">
                       <div className="relative h-6 bg-slate-100 rounded-full overflow-hidden">
                         <div
-                          className="absolute inset-y-0 left-0 bg-gradient-to-r from-amber-500 to-pink-400 rounded-full transition-all duration-500"
+                          className="absolute inset-y-0 left-0 bg-gradient-to-r from-green-700 to-green-400 rounded-full transition-all duration-500"
                           style={{ width: `${bank.successRate}%` }}
                         />
                         <span className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-slate-700">
@@ -483,7 +483,7 @@ export default function AnalyticsPage() {
         <Card className="border-0 shadow-lg">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
-              <Clock className="w-4 h-4 text-amber-600" /> Peak Transaction Hours
+              <Clock className="w-4 h-4 text-green-700" /> Peak Transaction Hours
             </CardTitle>
             <CardDescription>When your customers pay most</CardDescription>
           </CardHeader>
@@ -578,7 +578,7 @@ export default function AnalyticsPage() {
               </div>
             ) : (
               <div className="h-[220px] flex items-center justify-center text-slate-400 flex-col gap-2">
-                <CheckCircle className="w-8 h-8 text-amber-300" />
+                <CheckCircle className="w-8 h-8 text-green-300" />
                 <span>No failures in this period</span>
               </div>
             )}
@@ -616,11 +616,11 @@ function KpiCard({
             {change !== undefined && change !== 0 && (
               <>
                 {change > 0 ? (
-                  <ArrowUpRight className="w-3 h-3 text-amber-500" />
+                  <ArrowUpRight className="w-3 h-3 text-green-600" />
                 ) : (
                   <ArrowDownRight className="w-3 h-3 text-red-500" />
                 )}
-                <span className={`text-xs font-semibold ${change > 0 ? "text-amber-500" : "text-red-500"}`}>
+                <span className={`text-xs font-semibold ${change > 0 ? "text-green-600" : "text-red-500"}`}>
                   {change > 0 ? "+" : ""}{change}%
                 </span>
               </>

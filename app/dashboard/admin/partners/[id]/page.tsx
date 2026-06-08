@@ -121,19 +121,19 @@ export default function PartnerDetailPage() {
               <p className="text-slate-500">{partner.email}</p>
               <div className="flex items-center gap-3 mt-2">
                 {partner.isActive
-                  ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"><div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />Active</span>
+                  ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"><div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />Active</span>
                   : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400">Inactive</span>}
                 {partner.kycStatus === 'approved'
-                  ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"><CheckCircle className="w-3 h-3" />KYC Approved</span>
+                  ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"><CheckCircle className="w-3 h-3" />KYC Approved</span>
                   : partner.kycStatus === 'rejected'
                   ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400"><XCircle className="w-3 h-3" />KYC Rejected</span>
-                  : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"><Clock className="w-3 h-3" />KYC Pending</span>}
+                  : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-400"><Clock className="w-3 h-3" />KYC Pending</span>}
                 {partner.commissionMode === 'commission'
                   ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"><Percent className="w-3 h-3" />Commission</span>
                   : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400">Handle Outside</span>}
                 {partner.accountMode === 'live'
-                  ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">LIVE</span>
-                  : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">DEMO</span>}
+                  ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400">LIVE</span>
+                  : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-400">DEMO</span>}
               </div>
             </div>
           </div>
@@ -147,7 +147,7 @@ export default function PartnerDetailPage() {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-100 dark:border-slate-700/50">
             <div><p className="text-2xl font-bold text-slate-900 dark:text-white">{partner.stats.merchantCount}</p><p className="text-xs text-slate-500">Merchants</p></div>
             <div><p className="text-2xl font-bold text-slate-900 dark:text-white">{partner.stats.totalTransactions}</p><p className="text-xs text-slate-500">Transactions</p></div>
-            <div><p className="text-2xl font-bold text-amber-500">R {parseFloat(partner.stats.totalVolume || '0').toLocaleString()}</p><p className="text-xs text-slate-500">Total Volume</p></div>
+            <div><p className="text-2xl font-bold text-green-500">R {parseFloat(partner.stats.totalVolume || '0').toLocaleString()}</p><p className="text-xs text-slate-500">Total Volume</p></div>
           </div>
         )}
       </Card>
@@ -160,7 +160,7 @@ export default function PartnerDetailPage() {
             onClick={() => setActiveTab(tab.key)}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
               activeTab === tab.key
-                ? 'bg-white dark:bg-slate-700 text-amber-500 dark:text-amber-400 shadow-sm'
+                ? 'bg-white dark:bg-slate-700 text-green-500 dark:text-green-400 shadow-sm'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
@@ -205,7 +205,7 @@ function OverviewTab({ partner }: { partner: Partner }) {
       </Card>
 
       <Card className="p-6 bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50">
-        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2"><Shield className="w-5 h-5 text-amber-600" />Account Status</h3>
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2"><Shield className="w-5 h-5 text-green-700" />Account Status</h3>
         <div className="space-y-1">
           <InfoRow label="Account Status" value={partner.isActive ? 'Active' : 'Inactive'} />
           <InfoRow label="KYC Status" value={partner.kycStatus} />
@@ -217,7 +217,7 @@ function OverviewTab({ partner }: { partner: Partner }) {
 
       {partner.stats && (
         <Card className="p-6 md:col-span-2 bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50">
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2"><Percent className="w-5 h-5 text-amber-500" />Performance Summary</h3>
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2"><Percent className="w-5 h-5 text-green-500" />Performance Summary</h3>
           <div className="grid grid-cols-3 gap-6">
             <div className="text-center">
               <p className="text-3xl font-bold text-slate-900 dark:text-white">{partner.stats.merchantCount}</p>
@@ -228,7 +228,7 @@ function OverviewTab({ partner }: { partner: Partner }) {
               <p className="text-sm text-slate-500 mt-1">Total Transactions</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-amber-500">R {parseFloat(partner.stats.totalVolume || '0').toLocaleString()}</p>
+              <p className="text-3xl font-bold text-green-500">R {parseFloat(partner.stats.totalVolume || '0').toLocaleString()}</p>
               <p className="text-sm text-slate-500 mt-1">Total Volume</p>
             </div>
           </div>
@@ -293,7 +293,7 @@ function MerchantsTab({ partnerId }: { partnerId: string }) {
         {merchants.map((m) => (
           <div key={m.id} className="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
             <div className="flex items-center gap-4 min-w-0 flex-1">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-pink-600 flex items-center justify-center text-white font-bold shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-700 to-green-500 flex items-center justify-center text-white font-bold shrink-0">
                 {(m.companyName || m.name || '?')[0].toUpperCase()}
               </div>
               <div className="min-w-0 flex-1 md:grid md:grid-cols-4 md:gap-4 md:items-center">
@@ -305,7 +305,7 @@ function MerchantsTab({ partnerId }: { partnerId: string }) {
                 </div>
                 <div className="md:col-span-1">
                   {m.isActive
-                    ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"><CheckCircle className="w-3 h-3" />Active</span>
+                    ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"><CheckCircle className="w-3 h-3" />Active</span>
                     : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400"><XCircle className="w-3 h-3" />Inactive</span>}
                 </div>
                 <div className="md:col-span-1 hidden md:block">
@@ -404,7 +404,7 @@ function CommissionTab({ partnerId }: { partnerId: string }) {
           <div className="flex gap-4">
             <label className={`flex-1 flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
               config.commissionMode === 'handle_outside'
-                ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-400'
+                ? 'border-green-500 bg-green-50 dark:bg-green-900/20 dark:border-green-400'
                 : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
             }`}>
               <input
@@ -484,7 +484,7 @@ function CommissionTab({ partnerId }: { partnerId: string }) {
                 type="button"
                 onClick={() => setConfig({ ...config, vatEnabled: !config.vatEnabled })}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  config.vatEnabled ? 'bg-amber-500' : 'bg-slate-300 dark:bg-slate-600'
+                  config.vatEnabled ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'
                 }`}
               >
                 <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -515,7 +515,7 @@ function CommissionTab({ partnerId }: { partnerId: string }) {
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="gap-2 bg-gradient-to-r from-amber-500 to-pink-600 text-white"
+          className="gap-2 bg-gradient-to-r from-green-700 to-green-500 text-white"
         >
           <Save className="w-4 h-4" />{saving ? 'Saving...' : 'Save Commission Config'}
         </Button>
@@ -617,7 +617,7 @@ function SettingsTab({ partner, onUpdate }: { partner: Partner; onUpdate: () => 
       {/* Account Controls */}
       <Card className="p-6 bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50">
         <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-          <Shield className="w-5 h-5 text-amber-600" />Account Controls
+          <Shield className="w-5 h-5 text-green-700" />Account Controls
         </h3>
         <div className="space-y-4">
           <div>
@@ -662,7 +662,7 @@ function SettingsTab({ partner, onUpdate }: { partner: Partner; onUpdate: () => 
           <Button
             onClick={handleSave}
             disabled={saving}
-            className="w-full bg-gradient-to-r from-amber-500 to-pink-600 text-white gap-2"
+            className="w-full bg-gradient-to-r from-green-700 to-green-500 text-white gap-2"
           >
             <Save className="w-4 h-4" />{saving ? 'Saving...' : 'Save Changes'}
           </Button>

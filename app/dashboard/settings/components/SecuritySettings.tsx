@@ -73,7 +73,7 @@ export function SecuritySettings() {
       <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 overflow-hidden">
         <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/50">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-pink-600 flex items-center justify-center text-white">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-green-700 to-green-500 flex items-center justify-center text-white">
               <Lock className="w-4.5 h-4.5" />
             </div>
             <div>
@@ -143,7 +143,7 @@ export function SecuritySettings() {
 
         <div className="px-6 py-4 bg-slate-50/50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-700/50 flex justify-end gap-3">
           <Button variant="outline" size="sm" onClick={() => { setCurrentPassword(""); setNewPassword(""); setConfirmPassword(""); }}>Cancel</Button>
-          <Button size="sm" onClick={handlePasswordReset} disabled={loading} className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0">
+          <Button size="sm" onClick={handlePasswordReset} disabled={loading} className="bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white border-0">
             {loading ? "Updating..." : "Update Password"}
           </Button>
         </div>

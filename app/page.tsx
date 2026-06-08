@@ -21,15 +21,15 @@ const features = [
     icon: Zap,
     title: 'Instant Pay By Bank',
     description: 'Real-time EFT payments with instant confirmation. Your customers pay directly from their bank — no cards, no wallets, no friction.',
-    iconColor: 'text-amber-500',
-    bgColor: 'bg-amber-500/10',
+    iconColor: 'text-green-600',
+    bgColor: 'bg-green-600/10',
   },
   {
     icon: LinkIcon,
     title: 'Secure Payment Links',
     description: 'Generate encrypted, time-limited payment links with bank-level security. Share via SMS, email, or embed on your site.',
-    iconColor: 'text-pink-500',
-    bgColor: 'bg-pink-500/10',
+    iconColor: 'text-green-500',
+    bgColor: 'bg-green-500/10',
   },
   {
     icon: BarChart3,
@@ -56,8 +56,8 @@ const features = [
     icon: CreditCard,
     title: 'Flexible Fee Models',
     description: 'Choose fixed, percentage, or volume-based pricing. Custom rates per merchant with transparent invoicing and automated reconciliation.',
-    iconColor: 'text-amber-500',
-    bgColor: 'bg-amber-500/10',
+    iconColor: 'text-green-600',
+    bgColor: 'bg-green-600/10',
   },
 ];
 
@@ -100,9 +100,9 @@ export default function LandingPage() {
       <section className="relative">
         {/* Background Effects */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-amber-500/8 via-pink-500/5 to-transparent rounded-full blur-3xl" />
-          <div className="absolute top-40 -left-40 w-80 h-80 bg-amber-400/10 rounded-full blur-3xl" />
-          <div className="absolute top-60 -right-40 w-80 h-80 bg-pink-500/10 rounded-full blur-3xl" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-green-700/8 via-green-500/5 to-transparent rounded-full blur-3xl" />
+          <div className="absolute top-40 -left-40 w-80 h-80 bg-green-400/10 rounded-full blur-3xl" />
+          <div className="absolute top-60 -right-40 w-80 h-80 bg-green-500/10 rounded-full blur-3xl" />
           {/* Grid pattern */}
           <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px]" />
         </div>
@@ -110,9 +110,9 @@ export default function LandingPage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-20 pb-24 md:pt-32 md:pb-32">
           <div className="max-w-4xl mx-auto text-center">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-50 dark:bg-amber-500/10 border border-amber-200/60 dark:border-amber-500/20 mb-8">
-              <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-              <span className="text-sm font-medium text-amber-700 dark:text-amber-400">Trusted by South African businesses</span>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-50 dark:bg-green-600/10 border border-green-200/60 dark:border-green-600/20 mb-8">
+              <div className="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse" />
+              <span className="text-sm font-medium text-green-800 dark:text-green-400">Trusted by South African businesses</span>
             </div>
 
             {/* Headline */}
@@ -130,7 +130,7 @@ export default function LandingPage() {
             {/* CTA Group */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
               <Link href="/auth/register">
-                <Button size="lg" className="px-8 h-13 yp-gradient text-white text-base font-semibold rounded-xl shadow-lg shadow-amber-500/25 hover:shadow-xl hover:shadow-amber-500/30 hover:opacity-95 transition-all">
+                <Button size="lg" className="px-8 h-13 yp-gradient text-white text-base font-semibold rounded-xl shadow-lg shadow-green-700/25 hover:shadow-xl hover:shadow-green-700/30 hover:opacity-95 transition-all">
                   Start Accepting Payments
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
@@ -147,7 +147,7 @@ export default function LandingPage() {
               {stats.map((stat) => (
                 <div key={stat.label} className="text-center">
                   <p className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                    {stat.value}<span className="text-amber-500">{stat.suffix}</span>
+                    {stat.value}<span className="text-green-600">{stat.suffix}</span>
                   </p>
                   <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">{stat.label}</p>
                 </div>
@@ -164,7 +164,7 @@ export default function LandingPage() {
       <section id="features" className="relative py-24 md:py-32 bg-slate-50/50 dark:bg-slate-900/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="max-w-2xl mx-auto text-center mb-16">
-            <span className="text-sm font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400">Features</span>
+            <span className="text-sm font-semibold uppercase tracking-widest text-green-700 dark:text-green-400">Features</span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white mt-3 tracking-tight">
               Everything you need to grow
             </h2>
@@ -177,7 +177,7 @@ export default function LandingPage() {
             {features.map((feature) => (
               <div
                 key={feature.title}
-                className="group relative bg-white dark:bg-slate-800/50 rounded-2xl p-7 border border-slate-200/80 dark:border-slate-700/50 hover:border-amber-300/50 dark:hover:border-amber-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/5"
+                className="group relative bg-white dark:bg-slate-800/50 rounded-2xl p-7 border border-slate-200/80 dark:border-slate-700/50 hover:border-green-300/50 dark:hover:border-green-600/30 transition-all duration-300 hover:shadow-lg hover:shadow-green-600/5"
               >
                 <div className={`w-12 h-12 rounded-xl ${feature.bgColor} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300`}>
                   <feature.icon className={`w-6 h-6 ${feature.iconColor}`} />
@@ -194,7 +194,7 @@ export default function LandingPage() {
       <section id="how-it-works" className="py-24 md:py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="max-w-2xl mx-auto text-center mb-16">
-            <span className="text-sm font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400">How It Works</span>
+            <span className="text-sm font-semibold uppercase tracking-widest text-green-700 dark:text-green-400">How It Works</span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white mt-3 tracking-tight">
               Up and running in minutes
             </h2>
@@ -208,10 +208,10 @@ export default function LandingPage() {
               <div key={item.step} className="relative text-center md:text-left">
                 {/* Connector line */}
                 {i < steps.length - 1 && (
-                  <div className="hidden md:block absolute top-8 left-[calc(50%+40px)] right-[calc(-50%+40px)] h-px bg-gradient-to-r from-amber-300 to-pink-300 dark:from-amber-500/40 dark:to-pink-500/40" />
+                  <div className="hidden md:block absolute top-8 left-[calc(50%+40px)] right-[calc(-50%+40px)] h-px bg-gradient-to-r from-green-300 to-green-500 dark:from-green-600/40 dark:to-green-500/40" />
                 )}
                 {/* Step number */}
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl yp-gradient text-white text-xl font-extrabold mb-5 shadow-lg shadow-amber-500/20">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl yp-gradient text-white text-xl font-extrabold mb-5 shadow-lg shadow-green-700/20">
                   {item.step}
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{item.title}</h3>
@@ -226,7 +226,7 @@ export default function LandingPage() {
       <section id="banks" className="py-24 md:py-32 bg-slate-50/50 dark:bg-slate-900/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="max-w-2xl mx-auto text-center mb-16">
-            <span className="text-sm font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400">Supported Banks</span>
+            <span className="text-sm font-semibold uppercase tracking-widest text-green-700 dark:text-green-400">Supported Banks</span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white mt-3 tracking-tight">
               One integration, every bank
             </h2>
@@ -239,10 +239,10 @@ export default function LandingPage() {
             {banks.map((bank) => (
               <div
                 key={bank}
-                className="flex items-center justify-center h-20 rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/50 hover:border-amber-300/50 dark:hover:border-amber-500/30 transition-all duration-300 hover:shadow-md group"
+                className="flex items-center justify-center h-20 rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/50 hover:border-green-300/50 dark:hover:border-green-600/30 transition-all duration-300 hover:shadow-md group"
               >
                 <div className="flex items-center gap-2">
-                  <Wallet className="w-5 h-5 text-slate-400 group-hover:text-amber-500 transition-colors" />
+                  <Wallet className="w-5 h-5 text-slate-400 group-hover:text-green-600 transition-colors" />
                   <span className="font-semibold text-sm text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{bank}</span>
                 </div>
               </div>
@@ -257,7 +257,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
             {/* Left: Text */}
             <div>
-              <span className="text-sm font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400">Why YetoPay</span>
+              <span className="text-sm font-semibold uppercase tracking-widest text-green-700 dark:text-green-400">Why YetoPay</span>
               <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mt-3 tracking-tight">
                 Built for businesses that move fast
               </h2>
@@ -283,7 +283,7 @@ export default function LandingPage() {
 
               <div className="mt-10">
                 <Link href="/auth/register">
-                  <Button size="lg" className="yp-gradient text-white font-semibold rounded-xl shadow-lg shadow-amber-500/20 hover:shadow-xl hover:opacity-95 transition-all">
+                  <Button size="lg" className="yp-gradient text-white font-semibold rounded-xl shadow-lg shadow-green-700/20 hover:shadow-xl hover:opacity-95 transition-all">
                     Start Free Today
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
@@ -295,9 +295,9 @@ export default function LandingPage() {
             <div className="grid grid-cols-2 gap-4">
               {[
                 { icon: Lock, label: 'Bank-Grade Security', desc: '256-bit AES encryption', color: 'from-emerald-500 to-teal-500' },
-                { icon: Zap, label: 'Instant Settlement', desc: 'Real-time confirmations', color: 'from-amber-500 to-orange-500' },
+                { icon: Zap, label: 'Instant Settlement', desc: 'Real-time confirmations', color: 'from-green-700 to-green-500' },
                 { icon: Users, label: 'Partner Programme', desc: 'White-label ready', color: 'from-violet-500 to-purple-500' },
-                { icon: TrendingUp, label: 'Live Reporting', desc: 'Real-time dashboards', color: 'from-pink-500 to-rose-500' },
+                { icon: TrendingUp, label: 'Live Reporting', desc: 'Real-time dashboards', color: 'from-green-600 to-emerald-500' },
               ].map((card) => (
                 <div key={card.label} className="bg-white dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-700/50 hover:shadow-lg transition-all duration-300 group">
                   <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
@@ -335,7 +335,7 @@ export default function LandingPage() {
                   </Button>
                 </Link>
                 <Link href="/auth/login">
-                  <Button variant="outline" size="lg" className="px-8 h-13 border-white/30 text-white font-semibold rounded-xl hover:bg-white/10 transition-all text-base">
+                  <Button size="lg" className="px-8 h-13 bg-transparent border-2 border-white/40 text-white font-semibold rounded-xl hover:bg-white/10 transition-all text-base">
                     Sign In
                   </Button>
                 </Link>
@@ -358,7 +358,7 @@ export default function LandingPage() {
                 Modern Pay By Bank payment solutions for South African businesses.
               </p>
               <div className="flex items-center gap-2 mt-4">
-                <Globe className="w-4 h-4 text-amber-500" />
+                <Globe className="w-4 h-4 text-green-600" />
                 <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Proudly South African</span>
               </div>
             </div>

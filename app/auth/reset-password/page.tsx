@@ -65,11 +65,11 @@ function ForgotPassword() {
 
   if (sent) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4 sm:p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4 sm:p-6">
         <div className="w-full max-w-md">
           <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-white/20 dark:border-slate-700/50 p-5 sm:p-8 shadow-2xl text-center">
-            <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Mail className="w-8 h-8 text-amber-600" />
+            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Mail className="w-8 h-8 text-green-700" />
             </div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Check Your Email</h1>
             <p className="text-slate-600 dark:text-slate-400 mb-2">
@@ -100,7 +100,7 @@ function ForgotPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4 sm:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-2 mb-6">
@@ -148,7 +148,7 @@ function ForgotPassword() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white py-6 rounded-xl shadow-lg"
+              className="w-full bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white py-6 rounded-xl shadow-lg"
             >
               {isLoading ? (
                 <span className="flex items-center justify-center">
@@ -168,7 +168,7 @@ function ForgotPassword() {
           </form>
 
           <div className="mt-8 text-center">
-            <Link href="/auth/login" className="text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 text-sm font-medium inline-flex items-center">
+            <Link href="/auth/login" className="text-slate-600 dark:text-slate-400 hover:text-green-700 dark:hover:text-green-400 text-sm font-medium inline-flex items-center">
               <ArrowLeft className="w-4 h-4 mr-1" />
               Back to Sign In
             </Link>
@@ -236,18 +236,18 @@ function SetNewPassword({ token }: { token: string }) {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4 sm:p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4 sm:p-6">
         <div className="w-full max-w-md">
           <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-white/20 dark:border-slate-700/50 p-5 sm:p-8 shadow-2xl text-center">
-            <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-8 h-8 text-amber-600" />
+            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle className="w-8 h-8 text-green-700" />
             </div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Password Reset!</h1>
             <p className="text-slate-600 dark:text-slate-400 mb-6">
               Your password has been reset successfully. Redirecting to sign in...
             </p>
             <Link href="/auth/login">
-              <Button className="w-full bg-gradient-to-r from-amber-500 to-pink-600 text-white">
+              <Button className="w-full bg-gradient-to-r from-green-700 to-green-500 text-white">
                 Sign In Now
               </Button>
             </Link>
@@ -258,7 +258,7 @@ function SetNewPassword({ token }: { token: string }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4 sm:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-2 mb-6">
@@ -342,7 +342,7 @@ function SetNewPassword({ token }: { token: string }) {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white py-6 rounded-xl shadow-lg"
+              className="w-full bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white py-6 rounded-xl shadow-lg"
             >
               {isLoading ? (
                 <span className="flex items-center justify-center">

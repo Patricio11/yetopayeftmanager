@@ -71,7 +71,7 @@ const formatDate = (d: string | null) => {
 const statusConfig: Record<string, { label: string; color: string; bg: string; icon: any }> = {
   draft: { label: "Draft", color: "text-slate-600", bg: "bg-slate-100 border-slate-200", icon: FileText },
   sent: { label: "Sent", color: "text-blue-600", bg: "bg-blue-50 border-blue-200", icon: Send },
-  paid: { label: "Paid", color: "text-amber-500", bg: "bg-amber-50 border-amber-200", icon: CheckCircle },
+  paid: { label: "Paid", color: "text-green-500", bg: "bg-green-50 border-green-200", icon: CheckCircle },
   overdue: { label: "Overdue", color: "text-red-600", bg: "bg-red-50 border-red-200", icon: AlertCircle },
   cancelled: { label: "Cancelled", color: "text-gray-500", bg: "bg-gray-50 border-gray-200", icon: X },
 };
@@ -191,7 +191,7 @@ export default function ReconPage() {
           </Button>
           <Button
             onClick={() => setShowGenerate(true)}
-            className="gap-2 bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white shadow-lg shadow-amber-500/25"
+            className="gap-2 bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white shadow-lg shadow-green-500/25"
           >
             <Plus className="w-4 h-4" />
             Generate Invoice
@@ -201,12 +201,12 @@ export default function ReconPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-        <StatsCard icon={DollarSign} iconBg="bg-amber-100" iconColor="text-amber-500" shadowColor="shadow-amber-500/5"
-          gradientColor="from-amber-500/10" label="Total Revenue" value={formatCurrency(totalRevenue)}
-          sub={<span className="text-amber-500 flex items-center gap-1"><ArrowUpRight className="w-3 h-3" />{stats?.totalRevenueCount || 0} paid invoices</span>} />
-        <StatsCard icon={Clock} iconBg="bg-amber-100" iconColor="text-amber-600" shadowColor="shadow-amber-500/5"
-          gradientColor="from-amber-500/10" label="Outstanding" value={formatCurrency(outstanding)}
-          sub={<span className="text-amber-600 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{stats?.outstandingCount || 0} unpaid</span>} />
+        <StatsCard icon={DollarSign} iconBg="bg-green-100" iconColor="text-green-500" shadowColor="shadow-green-500/5"
+          gradientColor="from-green-500/10" label="Total Revenue" value={formatCurrency(totalRevenue)}
+          sub={<span className="text-green-500 flex items-center gap-1"><ArrowUpRight className="w-3 h-3" />{stats?.totalRevenueCount || 0} paid invoices</span>} />
+        <StatsCard icon={Clock} iconBg="bg-green-100" iconColor="text-green-700" shadowColor="shadow-green-500/5"
+          gradientColor="from-green-500/10" label="Outstanding" value={formatCurrency(outstanding)}
+          sub={<span className="text-green-700 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{stats?.outstandingCount || 0} unpaid</span>} />
         <StatsCard icon={Receipt} iconBg="bg-blue-100" iconColor="text-blue-600" shadowColor="shadow-blue-500/5"
           gradientColor="from-blue-500/10" label="This Month Txns" value={String(currentMonthTxns)}
           sub={<span className="text-blue-600">transactions completed</span>} />
@@ -313,7 +313,7 @@ export default function ReconPage() {
                         )}
                         {inv.status === "sent" && (
                           <>
-                            <Button variant="ghost" size="sm" onClick={() => handleStatusChange(inv.id, "paid")}><CheckCircle className="w-4 h-4 text-amber-500" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleStatusChange(inv.id, "paid")}><CheckCircle className="w-4 h-4 text-green-500" /></Button>
                             <Button variant="ghost" size="sm" onClick={() => handleStatusChange(inv.id, "overdue")}><AlertCircle className="w-4 h-4 text-red-500" /></Button>
                           </>
                         )}

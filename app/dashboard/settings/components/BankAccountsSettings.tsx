@@ -276,7 +276,7 @@ export function BankAccountsSettings() {
     <div className="space-y-6">
       {/* Add button */}
       <div className="flex justify-end">
-        <Button size="sm" onClick={openAddDialog} className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0">
+        <Button size="sm" onClick={openAddDialog} className="bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white border-0">
           <Plus className="w-4 h-4 mr-2" />
           Add Account
         </Button>
@@ -303,7 +303,7 @@ export function BankAccountsSettings() {
                       {account.bankColor ? (
                         <span className="w-5 h-5 rounded-full" style={{ backgroundColor: account.bankColor }} />
                       ) : (
-                        <Landmark className="w-5 h-5 text-amber-500" />
+                        <Landmark className="w-5 h-5 text-green-600" />
                       )}
                     </div>
                     <div>
@@ -430,7 +430,7 @@ export function BankAccountsSettings() {
 
           <DialogFooter>
             <Button variant="outline" size="sm" onClick={() => { setDialogOpen(false); resetForm(); }}>Cancel</Button>
-            <Button size="sm" onClick={handleSave} disabled={saving} className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0">
+            <Button size="sm" onClick={handleSave} disabled={saving} className="bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white border-0">
               {saving ? "Saving..." : editingAccount ? "Update Account" : "Add Account"}
             </Button>
           </DialogFooter>

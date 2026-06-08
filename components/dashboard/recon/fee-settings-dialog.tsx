@@ -71,7 +71,7 @@ export function FeeSettingsDialog({ currentFees, onClose, onSaved }: FeeSettings
           {/* Fixed Fee */}
           <div className="space-y-2">
             <Label htmlFor="fixedFee" className="flex items-center gap-2">
-              <DollarSign className="w-4 h-4 text-amber-500" />
+              <DollarSign className="w-4 h-4 text-green-600" />
               Fixed Fee per Transaction (ZAR)
             </Label>
             <div className="relative">
@@ -114,7 +114,7 @@ export function FeeSettingsDialog({ currentFees, onClose, onSaved }: FeeSettings
           {/* Volume Fee */}
           <div className="space-y-2">
             <Label htmlFor="volumeFee" className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-amber-600" />
+              <BarChart3 className="w-4 h-4 text-green-700" />
               Volume Fee (%)
             </Label>
             <div className="relative">
@@ -140,7 +140,7 @@ export function FeeSettingsDialog({ currentFees, onClose, onSaved }: FeeSettings
               <button
                 onClick={() => setVatEnabled(!vatEnabled)}
                 className={`relative w-11 h-6 rounded-full transition-colors ${
-                  vatEnabled ? "bg-amber-500" : "bg-slate-300"
+                  vatEnabled ? "bg-green-600" : "bg-slate-300"
                 }`}
               >
                 <span
@@ -168,9 +168,9 @@ export function FeeSettingsDialog({ currentFees, onClose, onSaved }: FeeSettings
           </div>
 
           {/* Info */}
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex gap-3">
-            <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-amber-800">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex gap-3">
+            <AlertCircle className="w-4 h-4 text-green-700 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-green-800">
               Set all three rates here. On each merchant&apos;s profile, you assign whether they use the <strong>fixed</strong>, <strong>percentage</strong>, or <strong>volume</strong> fee.
               Merchants can also have custom fee values that override these defaults.
             </p>

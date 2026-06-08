@@ -31,10 +31,10 @@ export function WebhooksSection({ selectedLanguage, onCopy, copiedCode }: Webhoo
             Instead of polling for status updates, we'll send you secure POST requests to your endpoint.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-              <CheckCircle className="w-5 h-5 text-amber-600 mb-2" />
-              <p className="text-sm font-medium text-amber-900">Real-time Updates</p>
-              <p className="text-xs text-amber-700">Instant notifications</p>
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+              <CheckCircle className="w-5 h-5 text-green-700 mb-2" />
+              <p className="text-sm font-medium text-green-900">Real-time Updates</p>
+              <p className="text-xs text-green-800">Instant notifications</p>
             </div>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
               <Shield className="w-5 h-5 text-blue-600 mb-2" />
@@ -133,7 +133,7 @@ export function WebhooksSection({ selectedLanguage, onCopy, copiedCode }: Webhoo
                   <td className="p-3"><strong>All Events (Wildcard)</strong> — Receive all current and future events</td>
                 </tr>
                 <tr>
-                  <td className="p-3"><code className="text-amber-600">payment.completed</code></td>
+                  <td className="p-3"><code className="text-green-700">payment.completed</code></td>
                   <td className="p-3">Payment successfully completed (EFT or Card)</td>
                 </tr>
                 <tr>
@@ -227,35 +227,35 @@ export function WebhooksSection({ selectedLanguage, onCopy, copiedCode }: Webhoo
               </div>
             </div>
             <div className="flex items-start gap-2">
-              <CheckCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <CheckCircle className="w-5 h-5 text-green-700 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-medium">Always verify signatures</p>
                 <p className="text-sm text-gray-600">Never trust unsigned webhooks</p>
               </div>
             </div>
             <div className="flex items-start gap-2">
-              <CheckCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <CheckCircle className="w-5 h-5 text-green-700 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-medium">Return 200 OK quickly</p>
                 <p className="text-sm text-gray-600">Process async, don't block the response</p>
               </div>
             </div>
             <div className="flex items-start gap-2">
-              <CheckCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <CheckCircle className="w-5 h-5 text-green-700 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-medium">Use HTTPS only</p>
                 <p className="text-sm text-gray-600">Never use HTTP endpoints</p>
               </div>
             </div>
             <div className="flex items-start gap-2">
-              <CheckCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <CheckCircle className="w-5 h-5 text-green-700 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-medium">Implement idempotency</p>
                 <p className="text-sm text-gray-600">Check event IDs to prevent duplicates</p>
               </div>
             </div>
             <div className="flex items-start gap-2">
-              <CheckCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <CheckCircle className="w-5 h-5 text-green-700 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-medium">Handle retries gracefully</p>
                 <p className="text-sm text-gray-600">Same event may arrive multiple times</p>

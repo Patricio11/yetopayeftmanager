@@ -160,12 +160,12 @@ export function QuickPaymentLinkModal({ trigger = 'button' }: QuickPaymentLinkMo
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           {trigger === 'button' ? (
-            <Button className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40 transition-all duration-300">
+            <Button className="bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white shadow-lg shadow-green-700/30 hover:shadow-xl hover:shadow-green-700/40 transition-all duration-300">
               <Plus className="w-4 h-4 mr-2" />
               Generate Payment Link
             </Button>
           ) : (
-            <Button className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white shadow-lg">
+            <Button className="bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white shadow-lg">
               <Plus className="w-4 h-4 mr-2" />
               Create Payment Link
             </Button>
@@ -175,7 +175,7 @@ export function QuickPaymentLinkModal({ trigger = 'button' }: QuickPaymentLinkMo
         {!paymentUrl ? (
           <>
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-amber-500 to-pink-600 bg-clip-text text-transparent">
+              <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-green-700 to-green-500 bg-clip-text text-transparent">
                 Generate Payment Link
               </DialogTitle>
               <DialogDescription className="text-slate-600 dark:text-slate-400">
@@ -241,7 +241,7 @@ export function QuickPaymentLinkModal({ trigger = 'button' }: QuickPaymentLinkMo
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-12 bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white shadow-lg font-semibold text-base"
+                className="w-full h-12 bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white shadow-lg font-semibold text-base"
               >
                 {isLoading ? (
                   <span className="flex items-center justify-center">
@@ -284,7 +284,7 @@ export function QuickPaymentLinkModal({ trigger = 'button' }: QuickPaymentLinkMo
             <div className="space-y-6 mt-4">
               {/* Success Icon */}
               <div className="flex justify-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-pink-600 rounded-full flex items-center justify-center shadow-lg shadow-amber-500/30">
+                <div className="w-20 h-20 bg-gradient-to-br from-green-700 to-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-700/30">
                   <CheckCircle className="w-10 h-10 text-white" />
                 </div>
               </div>
@@ -303,7 +303,7 @@ export function QuickPaymentLinkModal({ trigger = 'button' }: QuickPaymentLinkMo
               <div className="grid grid-cols-2 gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
                 <div>
                   <Label className="text-xs text-slate-600 dark:text-slate-400 font-semibold uppercase tracking-wide">Amount</Label>
-                  <p className="text-xl font-bold text-amber-500 dark:text-amber-400 mt-1">R {formData.amount}</p>
+                  <p className="text-xl font-bold text-green-600 dark:text-green-400 mt-1">R {formData.amount}</p>
                 </div>
                 <div>
                   <Label className="text-xs text-slate-600 dark:text-slate-400 font-semibold uppercase tracking-wide">Reference</Label>
@@ -316,7 +316,7 @@ export function QuickPaymentLinkModal({ trigger = 'button' }: QuickPaymentLinkMo
                 <Button
                   onClick={copyToClipboard}
                   variant="outline"
-                  className="h-12 border-2 hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:border-amber-300 dark:hover:border-amber-700 hover:text-amber-500 dark:hover:text-amber-400 transition-colors"
+                  className="h-12 border-2 hover:bg-green-50 dark:hover:bg-green-900/20 hover:border-green-300 dark:hover:border-green-700 hover:text-green-600 dark:hover:text-green-400 transition-colors"
                 >
                   {copied ? (
                     <>
@@ -343,7 +343,7 @@ export function QuickPaymentLinkModal({ trigger = 'button' }: QuickPaymentLinkMo
               <Button
                 onClick={resetForm}
                 variant="ghost"
-                className="w-full text-slate-600 dark:text-slate-400 hover:text-amber-500 dark:hover:text-amber-400"
+                className="w-full text-slate-600 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-400"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Another Link

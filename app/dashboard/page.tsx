@@ -168,11 +168,11 @@ export default async function DashboardPage() {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
           {/* Total Revenue */}
-          <Card className="p-5 bg-gradient-to-br from-white to-amber-50/50 dark:from-slate-800 dark:to-amber-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer">
+          <Card className="p-5 bg-gradient-to-br from-white to-green-50/50 dark:from-slate-800 dark:to-green-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer">
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-9 h-9 bg-gradient-to-br from-amber-500 to-pink-600 rounded-lg flex items-center justify-center">
+                  <div className="w-9 h-9 bg-gradient-to-br from-green-700 to-green-500 rounded-lg flex items-center justify-center">
                     <DollarSign className="w-5 h-5 text-white" />
                   </div>
                   <h3 className="text-xs font-medium text-slate-600 dark:text-slate-400">
@@ -186,7 +186,7 @@ export default async function DashboardPage() {
                   All time earnings
                 </p>
               </div>
-              <TrendingUp className="w-4 h-4 text-amber-500 mt-1" />
+              <TrendingUp className="w-4 h-4 text-green-600 mt-1" />
             </div>
           </Card>
 
@@ -213,11 +213,11 @@ export default async function DashboardPage() {
           </Card>
 
           {/* Completed */}
-          <Card className="p-5 bg-gradient-to-br from-white to-pink-50/50 dark:from-slate-800 dark:to-pink-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer">
+          <Card className="p-5 bg-gradient-to-br from-white to-emerald-50/50 dark:from-slate-800 dark:to-emerald-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer">
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-9 h-9 bg-gradient-to-br from-pink-500 to-rose-600 rounded-lg flex items-center justify-center">
+                  <div className="w-9 h-9 bg-gradient-to-br from-green-600 to-emerald-500 rounded-lg flex items-center justify-center">
                     <CheckCircle className="w-5 h-5 text-white" />
                   </div>
                   <h3 className="text-xs font-medium text-slate-600 dark:text-slate-400">
@@ -235,11 +235,11 @@ export default async function DashboardPage() {
           </Card>
 
           {/* Pending */}
-          <Card className="p-5 bg-gradient-to-br from-white to-amber-50/50 dark:from-slate-800 dark:to-amber-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer">
+          <Card className="p-5 bg-gradient-to-br from-white to-green-50/50 dark:from-slate-800 dark:to-green-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer">
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-9 h-9 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg flex items-center justify-center">
+                  <div className="w-9 h-9 bg-gradient-to-br from-green-700 to-green-500 rounded-lg flex items-center justify-center">
                     <Clock className="w-5 h-5 text-white" />
                   </div>
                   <h3 className="text-xs font-medium text-slate-600 dark:text-slate-400">
@@ -268,13 +268,13 @@ export default async function DashboardPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-amber-600" />
+                  <TrendingUp className="w-5 h-5 text-green-700" />
                   Recent Transactions
                 </h2>
                 <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Latest payment activity</p>
               </div>
               <Link href="/dashboard/transactions">
-                <Button variant="outline" size="sm" className="hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-600 dark:hover:text-amber-400 hover:border-amber-300 dark:hover:border-amber-700 transition-colors">
+                <Button variant="outline" size="sm" className="hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-700 dark:hover:text-green-400 hover:border-green-300 dark:hover:border-green-800 transition-colors">
                   View All
                   <ArrowUpRight className="w-4 h-4 ml-2" />
                 </Button>
@@ -289,7 +289,7 @@ export default async function DashboardPage() {
                   <div className="w-20 h-20 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 rounded-3xl flex items-center justify-center shadow-xl">
                     <CreditCard className="w-10 h-10 text-slate-400" />
                   </div>
-                  <div className="absolute -top-1 -right-1 w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center">
+                  <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-600 rounded-full flex items-center justify-center">
                     <Plus className="w-4 h-4 text-white" />
                   </div>
                 </div>
@@ -304,13 +304,13 @@ export default async function DashboardPage() {
                     <div className="flex items-center space-x-4">
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                         transaction.status === 'completed' 
-                          ? 'bg-amber-100 dark:bg-amber-900/20' 
+                          ? 'bg-green-100 dark:bg-green-900/20' 
                           : transaction.status === 'failed'
                           ? 'bg-red-100 dark:bg-red-900/20'
                           : 'bg-orange-100 dark:bg-orange-900/20'
                       }`}>
                         {transaction.status === 'completed' ? (
-                          <CheckCircle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                          <CheckCircle className="w-5 h-5 text-green-700 dark:text-green-400" />
                         ) : transaction.status === 'failed' ? (
                           <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
                         ) : (
@@ -336,7 +336,7 @@ export default async function DashboardPage() {
                       </p>
                       <span className={`text-xs px-2 py-1 rounded-full ${
                         transaction.status === 'completed'
-                          ? 'bg-amber-100 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400'
+                          ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400'
                           : transaction.status === 'failed'
                           ? 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400'
                           : 'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400'

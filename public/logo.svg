@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 40" fill="none">
   <defs>
     <linearGradient id="yp-brand" x1="0" y1="20" x2="200" y2="20" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#F9B233"/>
-      <stop offset="100%" stop-color="#E6007E"/>
+      <stop offset="0%" stop-color="#166534"/>
+      <stop offset="100%" stop-color="#22C55E"/>
     </linearGradient>
   </defs>
   <text x="0" y="32" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-weight="800" font-size="36" fill="url(#yp-brand)" letter-spacing="-0.5">YetoPay</text>

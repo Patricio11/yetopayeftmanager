@@ -124,8 +124,8 @@ export function CountdownTimer({
               strokeLinecap="round"
               className={`transition-all duration-1000 ease-linear ${
                 isWarning
-                  ? 'text-amber-500 dark:text-amber-400'
-                  : 'text-amber-500 dark:text-amber-400'
+                  ? 'text-green-600 dark:text-green-400'
+                  : 'text-green-600 dark:text-green-400'
               }`}
             />
           </svg>
@@ -135,7 +135,7 @@ export function CountdownTimer({
             <span
               className={`${config.text} font-bold tabular-nums ${
                 isWarning
-                  ? 'text-amber-600 dark:text-amber-400'
+                  ? 'text-green-700 dark:text-green-400'
                   : 'text-slate-900 dark:text-white'
               }`}
             >
@@ -143,7 +143,7 @@ export function CountdownTimer({
             </span>
             <span className={`text-xs font-medium ${
               isWarning
-                ? 'text-amber-500 dark:text-amber-400'
+                ? 'text-green-600 dark:text-green-400'
                 : 'text-slate-500 dark:text-slate-400'
             }`}>
               seconds
@@ -157,8 +157,8 @@ export function CountdownTimer({
         <div
           className={`flex items-center gap-2 px-4 py-2 rounded-full ${
             isWarning
-              ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
-              : 'bg-amber-100 dark:bg-amber-900/30 text-amber-500 dark:text-amber-400'
+              ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'
+              : 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
           }`}
         >
           <Clock className={config.icon} />
@@ -170,7 +170,7 @@ export function CountdownTimer({
 
       {/* Warning message */}
       {isWarning && secondsLeft > 0 && (
-        <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 animate-pulse">
+        <div className="flex items-center gap-2 text-green-700 dark:text-green-400 animate-pulse">
           <AlertCircle className="w-4 h-4" />
           <span className="text-sm font-medium">Time running out!</span>
         </div>
@@ -232,7 +232,7 @@ export function InlineCountdown({
     <div
       className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold ${
         isWarning
-          ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
+          ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'
           : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
       } ${className}`}
     >

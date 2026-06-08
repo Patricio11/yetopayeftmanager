@@ -79,11 +79,11 @@ function CreateApiKeyModal({ onClose, merchantId }: { onClose: () => void; merch
                 </p>
               </div>
 
-              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 flex gap-3">
-                <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-amber-900 dark:text-amber-300">
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 flex gap-3">
+                <AlertCircle className="w-5 h-5 text-green-700 dark:text-green-400 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-green-900 dark:text-green-300">
                   <p className="font-medium mb-1">Important Security Notice</p>
-                  <p className="text-amber-800 dark:text-amber-400/80">
+                  <p className="text-green-800 dark:text-green-400/80">
                     Your API key and secret will only be shown once. Make sure to copy and store them securely
                     before closing this dialog.
                   </p>
@@ -92,7 +92,7 @@ function CreateApiKeyModal({ onClose, merchantId }: { onClose: () => void; merch
 
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" size="sm" onClick={onClose}>Cancel</Button>
-                <Button size="sm" onClick={handleCreate} disabled={creating} className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0">
+                <Button size="sm" onClick={handleCreate} disabled={creating} className="bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white border-0">
                   {creating ? "Creating..." : "Create API Key"}
                 </Button>
               </div>
@@ -100,7 +100,7 @@ function CreateApiKeyModal({ onClose, merchantId }: { onClose: () => void; merch
           ) : (
             <div className="space-y-6">
               <div className="flex items-center justify-center py-4">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-pink-600 flex items-center justify-center">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-700 to-green-500 flex items-center justify-center">
                   <Check className="w-8 h-8 text-white" />
                 </div>
               </div>
@@ -231,7 +231,7 @@ export function ApiKeysSettings() {
         <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 p-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-green-600 to-green-700 flex items-center justify-center text-white">
                 <User className="w-4 h-4" />
               </div>
               <div>
@@ -262,7 +262,7 @@ export function ApiKeysSettings() {
 
       {/* Create button */}
       <div className="flex justify-end">
-        <Button size="sm" onClick={() => setShowCreateModal(true)} className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0">
+        <Button size="sm" onClick={() => setShowCreateModal(true)} className="bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white border-0">
           <Plus className="w-4 h-4 mr-2" />
           Create API Key
         </Button>

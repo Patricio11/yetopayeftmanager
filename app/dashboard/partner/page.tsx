@@ -29,7 +29,7 @@ const formatCurrency = (val: number) =>
 const statusBadge = (status: string) => {
   switch (status) {
     case "completed":
-      return "bg-amber-100 text-amber-600 border-amber-200";
+      return "bg-green-100 text-green-700 border-green-200";
     case "failed":
       return "bg-red-100 text-red-700 border-red-200";
     case "pending":
@@ -43,7 +43,7 @@ const statusBadge = (status: string) => {
 const statusIcon = (status: string) => {
   switch (status) {
     case "completed":
-      return <CheckCircle className="w-4 h-4 text-amber-500" />;
+      return <CheckCircle className="w-4 h-4 text-green-500" />;
     case "failed":
       return <XCircle className="w-4 h-4 text-red-600" />;
     case "pending":
@@ -142,8 +142,8 @@ export default function PartnerDashboardPage() {
       value: data.activeMerchants.toString(),
       subtitle: "Currently active",
       icon: Users,
-      iconBg: "from-amber-500 to-pink-600",
-      cardBg: "to-amber-50/50",
+      iconBg: "from-green-700 to-green-500",
+      cardBg: "to-green-50/50",
     },
     {
       title: "Transactions This Month",
@@ -158,8 +158,8 @@ export default function PartnerDashboardPage() {
       value: formatCurrency(data.volumeThisMonth),
       subtitle: "Total payment volume",
       icon: DollarSign,
-      iconBg: "from-amber-500 to-orange-600",
-      cardBg: "to-amber-50/50",
+      iconBg: "from-green-500 to-orange-600",
+      cardBg: "to-green-50/50",
     },
   ];
 
@@ -171,7 +171,7 @@ export default function PartnerDashboardPage() {
           Partner Dashboard
         </h1>
         <p className="text-slate-500 mt-1 flex items-center gap-2">
-          <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
+          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
           Overview of your merchant portfolio
         </p>
       </div>
@@ -196,7 +196,7 @@ export default function PartnerDashboardPage() {
                   <p className="text-2xl font-bold text-slate-900 tracking-tight">{card.value}</p>
                   <p className="text-xs text-slate-500 mt-1">{card.subtitle}</p>
                 </div>
-                <TrendingUp className="w-4 h-4 text-amber-500 mt-1" />
+                <TrendingUp className="w-4 h-4 text-green-500 mt-1" />
               </div>
             </div>
           );
@@ -209,7 +209,7 @@ export default function PartnerDashboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                <Activity className="w-5 h-5 text-amber-500" />
+                <Activity className="w-5 h-5 text-green-500" />
                 Recent Transactions
               </h2>
               <p className="text-sm text-slate-500 mt-1">Latest activity across your merchants</p>

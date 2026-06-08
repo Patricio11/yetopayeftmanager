@@ -29,7 +29,7 @@ export default function TermsAndConditionsPage() {
       {/* Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-amber-500 to-pink-600 text-white flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-green-700 to-green-500 text-white flex items-center justify-center">
             <FileText size={24} />
           </div>
           <div>
@@ -108,7 +108,7 @@ export default function TermsAndConditionsPage() {
             We take the security of your information seriously. All data transmitted through YetoPay
             is protected by TLS encryption. We process your personal information in accordance with
             our{' '}
-            <Link href="/privacy-policy" className="text-amber-600 hover:text-amber-700">
+            <Link href="/privacy-policy" className="text-green-700 hover:text-green-800">
               Privacy Policy
             </Link>
             , POPIA, and other applicable data protection laws.
@@ -202,7 +202,7 @@ export default function TermsAndConditionsPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-gray-500">&copy; {new Date().getFullYear()} YetoPay (Pty) Ltd. All rights reserved.</p>
           <div className="flex gap-6">
-            <Link href="/terms-and-conditions" className="text-sm text-amber-600 font-medium">
+            <Link href="/terms-and-conditions" className="text-sm text-green-700 font-medium">
               Terms &amp; Conditions
             </Link>
             <Link href="/privacy-policy" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">

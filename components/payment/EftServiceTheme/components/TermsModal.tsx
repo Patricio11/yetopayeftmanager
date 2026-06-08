@@ -41,7 +41,7 @@ const TermsModal: React.FC<TermsModalProps> = ({
               href="/privacy-policy"
               target="_blank"
               rel="noopener noreferrer"
-              className="block text-gray-900 font-medium underline underline-offset-2 hover:text-amber-600 transition-colors"
+              className="block text-gray-900 font-medium underline underline-offset-2 hover:text-green-700 transition-colors"
             >
               Privacy Policy
             </a>
@@ -49,7 +49,7 @@ const TermsModal: React.FC<TermsModalProps> = ({
               href="/terms-and-conditions"
               target="_blank"
               rel="noopener noreferrer"
-              className="block text-gray-900 font-medium underline underline-offset-2 hover:text-amber-600 transition-colors"
+              className="block text-gray-900 font-medium underline underline-offset-2 hover:text-green-700 transition-colors"
             >
               Terms &amp; Conditions
             </a>
@@ -66,7 +66,7 @@ const TermsModal: React.FC<TermsModalProps> = ({
           </button>
           <button
             onClick={() => { onAgree?.(); onClose(); }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-pink-600 text-white text-sm hover:from-amber-600 hover:to-pink-700"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-green-700 to-green-500 text-white text-sm hover:from-green-800 hover:to-green-600"
           >
             <Check size={16} />
             I Agree

@@ -228,7 +228,7 @@ export default function AdminMerchantsPage() {
       </span>
     );
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 ring-1 ring-amber-200 dark:ring-amber-800">
+      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-400 ring-1 ring-green-200 dark:ring-green-800">
         <Clock className="w-3 h-3" />Pending
       </span>
     );
@@ -264,7 +264,7 @@ export default function AdminMerchantsPage() {
           <Button variant="outline" size="sm" onClick={fetchMerchants} className="gap-1.5">
             <RefreshCw className="w-3.5 h-3.5" />Refresh
           </Button>
-          <Button size="sm" onClick={() => { setShowCreate(true); setInviteLink(''); }} className="gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-sm">
+          <Button size="sm" onClick={() => { setShowCreate(true); setInviteLink(''); }} className="gap-1.5 bg-gradient-to-r from-green-700 to-green-600 hover:from-green-800 hover:to-green-700 text-white shadow-sm">
             <Plus className="w-3.5 h-3.5" />Add Merchant
           </Button>
         </div>
@@ -275,7 +275,7 @@ export default function AdminMerchantsPage() {
         {[
           { label: 'Total', value: stats.total, icon: Building2, color: 'text-slate-600 dark:text-slate-300', bg: 'bg-slate-100 dark:bg-slate-800' },
           { label: 'Active', value: stats.active, icon: CheckCircle, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-900/30' },
-          { label: 'KYC Pending', value: stats.kycPending, icon: Clock, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/30' },
+          { label: 'KYC Pending', value: stats.kycPending, icon: Clock, color: 'text-green-700 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-900/30' },
           { label: 'With Partner', value: stats.withPartner, icon: Users, color: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-50 dark:bg-violet-900/30' },
         ].map((s) => (
           <div key={s.label} className="flex items-center gap-3 p-3.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/50">
@@ -385,7 +385,7 @@ export default function AdminMerchantsPage() {
                   <div className="flex items-center gap-3 min-w-0">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0 ${
                       m.isActive
-                        ? 'bg-gradient-to-br from-amber-500 to-amber-600'
+                        ? 'bg-gradient-to-br from-green-700 to-green-600'
                         : 'bg-gradient-to-br from-slate-400 to-slate-500'
                     }`}>
                       {(m.companyName || m.name || '?')[0].toUpperCase()}
@@ -564,7 +564,7 @@ export default function AdminMerchantsPage() {
                     <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(inviteLink); toast({ title: 'Copied!' }); }}><Copy className="w-4 h-4" /></Button>
                   </div>
                 )}
-                <Button onClick={() => setShowCreate(false)} className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white">Done</Button>
+                <Button onClick={() => setShowCreate(false)} className="w-full bg-gradient-to-r from-green-700 to-green-600 hover:from-green-800 hover:to-green-700 text-white">Done</Button>
               </div>
             ) : (
               <form onSubmit={handleCreate} className="space-y-4">
@@ -592,7 +592,7 @@ export default function AdminMerchantsPage() {
                       {availableServices.map((svc: any) => (
                         <div key={svc.id} className="flex items-center justify-between p-3 border border-slate-200 dark:border-slate-700 rounded-lg">
                           <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${selectedServices.includes(svc.code) ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-slate-100 dark:bg-slate-700'}`}>
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${selectedServices.includes(svc.code) ? 'bg-green-100 dark:bg-green-900/30' : 'bg-slate-100 dark:bg-slate-700'}`}>
                               {svc.category === 'card' ? <span className="text-sm">💳</span> : <span className="text-sm">🏦</span>}
                             </div>
                             <div>
@@ -615,7 +615,7 @@ export default function AdminMerchantsPage() {
                 </div>
                 <div className="flex gap-3 pt-2">
                   <Button type="button" variant="outline" onClick={() => setShowCreate(false)} className="flex-1">Cancel</Button>
-                  <Button type="submit" disabled={creating || selectedServices.length === 0} className="flex-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white">
+                  <Button type="submit" disabled={creating || selectedServices.length === 0} className="flex-1 bg-gradient-to-r from-green-700 to-green-600 hover:from-green-800 hover:to-green-700 text-white">
                     {creating ? 'Creating...' : 'Create & Invite'}
                   </Button>
                 </div>

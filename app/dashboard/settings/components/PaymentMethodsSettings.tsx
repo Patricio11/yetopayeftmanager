@@ -39,9 +39,9 @@ const CATEGORY_COLORS: Record<string, string> = {
   eft: "from-blue-500 to-blue-600",
   card: "from-violet-500 to-violet-600",
   qr: "from-emerald-500 to-emerald-600",
-  voucher: "from-amber-500 to-amber-600",
+  voucher: "from-green-600 to-green-700",
   crypto: "from-orange-500 to-orange-600",
-  wallet: "from-pink-500 to-pink-600",
+  wallet: "from-green-500 to-green-600",
 };
 
 export function PaymentMethodsSettings() {

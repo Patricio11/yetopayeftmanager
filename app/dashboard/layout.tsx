@@ -60,7 +60,7 @@ export default async function DashboardLayout({
   // Both roles can create payment links and view transactions
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-amber-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-green-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900">
       {session.impersonating && <ImpersonationBanner />}
       <DashboardNav userRole={session.user.role || 'merchant'} accountMode={(session.user as any).accountMode} />
       {(role === 'merchant' || role === 'partner') && (

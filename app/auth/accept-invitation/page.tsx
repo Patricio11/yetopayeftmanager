@@ -80,18 +80,18 @@ function AcceptInvitationContent() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4 sm:p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4 sm:p-6">
         <div className="w-full max-w-md">
           <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-white/20 dark:border-slate-700/50 p-5 sm:p-8 shadow-2xl text-center">
-            <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-8 h-8 text-amber-600" />
+            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle className="w-8 h-8 text-green-700" />
             </div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Account Activated!</h1>
             <p className="text-slate-600 dark:text-slate-400 mb-6">
               Your account has been set up successfully. Redirecting to sign in...
             </p>
             <Link href="/auth/login">
-              <Button className="w-full bg-gradient-to-r from-amber-500 to-pink-600 text-white">
+              <Button className="w-full bg-gradient-to-r from-green-700 to-green-500 text-white">
                 Sign In Now
               </Button>
             </Link>
@@ -102,7 +102,7 @@ function AcceptInvitationContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4 sm:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-2 mb-6">
@@ -118,7 +118,7 @@ function AcceptInvitationContent() {
               Create a password to activate your {roleLabel} account
             </p>
             {email && (
-              <p className="mt-2 text-sm text-amber-600 dark:text-amber-400 font-medium">{email}</p>
+              <p className="mt-2 text-sm text-green-700 dark:text-green-400 font-medium">{email}</p>
             )}
           </div>
 
@@ -199,7 +199,7 @@ function AcceptInvitationContent() {
             <Button
               type="submit"
               disabled={isLoading || !token}
-              className="w-full bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white py-6 rounded-xl shadow-lg"
+              className="w-full bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white py-6 rounded-xl shadow-lg"
             >
               {isLoading ? (
                 <span className="flex items-center justify-center">
@@ -221,7 +221,7 @@ function AcceptInvitationContent() {
 
         <p className="mt-8 text-center text-sm text-slate-600 dark:text-slate-400">
           Already have an account?{' '}
-          <Link href="/auth/login" className="text-amber-600 dark:text-amber-400 hover:underline font-medium">
+          <Link href="/auth/login" className="text-green-700 dark:text-green-400 hover:underline font-medium">
             Sign in
           </Link>
         </p>

@@ -146,7 +146,7 @@ function SettingsContent() {
       <div className="border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 md:px-6 max-w-7xl">
           <div className="flex items-center gap-3 py-5">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-pink-600 text-white shadow-md shadow-amber-500/20">
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-green-700 to-green-500 text-white shadow-md shadow-green-700/20">
               <Settings className="w-5 h-5" />
             </div>
             <div>
@@ -170,7 +170,7 @@ function SettingsContent() {
                 const Icon = currentItem?.icon || Settings;
                 return (
                   <>
-                    <Icon className="w-4 h-4 text-amber-600" />
+                    <Icon className="w-4 h-4 text-green-700" />
                     <span className="font-medium text-slate-900 dark:text-white">{currentItem?.label || "Settings"}</span>
                   </>
                 );
@@ -201,13 +201,13 @@ function SettingsContent() {
                           className={cn(
                             "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all duration-150 group",
                             isActive
-                              ? "bg-gradient-to-r from-amber-50 to-pink-50 dark:from-amber-950/30 dark:to-pink-950/30 text-amber-700 dark:text-amber-400 shadow-sm border border-amber-200/60 dark:border-amber-800/40"
+                              ? "bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 text-green-800 dark:text-green-400 shadow-sm border border-green-200/60 dark:border-green-800/40"
                               : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white"
                           )}
                         >
                           <Icon className={cn(
                             "w-4 h-4 flex-shrink-0 transition-colors",
-                            isActive ? "text-amber-600 dark:text-amber-400" : "text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300"
+                            isActive ? "text-green-700 dark:text-green-400" : "text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300"
                           )} />
                           <div className="min-w-0">
                             <div className={cn("text-sm font-medium truncate", isActive && "font-semibold")}>{item.label}</div>

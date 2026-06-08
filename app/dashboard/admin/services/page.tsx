@@ -33,9 +33,9 @@ const CATEGORY_META: Record<string, { label: string; icon: any; color: string }>
   eft: { label: "EFT", icon: Building2, color: "text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400" },
   card: { label: "Card", icon: CreditCard, color: "text-violet-600 bg-violet-50 dark:bg-violet-900/20 dark:text-violet-400" },
   qr: { label: "QR", icon: QrCode, color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400" },
-  voucher: { label: "Voucher", icon: Ticket, color: "text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400" },
+  voucher: { label: "Voucher", icon: Ticket, color: "text-green-700 bg-green-50 dark:bg-green-900/20 dark:text-green-400" },
   crypto: { label: "Crypto", icon: Coins, color: "text-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400" },
-  wallet: { label: "Wallet", icon: Wallet, color: "text-pink-600 bg-pink-50 dark:bg-pink-900/20 dark:text-pink-400" },
+  wallet: { label: "Wallet", icon: Wallet, color: "text-green-500 bg-emerald-50 dark:bg-emerald-900/20 dark:text-green-400" },
 };
 
 const PROVIDER_LABEL: Record<string, string> = {
@@ -225,7 +225,7 @@ export default function AdminServicesPage() {
                       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
                         isConfigured
                           ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                          : "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                          : "bg-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-400"
                       }`}>
                         {isConfigured ? <CheckCircle className="w-3 h-3" /> : <Settings2 className="w-3 h-3" />}
                         {isConfigured ? "Configured" : "Setup Required"}
@@ -439,7 +439,7 @@ function ProviderConfigModal({
           </Button>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={onClose}>Cancel</Button>
-            <Button size="sm" onClick={handleSave} disabled={saving} className="gap-1.5 bg-amber-500 hover:bg-amber-600 text-white">
+            <Button size="sm" onClick={handleSave} disabled={saving} className="gap-1.5 bg-green-500 hover:bg-green-700 text-white">
               {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
               Save Credentials
             </Button>

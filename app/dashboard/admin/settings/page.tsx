@@ -206,8 +206,8 @@ export default function AdminSettingsPage() {
       {/* Terms & Conditions */}
       <Card className="p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
-            <Shield className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+          <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+            <Shield className="w-5 h-5 text-green-600 dark:text-green-400" />
           </div>
           <div>
             <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Terms & Conditions</h2>
@@ -226,7 +226,7 @@ export default function AdminSettingsPage() {
               aria-checked={tcEnabled}
               onClick={() => setTcEnabled(!tcEnabled)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                tcEnabled ? 'bg-amber-500' : 'bg-slate-300 dark:bg-slate-600'
+                tcEnabled ? 'bg-green-600' : 'bg-slate-300 dark:bg-slate-600'
               }`}
             >
               <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -240,7 +240,7 @@ export default function AdminSettingsPage() {
               href="/privacy-policy"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-amber-600 hover:text-amber-700 underline underline-offset-2"
+              className="text-green-700 hover:text-green-800 underline underline-offset-2"
             >
               View Privacy Policy
             </a>
@@ -248,7 +248,7 @@ export default function AdminSettingsPage() {
               href="/terms-and-conditions"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-amber-600 hover:text-amber-700 underline underline-offset-2"
+              className="text-green-700 hover:text-green-800 underline underline-offset-2"
             >
               View Terms &amp; Conditions
             </a>
@@ -289,8 +289,8 @@ export default function AdminSettingsPage() {
       {/* Alert Settings */}
       <Card className="p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
-            <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+          <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+            <AlertCircle className="w-5 h-5 text-green-700 dark:text-green-400" />
           </div>
           <div>
             <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Alert Notifications</h2>
@@ -341,7 +341,7 @@ export default function AdminSettingsPage() {
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="bg-amber-500 hover:bg-amber-600 text-white px-8"
+          className="bg-green-600 hover:bg-green-700 text-white px-8"
         >
           {saving ? (
             <>

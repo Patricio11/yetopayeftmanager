@@ -162,7 +162,7 @@ export default function AdminPartnersPage() {
         </div>
         <div className="flex gap-3">
           <Button variant="outline" onClick={fetchPartners} className="gap-2"><RefreshCw className="w-4 h-4" />Refresh</Button>
-          <Button onClick={() => { setShowCreate(true); setInviteLink(''); }} className="gap-2 bg-gradient-to-r from-amber-500 to-pink-600 text-white"><Plus className="w-4 h-4" />Invite Partner</Button>
+          <Button onClick={() => { setShowCreate(true); setInviteLink(''); }} className="gap-2 bg-gradient-to-r from-green-700 to-green-500 text-white"><Plus className="w-4 h-4" />Invite Partner</Button>
         </div>
       </div>
 
@@ -170,9 +170,9 @@ export default function AdminPartnersPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
           { label: 'Total Partners', value: stats.total, icon: Users, bg: 'bg-purple-100 dark:bg-purple-900/30', fg: 'text-purple-600 dark:text-purple-400' },
-          { label: 'Active', value: stats.active, icon: CheckCircle, bg: 'bg-amber-100 dark:bg-amber-900/30', fg: 'text-amber-500 dark:text-amber-400' },
+          { label: 'Active', value: stats.active, icon: CheckCircle, bg: 'bg-green-100 dark:bg-green-900/30', fg: 'text-green-500 dark:text-green-400' },
           { label: 'Inactive', value: stats.inactive, icon: XCircle, bg: 'bg-slate-100 dark:bg-slate-800', fg: 'text-slate-600 dark:text-slate-400' },
-          { label: 'Commission Mode', value: stats.commission, icon: Percent, bg: 'bg-amber-100 dark:bg-amber-900/30', fg: 'text-amber-600 dark:text-amber-400' },
+          { label: 'Commission Mode', value: stats.commission, icon: Percent, bg: 'bg-green-100 dark:bg-green-900/30', fg: 'text-green-700 dark:text-green-400' },
         ].map((s) => (
           <Card key={s.label} className="p-4 bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50">
             <div className="flex items-center gap-3">
@@ -223,7 +223,7 @@ export default function AdminPartnersPage() {
                     <div className="flex items-center gap-2">
                       <p className="font-semibold text-slate-900 dark:text-white truncate">{p.companyName || p.name}</p>
                       {p.isActive
-                        ? <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" title="Active" />
+                        ? <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" title="Active" />
                         : <span className="w-2 h-2 rounded-full bg-slate-400 shrink-0" title="Inactive" />}
                       {!p.isActive && !p.emailVerified && (
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Pending</span>
@@ -256,7 +256,7 @@ export default function AdminPartnersPage() {
                     <Eye className="w-3 h-3" />
                     Impersonate
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={() => toggleStatus(p.id, p.isActive)} className={p.isActive ? 'text-amber-600 hover:text-amber-700' : 'text-amber-500 hover:text-amber-600'}>
+                  <Button size="sm" variant="ghost" onClick={() => toggleStatus(p.id, p.isActive)} className={p.isActive ? 'text-green-700 hover:text-green-800' : 'text-green-500 hover:text-green-700'}>
                     {p.isActive ? 'Deactivate' : 'Activate'}
                   </Button>
                   <Link href={`/dashboard/admin/partners/${p.id}`}>
@@ -316,7 +316,7 @@ export default function AdminPartnersPage() {
                       {availableServices.map((svc: any) => (
                         <div key={svc.id} className="flex items-center justify-between p-3 border border-slate-200 dark:border-slate-700 rounded-lg">
                           <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${selectedServices.includes(svc.code) ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-slate-100 dark:bg-slate-700'}`}>
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${selectedServices.includes(svc.code) ? 'bg-green-100 dark:bg-green-900/30' : 'bg-slate-100 dark:bg-slate-700'}`}>
                               {svc.category === 'card' ? <span className="text-sm">💳</span> : <span className="text-sm">🏦</span>}
                             </div>
                             <div>
@@ -339,7 +339,7 @@ export default function AdminPartnersPage() {
                 </div>
                 <div className="flex gap-3 pt-2">
                   <Button type="button" variant="outline" onClick={() => setShowCreate(false)} className="flex-1">Cancel</Button>
-                  <Button type="submit" disabled={creating || selectedServices.length === 0} className="flex-1 bg-gradient-to-r from-amber-500 to-pink-600 text-white">{creating ? 'Creating...' : 'Create & Invite'}</Button>
+                  <Button type="submit" disabled={creating || selectedServices.length === 0} className="flex-1 bg-gradient-to-r from-green-700 to-green-500 text-white">{creating ? 'Creating...' : 'Create & Invite'}</Button>
                 </div>
               </form>
             )}

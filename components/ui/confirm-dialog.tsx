@@ -38,7 +38,7 @@ export function ConfirmDialog({
   const variantStyles = {
     danger: "bg-red-600 hover:bg-red-700 text-white",
     warning: "bg-amber-500 hover:bg-amber-600 text-white",
-    default: "bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white",
+    default: "bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white",
   };
 
   return (

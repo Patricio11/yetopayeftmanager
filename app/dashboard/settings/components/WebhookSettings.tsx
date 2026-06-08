@@ -232,7 +232,7 @@ export function WebhookSettings() {
     <div className="space-y-6">
       {/* Create button */}
       <div className="flex justify-end">
-        <Button size="sm" onClick={() => setShowCreateModal(true)} className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0">
+        <Button size="sm" onClick={() => setShowCreateModal(true)} className="bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white border-0">
           <Plus className="w-4 h-4 mr-2" />
           Add Webhook
         </Button>
@@ -378,7 +378,7 @@ export function WebhookSettings() {
                         event.highlight
                           ? "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
                           : selectedEvents.includes(event.value)
-                            ? "border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-900/10"
+                            ? "border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/10"
                             : "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                       }`}
                     >
@@ -420,7 +420,7 @@ export function WebhookSettings() {
 
             <div className="px-6 py-4 bg-slate-50/50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-700/50 flex justify-end gap-3">
               <Button variant="outline" size="sm" onClick={() => setShowCreateModal(false)}>Cancel</Button>
-              <Button size="sm" onClick={handleCreateWebhook} disabled={creating} className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0">
+              <Button size="sm" onClick={handleCreateWebhook} disabled={creating} className="bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white border-0">
                 {creating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating...</> : "Create Webhook"}
               </Button>
             </div>
@@ -434,7 +434,7 @@ export function WebhookSettings() {
           <div className="w-full max-w-lg border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 shadow-2xl overflow-hidden">
             <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/50">
               <div className="flex items-center gap-2">
-                <Shield className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                <Shield className="w-5 h-5 text-green-700 dark:text-green-400" />
                 <h3 className="text-base font-semibold text-slate-900 dark:text-white">Webhook Secret</h3>
               </div>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Copy and store this secret securely. It will not be shown again.</p>
@@ -585,7 +585,7 @@ export function WebhookSettings() {
                                   ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
                                   : delivery.statusCode >= 400
                                     ? "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800"
-                                    : "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800"
+                                    : "bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-400 border-green-200 dark:border-green-800"
                               }`}
                             >
                               {delivery.statusCode}
@@ -629,7 +629,7 @@ export function WebhookSettings() {
                               <span>Delivered: {new Date(delivery.deliveredAt).toLocaleString("en-ZA")}</span>
                             )}
                             {delivery.nextRetryAt && (
-                              <span className="text-amber-600 dark:text-amber-400">Next retry: {new Date(delivery.nextRetryAt).toLocaleString("en-ZA")}</span>
+                              <span className="text-green-700 dark:text-green-400">Next retry: {new Date(delivery.nextRetryAt).toLocaleString("en-ZA")}</span>
                             )}
                           </div>
                         </div>

@@ -294,7 +294,7 @@ function ApiSidebar() {
     <Card className="sticky top-24 border-2 border-gray-100 dark:border-gray-800 shadow-lg">
       <CardHeader className="border-b border-gray-100 dark:border-gray-800">
         <CardTitle className="text-lg flex items-center gap-2">
-          <Book className="w-5 h-5 text-amber-600" />
+          <Book className="w-5 h-5 text-green-700" />
           Navigation
         </CardTitle>
       </CardHeader>
@@ -311,7 +311,7 @@ function ApiSidebar() {
                 transition-all duration-200 text-left group
                 ${
                   isActive
-                    ? "bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-600 shadow-sm"
+                    ? "bg-green-50 dark:bg-green-900/20 border-l-4 border-green-700 shadow-sm"
                     : "hover:bg-gray-50 dark:hover:bg-gray-800 border-l-4 border-transparent"
                 }
               `}
@@ -319,21 +319,21 @@ function ApiSidebar() {
               <Icon 
                 className={`w-4 h-4 transition-colors ${
                   isActive 
-                    ? "text-amber-600 dark:text-amber-400"
-                    : "text-gray-500 dark:text-gray-400 group-hover:text-amber-600 dark:group-hover:text-amber-400"
+                    ? "text-green-700 dark:text-green-400"
+                    : "text-gray-500 dark:text-gray-400 group-hover:text-green-700 dark:group-hover:text-green-400"
                 }`} 
               />
               <span 
                 className={`text-sm font-medium transition-colors ${
                   isActive 
-                    ? "text-amber-700 dark:text-amber-300"
+                    ? "text-green-800 dark:text-green-300"
                     : "text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100"
                 }`}
               >
                 {section.label}
               </span>
               {isActive && (
-                <ChevronRight className="w-4 h-4 ml-auto text-amber-600 dark:text-amber-400" />
+                <ChevronRight className="w-4 h-4 ml-auto text-green-700 dark:text-green-400" />
               )}
             </button>
           );
@@ -354,8 +354,8 @@ function QuickStartSection({
     <Card>
       <CardHeader>
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-            <Zap className="w-5 h-5 text-amber-600" />
+          <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+            <Zap className="w-5 h-5 text-green-700" />
           </div>
           <div>
             <CardTitle>Quick Start</CardTitle>
@@ -613,7 +613,7 @@ function EndpointsSection({ selectedLanguage, onCopy, copiedCode }: any) {
                       onClick={() => setSelectedEndpoint(endpoint.id)}
                       className={`w-full flex items-center gap-3 p-3 transition-all ${
                         selectedEndpoint === endpoint.id
-                          ? "bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500"
+                          ? "bg-green-50 dark:bg-green-900/20 border-l-4 border-green-600"
                           : "hover:bg-gray-50 dark:hover:bg-gray-800 border-l-4 border-transparent"
                       }`}
                     >
@@ -1127,7 +1127,7 @@ const ICON_COLORS: Record<string, { bg: string; text: string }> = {
   emerald: { bg: "bg-emerald-100", text: "text-emerald-600" },
   violet: { bg: "bg-violet-100", text: "text-violet-600" },
   blue: { bg: "bg-blue-100", text: "text-blue-600" },
-  amber: { bg: "bg-amber-100", text: "text-amber-600" },
+  amber: { bg: "bg-green-100", text: "text-green-700" },
 };
 
 // Payment Methods Section
@@ -1140,8 +1140,8 @@ function PaymentMethodsSection({ services, isAdmin }: { services: MerchantServic
     <Card>
       <CardHeader>
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 bg-gradient-to-br from-amber-100 to-pink-100 rounded-lg flex items-center justify-center">
-            <CreditCard className="w-5 h-5 text-amber-600" />
+          <div className="w-10 h-10 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg flex items-center justify-center">
+            <CreditCard className="w-5 h-5 text-green-700" />
           </div>
           <div>
             <CardTitle>Payment Methods</CardTitle>
@@ -1223,7 +1223,7 @@ function PaymentMethodsSection({ services, isAdmin }: { services: MerchantServic
                 "5. Webhook fires with paymentMethod"
               ].map((step, i, arr) => (
                 <div key={step} className="flex items-center gap-2 flex-shrink-0">
-                  <span className="bg-gradient-to-r from-amber-500 to-pink-600 text-white rounded-full px-3 py-1.5 font-medium text-xs">{step}</span>
+                  <span className="bg-gradient-to-r from-green-700 to-green-500 text-white rounded-full px-3 py-1.5 font-medium text-xs">{step}</span>
                   {i < arr.length - 1 && <ArrowRight className="w-4 h-4 text-slate-400" />}
                 </div>
               ))}
@@ -1365,7 +1365,7 @@ function TestingSection() {
 function StepCard({ number, title, description }: any) {
   return (
     <div className="flex gap-4">
-      <div className="w-8 h-8 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold flex-shrink-0">
+      <div className="w-8 h-8 rounded-full bg-green-700 text-white flex items-center justify-center font-bold flex-shrink-0">
         {number}
       </div>
       <div>
@@ -1396,7 +1396,7 @@ function LanguageSelector({ selected, onChange }: any) {
             flex items-center gap-2
             ${
               selected === lang.id
-                ? "bg-white dark:bg-gray-700 text-amber-600 dark:text-amber-400 shadow-md scale-105 z-10"
+                ? "bg-white dark:bg-gray-700 text-green-700 dark:text-green-400 shadow-md scale-105 z-10"
                 : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50"
             }
           `}
@@ -1404,7 +1404,7 @@ function LanguageSelector({ selected, onChange }: any) {
           <span className="text-base">{lang.icon}</span>
           <span>{lang.label}</span>
           {selected === lang.id && (
-            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-1.5 h-1.5 bg-amber-600 dark:bg-amber-400 rounded-full" />
+            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-1.5 h-1.5 bg-green-700 dark:bg-green-400 rounded-full" />
           )}
         </button>
       ))}
@@ -1434,7 +1434,7 @@ function EventBadge({ event, color }: any) {
 
 function ToolCard({ name, description }: any) {
   return (
-    <div className="border rounded-lg p-3 hover:border-amber-500 transition-colors cursor-pointer">
+    <div className="border rounded-lg p-3 hover:border-green-600 transition-colors cursor-pointer">
       <h4 className="font-semibold mb-1">{name}</h4>
       <p className="text-sm text-gray-600">{description}</p>
     </div>

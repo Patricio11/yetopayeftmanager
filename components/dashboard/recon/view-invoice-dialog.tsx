@@ -228,9 +228,9 @@ export function ViewInvoiceDialog({ invoice, onClose, onStatusChange }: ViewInvo
 
           {/* Notes */}
           {invoice.notes && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-              <p className="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-1">Notes</p>
-              <p className="text-sm text-amber-800">{invoice.notes}</p>
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <p className="text-xs font-semibold text-green-800 uppercase tracking-wider mb-1">Notes</p>
+              <p className="text-sm text-green-800">{invoice.notes}</p>
             </div>
           )}
 

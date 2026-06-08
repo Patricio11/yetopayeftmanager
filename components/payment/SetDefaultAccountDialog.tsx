@@ -32,7 +32,7 @@ export function SetDefaultAccountDialog({
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-amber-500 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-600 to-green-600 flex items-center justify-center">
               <Star className="w-6 h-6 text-white" fill="white" />
             </div>
             <div>
@@ -51,7 +51,7 @@ export function SetDefaultAccountDialog({
         </div>
 
         {/* Account Info */}
-        <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
           <div className="flex items-center gap-2 mb-2">
             <div className="text-sm font-semibold text-gray-900">{bankName}</div>
           </div>
@@ -75,19 +75,19 @@ export function SetDefaultAccountDialog({
         {/* Benefits */}
         <div className="mb-6 space-y-2">
           <div className="flex items-start gap-2">
-            <Check size={16} className="text-amber-500 mt-0.5 flex-shrink-0" />
+            <Check size={16} className="text-green-600 mt-0.5 flex-shrink-0" />
             <p className="text-sm text-gray-600">
               This account will be pre-selected for future payments
             </p>
           </div>
           <div className="flex items-start gap-2">
-            <Check size={16} className="text-amber-500 mt-0.5 flex-shrink-0" />
+            <Check size={16} className="text-green-600 mt-0.5 flex-shrink-0" />
             <p className="text-sm text-gray-600">
               Faster checkout with one-click payments
             </p>
           </div>
           <div className="flex items-start gap-2">
-            <Check size={16} className="text-amber-500 mt-0.5 flex-shrink-0" />
+            <Check size={16} className="text-green-600 mt-0.5 flex-shrink-0" />
             <p className="text-sm text-gray-600">
               You can change this anytime
             </p>
@@ -98,7 +98,7 @@ export function SetDefaultAccountDialog({
         <div className="flex flex-col gap-2">
           <button
             onClick={onSetDefault}
-            className="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white py-3 px-6 rounded-lg font-medium hover:from-amber-600 hover:to-amber-700 focus:ring-4 focus:ring-amber-200 transition-all duration-200 flex items-center justify-center gap-2"
+            className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 px-6 rounded-lg font-medium hover:from-green-700 hover:to-green-800 focus:ring-4 focus:ring-green-200 transition-all duration-200 flex items-center justify-center gap-2"
           >
             <Star size={18} />
             Yes, Set as Default

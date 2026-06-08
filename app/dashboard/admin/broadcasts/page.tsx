@@ -270,7 +270,7 @@ export default function AdminBroadcastsPage() {
           </div>
           <Button
             onClick={() => { setSubject(''); setContent(''); setView('create'); }}
-            className="gap-2 bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0"
+            className="gap-2 bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white border-0"
           >
             <Plus className="w-4 h-4" />
             New Broadcast
@@ -280,7 +280,7 @@ export default function AdminBroadcastsPage() {
         {/* Broadcasts List */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-6 h-6 text-amber-500 animate-spin" />
+            <Loader2 className="w-6 h-6 text-green-500 animate-spin" />
           </div>
         ) : broadcasts.length === 0 ? (
           <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 p-12 text-center">
@@ -289,7 +289,7 @@ export default function AdminBroadcastsPage() {
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Create your first broadcast to communicate with your merchants and partners.</p>
             <Button
               onClick={() => setView('create')}
-              className="gap-2 bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0"
+              className="gap-2 bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white border-0"
             >
               <Plus className="w-4 h-4" />
               Create Broadcast
@@ -300,7 +300,7 @@ export default function AdminBroadcastsPage() {
             {broadcasts.map((b) => (
               <div
                 key={b.id}
-                className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 hover:border-amber-300 dark:hover:border-amber-700 transition-colors cursor-pointer"
+                className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 hover:border-green-300 dark:hover:border-green-800 transition-colors cursor-pointer"
                 onClick={() => loadBroadcastDetail(b.id)}
               >
                 <div className="p-5">
@@ -333,7 +333,7 @@ export default function AdminBroadcastsPage() {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="gap-1.5 text-amber-600 border-amber-200 hover:bg-amber-50 dark:text-amber-400 dark:border-amber-800"
+                          className="gap-1.5 text-green-700 border-green-200 hover:bg-green-50 dark:text-green-400 dark:border-green-900"
                           onClick={(e) => { e.stopPropagation(); openSendModal(b.id, b.subject); }}
                         >
                           <Send className="w-3.5 h-3.5" />
@@ -381,7 +381,7 @@ export default function AdminBroadcastsPage() {
         <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 overflow-hidden">
           <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/50">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-pink-600 flex items-center justify-center text-white">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-green-700 to-green-500 flex items-center justify-center text-white">
                 <Mail className="w-4.5 h-4.5" />
               </div>
               <div>
@@ -402,7 +402,7 @@ export default function AdminBroadcastsPage() {
             <div className="space-y-2">
               <Label className="text-slate-700 dark:text-slate-300 text-sm">Content</Label>
               <textarea
-                className="w-full min-h-[200px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 resize-y"
+                className="w-full min-h-[200px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 resize-y"
                 placeholder="Write your email content here. You can use line breaks for paragraphs..."
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
@@ -416,7 +416,7 @@ export default function AdminBroadcastsPage() {
               size="sm"
               disabled={saving || !subject.trim() || !content.trim()}
               onClick={handleCreate}
-              className="gap-2 bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0"
+              className="gap-2 bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white border-0"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               Create & Send
@@ -453,7 +453,7 @@ export default function AdminBroadcastsPage() {
             </Button>
             <Button
               size="sm"
-              className="gap-1.5 bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0"
+              className="gap-1.5 bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white border-0"
               onClick={() => openSendModal(b.id, b.subject)}
             >
               {b.status === 'sent' ? <RefreshCw className="w-3.5 h-3.5" /> : <Send className="w-3.5 h-3.5" />}
@@ -464,9 +464,9 @@ export default function AdminBroadcastsPage() {
 
         {/* Edit Mode */}
         {editing && (
-          <div className="border border-amber-200 dark:border-amber-800 rounded-xl bg-amber-50/50 dark:bg-amber-900/10 overflow-hidden">
-            <div className="px-6 py-4 border-b border-amber-200 dark:border-amber-800/50">
-              <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-300">Edit Broadcast</h3>
+          <div className="border border-green-200 dark:border-green-900 rounded-xl bg-green-50/50 dark:bg-green-900/10 overflow-hidden">
+            <div className="px-6 py-4 border-b border-green-200 dark:border-green-900/50">
+              <h3 className="text-sm font-semibold text-green-900 dark:text-green-300">Edit Broadcast</h3>
             </div>
             <div className="p-6 space-y-4">
               <div className="space-y-2">
@@ -476,7 +476,7 @@ export default function AdminBroadcastsPage() {
               <div className="space-y-2">
                 <Label className="text-sm">Content</Label>
                 <textarea
-                  className="w-full min-h-[150px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 resize-y"
+                  className="w-full min-h-[150px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 resize-y"
                   value={editContent}
                   onChange={(e) => setEditContent(e.target.value)}
                 />
@@ -487,7 +487,7 @@ export default function AdminBroadcastsPage() {
                   size="sm"
                   disabled={editSaving}
                   onClick={handleEdit}
-                  className="bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0"
+                  className="bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white border-0"
                 >
                   {editSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Changes'}
                 </Button>
@@ -614,13 +614,13 @@ export default function AdminBroadcastsPage() {
                     onClick={() => { setRecipientType(opt.value); setSelectedUsers([]); setSearchResults([]); setRecipientSearch(''); }}
                     className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${
                       recipientType === opt.value
-                        ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-600'
+                        ? 'border-green-500 bg-green-50 dark:bg-green-900/20 dark:border-green-700'
                         : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
                     }`}
                   >
-                    <opt.icon className={`w-4 h-4 flex-shrink-0 ${recipientType === opt.value ? 'text-amber-600' : 'text-slate-400'}`} />
+                    <opt.icon className={`w-4 h-4 flex-shrink-0 ${recipientType === opt.value ? 'text-green-700' : 'text-slate-400'}`} />
                     <div>
-                      <p className={`text-sm font-medium ${recipientType === opt.value ? 'text-amber-800 dark:text-amber-300' : 'text-slate-700 dark:text-slate-300'}`}>{opt.label}</p>
+                      <p className={`text-sm font-medium ${recipientType === opt.value ? 'text-green-900 dark:text-green-300' : 'text-slate-700 dark:text-slate-300'}`}>{opt.label}</p>
                       <p className="text-[10px] text-slate-400">{opt.desc}</p>
                     </div>
                   </button>
@@ -639,14 +639,14 @@ export default function AdminBroadcastsPage() {
                     onChange={(e) => setRecipientSearch(e.target.value)}
                     className="pl-10"
                   />
-                  {searching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500 animate-spin" />}
+                  {searching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500 animate-spin" />}
                 </div>
 
                 {/* Selected users */}
                 {selectedUsers.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {selectedUsers.map((u) => (
-                      <span key={u.id} className="inline-flex items-center gap-1.5 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 px-2.5 py-1 rounded-full text-xs font-medium">
+                      <span key={u.id} className="inline-flex items-center gap-1.5 bg-green-100 dark:bg-green-900/30 text-green-900 dark:text-green-300 px-2.5 py-1 rounded-full text-xs font-medium">
                         {u.name}
                         <button onClick={() => setSelectedUsers(prev => prev.filter(s => s.id !== u.id))} className="hover:text-red-600">
                           <X className="w-3 h-3" />
@@ -688,9 +688,9 @@ export default function AdminBroadcastsPage() {
 
             {/* Warning for broadcast */}
             {recipientType !== 'custom' && (
-              <div className="flex items-start gap-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
-                <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
+              <div className="flex items-start gap-3 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900 rounded-lg p-4">
+                <AlertCircle className="w-4 h-4 text-green-700 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-green-900 dark:text-green-300 leading-relaxed">
                   This will send the email to <strong>{recipientType === 'all' ? 'all merchants and partners' : recipientType === 'merchants' ? 'all merchants' : 'all partners'}</strong> with verified email addresses.
                 </p>
               </div>
@@ -706,7 +706,7 @@ export default function AdminBroadcastsPage() {
               size="sm"
               onClick={handleSend}
               disabled={sending || (recipientType === 'custom' && selectedUsers.length === 0)}
-              className="gap-2 bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white border-0"
+              className="gap-2 bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white border-0"
             >
               {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               {sending ? 'Sending...' : `Send${recipientType === 'custom' ? ` to ${selectedUsers.length}` : ''}`}

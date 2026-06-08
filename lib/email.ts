@@ -35,7 +35,7 @@ export async function sendVerificationEmail(email: string, url: string) {
     subject: "Verify your email - YetoPay",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%); padding: 32px; text-align: center;">
+        <div style="background: linear-gradient(140deg, #166534 0%, #22C55E 100%); padding: 32px; text-align: center;">
           <h1 style="color: white; margin: 0;">YetoPay</h1>
         </div>
         <div style="padding: 32px; background: #ffffff;">
@@ -44,7 +44,7 @@ export async function sendVerificationEmail(email: string, url: string) {
             Thanks for signing up! Please verify your email address by clicking the button below.
           </p>
           <div style="text-align: center; margin: 32px 0;">
-            <a href="${url}" style="background-color: #F9B233; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+            <a href="${url}" style="background-color: #16A34A; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
               Verify Email
             </a>
           </div>
@@ -67,7 +67,7 @@ export async function sendPasswordResetEmail(email: string, url: string) {
     subject: "Reset your password - YetoPay",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%); padding: 32px; text-align: center;">
+        <div style="background: linear-gradient(140deg, #166534 0%, #22C55E 100%); padding: 32px; text-align: center;">
           <h1 style="color: white; margin: 0;">YetoPay</h1>
         </div>
         <div style="padding: 32px; background: #ffffff;">
@@ -76,7 +76,7 @@ export async function sendPasswordResetEmail(email: string, url: string) {
             We received a request to reset your password. Click the button below to choose a new password.
           </p>
           <div style="text-align: center; margin: 32px 0;">
-            <a href="${url}" style="background-color: #F9B233; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+            <a href="${url}" style="background-color: #16A34A; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
               Reset Password
             </a>
           </div>
@@ -160,7 +160,7 @@ export async function sendBankRecoveryEmail(
   const subject = `✅ Bank Recovered: ${bankName} — YetoPay`;
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%); padding: 32px; text-align: center;">
+      <div style="background: linear-gradient(140deg, #166534 0%, #22C55E 100%); padding: 32px; text-align: center;">
         <h1 style="color: white; margin: 0;">YetoPay</h1>
         <p style="color: #bbf7d0; margin: 8px 0 0;">Bank Health Recovery</p>
       </div>
@@ -209,7 +209,7 @@ export async function sendPartnerInvitationEmail(email: string, invitationLink: 
     subject: "You've been invited to join YetoPay as a Partner",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%); padding: 32px; text-align: center;">
+        <div style="background: linear-gradient(140deg, #166534 0%, #22C55E 100%); padding: 32px; text-align: center;">
           <h1 style="color: white; margin: 0;">YetoPay</h1>
           <p style="color: #ddd6fe; margin: 8px 0 0;">Partner Invitation</p>
         </div>
@@ -220,7 +220,7 @@ export async function sendPartnerInvitationEmail(email: string, invitationLink: 
             manage merchants, view transactions across your merchant network, and earn commissions.
           </p>
           <div style="text-align: center; margin: 32px 0;">
-            <a href="${invitationLink}" style="background-color: #E6007E; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+            <a href="${invitationLink}" style="background-color: #16A34A; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
               Accept Invitation
             </a>
           </div>
@@ -243,7 +243,7 @@ export async function sendMerchantInvitationEmail(email: string, invitationLink:
     subject: "You've been invited to join YetoPay as a Merchant",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%); padding: 32px; text-align: center;">
+        <div style="background: linear-gradient(140deg, #166534 0%, #22C55E 100%); padding: 32px; text-align: center;">
           <h1 style="color: white; margin: 0;">YetoPay</h1>
           <p style="color: #ddd6fe; margin: 8px 0 0;">Merchant Invitation</p>
         </div>
@@ -254,7 +254,7 @@ export async function sendMerchantInvitationEmail(email: string, invitationLink:
             to set up your account and start accepting payments.
           </p>
           <div style="text-align: center; margin: 32px 0;">
-            <a href="${invitationLink}" style="background-color: #F9B233; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+            <a href="${invitationLink}" style="background-color: #16A34A; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
               Accept Invitation
             </a>
           </div>
@@ -281,7 +281,7 @@ export async function sendMerchantInvitedByPartnerEmail(
     subject: `You've been invited to join YetoPay by ${partnerCompanyName}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%); padding: 32px; text-align: center;">
+        <div style="background: linear-gradient(140deg, #166534 0%, #22C55E 100%); padding: 32px; text-align: center;">
           <h1 style="color: white; margin: 0;">YetoPay</h1>
           <p style="color: #bbf7d0; margin: 8px 0 0;">Merchant Invitation</p>
         </div>
@@ -292,7 +292,7 @@ export async function sendMerchantInvitedByPartnerEmail(
             Accept the invitation to set up your account and start accepting EFT payments.
           </p>
           <div style="text-align: center; margin: 32px 0;">
-            <a href="${invitationLink}" style="background-color: #F9B233; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+            <a href="${invitationLink}" style="background-color: #16A34A; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
               Accept Invitation
             </a>
           </div>
@@ -317,7 +317,7 @@ export async function sendAdminNewRegistrationEmail(
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%); padding: 32px; text-align: center;">
+      <div style="background: linear-gradient(140deg, #166534 0%, #22C55E 100%); padding: 32px; text-align: center;">
         <h1 style="color: white; margin: 0;">YetoPay</h1>
         <p style="color: #fde68a; margin: 8px 0 0;">New User Registration</p>
       </div>
@@ -372,7 +372,7 @@ export async function sendAdminEmailVerifiedEmail(
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%); padding: 32px; text-align: center;">
+      <div style="background: linear-gradient(140deg, #166534 0%, #22C55E 100%); padding: 32px; text-align: center;">
         <h1 style="color: white; margin: 0;">YetoPay</h1>
         <p style="color: #bbf7d0; margin: 8px 0 0;">Email Verified</p>
       </div>
@@ -479,7 +479,7 @@ export async function sendPartnerActionNotificationEmail(
 // ─── KYC / Onboarding Email Templates ───────────────────────────────────────
 
 const kycHeader = `
-  <div style="background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%); padding: 32px; text-align: center;">
+  <div style="background: linear-gradient(140deg, #166534 0%, #22C55E 100%); padding: 32px; text-align: center;">
     <h1 style="color: white; margin: 0;">YetoPay</h1>
   </div>`;
 
@@ -630,7 +630,7 @@ export async function sendBroadcastEmail(
 
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f9fafb;">
-      <div style="background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%); padding: 40px 32px; text-align: center;">
+      <div style="background: linear-gradient(140deg, #166534 0%, #22C55E 100%); padding: 40px 32px; text-align: center;">
         <h1 style="color: white; margin: 0; font-size: 28px; letter-spacing: -0.5px;">YetoPay</h1>
       </div>
       <div style="padding: 40px 32px; background: #ffffff;">
@@ -639,7 +639,7 @@ export async function sendBroadcastEmail(
       </div>
       <div style="padding: 24px 32px; background: #f9fafb; text-align: center;">
         <a href="${appUrl}/dashboard"
-          style="display: inline-block; background: linear-gradient(140deg, #F9B233 0%, #E6007E 100%); color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">
+          style="display: inline-block; background: linear-gradient(140deg, #166534 0%, #22C55E 100%); color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">
           Go to Dashboard
         </a>
       </div>

@@ -26,7 +26,7 @@ interface Merchant {
 const statusBadge = (status: string) => {
   switch (status) {
     case "active":
-      return "bg-amber-100 text-amber-600 border-amber-200";
+      return "bg-green-100 text-green-700 border-green-200";
     case "suspended":
     case "inactive":
       return "bg-red-100 text-red-700 border-red-200";
@@ -104,7 +104,7 @@ export default function PartnerMerchantsPage() {
           </h1>
           <p className="text-slate-500 mt-1">Manage your merchant portfolio</p>
         </div>
-        <Button onClick={() => setShowInviteModal(true)} className="bg-amber-500 hover:bg-amber-600 text-white">
+        <Button onClick={() => setShowInviteModal(true)} className="bg-green-600 hover:bg-green-700 text-white">
           <Plus className="w-4 h-4 mr-2" />
           Invite Merchant
         </Button>
@@ -119,7 +119,7 @@ export default function PartnerMerchantsPage() {
             placeholder="Search by name, email, or company..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent"
           />
         </div>
       </div>
@@ -164,7 +164,7 @@ export default function PartnerMerchantsPage() {
                   : "Invite your first merchant to get started"}
               </p>
               {!search && (
-                <Button onClick={() => setShowInviteModal(true)} className="bg-amber-500 hover:bg-amber-600 text-white">
+                <Button onClick={() => setShowInviteModal(true)} className="bg-green-600 hover:bg-green-700 text-white">
                   <Plus className="w-4 h-4 mr-2" />
                   Invite Merchant
                 </Button>
@@ -176,11 +176,11 @@ export default function PartnerMerchantsPage() {
                 <div
                   key={merchant.id}
                   onClick={() => router.push(`/dashboard/partner/merchants/${merchant.id}`)}
-                  className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm hover:shadow-lg hover:border-amber-200 transition-all duration-200 cursor-pointer"
+                  className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm hover:shadow-lg hover:border-green-200 transition-all duration-200 cursor-pointer"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-pink-600 rounded-lg flex items-center justify-center">
+                      <div className="w-10 h-10 bg-gradient-to-br from-green-700 to-green-500 rounded-lg flex items-center justify-center">
                         <Building2 className="w-5 h-5 text-white" />
                       </div>
                       <div>
@@ -364,7 +364,7 @@ function InviteMerchantModal({
                 )}
               </>
             )}
-            <Button onClick={onClose} className="w-full bg-amber-500 hover:bg-amber-600 text-white">Done</Button>
+            <Button onClick={onClose} className="w-full bg-green-600 hover:bg-green-700 text-white">Done</Button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -382,7 +382,7 @@ function InviteMerchantModal({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Contact person name"
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent"
               />
             </div>
 
@@ -394,7 +394,7 @@ function InviteMerchantModal({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="merchant@company.com"
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent"
               />
             </div>
 
@@ -406,7 +406,7 @@ function InviteMerchantModal({
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
                 placeholder="Company (Pty) Ltd"
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent"
               />
             </div>
 
@@ -422,7 +422,7 @@ function InviteMerchantModal({
                   {availableServices.map((svc: any) => (
                     <div key={svc.id} className="flex items-center justify-between p-3 border border-slate-200 rounded-lg">
                       <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${selectedServices.includes(svc.code) ? 'bg-amber-100' : 'bg-slate-100'}`}>
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${selectedServices.includes(svc.code) ? 'bg-green-100' : 'bg-slate-100'}`}>
                           {svc.category === 'card' ? <span className="text-sm">💳</span> : <span className="text-sm">🏦</span>}
                         </div>
                         <div>
@@ -449,7 +449,7 @@ function InviteMerchantModal({
               <Button
                 type="submit"
                 disabled={submitting || selectedServices.length === 0}
-                className="bg-amber-500 hover:bg-amber-600 text-white"
+                className="bg-green-600 hover:bg-green-700 text-white"
               >
                 {submitting ? "Sending..." : "Send Invitation"}
               </Button>

@@ -29,7 +29,7 @@ export default function PrivacyPolicyPage() {
       {/* Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-amber-500 to-pink-600 text-white flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-green-700 to-green-500 text-white flex items-center justify-center">
             <Shield size={24} />
           </div>
           <div>
@@ -168,7 +168,7 @@ export default function PrivacyPolicyPage() {
             <Link href="/terms-and-conditions" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
               Terms &amp; Conditions
             </Link>
-            <Link href="/privacy-policy" className="text-sm text-amber-600 font-medium">
+            <Link href="/privacy-policy" className="text-sm text-green-700 font-medium">
               Privacy Policy
             </Link>
           </div>

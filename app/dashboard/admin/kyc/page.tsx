@@ -54,7 +54,7 @@ interface KycUser {
 type Tab = 'pending_review' | 'pending' | 'approved' | 'rejected' | 'ALL';
 
 const TABS: { id: Tab; label: string; icon: any; color: string }[] = [
-  { id: 'pending_review', label: 'Pending Review', icon: Clock, color: 'text-amber-600' },
+  { id: 'pending_review', label: 'Pending Review', icon: Clock, color: 'text-green-700' },
   { id: 'pending', label: 'Not Submitted', icon: FileText, color: 'text-violet-600' },
   { id: 'approved', label: 'Approved', icon: CheckCircle, color: 'text-emerald-600' },
   { id: 'rejected', label: 'Rejected', icon: XCircle, color: 'text-red-600' },
@@ -103,7 +103,7 @@ export default function AdminKycPage() {
 
   const statusBadge = (status: string | null) => {
     const map: Record<string, { label: string; bg: string; text: string; icon: any }> = {
-      pending_review: { label: 'Pending Review', bg: 'bg-amber-50 dark:bg-amber-900/30', text: 'text-amber-700 dark:text-amber-400', icon: Clock },
+      pending_review: { label: 'Pending Review', bg: 'bg-green-50 dark:bg-green-900/30', text: 'text-green-800 dark:text-green-400', icon: Clock },
       pending: { label: 'Not Submitted', bg: 'bg-violet-50 dark:bg-violet-900/30', text: 'text-violet-700 dark:text-violet-400', icon: FileText },
       approved: { label: 'KYC Approved', bg: 'bg-emerald-50 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-400', icon: CheckCircle },
       rejected: { label: 'Rejected', bg: 'bg-red-50 dark:bg-red-900/30', text: 'text-red-700 dark:text-red-400', icon: XCircle },
@@ -157,7 +157,7 @@ export default function AdminKycPage() {
               {count > 0 && (
                 <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
                   isActive && tab.id === 'pending_review'
-                    ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400'
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400'
                     : 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400'
                 }`}>
                   {count}
@@ -225,7 +225,7 @@ export default function AdminKycPage() {
                     u.kycStatus === 'approved'
                       ? 'bg-gradient-to-br from-emerald-500 to-emerald-600'
                       : u.kycStatus === 'pending_review'
-                      ? 'bg-gradient-to-br from-amber-500 to-amber-600'
+                      ? 'bg-gradient-to-br from-green-500 to-green-700'
                       : 'bg-gradient-to-br from-slate-400 to-slate-500'
                   }`}>
                     {(u.companyName || u.name || '?')[0].toUpperCase()}
@@ -354,7 +354,7 @@ function ReviewModal({
 
   const statusBadge = (status: string | null) => {
     const map: Record<string, { label: string; bg: string }> = {
-      pending_review: { label: 'Pending Review', bg: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400' },
+      pending_review: { label: 'Pending Review', bg: 'bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-400' },
       pending: { label: 'Not Submitted', bg: 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400' },
       approved: { label: 'KYC Approved', bg: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400' },
       rejected: { label: 'Rejected', bg: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' },
@@ -365,7 +365,7 @@ function ReviewModal({
 
   const modeBadge = user.accountMode === 'live'
     ? <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">LIVE</span>
-    : <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">DEMO</span>;
+    : <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">DEMO</span>;
 
   const hasKycData = Object.keys(kyc).length > 0;
 
@@ -399,7 +399,7 @@ function ReviewModal({
             </div>
           )}
           {user.vettingAdminNote && (
-            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-3 text-sm text-amber-800 dark:text-amber-300">
+            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-3 text-sm text-green-900 dark:text-green-300">
               <strong>Admin note:</strong> {user.vettingAdminNote}
             </div>
           )}
@@ -527,12 +527,12 @@ function ReviewModal({
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group"
                   >
-                    <FileText className="w-5 h-5 text-amber-500 shrink-0" />
+                    <FileText className="w-5 h-5 text-green-500 shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{doc.requirementName}</p>
                       <p className="text-xs text-slate-500 truncate">{doc.originalName}</p>
                     </div>
-                    <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-amber-500 transition-colors shrink-0" />
+                    <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-green-500 transition-colors shrink-0" />
                   </a>
                 ))}
               </div>
@@ -563,7 +563,7 @@ function ReviewModal({
                   size="sm"
                   disabled={!reason.trim() || processing}
                   onClick={() => handleAction(actionType, actionType === 'reject' ? { reason } : { note: reason })}
-                  className={actionType === 'reject' ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-amber-500 hover:bg-amber-600 text-white'}
+                  className={actionType === 'reject' ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-green-500 hover:bg-green-700 text-white'}
                 >
                   {processing ? <Loader2 className="w-4 h-4 animate-spin" /> : actionType === 'reject' ? 'Reject' : 'Request Changes'}
                 </Button>
@@ -580,7 +580,7 @@ function ReviewModal({
                 size="sm"
                 variant="outline"
                 onClick={() => setActionType('request-changes')}
-                className="gap-1.5 text-amber-600 border-amber-200 hover:bg-amber-50"
+                className="gap-1.5 text-green-700 border-green-200 hover:bg-green-50"
               >
                 <AlertTriangle className="w-3.5 h-3.5" />Request Changes
               </Button>

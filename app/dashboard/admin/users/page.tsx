@@ -89,9 +89,9 @@ export default function AdminUsersPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
           { label: 'Total Users', value: stats.total, icon: Users, bg: 'bg-blue-100 dark:bg-blue-900/30', fg: 'text-blue-600 dark:text-blue-400' },
-          { label: 'Merchants', value: stats.merchants, icon: Building2, bg: 'bg-amber-100 dark:bg-amber-900/30', fg: 'text-amber-500 dark:text-amber-400' },
+          { label: 'Merchants', value: stats.merchants, icon: Building2, bg: 'bg-green-100 dark:bg-green-900/30', fg: 'text-green-500 dark:text-green-400' },
           { label: 'Admins', value: stats.admins, icon: Shield, bg: 'bg-purple-100 dark:bg-purple-900/30', fg: 'text-purple-600 dark:text-purple-400' },
-          { label: 'Active', value: stats.active, icon: CheckCircle, bg: 'bg-pink-100 dark:bg-pink-900/30', fg: 'text-pink-600 dark:text-pink-400' },
+          { label: 'Active', value: stats.active, icon: CheckCircle, bg: 'bg-emerald-100 dark:bg-emerald-900/30', fg: 'text-green-500 dark:text-green-400' },
         ].map((s) => (
           <Card key={s.label} className="p-4 bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50">
             <div className="flex items-center gap-3">
@@ -160,7 +160,7 @@ export default function AdminUsersPage() {
                     <tr key={u.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/20">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-pink-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-green-700 to-green-500 flex items-center justify-center text-white font-bold text-sm shrink-0">
                             {(u.name || '?')[0].toUpperCase()}
                           </div>
                           <div>
@@ -173,19 +173,19 @@ export default function AdminUsersPage() {
                       <td className="px-4 py-3 text-center">{roleBadge(u.role)}</td>
                       <td className="px-4 py-3 text-center">
                         {u.isActive
-                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"><div className="w-1.5 h-1.5 rounded-full bg-amber-500" />Active</span>
+                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"><div className="w-1.5 h-1.5 rounded-full bg-green-500" />Active</span>
                           : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400">Inactive</span>}
                       </td>
                       <td className="px-4 py-3 text-center">
                         {u.kycStatus === 'approved'
-                          ? <CheckCircle className="w-4 h-4 text-amber-500 mx-auto" />
+                          ? <CheckCircle className="w-4 h-4 text-green-500 mx-auto" />
                           : u.kycStatus === 'rejected'
                           ? <XCircle className="w-4 h-4 text-red-500 mx-auto" />
-                          : <Clock className="w-4 h-4 text-amber-500 mx-auto" />}
+                          : <Clock className="w-4 h-4 text-green-500 mx-auto" />}
                       </td>
                       <td className="px-4 py-3 text-center">
                         {u.emailVerified
-                          ? <Mail className="w-4 h-4 text-amber-500 mx-auto" />
+                          ? <Mail className="w-4 h-4 text-green-500 mx-auto" />
                           : <Mail className="w-4 h-4 text-slate-300 mx-auto" />}
                       </td>
                       <td className="px-4 py-3 text-slate-500 text-sm">{new Date(u.createdAt).toLocaleDateString()}</td>
