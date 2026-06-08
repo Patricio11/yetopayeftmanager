@@ -1255,6 +1255,20 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
                 onChange={(e) => handleInputChange(name, e.target.value)}
                 placeholder={input.html_options?.placeholder}
                 disabled={isAutoFilled}
+                // Never let the browser/password-manager remember or refill these
+                // proxied bank credentials. Without this, fields like name="username"
+                // get refilled with a *previous* bank's value on the next payment
+                // (same origin + same field name), leaking e.g. a Standard Bank login
+                // into an ABSA login form. "new-password" reliably defeats password
+                // managers; the data-* hints cover LastPass/1Password/Bitwarden.
+                autoComplete={input.type === 'password' ? 'new-password' : 'off'}
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck={false}
+                data-lpignore="true"
+                data-1p-ignore="true"
+                data-bwignore="true"
+                data-form-type="other"
                 className={`w-full py-3 border rounded-lg transition-all duration-200 ${
                   isAutoFilled 
                     ? 'bg-amber-50 border-amber-300 text-amber-900 cursor-not-allowed font-mono pl-10 pr-4'
@@ -1541,7 +1555,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
         {pageError && <p className="text-red-500 text-sm text-center bg-red-50 p-3 rounded-lg">{pageError}</p>}
 
         {apiResponse.type === 'input' && apiResponse.inputs && (
-          <form onSubmit={handleFormSubmit} noValidate>
+          <form onSubmit={handleFormSubmit} noValidate autoComplete="off">
             <div className="space-y-4">
               {apiResponse.inputs.map((input) => (input.type === 'submit' || input.type === 'tc' ? null : renderInput(input)))}
 
