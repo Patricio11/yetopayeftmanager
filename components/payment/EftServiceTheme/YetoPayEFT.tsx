@@ -727,6 +727,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     setIsLoading(true);
     setPageError(null);
     setFormData({});
+    setProcessingMessage(initialStep === 'load_bank' ? 'Connecting to your bank...' : initialStep === 'auth' ? 'Authenticating...' : 'Processing your payment...');
     setCurrentStep('processing');
 
     let currentExecutionStep: string | undefined = initialStep;
@@ -1131,9 +1132,9 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
 
   const handleBackToBank = () => {
     console.log('🔙 Going back to bank selection...');
-    // Reset to bank selection step
     setSelectedBank(null);
     setCurrentStep('init');
+    setIsLoading(false);
     setApiResponse(null);
     setFormData({});
     setFormErrors({});
@@ -2192,16 +2193,16 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
             <div className="flex gap-3 ml-[52px]">
               <button
                 onClick={() => { setCancelConfirmOpen(false); handleBackToBank(); }}
-                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 font-medium text-sm text-slate-700 transition-colors"
+                className="px-5 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 font-medium text-sm text-slate-700 transition-colors"
               >
                 Change Bank
               </button>
               <button
                 onClick={handleCancelConfirm}
                 disabled={cancelLoading}
-                className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white font-medium text-sm transition-all disabled:opacity-60"
+                className="px-5 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-pink-600 hover:from-amber-600 hover:to-pink-700 text-white font-medium text-sm transition-all disabled:opacity-60"
               >
-                {cancelLoading ? "Cancelling..." : "Cancel Payment"}
+                {cancelLoading ? "Cancelling..." : "Confirm"}
               </button>
             </div>
           </div>
