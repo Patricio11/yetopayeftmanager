@@ -308,6 +308,49 @@ export async function sendMerchantInvitedByPartnerEmail(
   });
 }
 
+export async function sendTeamInvitationEmail(
+  email: string,
+  invitationLink: string,
+  inviterName: string,
+  companyName: string,
+  roleName: string
+) {
+  await transporter.sendMail({
+    from,
+    to: email,
+    subject: `You've been invited to join ${companyName} on YetoPay`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(140deg, #166534 0%, #22C55E 100%); padding: 32px; text-align: center;">
+          <h1 style="color: white; margin: 0;">YetoPay</h1>
+          <p style="color: #bbf7d0; margin: 8px 0 0;">Team Invitation</p>
+        </div>
+        <div style="padding: 32px; background: #ffffff;">
+          <h2 style="color: #1f2937;">You're invited to join the team</h2>
+          <p style="color: #4b5563; line-height: 1.6;">
+            <strong>${inviterName}</strong> has invited you to join <strong>${companyName}</strong> on YetoPay
+            as a <strong>${roleName}</strong>.
+          </p>
+          <p style="color: #4b5563; line-height: 1.6;">
+            Accept the invitation below to set up your account and get started.
+          </p>
+          <div style="text-align: center; margin: 32px 0;">
+            <a href="${invitationLink}" style="background-color: #16A34A; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+              Accept Invitation
+            </a>
+          </div>
+          <p style="color: #9ca3af; font-size: 14px;">
+            This invitation link will expire in 7 days. If you didn't expect this email, you can safely ignore it.
+          </p>
+        </div>
+        <div style="padding: 16px; text-align: center; color: #9ca3af; font-size: 12px;">
+          &copy; ${new Date().getFullYear()} YetoPay. All rights reserved.
+        </div>
+      </div>
+    `,
+  });
+}
+
 // ─── Admin Notification Templates ────────────────────────────────────────────
 
 export async function sendAdminNewRegistrationEmail(

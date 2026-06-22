@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { users, verifications, accounts } from "@/lib/db/schema";
+import { users, verifications, accounts, merchantTeamMembers } from "@/lib/db/schema";
 import { eq, and, gt } from "drizzle-orm";
 import { z } from "zod";
 import crypto from "crypto";
@@ -102,6 +102,21 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date(),
       })
       .where(eq(users.id, user.id));
+
+    // Activate any pending team memberships for this user
+    await db
+      .update(merchantTeamMembers)
+      .set({
+        status: "active",
+        acceptedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(merchantTeamMembers.userId, user.id),
+          eq(merchantTeamMembers.status, "pending")
+        )
+      );
 
     // Delete the used invitation token
     await db

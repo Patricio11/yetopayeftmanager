@@ -6,7 +6,7 @@ import { useSession } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import {
   User, Key, Lock, Building2, Bell, CreditCard, Zap,
-  Webhook, ExternalLink, FileText, Activity, Settings, ChevronRight,
+  Webhook, ExternalLink, FileText, Activity, Settings, ChevronRight, Users,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -21,6 +21,7 @@ import { WebhookSettings } from "./components/WebhookSettings";
 import { EftUrlSettings } from "./components/EftUrlSettings";
 import { TermsAndConditionsSettings } from "./components/TermsAndConditionsSettings";
 import { MonitoringSettings } from "./components/MonitoringSettings";
+import { TeamSettings } from "./components/TeamSettings";
 
 type NavItem = {
   id: string;
@@ -43,6 +44,12 @@ const navGroups: NavGroup[] = [
       { id: "security", label: "Security", icon: Lock, description: "Password & 2FA" },
       { id: "company", label: "Company", icon: Building2, description: "Business details" },
       { id: "notifications", label: "Notifications", icon: Bell, description: "Alert preferences" },
+    ],
+  },
+  {
+    title: "Team",
+    items: [
+      { id: "team", label: "Team Members", icon: Users, description: "Manage your team" },
     ],
   },
   {
@@ -81,6 +88,7 @@ const pageMap: Record<string, { title: string; description: string }> = {
   webhooks: { title: "Webhooks", description: "Set up real-time event notifications" },
   terms: { title: "Terms & Conditions", description: "Manage the T&Cs shown on the payment page" },
   monitoring: { title: "Monitoring", description: "Configure alerts and health check notifications" },
+  team: { title: "Team Members", description: "Invite people and manage permissions for your account" },
 };
 
 function SettingsContent() {
@@ -136,6 +144,7 @@ function SettingsContent() {
       case "eft-urls": return <EftUrlSettings />;
       case "terms": return isAdmin ? <TermsAndConditionsSettings /> : <ProfileSettings />;
       case "monitoring": return isAdmin ? <MonitoringSettings /> : <ProfileSettings />;
+      case "team": return <TeamSettings />;
       default: return <ProfileSettings />;
     }
   };

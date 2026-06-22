@@ -218,6 +218,7 @@ export function DashboardNav({ userRole, accountMode }: DashboardNavProps) {
     icon: MoreHorizontal,
     items: isPartner
       ? [
+          { title: "Team Members", href: "/dashboard/team", icon: Users },
           { title: "KYC", href: "/dashboard/kyc", icon: ShieldCheck },
           { title: "API Docs", href: "/dashboard/api-docs", icon: Book },
           { title: "Settings", href: "/dashboard/settings", icon: Settings },
@@ -229,6 +230,7 @@ export function DashboardNav({ userRole, accountMode }: DashboardNavProps) {
           { title: "Settings", href: "/dashboard/settings", icon: Settings },
         ]
       : [
+          { title: "Team Members", href: "/dashboard/team", icon: Users },
           { title: "KYC", href: "/dashboard/kyc", icon: ShieldCheck },
           { title: "Tokens", href: "/dashboard/tokens", icon: CreditCard },
           { title: "API Docs", href: "/dashboard/api-docs", icon: Book },
