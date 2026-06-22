@@ -327,17 +327,17 @@ export default function AnalyticsPage() {
       <div className="grid grid-cols-3 gap-4">
         <Card className="p-4 bg-slate-50 border-0">
           <p className="text-xs text-slate-500 font-medium">Lifetime Revenue</p>
-          <p className="text-lg font-bold text-slate-900">{formatCompact(data.allTime.totalRevenue)}</p>
+          <p className="text-lg font-bold text-slate-900">{formatCompact(data.allTime?.totalRevenue ?? 0)}</p>
         </Card>
         <Card className="p-4 bg-slate-50 border-0">
           <p className="text-xs text-slate-500 font-medium">Lifetime Transactions</p>
-          <p className="text-lg font-bold text-slate-900">{data.allTime.totalTransactions.toLocaleString()}</p>
+          <p className="text-lg font-bold text-slate-900">{(data.allTime?.totalTransactions ?? 0).toLocaleString()}</p>
         </Card>
         <Card className="p-4 bg-slate-50 border-0">
           <p className="text-xs text-slate-500 font-medium">Lifetime Success Rate</p>
           <p className="text-lg font-bold text-slate-900">
-            {data.allTime.totalTransactions > 0
-              ? `${Math.round((data.allTime.completedTransactions / data.allTime.totalTransactions) * 100)}%`
+            {(data.allTime?.totalTransactions ?? 0) > 0
+              ? `${Math.round(((data.allTime?.completedTransactions ?? 0) / data.allTime.totalTransactions) * 100)}%`
               : "—"}
           </p>
         </Card>

@@ -52,7 +52,28 @@ export default function PartnerAnalyticsPage() {
       const res = await fetch(`/api/partner/analytics?${params.toString()}`);
       const json = await res.json();
       if (json.success) {
-        setData(json.data);
+        const d = json.data;
+        const kpis = d.kpis || {};
+        const totalTx = kpis.totalTransactions ?? 0;
+        const completedTx = kpis.completedCount ?? 0;
+        const successRate = totalTx > 0 ? Math.round((completedTx / totalTx) * 100) : 0;
+        setData({
+          totalTransactions: totalTx,
+          totalVolume: parseFloat(kpis.totalAmount || "0"),
+          successRate,
+          growth: kpis.growth?.transactions ?? 0,
+          merchantBreakdown: (d.merchantBreakdown || []).map((m: any) => {
+            const mTotal = m.totalTransactions ?? 0;
+            const mCompleted = m.completedCount ?? 0;
+            return {
+              merchantId: m.merchantId,
+              merchantName: m.merchantCompany || m.merchantName || "Unknown",
+              transactions: mTotal,
+              volume: parseFloat(m.totalAmount || "0"),
+              successRate: mTotal > 0 ? Math.round((mCompleted / mTotal) * 100) : 0,
+            };
+          }),
+        });
       } else {
         setError(json.error || "Failed to load analytics");
       }

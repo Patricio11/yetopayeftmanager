@@ -83,7 +83,17 @@ export default function PartnerMerchantDetailPage() {
         const res = await fetch(`/api/partner/merchants/${merchantId}`);
         const json = await res.json();
         if (json.success) {
-          const data = json.data as MerchantDetail;
+          const raw = json.data;
+          const txStats = raw.stats?.transactions || {};
+          const data: MerchantDetail = {
+            ...raw,
+            stats: {
+              totalTransactions: txStats.total ?? 0,
+              completedTransactions: txStats.completed ?? 0,
+              failedTransactions: txStats.failed ?? 0,
+              totalVolume: parseFloat(txStats.totalAmount || "0"),
+            },
+          };
           setMerchant(data);
           setFormName(data.name || "");
           setFormCompanyName(data.companyName || "");
