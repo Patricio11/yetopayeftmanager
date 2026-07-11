@@ -92,18 +92,19 @@ export async function resolveSubMerchant(
   if (existing) {
     merchant = existing;
 
-    // Enrich the record when the partner supplies new details
+    // The connector platform is the source of truth — refresh stored details
+    // from whatever it sends. Email is the exception: a real email is login
+    // identity and is never overwritten (only a synthetic placeholder is).
     const updates: Record<string, any> = {};
     if (input.email && isSyntheticEmail(existing.email)) {
-      // Only replace a synthetic email, never a real one, and never collide
       const emailTaken = await db.query.users.findFirst({
         where: eq(users.email, input.email.toLowerCase()),
         columns: { id: true },
       });
       if (!emailTaken) updates.email = input.email.toLowerCase();
     }
-    if (input.phone && !existing.phone) updates.phone = input.phone;
-    if (input.logoUrl && !existing.companyLogoUrl) updates.companyLogoUrl = input.logoUrl;
+    if (input.phone && input.phone !== existing.phone) updates.phone = input.phone;
+    if (input.logoUrl && input.logoUrl !== existing.companyLogoUrl) updates.companyLogoUrl = input.logoUrl;
 
     if (Object.keys(updates).length > 0) {
       updates.updatedAt = new Date();
