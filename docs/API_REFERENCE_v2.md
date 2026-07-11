@@ -175,6 +175,7 @@ Create a new payment link. Returns a URL to redirect your customer to.
 | `notifyUrl` | string | No | Per-request webhook URL (prefer Settings > Webhooks) |
 | `expiresInHours` | number | No | Link expiry in hours (default: 24, max: 168) |
 | `metadata` | object | No | Custom key-value data returned in webhooks |
+| `merchant` | object | No | **Partner accounts only.** Attribute this transaction to one of your merchants (see below) |
 
 **Response:**
 
@@ -206,6 +207,80 @@ curl -X POST https://www.yetopay.co.za/api/payment-links \
   -H "Content-Type: application/json" \
   -d '{"amount":250,"reference":"INV-001","description":"Order #123"}'
 ```
+
+---
+
+#### Partner sub-merchants (connector integrations)
+
+Partner accounts integrating on behalf of their merchants can pass a
+`merchant` object. The payment page then shows **that merchant's** name and
+logo, and the customer pays into **that merchant's** bank account — not the
+partner's. The transaction is grouped under the merchant in all partner
+analytics, recon, and invoicing.
+
+The merchant `name` is unique per partner (case-insensitive). If the merchant
+doesn't exist yet it is created automatically — no invitation is sent. After
+the first call, you only need to send the name.
+
+**merchant object:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `merchant.name` | string | Yes | Merchant name — unique per partner, used to match repeat calls |
+| `merchant.email` | string | No | Merchant contact email |
+| `merchant.phone` | string | No | Merchant phone |
+| `merchant.logoUrl` | string | No | Logo shown on the payment page |
+| `merchant.bankAccount` | object | First call (live) | Payout account — required the first time a merchant is used in live mode |
+| `merchant.bankAccount.accountHolderName` | string | Yes | Account holder name |
+| `merchant.bankAccount.accountNumber` | string | Yes | Account number |
+| `merchant.bankAccount.bankCode` | string | Yes | Bank code |
+| `merchant.bankAccount.branchCode` | string | No | Branch code |
+| `merchant.bankAccount.accountType` | string | No | `savings` \| `cheque` \| `transmission` \| `bond` \| `investment` (default `cheque`) |
+
+**First call — full details:**
+
+```json
+{
+  "amount": 150.00,
+  "reference": "JB-889231",
+  "description": "Wallet top-up",
+  "merchant": {
+    "name": "Jabula Bet",
+    "email": "ops@jabulabet.com",
+    "bankAccount": {
+      "accountHolderName": "Jabula Bet (Pty) Ltd",
+      "accountNumber": "62123456789",
+      "bankCode": "FNB",
+      "branchCode": "250655",
+      "accountType": "cheque"
+    }
+  }
+}
+```
+
+**Repeat calls — name only:**
+
+```json
+{
+  "amount": 300.00,
+  "reference": "JB-889232",
+  "merchant": { "name": "Jabula Bet" }
+}
+```
+
+The response `data` includes `merchant: { id, name, created }` so your
+platform can store the YetoPay merchant id. Webhook events for these
+transactions are delivered to **your (the partner's) webhook endpoints** and
+include the `merchant` object for reconciliation, until the merchant sets up
+their own webhooks.
+
+**Errors:**
+
+| Status | Meaning |
+|--------|---------|
+| 403 | `merchant` sent by a non-partner account |
+| 400 | New live merchant without `bankAccount` |
+| 409 | `merchant.email` already belongs to another account |
 
 ---
 

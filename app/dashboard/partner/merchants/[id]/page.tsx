@@ -19,6 +19,9 @@ interface MerchantDetail {
   status: string;
   kycStatus: string | null;
   createdAt: string;
+  isActive?: boolean;
+  emailVerified?: boolean;
+  metadata?: { managedByPartner?: boolean } | null;
   stats: {
     totalTransactions: number;
     completedTransactions: number;
@@ -35,6 +38,9 @@ interface MerchantDetail {
 
 const formatCurrency = (val: number) =>
   new Intl.NumberFormat("en-ZA", { style: "currency", currency: "ZAR" }).format(val);
+
+const isSyntheticEmail = (email: string | null | undefined) =>
+  !!email?.endsWith("@sub.yetopay.internal");
 
 const statusBadge = (status: string) => {
   switch (status) {
@@ -70,7 +76,9 @@ export default function PartnerMerchantDetailPage() {
   // Editable fields
   const [formName, setFormName] = useState("");
   const [formCompanyName, setFormCompanyName] = useState("");
+  const [formEmail, setFormEmail] = useState("");
   const [formPhone, setFormPhone] = useState("");
+  const [sendingInvite, setSendingInvite] = useState(false);
   const [formWebsite, setFormWebsite] = useState("");
   const [formNotifyUrl, setFormNotifyUrl] = useState("");
   const [formSuccessUrl, setFormSuccessUrl] = useState("");
@@ -97,6 +105,7 @@ export default function PartnerMerchantDetailPage() {
           setMerchant(data);
           setFormName(data.name || "");
           setFormCompanyName(data.companyName || "");
+          setFormEmail(isSyntheticEmail(data.email) ? "" : data.email || "");
           setFormPhone(data.phone || "");
           setFormWebsite((json.data?.metadata as any)?.website || "");
           setFormNotifyUrl(data.settings?.notifyUrl || "");
@@ -127,6 +136,8 @@ export default function PartnerMerchantDetailPage() {
           name: formName,
           companyName: formCompanyName,
           phone: formPhone,
+          // Email only editable while the merchant has no active login
+          ...(!merchant?.isActive && formEmail ? { email: formEmail } : {}),
           website: formWebsite || undefined,
           eftSettings: {
             notifyUrl: formNotifyUrl,
@@ -139,14 +150,32 @@ export default function PartnerMerchantDetailPage() {
       const json = await res.json();
       if (json.success) {
         setSaveMessage("Changes saved successfully");
+        if (json.data) {
+          setMerchant((m) => (m ? { ...m, ...json.data, stats: m.stats } : m));
+        }
         setTimeout(() => setSaveMessage(""), 3000);
       } else {
-        setSaveMessage(json.error || "Failed to save changes");
+        setSaveMessage(json.message || json.error || "Failed to save changes");
       }
     } catch {
       setSaveMessage("Failed to save changes");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSendInvitation = async () => {
+    setSendingInvite(true);
+    setSaveMessage("");
+    try {
+      const res = await fetch(`/api/partner/merchants/${merchantId}/resend-invitation`, { method: "POST" });
+      const json = await res.json();
+      setSaveMessage(json.success ? json.message : (json.error || "Failed to send invitation"));
+      if (json.success) setTimeout(() => setSaveMessage(""), 4000);
+    } catch {
+      setSaveMessage("Failed to send invitation");
+    } finally {
+      setSendingInvite(false);
     }
   };
 
@@ -197,26 +226,52 @@ export default function PartnerMerchantDetailPage() {
       </Link>
 
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <div className="w-12 h-12 bg-gradient-to-br from-green-700 to-green-500 rounded-xl flex items-center justify-center">
-          <Building2 className="w-6 h-6 text-white" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">
-            {merchant.companyName || merchant.name}
-          </h1>
-          <div className="flex items-center gap-3 mt-1">
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusBadge(merchant.status)}`}>
-              {merchant.status}
-            </span>
-            {merchant.kycStatus && (
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusBadge(merchant.kycStatus)}`}>
-                KYC: {merchant.kycStatus}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-green-700 to-green-500 rounded-xl flex items-center justify-center">
+            <Building2 className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">
+              {merchant.companyName || merchant.name}
+            </h1>
+            <div className="flex items-center gap-3 mt-1">
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusBadge(merchant.status)}`}>
+                {merchant.status}
               </span>
-            )}
+              {merchant.metadata?.managedByPartner && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-indigo-50 text-indigo-700 border-indigo-200">
+                  API-managed
+                </span>
+              )}
+              {merchant.kycStatus && (
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusBadge(merchant.kycStatus)}`}>
+                  KYC: {merchant.kycStatus}
+                </span>
+              )}
+            </div>
           </div>
         </div>
+        {!merchant.isActive && !isSyntheticEmail(merchant.email) && (
+          <Button
+            onClick={handleSendInvitation}
+            disabled={sendingInvite}
+            variant="outline"
+            className="border-green-300 text-green-700 hover:bg-green-50"
+          >
+            <Mail className="w-4 h-4 mr-2" />
+            {sendingInvite ? "Sending..." : "Send YetoPay Invitation"}
+          </Button>
+        )}
       </div>
+
+      {/* API-managed hint */}
+      {merchant.metadata?.managedByPartner && isSyntheticEmail(merchant.email) && (
+        <div className="bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-3 text-sm text-indigo-700 flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          This merchant was created automatically via your API connector. Add their email below to be able to invite them to their own YetoPay account.
+        </div>
+      )}
 
       {/* Info Section */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
@@ -233,7 +288,9 @@ export default function PartnerMerchantDetailPage() {
             <Mail className="w-4 h-4 text-slate-400" />
             <div>
               <p className="text-xs text-slate-500">Email</p>
-              <p className="text-sm font-medium text-slate-900">{merchant.email}</p>
+              <p className="text-sm font-medium text-slate-900">
+                {isSyntheticEmail(merchant.email) ? <span className="italic text-slate-400">Not set yet</span> : merchant.email}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -336,6 +393,22 @@ export default function PartnerMerchantDetailPage() {
                   onChange={(e) => setFormCompanyName(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-600 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={formEmail}
+                  onChange={(e) => setFormEmail(e.target.value)}
+                  disabled={!!merchant.isActive}
+                  placeholder="merchant@company.com"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-400"
+                />
+                {merchant.isActive ? (
+                  <p className="text-xs text-slate-400 mt-1">Email cannot be changed for merchants with an active login</p>
+                ) : isSyntheticEmail(merchant.email) ? (
+                  <p className="text-xs text-indigo-600 mt-1">Add their real email to enable the YetoPay invitation</p>
+                ) : null}
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-600 mb-1">Phone</label>

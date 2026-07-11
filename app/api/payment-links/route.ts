@@ -7,6 +7,11 @@ import { checkRateLimit, getClientIdentifier } from "@/lib/security/rate-limit";
 import { eq, desc, and, gte } from "drizzle-orm";
 import { z } from "zod";
 import { dispatchWebhookEvent } from "@/lib/webhooks/dispatcher";
+import {
+  subMerchantSchema,
+  resolveSubMerchant,
+  SubMerchantError,
+} from "@/lib/partners/sub-merchants";
 
 const createPaymentLinkSchema = z.object({
   amount: z.number().positive().min(1, "Amount must be at least 1"),
@@ -20,6 +25,9 @@ const createPaymentLinkSchema = z.object({
   cancelledUrl: z.string().url("Invalid cancelled URL").optional(),
   expiresInHours: z.number().positive().max(168, "Max 7 days").optional(), // Max 7 days
   metadata: z.record(z.string(), z.any()).optional(),
+  // Partner connectors: attribute this transaction to a sub-merchant.
+  // First call needs full details; repeat calls can send just { name }.
+  merchant: subMerchantSchema.optional(),
 });
 
 /**
@@ -40,11 +48,60 @@ export async function POST(request: NextRequest) {
     // Authenticate via API key or session
     const auth = await authenticateMerchant(request, 'payment_links.create');
     if (!auth.success) return auth.response;
-    const merchantId = auth.merchantId;
+    const callerId = auth.merchantId;
 
     // Parse and validate request body
     const body = await request.json();
     const validatedData = createPaymentLinkSchema.parse(body);
+
+    // Fetch caller's role, default Pay By Bank URLs and account mode
+    const caller = await db.query.users.findFirst({
+      where: eq(users.id, callerId),
+      columns: { role: true, eftSettings: true, accountMode: true },
+    });
+
+    // ── Partner sub-merchant resolution ────────────────────────────────────
+    // Partners integrated via connector can attribute the transaction to one
+    // of their merchants. The payment goes to that merchant's bank account.
+    let merchantId = callerId;
+    let subMerchantInfo: { id: string; name: string; created: boolean } | null = null;
+
+    if (validatedData.merchant) {
+      if (caller?.role !== "partner") {
+        return NextResponse.json(
+          {
+            error: "Forbidden",
+            message: "Only partner accounts can attribute transactions to a sub-merchant. Remove the \"merchant\" field or use a partner API key.",
+          },
+          { status: 403 }
+        );
+      }
+
+      const resolved = await resolveSubMerchant(
+        callerId,
+        validatedData.merchant,
+        (caller.accountMode as "demo" | "live") || "demo"
+      );
+
+      // Live payments need a payout destination — fail here with a clear
+      // message instead of at the payment page.
+      if (resolved.merchant.accountMode === "live" && !resolved.hasPrimaryBankAccount) {
+        return NextResponse.json(
+          {
+            error: "Missing bank account",
+            message: `Merchant "${resolved.merchant.companyName}" has no bank account on file. Include "merchant.bankAccount" in this request to set one.`,
+          },
+          { status: 400 }
+        );
+      }
+
+      merchantId = resolved.merchant.id;
+      subMerchantInfo = {
+        id: resolved.merchant.id,
+        name: resolved.merchant.companyName || resolved.merchant.name,
+        created: resolved.created,
+      };
+    }
 
     // Check for duplicate reference within this merchant's transactions
     const existingRef = await db
@@ -68,13 +125,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Fetch merchant's default Pay By Bank URLs and account mode
-    const merchant = await db.query.users.findFirst({
-      where: eq(users.id, merchantId),
-      columns: { eftSettings: true, accountMode: true },
-    });
-    const eftDefaults = (merchant?.eftSettings as any) || {};
-    const isDemo = merchant?.accountMode === 'demo';
+    // Effective merchant for URLs/mode: the sub-merchant when set, else caller
+    let effectiveMerchant = caller;
+    if (merchantId !== callerId) {
+      const sub = await db.query.users.findFirst({
+        where: eq(users.id, merchantId),
+        columns: { role: true, eftSettings: true, accountMode: true },
+      });
+      effectiveMerchant = sub || caller;
+    }
+    // URL fallbacks: per-call → sub-merchant defaults → partner/caller defaults
+    const eftDefaults = {
+      ...((caller?.eftSettings as any) || {}),
+      ...((effectiveMerchant?.eftSettings as any) || {}),
+    };
+    const isDemo = effectiveMerchant?.accountMode === 'demo';
 
     // Create transaction record (per-transaction URLs override merchant defaults)
     const [transaction] = await db
@@ -133,6 +198,7 @@ export async function POST(request: NextRequest) {
           expiresAt: expiresAt.toISOString(),
           metadata: transaction.metadata,
           createdAt: transaction.createdAt.toISOString(),
+          ...(subMerchantInfo ? { merchant: { id: subMerchantInfo.id, name: subMerchantInfo.name } } : {}),
         }
       );
       console.log(`📤 Webhook dispatched: transaction.created for ${transaction.id}`);
@@ -153,10 +219,18 @@ export async function POST(request: NextRequest) {
         expiresAt: expiresAt.toISOString(),
         status: transaction.status,
         createdAt: transaction.createdAt.toISOString(),
+        ...(subMerchantInfo ? { merchant: subMerchantInfo } : {}),
       },
     });
   } catch (error: any) {
     console.error("❌ Error creating payment link:", error);
+
+    if (error instanceof SubMerchantError) {
+      return NextResponse.json(
+        { error: "Merchant error", message: error.message },
+        { status: error.status }
+      );
+    }
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

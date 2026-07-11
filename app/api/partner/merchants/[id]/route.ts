@@ -11,6 +11,9 @@ const updateMerchantSchema = z.object({
   name: z.string().min(1).optional(),
   companyName: z.string().min(1).optional(),
   phone: z.string().optional(),
+  // Email may only be changed for API-managed merchants that haven't
+  // activated a login yet (needed to replace the synthetic address).
+  email: z.string().email().optional(),
   address: z
     .object({
       street: z.string().optional(),
@@ -139,6 +142,33 @@ export async function PATCH(
 
     // Handle website → metadata merge
     const mergedUpdates: any = { ...updates };
+
+    // Email changes: only for merchants without an active login
+    if (updates.email !== undefined) {
+      const newEmail = updates.email.toLowerCase();
+      if (newEmail !== merchant.email) {
+        if (merchant.isActive) {
+          return NextResponse.json(
+            { success: false, message: 'Cannot change the email of a merchant with an active login' },
+            { status: 400 }
+          );
+        }
+        const emailTaken = await db.query.users.findFirst({
+          where: eq(users.email, newEmail),
+          columns: { id: true },
+        });
+        if (emailTaken) {
+          return NextResponse.json(
+            { success: false, message: 'This email already belongs to another account' },
+            { status: 409 }
+          );
+        }
+        mergedUpdates.email = newEmail;
+      } else {
+        delete mergedUpdates.email;
+      }
+    }
+
     if (updates.website !== undefined) {
       const existingMeta = (merchant.metadata as any) || {};
       mergedUpdates.metadata = { ...existingMeta, website: updates.website };

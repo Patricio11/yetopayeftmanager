@@ -29,6 +29,15 @@ export async function POST(
       return NextResponse.json({ success: false, error: 'Merchant has already accepted the invitation' }, { status: 400 });
     }
 
+    // API-managed merchants start with a synthetic placeholder email —
+    // a real email must be set before an invitation can be sent.
+    if (merchant.email.endsWith('@sub.yetopay.internal')) {
+      return NextResponse.json(
+        { success: false, error: 'This merchant has no email address yet. Edit the merchant and add their real email before sending an invitation.' },
+        { status: 400 }
+      );
+    }
+
     const partner = await db.query.users.findFirst({
       where: eq(users.id, partnerId),
     });

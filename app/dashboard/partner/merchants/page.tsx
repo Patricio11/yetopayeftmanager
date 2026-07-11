@@ -21,7 +21,11 @@ interface Merchant {
   kycStatus: string | null;
   lastActivity: string | null;
   createdAt: string;
+  metadata?: { managedByPartner?: boolean } | null;
 }
+
+const isApiManaged = (m: Merchant) => !!m.metadata?.managedByPartner;
+const hasSyntheticEmail = (m: Merchant) => m.email?.endsWith("@sub.yetopay.internal");
 
 const statusBadge = (status: string) => {
   switch (status) {
@@ -190,15 +194,26 @@ export default function PartnerMerchantsPage() {
                         <p className="text-xs text-slate-500">{merchant.name}</p>
                       </div>
                     </div>
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${statusBadge(merchant.status)}`}>
-                      {merchant.status}
-                    </span>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${statusBadge(merchant.status)}`}>
+                        {merchant.status}
+                      </span>
+                      {isApiManaged(merchant) && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border bg-indigo-50 text-indigo-700 border-indigo-200">
+                          API-managed
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2 text-slate-600">
                       <Mail className="w-3.5 h-3.5 text-slate-400" />
-                      <span className="truncate">{merchant.email}</span>
+                      {hasSyntheticEmail(merchant) ? (
+                        <span className="truncate italic text-slate-400">No email yet — created via API</span>
+                      ) : (
+                        <span className="truncate">{merchant.email}</span>
+                      )}
                     </div>
                     {merchant.lastActivity && (
                       <div className="flex items-center gap-2 text-slate-500">
@@ -216,16 +231,28 @@ export default function PartnerMerchantsPage() {
                   </div>
                   {!merchant.isActive && !merchant.emailVerified && (
                     <div className="pt-3 mt-3 border-t border-slate-100">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={(e) => resendInvitation(e, merchant.id, merchant.email)}
-                        disabled={resendingId === merchant.id}
-                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 gap-1.5 w-full justify-center"
-                      >
-                        <Send className="w-3.5 h-3.5" />
-                        {resendingId === merchant.id ? 'Sending...' : 'Resend Invitation'}
-                      </Button>
+                      {hasSyntheticEmail(merchant) ? (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/partner/merchants/${merchant.id}`); }}
+                          className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 gap-1.5 w-full justify-center"
+                        >
+                          <Mail className="w-3.5 h-3.5" />
+                          Add Email to Invite
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => resendInvitation(e, merchant.id, merchant.email)}
+                          disabled={resendingId === merchant.id}
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 gap-1.5 w-full justify-center"
+                        >
+                          <Send className="w-3.5 h-3.5" />
+                          {resendingId === merchant.id ? 'Sending...' : (isApiManaged(merchant) ? 'Send Invitation' : 'Resend Invitation')}
+                        </Button>
+                      )}
                     </div>
                   )}
                 </div>

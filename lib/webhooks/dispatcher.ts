@@ -6,6 +6,7 @@
 
 import { db } from "@/lib/db";
 import { webhookConfigurations, webhookDeliveries } from "@/lib/db/schema/team";
+import { users } from "@/lib/db/schema/users";
 import { eq, and, lte } from "drizzle-orm";
 import crypto from "crypto";
 import { validateWebhookUrl } from "@/lib/security/url-validation";
@@ -169,7 +170,7 @@ export async function dispatchWebhookEvent(
 ): Promise<void> {
   try {
     // Fetch active webhook configurations for this merchant and event type
-    const webhooks = await db
+    let webhooks = await db
       .select()
       .from(webhookConfigurations)
       .where(
@@ -178,6 +179,40 @@ export async function dispatchWebhookEvent(
           eq(webhookConfigurations.isActive, true)
         )
       );
+
+    // Partner fallback: sub-merchants created via the connector API have no
+    // webhook configs of their own — route their events to the partner's
+    // endpoints so the integrating platform receives them.
+    if (webhooks.length === 0) {
+      const merchant = await db.query.users.findFirst({
+        where: eq(users.id, merchantId),
+        columns: { partnerId: true, companyName: true, name: true },
+      });
+
+      if (merchant?.partnerId) {
+        webhooks = await db
+          .select()
+          .from(webhookConfigurations)
+          .where(
+            and(
+              eq(webhookConfigurations.merchantId, merchant.partnerId),
+              eq(webhookConfigurations.isActive, true)
+            )
+          );
+
+        if (webhooks.length > 0) {
+          // Tag the payload so the partner can attribute the event
+          eventData = {
+            ...eventData,
+            merchant: eventData.merchant || {
+              id: merchantId,
+              name: merchant.companyName || merchant.name,
+            },
+          };
+          console.log(`↪️ Routing ${eventType} for sub-merchant ${merchantId} to partner ${merchant.partnerId}`);
+        }
+      }
+    }
 
     // Filter webhooks that are subscribed to this event
     // Support wildcard subscription: '*' or 'payment.all' subscribes to all events
