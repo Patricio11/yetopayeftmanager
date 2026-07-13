@@ -335,10 +335,11 @@ export default function AdminMerchantsPage() {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/50 rounded-xl overflow-hidden shadow-sm">
+      {/* Table (no overflow-hidden — the row actions dropdown must be able to
+          escape the card, otherwise it gets clipped on the last/only row) */}
+      <div className="bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/50 rounded-xl shadow-sm">
         {/* Table Header */}
-        <div className="hidden lg:grid lg:grid-cols-[1fr_140px_120px_130px_120px_60px] gap-4 px-5 py-3 bg-slate-50 dark:bg-slate-800 border-b border-slate-200/60 dark:border-slate-700/50 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+        <div className="hidden lg:grid lg:grid-cols-[1fr_140px_120px_130px_120px_60px] gap-4 px-5 py-3 bg-slate-50 dark:bg-slate-800 rounded-t-xl border-b border-slate-200/60 dark:border-slate-700/50 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
           <button onClick={() => toggleSort('name')} className="flex items-center gap-1 hover:text-slate-700 dark:hover:text-slate-200 transition-colors text-left">
             Merchant <ArrowUpDown className="w-3 h-3" />
           </button>
@@ -522,7 +523,7 @@ export default function AdminMerchantsPage() {
 
         {/* Footer */}
         {!loading && filtered.length > 0 && (
-          <div className="px-5 py-3 border-t border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 flex items-center justify-between">
+          <div className="px-5 py-3 border-t border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 rounded-b-xl flex items-center justify-between">
             <p className="text-xs text-slate-500">
               Showing {filtered.length} of {merchants.length} merchants
             </p>
