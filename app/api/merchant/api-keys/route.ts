@@ -1,11 +1,13 @@
 /**
  * API Keys Management
- * 
- * Merchants can create, list, and revoke API keys
+ *
+ * Merchants and partners can create, list, and revoke API keys.
+ * Partner keys are used by connector platforms to create payment links
+ * on behalf of their sub-merchants.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { requireMerchant } from '@/lib/auth/authorization';
+import { requireMerchantOrPartner } from '@/lib/auth/authorization';
 import { generateApiKey, listApiKeys, revokeApiKey } from '@/lib/auth/api-key';
 import { z } from 'zod';
 
@@ -19,7 +21,7 @@ const createKeySchema = z.object({
  * Create a new API key
  */
 export async function POST(request: NextRequest) {
-  const auth = await requireMerchant();
+  const auth = await requireMerchantOrPartner();
   if (!auth.authorized) return auth.response;
   
   try {
@@ -74,7 +76,7 @@ export async function POST(request: NextRequest) {
  * List all API keys for merchant
  */
 export async function GET(request: NextRequest) {
-  const auth = await requireMerchant();
+  const auth = await requireMerchantOrPartner();
   if (!auth.authorized) return auth.response;
   
   try {

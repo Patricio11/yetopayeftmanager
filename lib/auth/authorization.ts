@@ -83,6 +83,40 @@ export async function requireMerchant() {
   };
 }
 
+/**
+ * Allow merchants AND partners (plus admin).
+ * Used for shared integration features like API keys — partners integrate
+ * via connector and create payment links on behalf of their sub-merchants.
+ */
+export async function requireMerchantOrPartner() {
+  const session = await getSession();
+
+  if (!session) {
+    return {
+      authorized: false as const,
+      response: NextResponse.json(
+        { error: 'Unauthorized', message: 'Please sign in to access this resource' },
+        { status: 401 }
+      ),
+    };
+  }
+
+  if (!['admin', 'merchant', 'partner'].includes(session.user.role || '')) {
+    return {
+      authorized: false as const,
+      response: NextResponse.json(
+        { error: 'Forbidden', message: 'Merchant or partner access required' },
+        { status: 403 }
+      ),
+    };
+  }
+
+  return {
+    authorized: true as const,
+    session,
+  };
+}
+
 export async function requirePartner() {
   const session = await getSession();
 
