@@ -7,7 +7,7 @@ import {
   CreditCard, Landmark, ChevronRight, ChevronLeft,
   CheckCircle, X, AlertTriangle, Shield,
 } from 'lucide-react';
-import YetoPayLogo from '@/components/brand/YetoPayLogo';
+import PaymentPageBrand, { PaymentPageBranding } from '@/components/brand/PaymentPageBrand';
 
 interface AvailableService {
   code: string;
@@ -48,6 +48,7 @@ interface PaymentInterfaceProps {
   }>;
   token: string;
   merchantBankAccount: any;
+  branding?: PaymentPageBranding | null;
   isDemo?: boolean;
   enableReceipt?: boolean;
   fnbVerifyResult?: boolean;
@@ -63,6 +64,7 @@ export default function PaymentInterface({
   banks,
   token,
   merchantBankAccount,
+  branding,
   isDemo,
   enableReceipt,
   fnbVerifyResult,
@@ -355,6 +357,7 @@ export default function PaymentInterface({
             bankCode: merchantBankAccount.bankCode,
           },
           token,
+          branding,
           isDemo,
           enableReceipt,
           fnbVerifyResult,
@@ -378,7 +381,7 @@ export default function PaymentInterface({
         )}
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-md mx-auto mb-6">
-            <YetoPayLogo size="lg" />
+            <PaymentPageBrand branding={branding} />
           </div>
           <div className="max-w-md mx-auto">
             <div className="bg-white rounded-xl shadow-lg p-6 mb-8">

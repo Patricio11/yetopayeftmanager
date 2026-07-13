@@ -7,7 +7,7 @@ import {
   Landmark, Info, CornerDownLeft,
 } from 'lucide-react';
 import TermsModal from './components/TermsModal';
-import YetoPayLogo from '@/components/brand/YetoPayLogo';
+import PaymentPageBrand, { PaymentPageBranding } from '@/components/brand/PaymentPageBrand';
 import { CountdownTimer } from '@/components/payment/CountdownTimer';
 import { getDeviceFingerprint, collectDeviceInfo, getDeviceDescription } from '@/lib/utils/device-fingerprint';
 import { saveCredentialsToBrowser, deleteCredentialFromBrowser } from '@/lib/utils/browser-credential-storage';
@@ -104,6 +104,7 @@ interface YetoPayEFTProps {
       bankCode: string;
     };
     token: string;
+    branding?: PaymentPageBranding | null;
     isDemo?: boolean;
     enableReceipt?: boolean;
     fnbVerifyResult?: boolean;
@@ -2096,7 +2097,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-md mx-auto relative">
           <div className="mb-6">
-            <YetoPayLogo size="lg" />
+            <PaymentPageBrand branding={initialData?.branding} />
           </div>
 
           

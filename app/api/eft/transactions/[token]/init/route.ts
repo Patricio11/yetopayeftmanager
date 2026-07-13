@@ -92,6 +92,28 @@ export async function GET(
       );
     }
 
+    // ── Payment page header branding ─────────────────────────────────────
+    // For merchants that belong to a partner, the partner's brand controls
+    // the page header (the merchant's own logo still shows on the pay card).
+    // Standalone merchants use their own preference. Modes:
+    //   'yetopay' (default) | 'logo' (company logo) | 'hidden' (no header)
+    let brandingSource = merchant;
+    if (merchant.partnerId) {
+      const partner = await db.query.users.findFirst({
+        where: eq(users.id, merchant.partnerId),
+        columns: { companyLogoUrl: true, companyName: true, name: true, metadata: true },
+      });
+      if (partner) brandingSource = { ...merchant, ...partner } as typeof merchant;
+    }
+    const brandingMode =
+      ((brandingSource.metadata as any)?.paymentPageBranding as string) || "yetopay";
+    const branding = {
+      // 'logo' mode without an uploaded logo falls back to the YetoPay brand
+      mode: brandingMode === "logo" && !brandingSource.companyLogoUrl ? "yetopay" : brandingMode,
+      logoUrl: brandingSource.companyLogoUrl || null,
+      brandName: brandingSource.companyName || brandingSource.name,
+    };
+
     // Fetch merchant's primary bank account (not required for demo mode)
     const isDemo = !!transaction.isDemo;
     const primaryBankAccount = await db.query.eftBankAccounts.findFirst({
@@ -202,6 +224,7 @@ export async function GET(
           },
         },
         banks: mappedBanks,
+        branding,
         isDemo: !!transaction.isDemo,
         enableReceipt: !!(merchant.eftSettings as any)?.enableReceipt,
         fnbVerifyResult: !!(merchant.eftSettings as any)?.fnbVerifyResult,

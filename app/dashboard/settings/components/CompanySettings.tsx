@@ -5,8 +5,9 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building2, Globe, FileText, MapPin, Camera, Trash2, Loader2 } from "lucide-react";
+import { Building2, Globe, FileText, MapPin, Camera, Trash2, Loader2, Palette, EyeOff, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import YetoPayLogo from "@/components/brand/YetoPayLogo";
 
 export function CompanySettings() {
   const { toast } = useToast();
@@ -22,6 +23,8 @@ export function CompanySettings() {
   const [city, setCity] = useState("");
   const [province, setProvince] = useState("");
   const [postalCode, setPostalCode] = useState("");
+  const [branding, setBranding] = useState<"yetopay" | "logo" | "hidden">("yetopay");
+  const [brandingSaving, setBrandingSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -44,7 +47,43 @@ export function CompanySettings() {
       })
       .catch(() => {})
       .finally(() => setFetching(false));
+
+    fetch("/api/merchant/branding")
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) setBranding(data.data.paymentPageBranding || "yetopay");
+      })
+      .catch(() => {});
   }, []);
+
+  const handleBrandingChange = async (mode: "yetopay" | "logo" | "hidden") => {
+    if (mode === "logo" && !companyLogoUrl) {
+      toast({ title: "Upload a logo first", description: "Add your company logo above to show it on the payment page.", variant: "destructive" });
+      return;
+    }
+    const previous = branding;
+    setBranding(mode);
+    setBrandingSaving(true);
+    try {
+      const res = await fetch("/api/merchant/branding", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paymentPageBranding: mode }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast({ title: "Branding updated", description: "Your payment page header has been updated." });
+      } else {
+        setBranding(previous);
+        toast({ title: "Error", description: data.message || "Failed to update branding", variant: "destructive" });
+      }
+    } catch {
+      setBranding(previous);
+      toast({ title: "Error", description: "Failed to update branding", variant: "destructive" });
+    } finally {
+      setBrandingSaving(false);
+    }
+  };
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -231,6 +270,104 @@ export function CompanySettings() {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Payment Page Branding */}
+      <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 overflow-hidden">
+        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/50">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white">
+              <Palette className="w-4.5 h-4.5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Payment Page Branding</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Choose what appears in the payment page header</p>
+            </div>
+            {brandingSaving && <Loader2 className="w-4 h-4 text-green-600 animate-spin ml-auto" />}
+          </div>
+        </div>
+
+        <div className="p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* YetoPay logo */}
+            <button
+              type="button"
+              onClick={() => handleBrandingChange("yetopay")}
+              disabled={brandingSaving}
+              className={`relative p-4 rounded-xl border-2 text-left transition-all cursor-pointer ${
+                branding === "yetopay"
+                  ? "border-green-500 bg-green-50 dark:bg-green-900/20"
+                  : "border-slate-200 dark:border-slate-600 hover:border-slate-300"
+              }`}
+            >
+              {branding === "yetopay" && (
+                <span className="absolute top-2 right-2 w-5 h-5 rounded-full bg-green-600 flex items-center justify-center">
+                  <Check className="w-3 h-3 text-white" />
+                </span>
+              )}
+              <div className="h-10 flex items-center mb-2">
+                <YetoPayLogo size="sm" />
+              </div>
+              <p className="text-sm font-medium text-slate-900 dark:text-white">YetoPay Logo</p>
+              <p className="text-xs text-slate-500 mt-0.5">Default YetoPay branding</p>
+            </button>
+
+            {/* Own logo */}
+            <button
+              type="button"
+              onClick={() => handleBrandingChange("logo")}
+              disabled={brandingSaving}
+              className={`relative p-4 rounded-xl border-2 text-left transition-all cursor-pointer ${
+                branding === "logo"
+                  ? "border-green-500 bg-green-50 dark:bg-green-900/20"
+                  : "border-slate-200 dark:border-slate-600 hover:border-slate-300"
+              } ${!companyLogoUrl ? "opacity-60" : ""}`}
+            >
+              {branding === "logo" && (
+                <span className="absolute top-2 right-2 w-5 h-5 rounded-full bg-green-600 flex items-center justify-center">
+                  <Check className="w-3 h-3 text-white" />
+                </span>
+              )}
+              <div className="h-10 flex items-center mb-2">
+                {companyLogoUrl ? (
+                  <Image src={companyLogoUrl} alt="Your logo" width={80} height={32} className="h-8 w-auto max-w-[100px] object-contain object-left" unoptimized />
+                ) : (
+                  <Camera className="w-6 h-6 text-slate-300" />
+                )}
+              </div>
+              <p className="text-sm font-medium text-slate-900 dark:text-white">My Logo</p>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {companyLogoUrl ? "Show your logo instead" : "Upload a logo above first"}
+              </p>
+            </button>
+
+            {/* Hidden */}
+            <button
+              type="button"
+              onClick={() => handleBrandingChange("hidden")}
+              disabled={brandingSaving}
+              className={`relative p-4 rounded-xl border-2 text-left transition-all cursor-pointer ${
+                branding === "hidden"
+                  ? "border-green-500 bg-green-50 dark:bg-green-900/20"
+                  : "border-slate-200 dark:border-slate-600 hover:border-slate-300"
+              }`}
+            >
+              {branding === "hidden" && (
+                <span className="absolute top-2 right-2 w-5 h-5 rounded-full bg-green-600 flex items-center justify-center">
+                  <Check className="w-3 h-3 text-white" />
+                </span>
+              )}
+              <div className="h-10 flex items-center mb-2">
+                <EyeOff className="w-6 h-6 text-slate-400" />
+              </div>
+              <p className="text-sm font-medium text-slate-900 dark:text-white">No Logo</p>
+              <p className="text-xs text-slate-500 mt-0.5">Hide the header completely</p>
+            </button>
+          </div>
+          <p className="text-xs text-slate-400 mt-4">
+            Partners: this setting applies to the payment pages of all your merchants. Their own logo still shows on the payment card.
+          </p>
         </div>
       </div>
 
