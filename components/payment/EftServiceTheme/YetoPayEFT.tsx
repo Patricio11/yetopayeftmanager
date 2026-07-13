@@ -601,7 +601,9 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     console.log(`[EFT] ${step} response step:`, result.step || result.next_step);
     if (!response.ok) {
       const message = (result && (result.message as string)) || `An error occurred during '${step}'.`;
-      throw new Error(message);
+      const err: any = new Error(message);
+      err.isHttpError = true; // a real backend error (as opposed to a dropped connection)
+      throw err;
     }
     return result;
   };
@@ -741,9 +743,27 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
       updateTransactionStatus('pending', 'Customer authenticating with bank');
     }
 
+    let networkRetries = 0;
+    const MAX_NETWORK_RETRIES = 40; // survive iOS suspending Safari during an in-app approval
     try {
       while (currentExecutionStep) {
-        const result = await executeStepApi(bankCode, currentExecutionStep, stepData);
+        let result: ApiResponse;
+        try {
+          result = await executeStepApi(bankCode, currentExecutionStep, stepData);
+          networkRetries = 0; // reset after any successful round-trip
+        } catch (err: any) {
+          // A dropped connection — e.g. iOS suspends Safari when you switch to the bank app to
+          // approve an in-app push — rejects fetch with a TypeError ("Load failed"). That's
+          // transient, so retry the SAME step instead of failing the whole transaction. Genuine
+          // HTTP errors (isHttpError) still fail immediately.
+          if (!err?.isHttpError && networkRetries < MAX_NETWORK_RETRIES) {
+            networkRetries++;
+            console.warn(`[EFT] connection dropped on '${currentExecutionStep}', retry ${networkRetries}`, err?.message);
+            await new Promise((r) => setTimeout(r, 2000));
+            continue;
+          }
+          throw err;
+        }
 
         // If the backend returns a terminal result anywhere, finish
         const norm = normalizeTerminal(result);
