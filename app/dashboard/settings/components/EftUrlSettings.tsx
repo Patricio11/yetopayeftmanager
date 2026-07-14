@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ExternalLink, Info, CheckCircle, XCircle, Ban, Bell } from "lucide-react";
+import { ExternalLink, Info, CheckCircle, XCircle, Ban, Bell, LayoutTemplate, Layers, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Switch } from "@/components/ui/switch";
 
 export function EftUrlSettings() {
   const { toast } = useToast();
@@ -15,6 +16,10 @@ export function EftUrlSettings() {
   const [successUrl, setSuccessUrl] = useState("");
   const [failureUrl, setFailureUrl] = useState("");
   const [cancelledUrl, setCancelledUrl] = useState("");
+  const [paymentLayout, setPaymentLayout] = useState<"full" | "banks_plain">("full");
+  const [plainShowCancel, setPlainShowCancel] = useState(true);
+  const [plainShowTerms, setPlainShowTerms] = useState(false);
+  const [plainBackground, setPlainBackground] = useState("#ffffff");
 
   useEffect(() => {
     fetch("/api/merchant/settings")
@@ -26,6 +31,10 @@ export function EftUrlSettings() {
           setSuccessUrl(eft.successUrl || "");
           setFailureUrl(eft.failureUrl || "");
           setCancelledUrl(eft.cancelledUrl || "");
+          setPaymentLayout(eft.paymentLayout === "banks_plain" ? "banks_plain" : "full");
+          setPlainShowCancel(eft.plainShowCancel !== false);
+          setPlainShowTerms(eft.plainShowTerms === true);
+          setPlainBackground(eft.plainBackground || "#ffffff");
         }
       })
       .catch(() => {})
@@ -39,12 +48,15 @@ export function EftUrlSettings() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          eftSettings: { notifyUrl, successUrl, failureUrl, cancelledUrl },
+          eftSettings: {
+            notifyUrl, successUrl, failureUrl, cancelledUrl,
+            paymentLayout, plainShowCancel, plainShowTerms, plainBackground,
+          },
         }),
       });
       const data = await res.json();
       if (data.success) {
-        toast({ title: "Saved", description: "Redirect URL settings updated successfully." });
+        toast({ title: "Saved", description: "Payment page settings updated successfully." });
       } else {
         toast({ title: "Error", description: data.error || "Failed to save", variant: "destructive" });
       }
@@ -121,6 +133,118 @@ export function EftUrlSettings() {
 
   return (
     <div className="space-y-6">
+      {/* Payment Page Layout */}
+      <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 overflow-hidden">
+        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/50">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center text-white">
+              <LayoutTemplate className="w-4.5 h-4.5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Payment Page Layout</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">How the payment page looks for your customers</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6 space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setPaymentLayout("full")}
+              className={`relative p-4 rounded-xl border-2 text-left transition-all cursor-pointer ${
+                paymentLayout === "full"
+                  ? "border-green-500 bg-green-50 dark:bg-green-900/20"
+                  : "border-slate-200 dark:border-slate-600 hover:border-slate-300"
+              }`}
+            >
+              {paymentLayout === "full" && (
+                <span className="absolute top-2 right-2 w-5 h-5 rounded-full bg-green-600 flex items-center justify-center">
+                  <Check className="w-3 h-3 text-white" />
+                </span>
+              )}
+              <div className="flex items-center gap-2 mb-1">
+                <Layers className={`w-4 h-4 ${paymentLayout === "full" ? "text-green-600" : "text-slate-400"}`} />
+                <span className="font-medium text-sm text-slate-900 dark:text-white">Full Layout</span>
+              </div>
+              <p className="text-xs text-slate-500">
+                The complete payment page: header brand, merchant card with amount and reference, steps, and payment flow.
+              </p>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setPaymentLayout("banks_plain")}
+              className={`relative p-4 rounded-xl border-2 text-left transition-all cursor-pointer ${
+                paymentLayout === "banks_plain"
+                  ? "border-green-500 bg-green-50 dark:bg-green-900/20"
+                  : "border-slate-200 dark:border-slate-600 hover:border-slate-300"
+              }`}
+            >
+              {paymentLayout === "banks_plain" && (
+                <span className="absolute top-2 right-2 w-5 h-5 rounded-full bg-green-600 flex items-center justify-center">
+                  <Check className="w-3 h-3 text-white" />
+                </span>
+              )}
+              <div className="flex items-center gap-2 mb-1">
+                <LayoutTemplate className={`w-4 h-4 ${paymentLayout === "banks_plain" ? "text-green-600" : "text-slate-400"}`} />
+                <span className="font-medium text-sm text-slate-900 dark:text-white">Banks Plain (Embed)</span>
+              </div>
+              <p className="text-xs text-slate-500">
+                Minimal theme for iframes: no branding, no amount card — just the steps and bank flow with tight padding. Ideal when your platform already shows the payment details.
+              </p>
+            </button>
+          </div>
+
+          {paymentLayout === "banks_plain" && (
+            <div className="rounded-xl border border-slate-200 dark:border-slate-600 p-4 space-y-4 bg-slate-50/50 dark:bg-slate-800/30">
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Embed Options</p>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">Show cancel button</p>
+                  <p className="text-xs text-slate-500">Let customers cancel the payment from inside the embed</p>
+                </div>
+                <Switch checked={plainShowCancel} onCheckedChange={setPlainShowCancel} />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">Show terms &amp; conditions</p>
+                  <p className="text-xs text-slate-500">Ask customers to accept T&amp;Cs before paying</p>
+                </div>
+                <Switch checked={plainShowTerms} onCheckedChange={setPlainShowTerms} />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">Background color</p>
+                  <p className="text-xs text-slate-500">Match your platform&apos;s background (default white)</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={plainBackground}
+                    onChange={(e) => setPlainBackground(e.target.value)}
+                    className="w-9 h-9 rounded-lg border border-slate-200 dark:border-slate-600 cursor-pointer bg-transparent"
+                  />
+                  <Input
+                    value={plainBackground}
+                    onChange={(e) => setPlainBackground(e.target.value)}
+                    className="w-28 font-mono text-sm"
+                    maxLength={7}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          <p className="text-xs text-slate-400">
+            Partners: this layout applies to the payment pages of all your connector merchants.
+          </p>
+        </div>
+      </div>
+
       <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 overflow-hidden">
         <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/50">
           <div className="flex items-center gap-3">
@@ -173,7 +297,7 @@ export function EftUrlSettings() {
 
       <div className="flex justify-end">
         <Button size="sm" onClick={handleSave} disabled={loading} className="bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white border-0">
-          {loading ? "Saving..." : "Save URL Settings"}
+          {loading ? "Saving..." : "Save Settings"}
         </Button>
       </div>
     </div>

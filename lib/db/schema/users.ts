@@ -82,6 +82,12 @@ export const users = pgTable("user", {
     fnbVerifyResult?: boolean;
     showTermsAndConditions?: boolean;
     enableReceipt?: boolean;
+    // Payment page layout: "full" (default) or "banks_plain" — a minimal,
+    // unbranded embed theme for iframes (steps + banks only)
+    paymentLayout?: "full" | "banks_plain";
+    plainShowCancel?: boolean;
+    plainShowTerms?: boolean;
+    plainBackground?: string;
   }>().default({}),
 
   // Metadata

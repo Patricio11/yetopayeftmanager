@@ -101,7 +101,7 @@ export async function GET(
     if (merchant.partnerId) {
       const partner = await db.query.users.findFirst({
         where: eq(users.id, merchant.partnerId),
-        columns: { companyLogoUrl: true, companyName: true, name: true, metadata: true },
+        columns: { companyLogoUrl: true, companyName: true, name: true, metadata: true, eftSettings: true },
       });
       if (partner) brandingSource = { ...merchant, ...partner } as typeof merchant;
     }
@@ -113,6 +113,17 @@ export async function GET(
       logoUrl: brandingSource.companyLogoUrl || null,
       brandName: brandingSource.companyName || brandingSource.name,
     };
+
+    // Payment page layout — "banks_plain" is a minimal, unbranded embed theme
+    // for iframes: no header, no pay card, just steps + banks. The partner's
+    // setting wins for partner-linked merchants (same source as branding).
+    const layoutEft = (brandingSource.eftSettings as any) || {};
+    const layout = {
+      mode: layoutEft.paymentLayout === "banks_plain" ? "banks_plain" : "full",
+      showCancel: layoutEft.plainShowCancel !== false, // default: shown
+      background: layoutEft.plainBackground || "#ffffff",
+    };
+    const plainMode = layout.mode === "banks_plain";
 
     // Fetch merchant's primary bank account (not required for demo mode)
     const isDemo = !!transaction.isDemo;
@@ -225,11 +236,15 @@ export async function GET(
         },
         banks: mappedBanks,
         branding,
+        layout,
         isDemo: !!transaction.isDemo,
         enableReceipt: !!(merchant.eftSettings as any)?.enableReceipt,
         fnbVerifyResult: !!(merchant.eftSettings as any)?.fnbVerifyResult,
         showSaveCredentials: !!(merchant.eftSettings as any)?.saveCredentialsEnabled,
-        showTerms: tc['eft_tc_enabled'] === 'true',
+        // Plain embed layout: T&Cs hidden unless the org explicitly enables them
+        showTerms: plainMode
+          ? layoutEft.plainShowTerms === true && tc['eft_tc_enabled'] === 'true'
+          : tc['eft_tc_enabled'] === 'true',
         availableServices,
         step: "init",
         token,

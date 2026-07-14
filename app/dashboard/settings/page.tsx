@@ -57,7 +57,7 @@ const navGroups: NavGroup[] = [
     items: [
       { id: "services", label: "Payment Methods", icon: Zap, description: "Enabled services" },
       { id: "bank-accounts", label: "Bank Accounts", icon: CreditCard, description: "Linked accounts" },
-      { id: "eft-urls", label: "Redirect URLs", icon: ExternalLink, description: "Success & failure URLs" },
+      { id: "eft-urls", label: "Payment Page", icon: ExternalLink, description: "Layout & redirect URLs" },
     ],
   },
   {
@@ -83,7 +83,7 @@ const pageMap: Record<string, { title: string; description: string }> = {
   notifications: { title: "Notifications", description: "Choose how you want to be notified" },
   services: { title: "Payment Methods", description: "Enable or disable payment services for your customers" },
   "bank-accounts": { title: "Bank Accounts", description: "Manage bank accounts for receiving payments" },
-  "eft-urls": { title: "Redirect URLs", description: "Configure where customers are sent after payment" },
+  "eft-urls": { title: "Payment Page", description: "Choose the payment page layout and configure redirect URLs" },
   "api-keys": { title: "API Keys", description: "Create and manage API keys for your integrations" },
   webhooks: { title: "Webhooks", description: "Set up real-time event notifications" },
   terms: { title: "Terms & Conditions", description: "Manage the T&Cs shown on the payment page" },

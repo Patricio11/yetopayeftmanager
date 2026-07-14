@@ -105,6 +105,7 @@ interface YetoPayEFTProps {
     };
     token: string;
     branding?: PaymentPageBranding | null;
+    layout?: { mode: string; showCancel?: boolean; background?: string } | null;
     isDemo?: boolean;
     enableReceipt?: boolean;
     fnbVerifyResult?: boolean;
@@ -2104,60 +2105,73 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     }
   };
 
+  // "banks_plain": minimal unbranded embed theme for iframes — the host
+  // platform already shows amount/reference/merchant, so we render only the
+  // steps and the payment flow with tight padding on a plain background.
+  const plainLayout = initialData?.layout?.mode === 'banks_plain';
+  const plainShowCancel = initialData?.layout?.showCancel !== false;
+  const plainBackground = initialData?.layout?.background || '#ffffff';
+  const showCancelButton = !plainLayout || plainShowCancel;
+
   return (
     <div
-      className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 select-none"
+      className={plainLayout ? "min-h-screen select-none" : "min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 select-none"}
+      style={plainLayout ? { backgroundColor: plainBackground } : undefined}
       onContextMenu={(e) => e.preventDefault()}
     >
       {initialData?.isDemo && (
-        <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-semibold">
+        <div className={plainLayout
+          ? "bg-amber-500 text-white text-center py-1.5 px-3 text-xs font-semibold"
+          : "bg-amber-500 text-white text-center py-2 px-4 text-sm font-semibold"}>
           DEMO MODE — This is a test transaction. No real payment will be processed.
         </div>
       )}
-      <div className="container mx-auto px-4 py-8">
+      <div className={plainLayout ? "mx-auto px-2 py-2" : "container mx-auto px-4 py-8"}>
         <div className="max-w-md mx-auto relative">
-          <div className="mb-6">
-            <PaymentPageBrand branding={initialData?.branding} />
-          </div>
-
-          
+          {!plainLayout && (
+            <div className="mb-6">
+              <PaymentPageBrand branding={initialData?.branding} />
+            </div>
+          )}
 
           {!isInitializing && currentStep !== 'error' && (
             <>
-              <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold text-gray-900">Pay {merchant.name}</h3>
-                    <p className="text-2xl font-bold text-gray-900">R{paymentDetails.amount}</p>
-                    <p className="text-sm text-gray-500">Reference: {paymentDetails.reference}</p>
-                  </div>
-                  <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
-                    {merchant.logo ? (
-                      <Image
-                        src={merchant.logo}
-                        alt={`${merchant.name} logo`}
-                        width={48}
-                        height={48}
-                        className="w-full h-full object-cover"
-                        unoptimized
-                      />
-                    ) : (
-                      <div className="w-6 h-6 bg-white rounded"></div>
-                    )}
+              {!plainLayout && (
+                <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-gray-900">Pay {merchant.name}</h3>
+                      <p className="text-2xl font-bold text-gray-900">R{paymentDetails.amount}</p>
+                      <p className="text-sm text-gray-500">Reference: {paymentDetails.reference}</p>
+                    </div>
+                    <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
+                      {merchant.logo ? (
+                        <Image
+                          src={merchant.logo}
+                          alt={`${merchant.name} logo`}
+                          width={48}
+                          height={48}
+                          className="w-full h-full object-cover"
+                          unoptimized
+                        />
+                      ) : (
+                        <div className="w-6 h-6 bg-white rounded"></div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="flex items-center justify-center mb-8">
+              )}
+              <div className={plainLayout ? "flex items-center justify-center mb-4" : "flex items-center justify-center mb-8"}>
                 {renderStepIndicator()}
               </div>
             </>
           )}
 
-          <div className="bg-white rounded-xl shadow-lg p-6 min-h-[200px] relative">
+          <div className={plainLayout ? "bg-white rounded-xl p-3 min-h-[200px] relative" : "bg-white rounded-xl shadow-lg p-6 min-h-[200px] relative"}>
             {/* Back button - left side */}
             {currentStep === 'auth' && (
               <div className="absolute top-0 left-0 mt-3 ml-3 z-20">
-                <button 
+                <button
                   onClick={handleBackToBank}
                   className="bg-gray-50 text-gray-700 font-semibold px-3 py-1 rounded-full text-sm flex items-center gap-1 hover:bg-gray-100 transition"
                   title="Change bank"
@@ -2168,26 +2182,30 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
               </div>
             )}
             {/* Cancel button - right side */}
-            <div className="absolute top-0 right-0 mt-3 mr-3 z-20">
-              <button onClick={() => setCancelConfirmOpen(true)} className="bg-red-50 text-red-600 font-semibold px-3 py-1 rounded-full text-sm flex items-center gap-2 hover:bg-red-100 transition">
-                <X className="w-4 h-4" /> Cancel
-              </button>
-            </div>
+            {showCancelButton && (
+              <div className="absolute top-0 right-0 mt-3 mr-3 z-20">
+                <button onClick={() => setCancelConfirmOpen(true)} className="bg-red-50 text-red-600 font-semibold px-3 py-1 rounded-full text-sm flex items-center gap-2 hover:bg-red-100 transition">
+                  <X className="w-4 h-4" /> Cancel
+                </button>
+              </div>
+            )}
             {renderContent()}
           </div>
 
-          <div className="mt-6 text-center">
-            <div className="flex items-center justify-center text-sm text-gray-500 mb-2">
-              <Shield size={16} className="mr-2" />
-              Secure TLS Encryption
+          {!plainLayout && (
+            <div className="mt-6 text-center">
+              <div className="flex items-center justify-center text-sm text-gray-500 mb-2">
+                <Shield size={16} className="mr-2" />
+                Secure TLS Encryption
+              </div>
+              <p className="text-xs text-gray-400">
+                By continuing you agree to YetoPay&apos;s{' '}
+                <a href="/terms-and-conditions" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:underline">
+                  T&amp;Cs
+                </a>
+              </p>
             </div>
-            <p className="text-xs text-gray-400">
-              By continuing you agree to YetoPay&apos;s{' '}
-              <a href="/terms-and-conditions" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:underline">
-                T&amp;Cs
-              </a>
-            </p>
-          </div>
+          )}
         </div>
       </div>
 

@@ -43,12 +43,16 @@ const updateSettingsSchema = z.object({
     security_alerts: z.boolean().optional(),
   }).optional(),
 
-  // EFT Settings (default URLs)
+  // EFT Settings (default URLs + payment page layout)
   eftSettings: z.object({
     notifyUrl: z.string().url().max(500).optional().or(z.literal("")),
     successUrl: z.string().url().max(500).optional().or(z.literal("")),
     failureUrl: z.string().url().max(500).optional().or(z.literal("")),
     cancelledUrl: z.string().url().max(500).optional().or(z.literal("")),
+    paymentLayout: z.enum(["full", "banks_plain"]).optional(),
+    plainShowCancel: z.boolean().optional(),
+    plainShowTerms: z.boolean().optional(),
+    plainBackground: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Invalid color").optional().or(z.literal("")),
   }).optional(),
 }).strict();
 

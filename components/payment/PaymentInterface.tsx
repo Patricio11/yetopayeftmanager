@@ -9,6 +9,12 @@ import {
 } from 'lucide-react';
 import PaymentPageBrand, { PaymentPageBranding } from '@/components/brand/PaymentPageBrand';
 
+export interface PaymentPageLayout {
+  mode: 'full' | 'banks_plain' | string;
+  showCancel?: boolean;
+  background?: string;
+}
+
 interface AvailableService {
   code: string;
   name: string;
@@ -49,6 +55,7 @@ interface PaymentInterfaceProps {
   token: string;
   merchantBankAccount: any;
   branding?: PaymentPageBranding | null;
+  layout?: PaymentPageLayout | null;
   isDemo?: boolean;
   enableReceipt?: boolean;
   fnbVerifyResult?: boolean;
@@ -65,6 +72,7 @@ export default function PaymentInterface({
   token,
   merchantBankAccount,
   branding,
+  layout,
   isDemo,
   enableReceipt,
   fnbVerifyResult,
@@ -77,6 +85,12 @@ export default function PaymentInterface({
   const [selectedMethod, setSelectedMethod] = useState<'eft' | 'card' | null>(null);
   const [cardLoading, setCardLoading] = useState(false);
   const [cardError, setCardError] = useState<string | null>(null);
+
+  // "banks_plain": minimal unbranded embed theme — no header, no pay card,
+  // tight padding, plain background. For iframes where the host platform
+  // already shows the amount/reference/merchant.
+  const plain = layout?.mode === 'banks_plain';
+  const plainBg = layout?.background || '#ffffff';
 
   useEffect(() => { setIsClient(true); }, []);
 
@@ -358,6 +372,7 @@ export default function PaymentInterface({
           },
           token,
           branding,
+          layout,
           isDemo,
           enableReceipt,
           fnbVerifyResult,
@@ -369,6 +384,27 @@ export default function PaymentInterface({
   );
 
   function renderPageShell(content: React.ReactNode) {
+    if (plain) {
+      return (
+        <div
+          className="min-h-screen select-none"
+          style={{ backgroundColor: plainBg }}
+          onContextMenu={(e) => e.preventDefault()}
+        >
+          {isDemo && (
+            <div className="bg-amber-500 text-white text-center py-1.5 px-3 text-xs font-semibold">
+              DEMO MODE — This is a test transaction. No real payment will be processed.
+            </div>
+          )}
+          <div className="mx-auto max-w-md px-2 py-2">
+            <div className="bg-white rounded-xl p-3 min-h-[200px]">
+              {content}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div
         className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 select-none"
