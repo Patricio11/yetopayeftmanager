@@ -5,12 +5,15 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building2, Globe, FileText, MapPin, Camera, Trash2, Loader2, Palette, EyeOff, Check } from "lucide-react";
+import { Building2, Globe, FileText, MapPin, Camera, Trash2, Loader2, Palette, EyeOff, Check, Zap, FlaskConical } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import YetoPayLogo from "@/components/brand/YetoPayLogo";
+import { useSession } from "@/lib/auth-client";
 
 export function CompanySettings() {
   const { toast } = useToast();
+  const { data: session } = useSession();
+  const isPartner = (session?.user as any)?.role === "partner";
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [companyName, setCompanyName] = useState("");
@@ -25,6 +28,9 @@ export function CompanySettings() {
   const [postalCode, setPostalCode] = useState("");
   const [branding, setBranding] = useState<"yetopay" | "logo" | "hidden">("yetopay");
   const [brandingSaving, setBrandingSaving] = useState(false);
+  const [subDemoMode, setSubDemoMode] = useState(false);
+  const [subDemoSaving, setSubDemoSaving] = useState(false);
+  const [partnerAccountMode, setPartnerAccountMode] = useState<string>("demo");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -55,6 +61,44 @@ export function CompanySettings() {
       })
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (!isPartner) return;
+    fetch("/api/partner/settings")
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setSubDemoMode(!!data.data.subMerchantsDemoMode);
+          setPartnerAccountMode(data.data.accountMode || "demo");
+        }
+      })
+      .catch(() => {});
+  }, [isPartner]);
+
+  const handleSubDemoChange = async (forceDemo: boolean) => {
+    const previous = subDemoMode;
+    setSubDemoMode(forceDemo);
+    setSubDemoSaving(true);
+    try {
+      const res = await fetch("/api/partner/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subMerchantsDemoMode: forceDemo }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast({ title: "Updated", description: data.message });
+      } else {
+        setSubDemoMode(previous);
+        toast({ title: "Error", description: data.message || "Failed to update", variant: "destructive" });
+      }
+    } catch {
+      setSubDemoMode(previous);
+      toast({ title: "Error", description: "Failed to update", variant: "destructive" });
+    } finally {
+      setSubDemoSaving(false);
+    }
+  };
 
   const handleBrandingChange = async (mode: "yetopay" | "logo" | "hidden") => {
     if (mode === "logo" && !companyLogoUrl) {
@@ -370,6 +414,84 @@ export function CompanySettings() {
           </p>
         </div>
       </div>
+
+      {/* Connector Merchants Processing (partners only) */}
+      {isPartner && (
+        <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 overflow-hidden">
+          <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/50">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white">
+                <FlaskConical className="w-4.5 h-4.5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Connector Merchants Processing</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  How transactions from merchants created via your API are processed
+                </p>
+              </div>
+              {subDemoSaving && <Loader2 className="w-4 h-4 text-green-600 animate-spin ml-auto" />}
+            </div>
+          </div>
+
+          <div className="p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => handleSubDemoChange(false)}
+                disabled={subDemoSaving}
+                className={`relative p-4 rounded-xl border-2 text-left transition-all cursor-pointer ${
+                  !subDemoMode
+                    ? "border-green-500 bg-green-50 dark:bg-green-900/20"
+                    : "border-slate-200 dark:border-slate-600 hover:border-slate-300"
+                }`}
+              >
+                {!subDemoMode && (
+                  <span className="absolute top-2 right-2 w-5 h-5 rounded-full bg-green-600 flex items-center justify-center">
+                    <Check className="w-3 h-3 text-white" />
+                  </span>
+                )}
+                <div className="flex items-center gap-2 mb-1">
+                  <Zap className={`w-4 h-4 ${!subDemoMode ? "text-green-600" : "text-slate-400"}`} />
+                  <span className="font-medium text-sm text-slate-900 dark:text-white">Follow My Account</span>
+                </div>
+                <p className="text-xs text-slate-500">
+                  Merchants inherit your status — your merchants were already vetted on your platform.
+                  {partnerAccountMode === "live"
+                    ? " Your account is live, so they process live payments."
+                    : " Your account is in demo, so they process demo payments until you go live."}
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleSubDemoChange(true)}
+                disabled={subDemoSaving}
+                className={`relative p-4 rounded-xl border-2 text-left transition-all cursor-pointer ${
+                  subDemoMode
+                    ? "border-amber-500 bg-amber-50 dark:bg-amber-900/20"
+                    : "border-slate-200 dark:border-slate-600 hover:border-slate-300"
+                }`}
+              >
+                {subDemoMode && (
+                  <span className="absolute top-2 right-2 w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center">
+                    <Check className="w-3 h-3 text-white" />
+                  </span>
+                )}
+                <div className="flex items-center gap-2 mb-1">
+                  <FlaskConical className={`w-4 h-4 ${subDemoMode ? "text-amber-600" : "text-slate-400"}`} />
+                  <span className="font-medium text-sm text-slate-900 dark:text-white">Force Demo Mode</span>
+                </div>
+                <p className="text-xs text-slate-500">
+                  All connector merchant transactions are simulated — no real money moves. Useful for testing your integration.
+                </p>
+              </button>
+            </div>
+            <p className="text-xs text-slate-400 mt-4">
+              Changes apply from the next transaction each merchant processes. Merchants with their own YetoPay login are not affected.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Business Details */}
       <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 overflow-hidden">

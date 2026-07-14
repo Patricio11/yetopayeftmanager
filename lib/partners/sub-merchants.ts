@@ -65,17 +65,38 @@ export function isSyntheticEmail(email: string | null | undefined): boolean {
   return !!email && email.endsWith("@sub.yetopay.internal");
 }
 
+/** Partner fields needed to derive a sub-merchant's effective status. */
+export interface PartnerContext {
+  accountMode: "demo" | "live";
+  kycStatus?: string | null;
+  metadata?: any;
+}
+
+/**
+ * Sub-merchants follow the partner's status: live when the partner is live,
+ * unless the partner has manually forced demo mode for connector merchants
+ * (Settings → subMerchantsDemoMode). Their KYC happened on the partner's
+ * platform, so a KYC-approved partner implies approved sub-merchants.
+ */
+export function effectiveSubMerchantMode(partner: PartnerContext): "demo" | "live" {
+  if ((partner.metadata as any)?.subMerchantsDemoMode) return "demo";
+  return partner.accountMode === "live" ? "live" : "demo";
+}
+
 /**
  * Find an existing sub-merchant by name under this partner (case-insensitive
  * companyName match), or create a shadow merchant record.
- * Updates stored details when new info is supplied on subsequent calls.
+ * Updates stored details when new info is supplied on subsequent calls, and
+ * keeps partner-managed records in sync with the partner's live/KYC status.
  */
 export async function resolveSubMerchant(
   partnerId: string,
   input: SubMerchantInput,
-  partnerAccountMode: "demo" | "live"
+  partner: PartnerContext
 ): Promise<ResolvedSubMerchant> {
   const name = input.name.trim();
+  const effectiveMode = effectiveSubMerchantMode(partner);
+  const inheritKycApproved = partner.kycStatus === "approved";
 
   // Case-insensitive lookup scoped to this partner
   const existing = await db.query.users.findFirst({
@@ -105,6 +126,14 @@ export async function resolveSubMerchant(
     }
     if (input.phone && input.phone !== existing.phone) updates.phone = input.phone;
     if (input.logoUrl && input.logoUrl !== existing.companyLogoUrl) updates.companyLogoUrl = input.logoUrl;
+
+    // Partner-managed records inherit the partner's status: follow the
+    // partner's live/demo mode and KYC approval. Merchants with their own
+    // login (invited/activated) keep their own lifecycle untouched.
+    if (isPartnerManaged(existing) && !existing.isActive) {
+      if (existing.accountMode !== effectiveMode) updates.accountMode = effectiveMode;
+      if (inheritKycApproved && existing.kycStatus !== "approved") updates.kycStatus = "approved";
+    }
 
     if (Object.keys(updates).length > 0) {
       updates.updatedAt = new Date();
@@ -146,8 +175,8 @@ export async function resolveSubMerchant(
         phone: input.phone || null,
         partnerId,
         isActive: false, // shadow record — cannot log in until invited
-        accountMode: partnerAccountMode,
-        kycStatus: "pending",
+        accountMode: effectiveMode,
+        kycStatus: inheritKycApproved ? "approved" : "pending",
         metadata: { managedByPartner: true, source: "payment-link-api" },
         createdBy: partnerId,
         createdAt: new Date(),

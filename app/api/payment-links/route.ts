@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     // Fetch caller's role, default Pay By Bank URLs and account mode
     const caller = await db.query.users.findFirst({
       where: eq(users.id, callerId),
-      columns: { role: true, eftSettings: true, accountMode: true },
+      columns: { role: true, eftSettings: true, accountMode: true, kycStatus: true, metadata: true },
     });
 
     // ── Partner sub-merchant resolution ────────────────────────────────────
@@ -77,11 +77,11 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      const resolved = await resolveSubMerchant(
-        callerId,
-        validatedData.merchant,
-        (caller.accountMode as "demo" | "live") || "demo"
-      );
+      const resolved = await resolveSubMerchant(callerId, validatedData.merchant, {
+        accountMode: (caller.accountMode as "demo" | "live") || "demo",
+        kycStatus: caller.kycStatus,
+        metadata: caller.metadata,
+      });
 
       // Live payments need a payout destination — fail here with a clear
       // message instead of at the payment page.
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
     if (merchantId !== callerId) {
       const sub = await db.query.users.findFirst({
         where: eq(users.id, merchantId),
-        columns: { role: true, eftSettings: true, accountMode: true },
+        columns: { role: true, eftSettings: true, accountMode: true, kycStatus: true, metadata: true },
       });
       effectiveMerchant = sub || caller;
     }
