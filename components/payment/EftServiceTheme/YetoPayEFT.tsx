@@ -7,7 +7,7 @@ import {
   Landmark, Info, CornerDownLeft,
 } from 'lucide-react';
 import TermsModal from './components/TermsModal';
-import PaymentPageBrand, { PaymentPageBranding } from '@/components/brand/PaymentPageBrand';
+import PaymentPageBrand, { PaymentPageBranding, brandColorProps } from '@/components/brand/PaymentPageBrand';
 import { CountdownTimer } from '@/components/payment/CountdownTimer';
 import { getDeviceFingerprint, collectDeviceInfo, getDeviceDescription } from '@/lib/utils/device-fingerprint';
 import { saveCredentialsToBrowser, deleteCredentialFromBrowser } from '@/lib/utils/browser-credential-storage';
@@ -2112,11 +2112,12 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   const plainShowCancel = initialData?.layout?.showCancel !== false;
   const plainBackground = initialData?.layout?.background || '#ffffff';
   const showCancelButton = !plainLayout || plainShowCancel;
+  const brandColors = brandColorProps(initialData?.branding);
 
   return (
     <div
-      className={plainLayout ? "min-h-screen select-none" : "min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 select-none"}
-      style={plainLayout ? { backgroundColor: plainBackground } : undefined}
+      className={(plainLayout ? "min-h-screen select-none" : "min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 select-none") + brandColors.className}
+      style={{ ...(plainLayout ? { backgroundColor: plainBackground } : {}), ...brandColors.style }}
       onContextMenu={(e) => e.preventDefault()}
     >
       {initialData?.isDemo && (

@@ -7,6 +7,23 @@ export interface PaymentPageBranding {
   mode: "yetopay" | "logo" | "hidden" | string;
   logoUrl?: string | null;
   brandName?: string | null;
+  /** Custom gradient colors; null/undefined = default YetoPay green */
+  colors?: { from: string; to: string } | null;
+}
+
+/** className + CSS vars to apply custom brand colors on a page wrapper */
+export function brandColorProps(branding?: PaymentPageBranding | null): {
+  className: string;
+  style: React.CSSProperties;
+} {
+  if (!branding?.colors) return { className: "", style: {} };
+  return {
+    className: " pp-brand",
+    style: {
+      ["--pp-from" as any]: branding.colors.from,
+      ["--pp-to" as any]: branding.colors.to,
+    },
+  };
 }
 
 /**

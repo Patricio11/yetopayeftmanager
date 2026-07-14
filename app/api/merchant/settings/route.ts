@@ -53,6 +53,8 @@ const updateSettingsSchema = z.object({
     plainShowCancel: z.boolean().optional(),
     plainShowTerms: z.boolean().optional(),
     plainBackground: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Invalid color").optional().or(z.literal("")),
+    brandColorFrom: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Invalid color").optional().or(z.literal("")),
+    brandColorTo: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Invalid color").optional().or(z.literal("")),
   }).optional(),
 }).strict();
 

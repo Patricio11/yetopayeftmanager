@@ -107,11 +107,17 @@ export async function GET(
     }
     const brandingMode =
       ((brandingSource.metadata as any)?.paymentPageBranding as string) || "yetopay";
+    const brandingEft = (brandingSource.eftSettings as any) || {};
     const branding = {
       // 'logo' mode without an uploaded logo falls back to the YetoPay brand
       mode: brandingMode === "logo" && !brandingSource.companyLogoUrl ? "yetopay" : brandingMode,
       logoUrl: brandingSource.companyLogoUrl || null,
       brandName: brandingSource.companyName || brandingSource.name,
+      // Custom brand colors (gradient start/end) — null means default green
+      colors:
+        brandingEft.brandColorFrom && brandingEft.brandColorTo
+          ? { from: brandingEft.brandColorFrom, to: brandingEft.brandColorTo }
+          : null,
     };
 
     // Payment page layout — "banks_plain" is a minimal, unbranded embed theme

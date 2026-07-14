@@ -45,6 +45,12 @@ export async function PATCH(
     if (typeof body.plainBackground === "string" && /^#[0-9a-fA-F]{6}$/.test(body.plainBackground)) {
       updatedSettings.plainBackground = body.plainBackground;
     }
+    // Custom brand colors — empty string resets to the default theme
+    for (const key of ["brandColorFrom", "brandColorTo"] as const) {
+      if (typeof body[key] === "string" && (body[key] === "" || /^#[0-9a-fA-F]{6}$/.test(body[key]))) {
+        updatedSettings[key] = body[key];
+      }
+    }
 
     await db
       .update(users)

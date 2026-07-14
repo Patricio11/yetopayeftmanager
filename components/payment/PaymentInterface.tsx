@@ -7,7 +7,7 @@ import {
   CreditCard, Landmark, ChevronRight, ChevronLeft,
   CheckCircle, X, AlertTriangle, Shield,
 } from 'lucide-react';
-import PaymentPageBrand, { PaymentPageBranding } from '@/components/brand/PaymentPageBrand';
+import PaymentPageBrand, { PaymentPageBranding, brandColorProps } from '@/components/brand/PaymentPageBrand';
 
 export interface PaymentPageLayout {
   mode: 'full' | 'banks_plain' | string;
@@ -91,6 +91,7 @@ export default function PaymentInterface({
   // already shows the amount/reference/merchant.
   const plain = layout?.mode === 'banks_plain';
   const plainBg = layout?.background || '#ffffff';
+  const brandColors = brandColorProps(branding);
 
   useEffect(() => { setIsClient(true); }, []);
 
@@ -387,8 +388,8 @@ export default function PaymentInterface({
     if (plain) {
       return (
         <div
-          className="min-h-screen select-none"
-          style={{ backgroundColor: plainBg }}
+          className={"min-h-screen select-none" + brandColors.className}
+          style={{ backgroundColor: plainBg, ...brandColors.style }}
           onContextMenu={(e) => e.preventDefault()}
         >
           {isDemo && (
@@ -407,7 +408,8 @@ export default function PaymentInterface({
 
     return (
       <div
-        className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 select-none"
+        className={"min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 select-none" + brandColors.className}
+        style={brandColors.style}
         onContextMenu={(e) => e.preventDefault()}
       >
         {isDemo && (

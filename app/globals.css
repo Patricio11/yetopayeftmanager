@@ -142,3 +142,41 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/* ── Payment page custom brand colors ──────────────────────────────────────
+   Applied when an org sets custom colors (Settings → Payment Page).
+   The wrapper gets class "pp-brand" + inline vars --pp-from / --pp-to, and
+   these scoped rules recolor the green utility classes used by the payment
+   components. Pages without custom colors are completely unaffected. */
+.pp-brand .from-green-700 { --tw-gradient-from: var(--pp-from); }
+.pp-brand .from-green-800 { --tw-gradient-from: color-mix(in srgb, var(--pp-from) 80%, black); }
+.pp-brand .hover\:from-green-800:hover { --tw-gradient-from: color-mix(in srgb, var(--pp-from) 80%, black); }
+.pp-brand .to-green-500 { --tw-gradient-to: var(--pp-to); }
+.pp-brand .to-green-600 { --tw-gradient-to: color-mix(in srgb, var(--pp-to) 85%, black); }
+.pp-brand .hover\:to-green-600:hover { --tw-gradient-to: color-mix(in srgb, var(--pp-to) 85%, black); }
+.pp-brand .from-green-50 { --tw-gradient-from: color-mix(in srgb, var(--pp-from) 6%, white); }
+.pp-brand .to-emerald-50 { --tw-gradient-to: color-mix(in srgb, var(--pp-to) 6%, white); }
+.pp-brand .bg-green-600 { background-color: var(--pp-from); }
+.pp-brand .bg-green-50 { background-color: color-mix(in srgb, var(--pp-from) 8%, white); }
+.pp-brand .hover\:bg-green-50:hover { background-color: color-mix(in srgb, var(--pp-from) 8%, white); }
+.pp-brand .bg-green-100 { background-color: color-mix(in srgb, var(--pp-from) 14%, white); }
+.pp-brand .bg-emerald-50 { background-color: color-mix(in srgb, var(--pp-from) 8%, white); }
+.pp-brand .text-green-500 { color: var(--pp-to); }
+.pp-brand .text-green-600 { color: var(--pp-from); }
+.pp-brand .hover\:text-green-600:hover { color: var(--pp-from); }
+.pp-brand .text-green-700 { color: var(--pp-from); }
+.pp-brand .hover\:text-green-700:hover { color: color-mix(in srgb, var(--pp-from) 85%, black); }
+.pp-brand .text-green-800 { color: color-mix(in srgb, var(--pp-from) 85%, black); }
+.pp-brand .text-green-900 { color: color-mix(in srgb, var(--pp-from) 70%, black); }
+.pp-brand .border-green-200 { border-color: color-mix(in srgb, var(--pp-from) 25%, white); }
+.pp-brand .border-green-300 { border-color: color-mix(in srgb, var(--pp-from) 40%, white); }
+.pp-brand .border-green-400 { border-color: color-mix(in srgb, var(--pp-from) 60%, white); }
+.pp-brand .hover\:border-green-400:hover { border-color: color-mix(in srgb, var(--pp-from) 60%, white); }
+.pp-brand .border-green-500 { border-color: var(--pp-to); }
+.pp-brand .border-green-600 { border-color: var(--pp-from); }
+.pp-brand .hover\:border-green-600:hover { border-color: var(--pp-from); }
+.pp-brand .ring-green-600 { --tw-ring-color: var(--pp-from); }
+.pp-brand .ring-green-200 { --tw-ring-color: color-mix(in srgb, var(--pp-from) 25%, white); }
+.pp-brand .focus\:ring-green-500:focus { --tw-ring-color: var(--pp-to); }
+.pp-brand .focus\:ring-green-600:focus { --tw-ring-color: var(--pp-from); }
+.pp-brand .border-t-green-600 { border-top-color: var(--pp-from); }

@@ -88,6 +88,10 @@ export const users = pgTable("user", {
     plainShowCancel?: boolean;
     plainShowTerms?: boolean;
     plainBackground?: string;
+    // Custom brand colors for the payment page (gradient start/end).
+    // Both must be set; empty means default YetoPay green.
+    brandColorFrom?: string;
+    brandColorTo?: string;
   }>().default({}),
 
   // Metadata
