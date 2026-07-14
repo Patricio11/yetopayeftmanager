@@ -5,12 +5,14 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   ArrowLeft, Building2, Mail, Phone, Users, CheckCircle, XCircle, Clock,
-  Shield, Save, Percent, ChevronRight, FileText, Settings, AlertTriangle
+  Shield, Save, Percent, ChevronRight, FileText, Settings, AlertTriangle,
+  LayoutTemplate
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 
 type Tab = 'overview' | 'merchants' | 'commission' | 'invoices' | 'settings';
@@ -27,6 +29,12 @@ interface Partner {
   accountMode?: string;
   merchantCount?: number;
   createdAt: string;
+  eftSettings?: {
+    paymentLayout?: string;
+    plainShowCancel?: boolean;
+    plainShowTerms?: boolean;
+    plainBackground?: string;
+  } | null;
   stats?: {
     merchantCount: number;
     totalTransactions: number;
@@ -547,6 +555,33 @@ function SettingsTab({ partner, onUpdate }: { partner: Partner; onUpdate: () => 
   const [isActive, setIsActive] = useState(partner.isActive);
   const [accountMode, setAccountMode] = useState(partner.accountMode || 'demo');
   const [deactivating, setDeactivating] = useState(false);
+  const eft = partner.eftSettings || {};
+  const [paymentLayout, setPaymentLayout] = useState<'full' | 'banks_plain'>(
+    eft.paymentLayout === 'banks_plain' ? 'banks_plain' : 'full'
+  );
+  const [plainShowCancel, setPlainShowCancel] = useState(eft.plainShowCancel !== false);
+  const [plainShowTerms, setPlainShowTerms] = useState(eft.plainShowTerms === true);
+  const [plainBackground, setPlainBackground] = useState(eft.plainBackground || '#ffffff');
+  const [layoutSaving, setLayoutSaving] = useState(false);
+
+  const saveLayoutSettings = async (updates: Record<string, any>) => {
+    setLayoutSaving(true);
+    try {
+      const res = await fetch(`/api/admin/merchants/${partner.id}/eft-settings`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast({ title: 'Saved', description: 'Payment page layout updated for this partner' });
+      } else {
+        toast({ title: 'Error', description: data.error || 'Failed to save', variant: 'destructive' });
+      }
+    } catch {
+      toast({ title: 'Error', description: 'Failed to save setting', variant: 'destructive' });
+    } finally { setLayoutSaving(false); }
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -666,6 +701,71 @@ function SettingsTab({ partner, onUpdate }: { partner: Partner; onUpdate: () => 
           >
             <Save className="w-4 h-4" />{saving ? 'Saving...' : 'Save Changes'}
           </Button>
+        </div>
+      </Card>
+
+      {/* Payment Page Layout */}
+      <Card className="p-6 bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
+          <LayoutTemplate className="w-5 h-5 text-teal-600" />Payment Page Layout
+        </h3>
+        <p className="text-xs text-slate-500 mb-4">
+          Applies to the payment pages of all this partner&apos;s connector merchants
+        </p>
+        <div className="space-y-4">
+          <div>
+            <Label>Layout</Label>
+            <select
+              value={paymentLayout}
+              onChange={(e) => {
+                const mode = e.target.value as 'full' | 'banks_plain';
+                setPaymentLayout(mode);
+                saveLayoutSettings({ paymentLayout: mode });
+              }}
+              disabled={layoutSaving}
+              className="w-full mt-1 px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-sm"
+            >
+              <option value="full">Full Layout (default)</option>
+              <option value="banks_plain">Banks Plain (Embed)</option>
+            </select>
+            <p className="text-xs text-slate-500 mt-1">
+              Banks Plain is a minimal, unbranded theme for iframes — steps and bank flow only.
+            </p>
+          </div>
+
+          {paymentLayout === 'banks_plain' && (
+            <div className="rounded-lg border border-slate-200 dark:border-slate-700 p-4 space-y-3 bg-slate-50/50 dark:bg-slate-900/30">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-slate-700 dark:text-slate-300">Show cancel button</p>
+                <Switch
+                  checked={plainShowCancel}
+                  onCheckedChange={(checked) => { setPlainShowCancel(checked); saveLayoutSettings({ plainShowCancel: checked }); }}
+                  disabled={layoutSaving}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-slate-700 dark:text-slate-300">Show terms &amp; conditions</p>
+                <Switch
+                  checked={plainShowTerms}
+                  onCheckedChange={(checked) => { setPlainShowTerms(checked); saveLayoutSettings({ plainShowTerms: checked }); }}
+                  disabled={layoutSaving}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-slate-700 dark:text-slate-300">Background color</p>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={plainBackground}
+                    onChange={(e) => setPlainBackground(e.target.value)}
+                    onBlur={() => saveLayoutSettings({ plainBackground })}
+                    className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-600 cursor-pointer bg-transparent"
+                  />
+                  <span className="text-xs font-mono text-slate-500">{plainBackground}</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </Card>
 

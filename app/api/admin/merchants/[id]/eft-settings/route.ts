@@ -32,6 +32,20 @@ export async function PATCH(
       updatedSettings.enableReceipt = body.enableReceipt;
     }
 
+    // Payment page layout (admin can configure for any merchant or partner)
+    if (body.paymentLayout === "full" || body.paymentLayout === "banks_plain") {
+      updatedSettings.paymentLayout = body.paymentLayout;
+    }
+    if (typeof body.plainShowCancel === "boolean") {
+      updatedSettings.plainShowCancel = body.plainShowCancel;
+    }
+    if (typeof body.plainShowTerms === "boolean") {
+      updatedSettings.plainShowTerms = body.plainShowTerms;
+    }
+    if (typeof body.plainBackground === "string" && /^#[0-9a-fA-F]{6}$/.test(body.plainBackground)) {
+      updatedSettings.plainBackground = body.plainBackground;
+    }
+
     await db
       .update(users)
       .set({ eftSettings: updatedSettings, updatedAt: new Date() })
