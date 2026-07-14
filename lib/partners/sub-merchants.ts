@@ -14,8 +14,8 @@
  */
 
 import { db } from "@/lib/db";
-import { users, eftBankAccounts } from "@/lib/db/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { users, eftBankAccounts, settlementBanks } from "@/lib/db/schema";
+import { eq, and, or, sql } from "drizzle-orm";
 import crypto from "crypto";
 import { z } from "zod";
 
@@ -160,6 +160,17 @@ export async function resolveSubMerchant(
 
   // Upsert primary bank account when provided
   if (input.bankAccount) {
+    // Link the free-text bankCode to a settlement bank so the bank name
+    // resolves everywhere (admin views, recon). Match on code or name.
+    const codeLower = input.bankAccount.bankCode.toLowerCase();
+    const settlementBank = await db.query.settlementBanks.findFirst({
+      where: or(
+        sql`lower(${settlementBanks.code}) = ${codeLower}`,
+        sql`lower(${settlementBanks.bankName}) = ${codeLower}`,
+        sql`lower(${settlementBanks.fullName}) = ${codeLower}`
+      ),
+    });
+
     const primary = await db.query.eftBankAccounts.findFirst({
       where: and(
         eq(eftBankAccounts.merchantId, merchant.id),
@@ -174,7 +185,8 @@ export async function resolveSubMerchant(
           accountNumber: input.bankAccount.accountNumber,
           accountHolderName: input.bankAccount.accountHolderName,
           bankCode: input.bankAccount.bankCode,
-          branchCode: input.bankAccount.branchCode || primary.branchCode,
+          settlementBankId: settlementBank?.id || primary.settlementBankId,
+          branchCode: input.bankAccount.branchCode || settlementBank?.branchCode || primary.branchCode,
           branchName: input.bankAccount.branchName || primary.branchName,
           accountType: input.bankAccount.accountType,
           updatedAt: new Date(),
@@ -187,7 +199,8 @@ export async function resolveSubMerchant(
         accountHolderName: input.bankAccount.accountHolderName,
         accountName: name,
         bankCode: input.bankAccount.bankCode,
-        branchCode: input.bankAccount.branchCode || null,
+        settlementBankId: settlementBank?.id || null,
+        branchCode: input.bankAccount.branchCode || settlementBank?.branchCode || null,
         branchName: input.bankAccount.branchName || null,
         accountType: input.bankAccount.accountType,
         isPrimary: true,

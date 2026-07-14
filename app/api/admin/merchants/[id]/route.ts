@@ -86,7 +86,9 @@ export async function GET(
       account_holder: primaryBank.accountHolderName,
       account_number: primaryBank.accountNumber,
       account_type: primaryBank.accountType,
-      bank_name: primaryBank.bankFullName || primaryBank.bankName,
+      // Fall back to the raw bank code (e.g. from connector-created accounts
+      // that didn't match a settlement bank) instead of showing nothing
+      bank_name: primaryBank.bankFullName || primaryBank.bankName || primaryBank.bankCode,
       branch_code: primaryBank.branchCode,
     } : merchant.bankAccount;
 
