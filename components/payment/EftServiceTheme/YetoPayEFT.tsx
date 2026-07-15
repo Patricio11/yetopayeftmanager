@@ -1429,9 +1429,11 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
                 <Image
                   src={input.data_uri}
                   alt="Security captcha"
-                  width={200}
-                  height={80}
-                  className="border border-gray-300 rounded-lg shadow-sm max-w-full h-auto"
+                  width={360}
+                  height={144}
+                  // Larger + white-padded so the code is easy to read; captured at natural
+                  // resolution on the backend so upscaling stays crisp.
+                  className="w-72 sm:w-80 h-auto max-w-full border border-gray-300 rounded-lg shadow-sm bg-white p-2"
                   unoptimized
                 />
               </div>
@@ -1447,6 +1449,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
                 error ? 'border-red-500' : 'border-gray-300'
               }`}
               autoComplete="off"
+              autoFocus
             />
             {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
           </div>
