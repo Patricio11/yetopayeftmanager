@@ -14,6 +14,7 @@ import { decryptString } from "@/lib/security/credential-encryption";
 
 // Event types
 export type WebhookEventType =
+  | 'payment.initiated'
   | 'payment.completed'
   | 'payment.failed'
   | 'payment.cancelled'

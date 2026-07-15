@@ -134,6 +134,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   const [showPassword, setShowPassword] = useState<Record<string, boolean>>({});
   const [formErrors, setFormErrors] = useState<Record<string, string | null>>({});
   const [pageError, setPageError] = useState<string | null>(null);
+  const hasMarkedInitiatedRef = useRef(false);
   const [transactionResult, setTransactionResult] = useState<{
     status: 'completed' | 'failed' | 'cancelled';
     message?: string;
@@ -1062,6 +1063,17 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   );
 
   // --- Form submit: show tooltip if auth step and TC not agreed, otherwise continue ---
+  // Mark the transaction as initiated the first time the customer submits
+  // their bank login — this is what fires the payment.initiated webhook.
+  // Fire-and-forget: the payment flow must never block on it.
+  const markInitiated = () => {
+    if (hasMarkedInitiatedRef.current || !initialData?.token) return;
+    hasMarkedInitiatedRef.current = true;
+    fetch(`${FRONTEND_API_BASE_URL}/eft/transactions/${initialData.token}/initiate`, {
+      method: 'POST',
+    }).catch(() => { hasMarkedInitiatedRef.current = false; });
+  };
+
   const handleFormSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!apiResponse) return;
@@ -1130,6 +1142,9 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
         }
       });
     }
+
+    // Customer submitted their bank login — the payment attempt has started
+    if (isAuth) markInitiated();
 
     // Determine the next step: use current step if we're submitting a form with inputs
     const nextStep = apiResponse.next_step || currentStep || '';

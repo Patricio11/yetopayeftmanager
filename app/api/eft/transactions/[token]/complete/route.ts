@@ -137,7 +137,10 @@ export async function POST(
 
     // Validate status transitions — prevent going backward or skipping states
     const VALID_TRANSITIONS: Record<string, string[]> = {
-      not_started: ["initiated", "pending", "cancelled", "expired"],
+      // Terminal statuses allowed from not_started as a safety net: "initiated"
+      // is marked by a separate frontend call on credential submit, which could
+      // be missed on flaky networks — completion must still be recordable.
+      not_started: ["initiated", "pending", "completed", "failed", "aborted", "cancelled", "expired"],
       initiated: ["pending", "completed", "failed", "aborted", "cancelled", "expired"],
       pending: ["completed", "failed", "aborted", "cancelled", "expired"],
     };

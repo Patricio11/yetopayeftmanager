@@ -80,6 +80,7 @@ export async function POST(request: NextRequest) {
     // Validate events
     const validEvents = [
       '*',
+      'payment.initiated',
       'payment.completed',
       'payment.failed',
       'payment.cancelled',
@@ -207,6 +208,7 @@ export async function PATCH(request: NextRequest) {
     if (events !== undefined) {
       const validEvents = [
         '*',
+        'payment.initiated',
         'payment.completed',
         'payment.failed',
         'payment.cancelled',

@@ -79,11 +79,12 @@ export async function POST(
       );
     }
 
-    // Update transaction to initiated status with bank info
+    // Record the selected bank. Status stays as-is — "initiated" is only set
+    // once the customer submits their bank login (see the /initiate endpoint),
+    // so that payment.initiated genuinely means the customer started paying.
     const [updatedTransaction] = await db
       .update(eftTransactions)
       .set({
-        status: "initiated",
         eftBankId: bank.id,
         updatedAt: new Date(),
         metadata: {
@@ -96,7 +97,7 @@ export async function POST(
       .where(eq(eftTransactions.id, transactionId))
       .returning();
 
-    console.log(`✅ Transaction initiated: ${transactionId} -> Bank: ${bank.bankName} (${validatedData.bankCode})`);
+    console.log(`✅ Bank selected: ${transactionId} -> ${bank.bankName} (${validatedData.bankCode})`);
 
     // Dispatch transaction.updated webhook event
     try {

@@ -10,7 +10,7 @@ import {
   Copy, Trash2, Plus, Check, AlertCircle, Shield,
   Webhook, RefreshCw, ExternalLink, Activity, X, Code,
   ChevronDown, ChevronRight, Clock, Loader2, Zap,
-  CheckCircle, XCircle, ArrowUpDown,
+  CheckCircle, XCircle, ArrowUpDown, Pencil,
 } from "lucide-react";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -42,9 +42,12 @@ export function WebhookSettings() {
   const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
   const [isActive, setIsActive] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const availableEvents = [
     { value: '*', label: 'All Events (Wildcard)', description: 'Subscribe to all current and future events', highlight: true },
+    { value: 'payment.initiated', label: 'Payment Initiated', description: 'When the customer selected their bank and submitted their login — the payment attempt has started' },
     { value: 'payment.completed', label: 'Payment Completed', description: 'When a payment is successfully completed' },
     { value: 'payment.failed', label: 'Payment Failed', description: 'When a payment fails' },
     { value: 'payment.cancelled', label: 'Payment Cancelled', description: 'When a payment is cancelled by user or system' },
@@ -99,6 +102,78 @@ export function WebhookSettings() {
     } finally {
       setCreating(false);
     }
+  };
+
+  const openEditModal = (webhook: any) => {
+    setEditingId(webhook.id);
+    setUrl(webhook.url);
+    setSelectedEvents(webhook.events as string[]);
+    setIsActive(!!webhook.isActive);
+    setShowCreateModal(true);
+  };
+
+  const handleUpdateWebhook = async () => {
+    if (!editingId || !url || selectedEvents.length === 0) {
+      toast({ title: "Error", description: "URL and at least one event are required", variant: "destructive" });
+      return;
+    }
+    setCreating(true);
+    try {
+      const response = await fetch('/api/webhooks', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ webhookId: editingId, url, events: selectedEvents, isActive }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        toast({ title: "Saved", description: "Webhook updated successfully" });
+        closeModal();
+        fetchWebhooks();
+      } else {
+        toast({ title: "Error", description: data.message, variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to update webhook", variant: "destructive" });
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleToggleActive = async (webhook: any) => {
+    const next = !webhook.isActive;
+    setTogglingId(webhook.id);
+    // Optimistic update
+    setWebhooks((prev) => prev.map((w) => (w.id === webhook.id ? { ...w, isActive: next } : w)));
+    try {
+      const response = await fetch('/api/webhooks', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ webhookId: webhook.id, isActive: next }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        toast({
+          title: next ? "Webhook enabled" : "Webhook disabled",
+          description: next ? "Events will be delivered to this endpoint" : "Events will no longer be sent to this endpoint",
+        });
+      } else {
+        setWebhooks((prev) => prev.map((w) => (w.id === webhook.id ? { ...w, isActive: !next } : w)));
+        toast({ title: "Error", description: data.message, variant: "destructive" });
+      }
+    } catch {
+      setWebhooks((prev) => prev.map((w) => (w.id === webhook.id ? { ...w, isActive: !next } : w)));
+      toast({ title: "Error", description: "Failed to update webhook", variant: "destructive" });
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
+  const closeModal = () => {
+    setShowCreateModal(false);
+    setEditingId(null);
+    setUrl("");
+    setSelectedEvents([]);
+    setIsActive(true);
   };
 
   const handleDeleteWebhook = async (webhookId: string) => {
@@ -232,7 +307,7 @@ export function WebhookSettings() {
     <div className="space-y-6">
       {/* Create button */}
       <div className="flex justify-end">
-        <Button size="sm" onClick={() => setShowCreateModal(true)} className="bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white border-0">
+        <Button size="sm" onClick={() => { closeModal(); setShowCreateModal(true); }} className="bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white border-0">
           <Plus className="w-4 h-4 mr-2" />
           Add Webhook
         </Button>
@@ -244,7 +319,7 @@ export function WebhookSettings() {
           <Webhook className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
           <p className="text-slate-500 dark:text-slate-400 font-medium">No webhooks configured</p>
           <p className="text-sm text-slate-400 dark:text-slate-500 mt-1 mb-4">Create your first webhook to receive real-time event notifications</p>
-          <Button size="sm" onClick={() => setShowCreateModal(true)} variant="outline">
+          <Button size="sm" onClick={() => { closeModal(); setShowCreateModal(true); }} variant="outline">
             <Plus className="w-4 h-4 mr-2" />
             Create Your First Webhook
           </Button>
@@ -254,12 +329,12 @@ export function WebhookSettings() {
           {webhooks.map((webhook) => (
             <div key={webhook.id} className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 overflow-hidden">
               <div className="p-5">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white">
+                <div className="flex items-start justify-between mb-3 gap-3">
+                  <div className={`flex items-center gap-3 min-w-0 ${!webhook.isActive ? "opacity-60" : ""}`}>
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-white shrink-0 ${webhook.isActive ? "bg-gradient-to-br from-emerald-500 to-teal-600" : "bg-slate-400"}`}>
                       <Webhook className="w-4 h-4" />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="font-medium text-slate-900 dark:text-white text-sm break-all">{webhook.url}</p>
                         <Badge
@@ -269,13 +344,20 @@ export function WebhookSettings() {
                             : "bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 shrink-0"
                           }
                         >
-                          {webhook.isActive ? "Active" : "Inactive"}
+                          {webhook.isActive ? "Active" : "Disabled"}
                         </Badge>
                       </div>
                       <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
                         Secret: <code className="bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded text-slate-400 dark:text-slate-500">whsec_&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</code>
                       </p>
                     </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0" title={webhook.isActive ? "Disable webhook — keep it but stop sending events" : "Enable webhook"}>
+                    <Switch
+                      checked={!!webhook.isActive}
+                      onCheckedChange={() => handleToggleActive(webhook)}
+                      disabled={togglingId === webhook.id}
+                    />
                   </div>
                 </div>
 
@@ -308,6 +390,15 @@ export function WebhookSettings() {
                     <Zap className="w-3.5 h-3.5" />
                   )}
                   {testingId === webhook.id ? "Testing..." : "Test"}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => openEditModal(webhook)}
+                  className="text-xs h-8 gap-1.5"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  Edit
                 </Button>
                 <Button
                   size="sm"
@@ -353,10 +444,10 @@ export function WebhookSettings() {
           <div className="w-full max-w-lg border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/50 flex items-center justify-between">
               <div>
-                <h3 className="text-base font-semibold text-slate-900 dark:text-white">Create New Webhook</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Configure a new webhook endpoint</p>
+                <h3 className="text-base font-semibold text-slate-900 dark:text-white">{editingId ? "Edit Webhook" : "Create New Webhook"}</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{editingId ? "Update the endpoint URL, events, or status" : "Configure a new webhook endpoint"}</p>
               </div>
-              <button onClick={() => setShowCreateModal(false)} className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+              <button onClick={closeModal} className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                 <X className="w-5 h-5 text-slate-400" />
               </button>
             </div>
@@ -412,16 +503,18 @@ export function WebhookSettings() {
               <div className="flex items-center justify-between p-3 border border-slate-200 dark:border-slate-700 rounded-lg">
                 <div>
                   <p className="text-sm font-medium text-slate-900 dark:text-white">Active</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Start receiving events immediately</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{editingId ? "Deliver events to this endpoint" : "Start receiving events immediately"}</p>
                 </div>
                 <Switch checked={isActive} onCheckedChange={setIsActive} />
               </div>
             </div>
 
             <div className="px-6 py-4 bg-slate-50/50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-700/50 flex justify-end gap-3">
-              <Button variant="outline" size="sm" onClick={() => setShowCreateModal(false)}>Cancel</Button>
-              <Button size="sm" onClick={handleCreateWebhook} disabled={creating} className="bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white border-0">
-                {creating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating...</> : "Create Webhook"}
+              <Button variant="outline" size="sm" onClick={closeModal}>Cancel</Button>
+              <Button size="sm" onClick={editingId ? handleUpdateWebhook : handleCreateWebhook} disabled={creating} className="bg-gradient-to-r from-green-700 to-green-500 hover:from-green-800 hover:to-green-600 text-white border-0">
+                {creating
+                  ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{editingId ? "Saving..." : "Creating..."}</>
+                  : (editingId ? "Save Changes" : "Create Webhook")}
               </Button>
             </div>
           </div>

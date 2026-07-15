@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { createHash } from "crypto";
 import { getProviderConfig, asCallPayConfig } from "@/lib/providers";
 import { createPaymentKey } from "@/lib/providers/callpay";
+import { dispatchWebhookEvent } from "@/lib/webhooks/dispatcher";
 
 export async function POST(
   request: NextRequest,
@@ -75,6 +76,27 @@ export async function POST(
         updatedAt: new Date(),
       })
       .where(eq(eftTransactions.id, transaction.id));
+
+    // Fire payment.initiated — the customer chose card and is being sent to
+    // the card processor (only on the first initiation, not retries)
+    if (transaction.status === "not_started") {
+      try {
+        await dispatchWebhookEvent(transaction.merchantId, "payment.initiated", {
+          id: transaction.id,
+          reference: transaction.reference,
+          amount: parseFloat(transaction.amount),
+          status: "initiated",
+          paymentMethod: "card",
+          customerEmail: transaction.customerEmail || undefined,
+          customerName: transaction.customerName || undefined,
+          metadata: transaction.metadata,
+          createdAt: transaction.createdAt?.toISOString(),
+          initiatedAt: new Date().toISOString(),
+        });
+      } catch (error) {
+        console.error("Error dispatching payment.initiated webhook:", error);
+      }
+    }
 
     return NextResponse.json({
       success: true,
