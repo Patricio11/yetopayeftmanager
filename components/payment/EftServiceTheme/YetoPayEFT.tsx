@@ -170,11 +170,15 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   const submitGuard = useRef(false);
   const finalPollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const sseRef = useRef<EventSource | null>(null);
+  // Which in-app approval we're currently waiting on, so the mobile poll fallback hits the right
+  // endpoint: 'inAppRequired' (login / add-beneficiary approval → awaitAuthApproval) vs 'final'
+  // (the payment approval → finalStep). Kept in sync whenever we (re)enter an approve screen.
+  const inAppPollStep = useRef<'final' | 'inAppRequired'>('final');
 
 
   const stepNumbers: Record<string, number> = {
     initializing: 1, init: 1, load_bank: 1,
-    auth: 2, setup: 2, processing: 2, select: 2, 'demo-select': 2,
+    auth: 2, setup: 2, processing: 2, select: 2, 'demo-select': 2, inAppRequired: 2,
     payment: 3, 'otp-payment': 3, final: 3, 'verify-result': 3,
     completed: 4, failed: 4
   };
@@ -667,14 +671,18 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
           // Form inputs (account selection, OTP, etc.) — render the form
           setApiResponse(res);
           setCurrentStep(res.step || 'auth');
+          setIsInAppStep(false);
           setIsLoading(false);
-        } else if (res.step === 'final' && res.countdown) {
-          // Payment submitted — show new countdown for payment confirmation
+        } else if ((res.step === 'final' || res.step === 'inAppRequired') && res.countdown) {
+          // An in-app approval screen: either the payment approval ('final' → finalStep) or a
+          // non-payment approval keep-alive / new request ('inAppRequired' → awaitAuthApproval).
+          // Render it and reconnect the SSE so the server invokes the matching handler for the
+          // next window (finalStep once approveItPending clears, else awaitAuthApproval again).
+          inAppPollStep.current = res.step as 'final' | 'inAppRequired';
           setApiResponse(res);
-          setCurrentStep('final');
+          setCurrentStep(res.step);
           setIsInAppStep(true);
           setIsLoading(false);
-          // Reconnect SSE so the server invokes finalStep (approveItPending is now false)
           setTimeout(() => connectSSE(bankCode), 100);
         } else if (res.step === 'processing') {
           // Intermediate processing update (e.g. "auth approved, setting up payment...")
@@ -702,23 +710,63 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     };
   };
 
-  // --- Fallback polling (only used if SSE connection fails) ---
+  // --- Fallback polling (only used if the SSE connection fails, e.g. iOS suspends Safari when
+  // the user switches to the bank app to approve). Polls the endpoint for whichever approval we
+  // are currently on — '/inAppRequired' (login / add-beneficiary) or '/final' (payment) — and
+  // carries the whole flow to completion using polling alone, so mobile works without the SSE.
+  const stopPollingFallback = () => {
+    if (finalPollTimer.current) {
+      clearInterval(finalPollTimer.current);
+      finalPollTimer.current = null;
+    }
+  };
+
   const startFinalPollingFallback = (bankCode: string) => {
     if (finalPollTimer.current) clearInterval(finalPollTimer.current);
-    console.log('[EFT] SSE unavailable, falling back to polling');
+    console.log('[EFT] SSE unavailable, falling back to polling', inAppPollStep.current);
     finalPollTimer.current = setInterval(async () => {
       try {
-        const res = await executeStepApi(bankCode, 'final', {});
+        const res = await executeStepApi(bankCode, inAppPollStep.current, {});
+
+        // Terminal outcome (success / cancelled / failed) — finish and redirect.
         const norm = normalizeTerminal(res);
         if (norm.terminal) {
-          if (finalPollTimer.current) {
-            clearInterval(finalPollTimer.current);
-            finalPollTimer.current = null;
-          }
+          stopPollingFallback();
           await finishAndRedirect(norm.uiStatus, norm.message, res);
+          return;
+        }
+        if (res.ok === false) {
+          stopPollingFallback();
+          await finishAndRedirect('failed', res.message || 'An error occurred', res);
+          return;
+        }
+
+        // A form surfaced during/after approval (account selection, OTP) — render it and stop
+        // polling; the user's next submit resumes the normal SSE-driven flow.
+        const nextStep = (res.step || res.next_step) as string | undefined;
+        if (res.inputs) {
+          stopPollingFallback();
+          setApiResponse(res);
+          setCurrentStep(nextStep || 'select');
+          setIsInAppStep(false);
+          setIsLoading(false);
+          return;
+        }
+
+        // Still waiting on an approval, or moved from the login approval to the payment approval.
+        // Update the screen + switch the poll endpoint so the next tick hits the right handler.
+        if (nextStep === 'final' || nextStep === 'inAppRequired') {
+          inAppPollStep.current = nextStep;
+          setApiResponse(res);
+          setCurrentStep(nextStep);
+          setIsInAppStep(true);
+          setIsLoading(false);
+        } else if (nextStep === 'processing') {
+          const plainMsg = (res.message || '').replace(/<[^>]*>/g, '') || 'Processing your payment...';
+          setProcessingMessage(plainMsg);
         }
       } catch {
-        // ignore transient errors while waiting for approval
+        // transient (dropped connection while backgrounded) — keep polling
       }
     }, 3000);
   };
@@ -854,8 +902,12 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
           }
         }
 
-        // If the backend returns inputs (a form) or final (waiting for in-app approval) -> render UI and return control to user
-        if (result.inputs || stepToDisplay === 'final') {
+        // Stop and hand control back to the user when the backend returns inputs (a form) or an
+        // in-app approval screen: 'final' (payment approval) or 'inAppRequired' (any earlier
+        // approval — login / add-beneficiary). Both approval screens are SSE-driven and fall back
+        // to polling the matching endpoint on mobile.
+        const isInAppApproval = stepToDisplay === 'final' || stepToDisplay === 'inAppRequired';
+        if (result.inputs || isInAppApproval) {
           setApiResponse(result);
           setCurrentStep(stepToDisplay || (result.inputs ? 'auth' : 'final'));
           setIsLoading(false);
@@ -863,7 +915,8 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
           if ((stepToDisplay || '').toString().toLowerCase() === 'auth') {
             setAgreedToTerms(false);
           }
-          if (stepToDisplay === 'final') {
+          if (isInAppApproval) {
+            inAppPollStep.current = stepToDisplay as 'final' | 'inAppRequired';
             setIsInAppStep(true);
             connectSSE(bankCode);
           } else {
@@ -1561,7 +1614,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
             <h2 className="text-2xl font-bold text-gray-900 mb-2">{apiResponse.title}</h2>
             <div className="text-gray-600" style={{ whiteSpace: 'pre-line' }}>{apiResponse.message || ''}</div>
           </div>
-          {currentStep === 'final' && isInAppStep && (
+          {(currentStep === 'final' || currentStep === 'inAppRequired') && isInAppStep && (
             <button
               type="button"
               onClick={handleResendInApp}
@@ -2097,6 +2150,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
       case 'demo-select': return renderDemoOutcomePicker();
       case 'processing': return renderProcessingLoader();
       case 'select': return renderAccountSelection();
+      case 'inAppRequired':
       case 'final': return renderFinalStep();
       case 'completed':
       case 'failed':
