@@ -252,7 +252,26 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   };
 
   // Final UI -> update transaction status in our DB, then redirect
-  const finishAndRedirect = async (uiStatus: 'completed' | 'failed' | 'cancelled', message?: string, raw?: ApiResponse) => {
+  const finishAndRedirect = async (
+    finalStatus: 'completed' | 'failed' | 'cancelled',
+    finalMessage?: string,
+    raw?: ApiResponse
+  ) => {
+    let uiStatus = finalStatus;
+    let message = finalMessage;
+
+    // A genuine completion is proven by the EFT service's HMAC signature — the
+    // same proof /complete requires before it will record the payment. A bare
+    // status:"success" is not enough: an already-terminated session replies
+    // {"ok":true,"status":"success"} to a late /final poll, which would other-
+    // wise show "Payment Successful" for a prompt the customer never approved.
+    // Never tell a customer they paid when the backend will refuse to record it.
+    if (uiStatus === 'completed' && !initialData?.isDemo && !(raw as any)?.eftSignature) {
+      console.error('[EFT] Completion without an EFT service signature — refusing to show success');
+      uiStatus = 'failed';
+      message = 'We could not confirm this payment with your bank. Please check your account before trying again.';
+    }
+
     if (finalPollTimer.current) clearInterval(finalPollTimer.current);
     if (sseRef.current) { sseRef.current.close(); sseRef.current = null; }
     setTransactionResult({
