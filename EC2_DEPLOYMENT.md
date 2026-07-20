@@ -1541,3 +1541,47 @@ pm2 reload yetopay --update-env     # Reload with new env vars
 - [ ] SSE payment status updates verified working
 - [ ] Webhook delivery tested end-to-end
 - [ ] Payment flow smoke tested with real transaction
+
+---
+
+## Scaling the EFT Service: Multiple EC2 Instances Behind an ALB
+
+The EFT service is **stateful**: each payment session lives in process memory
+with a live headless-browser attached. A session **must** finish on the
+instance where it started. Multi-instance therefore requires **ALB sticky
+sessions**, honoured by the payment page.
+
+### How it works
+
+- The payment page sends every EFT call with `credentials: 'include'` and the
+  SSE stream with `withCredentials: true`, so the browser returns the ALB
+  stickiness cookie (`AWSALBCORS`, `SameSite=None; Secure`) on this
+  cross-origin traffic. The first call of a session (`load_bank`) pins the
+  instance; all later steps, polls, and the SSE land on the same one.
+- The EFT service already supports credentialed CORS (specific origin +
+  `access-control-allow-credentials: true`).
+- If a request still lands on the wrong instance (cookie expired, instance
+  replaced), the service **never fabricates success**: unknown sessions get an
+  explicit `409 { status: "expired", terminated: true }`, and completed
+  sessions return success **with** the stored `eftSignature` so the manager
+  can verify it. The payment page refuses to show success without that
+  signature.
+
+### Required ALB configuration
+
+| Setting | Value | Why |
+|---|---|---|
+| Target group stickiness | **Enabled**, LB-generated cookie | Sessions are per-instance |
+| Stickiness duration | ≥ 3600 s | Longer than any payment + in-app approval |
+| Idle timeout | ≥ 120 s | Bank steps are slow; SSE heartbeats every 15 s |
+| Health check path | `/health` | Only route to instances that answer |
+| Deregistration delay | ≥ 300 s | Lets in-flight payments finish during scale-in |
+
+### Rules
+
+1. **One service process per instance** — no PM2 cluster mode (workers don't
+   share sessions; stickiness only pins the instance, not the worker).
+2. **Scale in gently** — deregister an instance and let draining finish before
+   stopping it; any session still on it dies with the browser.
+3. **Single-instance mode needs none of this** — stickiness on/off makes no
+   difference with one target; the credentialed calls are harmless either way.

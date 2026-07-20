@@ -618,10 +618,15 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   };
 
   // --- Network: call EFT API endpoints for bank/step ---
+  // credentials: 'include' sends the ALB stickiness cookie (AWSALBCORS) so that
+  // when the EFT service runs multiple instances behind a load balancer, every
+  // request of this payment session lands on the instance holding the live
+  // browser session. Requires target-group stickiness + CORS with credentials
+  // on the EFT side (it already sends a specific origin + allow-credentials).
   const executeStepApi = async (bankCode: string, step: string, data: Record<string, any>) => {
     const url = `${getEftUrl(bankCode)}/${bankCode}/${step}?session_id=${sessionId}`;
     console.log(`[EFT] Calling ${step}`);
-    const response = await fetch(url, { method: 'POST', headers: authHeader(), body: JSON.stringify({ ...data }) });
+    const response = await fetch(url, { method: 'POST', headers: authHeader(), credentials: 'include', body: JSON.stringify({ ...data }) });
     const result: ApiResponse = await response.json();
     console.log(`[EFT] ${step} response step:`, result.step || result.next_step);
     if (!response.ok) {
@@ -642,7 +647,8 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     const sseUrl = `${getEftUrl(bankCode)}/${bankCode}/events?session_id=${sessionId}&token=${encodeURIComponent(authSecretBearerToken)}`;
     console.log('[SSE] Connecting to:', sseUrl);
 
-    const es = new EventSource(sseUrl);
+    // withCredentials sends the ALB stickiness cookie — same reason as executeStepApi
+    const es = new EventSource(sseUrl, { withCredentials: true });
     sseRef.current = es;
 
     es.addEventListener('connected', (e) => {
@@ -1034,6 +1040,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
       const response = await fetch(`${getEftUrl(bankCode)}/${bankCode}/cancel?session_id=${sid}`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(authSecretBearerToken ? { Authorization: `Bearer ${authSecretBearerToken}` } : {}) },
+        credentials: "include",
       });
 
       console.log(response);
