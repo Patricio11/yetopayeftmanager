@@ -98,7 +98,7 @@ Tokens are signed with these claims:
 | Claim | Value |
 |-------|-------|
 | `aud` | `eft-service` (fixed) |
-| `iss` | `EFT_JWT_ISSUER`, falling back to `NEXT_PUBLIC_APP_URL` |
+| `iss` | `EFT_JWT_ISSUER`, falling back to `NEXT_PUBLIC_APP_URL`, then `https://yetopay.co.za` |
 
 The EFT service validates `iss` against its own configured value. **This is not
 always the same as the app URL** — for example, the dashboard is served on

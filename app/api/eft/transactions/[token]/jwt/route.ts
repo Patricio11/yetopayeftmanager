@@ -136,7 +136,7 @@ export async function POST(
     const jwtToken = jwt.sign(payload, privateKey, {
       algorithm: 'RS256',
       audience: 'eft-service',
-      issuer: process.env.EFT_JWT_ISSUER || process.env.NEXT_PUBLIC_APP_URL || 'https://manager.yetopay.co.za',
+      issuer: process.env.EFT_JWT_ISSUER || process.env.NEXT_PUBLIC_APP_URL || 'https://yetopay.co.za',
       expiresIn: '1h', // Token valid for 1 hour
     });
 
