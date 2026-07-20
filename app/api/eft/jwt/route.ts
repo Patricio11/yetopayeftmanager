@@ -96,11 +96,12 @@ export async function POST(request: NextRequest) {
       ...(validatedData.sessionData || {}),
     };
 
-    // Generate JWT token
+    // Generate JWT token.
+    // Issuer must match the EFT service's expected value — see EFT_JWT_ISSUER.
     const token = jwt.sign(payload, privateKey, {
       algorithm: 'RS256',
       audience: 'eft-service',
-      issuer: process.env.NEXT_PUBLIC_APP_URL || 'https://manager.yetopay.co.za',
+      issuer: process.env.EFT_JWT_ISSUER || process.env.NEXT_PUBLIC_APP_URL || 'https://manager.yetopay.co.za',
       expiresIn: '1h', // Token valid for 1 hour
     });
 

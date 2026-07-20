@@ -91,6 +91,35 @@ NEXT_PUBLIC_EFT_SERVICE_URL=http://localhost:8080/v1/eft
 
 ---
 
+## 🏷️ **JWT Issuer (`EFT_JWT_ISSUER`)**
+
+Tokens are signed with these claims:
+
+| Claim | Value |
+|-------|-------|
+| `aud` | `eft-service` (fixed) |
+| `iss` | `EFT_JWT_ISSUER`, falling back to `NEXT_PUBLIC_APP_URL` |
+
+The EFT service validates `iss` against its own configured value. **This is not
+always the same as the app URL** — for example, the dashboard is served on
+`https://www.yetopay.co.za` (auth requires the exact origin, since preflight
+requests cannot follow the bare→www redirect) while the EFT service expects
+`https://yetopay.co.za`.
+
+When those differ, set the issuer explicitly:
+
+```env
+NEXT_PUBLIC_APP_URL=https://www.yetopay.co.za   # login / payment links
+EFT_JWT_ISSUER=https://yetopay.co.za            # what the EFT service expects
+```
+
+**Symptom of a mismatch:** the EFT service returns `401 {"message":"Invalid token"}`
+on calls like `load_bank`, and the payment page shows "Payment Failed — Invalid token".
+(A *missing* key gives `"Missing token"` instead, and a wrong key pair gives a
+signature error in the EFT service logs.)
+
+---
+
 ## 🔒 **Security Notes**
 
 1. **Never commit private keys to Git!**
