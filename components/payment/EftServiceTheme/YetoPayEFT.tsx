@@ -135,6 +135,11 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   const [formErrors, setFormErrors] = useState<Record<string, string | null>>({});
   const [pageError, setPageError] = useState<string | null>(null);
   const hasMarkedInitiatedRef = useRef(false);
+  // A transaction has exactly ONE terminal outcome. SSE and the poll fallback
+  // can race (two /final polls overlapped in production: the real signed result
+  // and a quick unsigned tombstone reply, 16ms apart → a failed AND a completed
+  // webhook). First finishAndRedirect wins; every later call is ignored.
+  const finishedRef = useRef(false);
   const [transactionResult, setTransactionResult] = useState<{
     status: 'completed' | 'failed' | 'cancelled';
     message?: string;
@@ -257,6 +262,12 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     finalMessage?: string,
     raw?: ApiResponse
   ) => {
+    if (finishedRef.current) {
+      console.log('[EFT] finishAndRedirect ignored — transaction already finished');
+      return;
+    }
+    finishedRef.current = true;
+
     let uiStatus = finalStatus;
     let message = finalMessage;
 
@@ -750,7 +761,13 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   const startFinalPollingFallback = (bankCode: string) => {
     if (finalPollTimer.current) clearInterval(finalPollTimer.current);
     console.log('[EFT] SSE unavailable, falling back to polling', inAppPollStep.current);
+    // finalStep drives a live browser and regularly takes longer than the poll
+    // interval — never let ticks overlap, or a second /final lands on the just-
+    // terminated session and races the real result (seen in production).
+    let tickInFlight = false;
     finalPollTimer.current = setInterval(async () => {
+      if (tickInFlight) return;
+      tickInFlight = true;
       try {
         const res = await executeStepApi(bankCode, inAppPollStep.current, {});
 
@@ -793,6 +810,8 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
         }
       } catch {
         // transient (dropped connection while backgrounded) — keep polling
+      } finally {
+        tickInFlight = false;
       }
     }, 3000);
   };

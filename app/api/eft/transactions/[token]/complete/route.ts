@@ -145,6 +145,36 @@ export async function POST(
       pending: ["completed", "failed", "aborted", "cancelled", "expired"],
     };
     const currentStatus = transaction.status || "not_started";
+
+    // ── Terminal-state protection ────────────────────────────────────────
+    // "completed" is final: nothing may ever downgrade it, and repeat reports
+    // are answered idempotently (racing SSE/poll reporters both get success,
+    // and no duplicate webhook fires).
+    if (currentStatus === "completed") {
+      console.log(`ℹ️ /complete on already-completed transaction ${transactionId} (reported: ${validatedData.status}) — ignoring`);
+      return NextResponse.json({
+        success: true,
+        message: "Transaction already completed",
+        transaction: {
+          id: transaction.id,
+          status: "completed",
+          reference: transaction.reference,
+        },
+      });
+    }
+    // A terminal failure may ONLY be upgraded to completed — and only with a
+    // valid EFT signature (verified below). This repairs the race where an
+    // unsigned tombstone reply records "failed" milliseconds before the real
+    // signed success arrives. Any other change to a terminal failure is rejected.
+    const TERMINAL_FAILURES = ["failed", "aborted", "cancelled", "expired"];
+    if (TERMINAL_FAILURES.includes(currentStatus) && validatedData.status !== "completed") {
+      console.log(`ℹ️ /complete on already-${currentStatus} transaction ${transactionId} (reported: ${validatedData.status}) — ignoring`);
+      return NextResponse.json(
+        { success: false, message: `Transaction already ${currentStatus}` },
+        { status: 409 }
+      );
+    }
+
     const allowedNext = VALID_TRANSITIONS[currentStatus];
     if (allowedNext && !allowedNext.includes(validatedData.status)) {
       console.error(`❌ Invalid status transition: ${currentStatus} -> ${validatedData.status} for ${transactionId}`);
