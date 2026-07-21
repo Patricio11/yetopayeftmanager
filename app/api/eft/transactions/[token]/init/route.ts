@@ -247,10 +247,15 @@ export async function GET(
         enableReceipt: !!(merchant.eftSettings as any)?.enableReceipt,
         fnbVerifyResult: !!(merchant.eftSettings as any)?.fnbVerifyResult,
         showSaveCredentials: !!(merchant.eftSettings as any)?.saveCredentialsEnabled,
-        // Plain embed layout: T&Cs hidden unless the org explicitly enables them
+        // T&Cs on the payment page — org-level control, partner-first (a
+        // partner's setting applies to all its merchants' pages). An explicit
+        // org value wins; orgs that never chose follow the platform default.
+        // Plain embed layout keeps its own opt-in (host page shows its own T&Cs).
         showTerms: plainMode
-          ? layoutEft.plainShowTerms === true && tc['eft_tc_enabled'] === 'true'
-          : tc['eft_tc_enabled'] === 'true',
+          ? layoutEft.plainShowTerms === true
+          : (typeof layoutEft.showTermsAndConditions === 'boolean'
+              ? layoutEft.showTermsAndConditions
+              : tc['eft_tc_enabled'] === 'true'),
         availableServices,
         step: "init",
         token,

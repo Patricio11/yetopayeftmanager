@@ -42,6 +42,9 @@ export async function PATCH(
     if (typeof body.plainShowTerms === "boolean") {
       updatedSettings.plainShowTerms = body.plainShowTerms;
     }
+    if (typeof body.showTermsAndConditions === "boolean") {
+      updatedSettings.showTermsAndConditions = body.showTermsAndConditions;
+    }
     if (typeof body.plainBackground === "string" && /^#[0-9a-fA-F]{6}$/.test(body.plainBackground)) {
       updatedSettings.plainBackground = body.plainBackground;
     }

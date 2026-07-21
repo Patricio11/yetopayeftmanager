@@ -50,6 +50,7 @@ const updateSettingsSchema = z.object({
     failureUrl: z.string().url().max(500).optional().or(z.literal("")),
     cancelledUrl: z.string().url().max(500).optional().or(z.literal("")),
     paymentLayout: z.enum(["full", "banks_plain"]).optional(),
+    showTermsAndConditions: z.boolean().optional(),
     plainShowCancel: z.boolean().optional(),
     plainShowTerms: z.boolean().optional(),
     plainBackground: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Invalid color").optional().or(z.literal("")),

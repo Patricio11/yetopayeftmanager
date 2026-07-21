@@ -17,6 +17,7 @@ export function EftUrlSettings() {
   const [failureUrl, setFailureUrl] = useState("");
   const [cancelledUrl, setCancelledUrl] = useState("");
   const [paymentLayout, setPaymentLayout] = useState<"full" | "banks_plain">("full");
+  const [showTerms, setShowTerms] = useState(false);
   const [plainShowCancel, setPlainShowCancel] = useState(true);
   const [plainShowTerms, setPlainShowTerms] = useState(false);
   const [plainBackground, setPlainBackground] = useState("#ffffff");
@@ -38,6 +39,7 @@ export function EftUrlSettings() {
           setFailureUrl(eft.failureUrl || "");
           setCancelledUrl(eft.cancelledUrl || "");
           setPaymentLayout(eft.paymentLayout === "banks_plain" ? "banks_plain" : "full");
+          setShowTerms(eft.showTermsAndConditions === true);
           setPlainShowCancel(eft.plainShowCancel !== false);
           setPlainShowTerms(eft.plainShowTerms === true);
           setPlainBackground(eft.plainBackground || "#ffffff");
@@ -61,7 +63,8 @@ export function EftUrlSettings() {
         body: JSON.stringify({
           eftSettings: {
             notifyUrl, successUrl, failureUrl, cancelledUrl,
-            paymentLayout, plainShowCancel, plainShowTerms, plainBackground,
+            paymentLayout, showTermsAndConditions: showTerms,
+            plainShowCancel, plainShowTerms, plainBackground,
             // Empty strings reset to the default YetoPay theme
             brandColorFrom: customColors ? brandColorFrom : "",
             brandColorTo: customColors ? brandColorTo : "",
@@ -209,6 +212,19 @@ export function EftUrlSettings() {
               </p>
             </button>
           </div>
+
+          {paymentLayout === "full" && (
+            <div className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-600 p-4">
+              <div>
+                <p className="text-sm font-medium text-slate-900 dark:text-white">Show Terms &amp; Conditions</p>
+                <p className="text-xs text-slate-500">
+                  Customers must accept the T&amp;Cs on the bank login step before paying.
+                  Partners: applies to all your merchants&apos; payment pages.
+                </p>
+              </div>
+              <Switch checked={showTerms} onCheckedChange={setShowTerms} />
+            </div>
+          )}
 
           {paymentLayout === "banks_plain" && (
             <div className="rounded-xl border border-slate-200 dark:border-slate-600 p-4 space-y-4 bg-slate-50/50 dark:bg-slate-800/30">
