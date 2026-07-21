@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import {
   Activity, Search, CheckCircle, XCircle, Clock, AlertCircle,
   Filter, ChevronDown, Eye, X, Hash, Building2, User, Landmark, Calendar,
+  ScrollText, ImageIcon, Code, Loader2, ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -88,6 +89,7 @@ export default function PartnerTransactionsPage() {
   const [search, setSearch] = useState("");
   const [banks, setBanks] = useState<Bank[]>([]);
   const [viewTxn, setViewTxn] = useState<Transaction | null>(null);
+  const [auditTxn, setAuditTxn] = useState<Transaction | null>(null);
 
   // Load merchants + banks for the filter dropdowns
   useEffect(() => {
@@ -525,10 +527,181 @@ export default function PartnerTransactionsPage() {
               )}
             </div>
 
-            <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex justify-end">
+            <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex justify-between items-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => { setAuditTxn(viewTxn); setViewTxn(null); }}
+                className="gap-2"
+              >
+                <ScrollText className="w-4 h-4" />
+                View Audit
+              </Button>
               <Button variant="outline" size="sm" onClick={() => setViewTxn(null)}>Close</Button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Audit Trail Dialog */}
+      {auditTxn && (
+        <AuditDialog txn={auditTxn} onClose={() => setAuditTxn(null)} />
+      )}
+    </div>
+  );
+}
+
+// ─── Audit Trail Dialog ──────────────────────────────────────────────────────
+
+interface AuditData {
+  date: string | null;
+  log: string | null;
+  screenshots: { name: string; url: string }[];
+}
+
+function auditLineClass(line: string): string {
+  if (line.includes("[ERROR]")) return "text-red-400";
+  if (line.includes("[WARN]")) return "text-amber-400";
+  if (line.includes("[SCREENSHOT]")) return "text-sky-400";
+  if (line.includes("[STEP]") || line.includes("[TRANSACTION_START]") || line.includes("[SUCCESS]")) return "text-emerald-400";
+  return "text-slate-300";
+}
+
+function AuditDialog({ txn, onClose }: { txn: Transaction; onClose: () => void }) {
+  const [loading, setLoading] = useState(true);
+  const [audit, setAudit] = useState<AuditData | null>(null);
+  const [tab, setTab] = useState<"screenshots" | "log">("screenshots");
+  const [lightbox, setLightbox] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    fetch(`/api/partner/transactions/${txn.id}/audit`)
+      .then((r) => r.json())
+      .then((j) => {
+        if (j.success) {
+          setAudit(j.data);
+          if ((j.data.screenshots?.length || 0) === 0 && j.data.log) setTab("log");
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [txn.id]);
+
+  const screenshots = audit?.screenshots || [];
+  const logLines = (audit?.log || "").split("\n");
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div
+        className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+          <div>
+            <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2">
+              <ScrollText className="w-5 h-5 text-green-700" />
+              Transaction Audit
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">Session log and captured screenshots · Ref {txn.reference}</p>
+          </div>
+          <button onClick={onClose} className="p-1 rounded hover:bg-slate-100 transition-colors">
+            <X className="w-5 h-5 text-slate-400" />
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex items-center gap-1 border-b border-slate-200 px-4">
+          <button
+            onClick={() => setTab("screenshots")}
+            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+              tab === "screenshots" ? "border-green-600 text-green-700" : "border-transparent text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            <ImageIcon className="w-4 h-4 inline mr-1.5" />
+            Screenshots {screenshots.length > 0 && `(${screenshots.length})`}
+          </button>
+          <button
+            onClick={() => setTab("log")}
+            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+              tab === "log" ? "border-green-600 text-green-700" : "border-transparent text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            <Code className="w-4 h-4 inline mr-1.5" />
+            Log
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto min-h-[320px] p-4">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <Loader2 className="w-8 h-8 text-slate-400 animate-spin mb-3" />
+              <p className="text-sm text-slate-500">Loading audit trail...</p>
+            </div>
+          ) : tab === "screenshots" ? (
+            screenshots.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <ImageIcon className="w-12 h-12 text-slate-300 mb-3" />
+                <p className="text-slate-500 font-medium">No screenshots found</p>
+                <p className="text-sm text-slate-400 mt-1">None were captured for this transaction.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {screenshots.map((s) => (
+                  <button
+                    key={s.url}
+                    onClick={() => setLightbox(s.url)}
+                    className="rounded-lg overflow-hidden border border-slate-200 bg-slate-50 hover:border-green-400 transition-colors text-left"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={s.url} alt={s.name} loading="lazy" className="w-full h-28 object-cover object-top" />
+                    <div className="px-2 py-1.5">
+                      <p className="text-[11px] text-slate-600 truncate" title={s.name}>
+                        {s.name.replace(/^\d+_/, "").replace(/\.(png|jpe?g|webp)$/i, "")}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )
+          ) : audit?.log ? (
+            <div className="rounded-lg bg-slate-950 p-4 overflow-x-auto">
+              <pre className="text-[11px] leading-relaxed font-mono whitespace-pre-wrap break-all">
+                {logLines.map((line, i) => (
+                  <div key={i} className={auditLineClass(line)}>{line}</div>
+                ))}
+              </pre>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <Code className="w-12 h-12 text-slate-300 mb-3" />
+              <p className="text-slate-500 font-medium">No log found</p>
+            </div>
+          )}
+        </div>
+
+        <div className="px-6 py-3 border-t border-slate-100 flex items-center justify-between">
+          <span className="text-xs text-slate-400">{audit?.date ? `Stored under ${audit.date}` : ""}</span>
+          <Button variant="outline" size="sm" onClick={onClose}>Close</Button>
+        </div>
+      </div>
+
+      {/* Lightbox */}
+      {lightbox && (
+        <div className="fixed inset-0 z-[60] bg-black/85 flex items-center justify-center p-4" onClick={(e) => { e.stopPropagation(); setLightbox(null); }}>
+          <button className="absolute top-4 right-4 p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10" onClick={(e) => { e.stopPropagation(); setLightbox(null); }}>
+            <X className="w-6 h-6" />
+          </button>
+          <a
+            href={lightbox}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm"
+          >
+            <ExternalLink className="w-4 h-4" /> Open original
+          </a>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={lightbox} alt="Screenshot" className="max-w-full max-h-full object-contain rounded-lg" onClick={(e) => e.stopPropagation()} />
         </div>
       )}
     </div>
