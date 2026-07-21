@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requirePartner } from '@/lib/auth/authorization';
 import { db } from '@/lib/db';
-import { users, eftTransactions } from '@/lib/db/schema';
-import { eq, and, count, desc, gte, lte, inArray } from 'drizzle-orm';
+import { users, eftTransactions, eftBanks } from '@/lib/db/schema';
+import { eq, and, count, desc, gte, lte, inArray, or, ilike, sql } from 'drizzle-orm';
 
 /**
  * GET /api/partner/transactions
@@ -19,6 +19,9 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const from = searchParams.get('from');
     const to = searchParams.get('to');
+    const search = searchParams.get('search');
+    const bankId = searchParams.get('bankId');
+    const paymentMethod = searchParams.get('paymentMethod');
     const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '50'), 1), 100);
     const offset = Math.max(parseInt(searchParams.get('offset') || '0'), 0);
 
@@ -61,7 +64,26 @@ export async function GET(request: NextRequest) {
       conditions.push(gte(eftTransactions.createdAt, new Date(from)));
     }
     if (to) {
-      conditions.push(lte(eftTransactions.createdAt, new Date(to)));
+      const endDate = new Date(to);
+      endDate.setHours(23, 59, 59, 999);
+      conditions.push(lte(eftTransactions.createdAt, endDate));
+    }
+    // Search matches reference, customer email/name, and the transaction ID
+    if (search) {
+      conditions.push(
+        or(
+          ilike(eftTransactions.reference, `%${search}%`),
+          ilike(eftTransactions.customerEmail, `%${search}%`),
+          ilike(eftTransactions.customerName, `%${search}%`),
+          sql`${eftTransactions.id}::text ILIKE ${`%${search}%`}`
+        )!
+      );
+    }
+    if (bankId) {
+      conditions.push(eq(eftTransactions.eftBankId, bankId));
+    }
+    if (paymentMethod) {
+      conditions.push(eq(eftTransactions.paymentMethod, paymentMethod));
     }
 
     const whereClause = and(...conditions);
@@ -87,11 +109,15 @@ export async function GET(request: NextRequest) {
         customerName: eftTransactions.customerName,
         createdAt: eftTransactions.createdAt,
         completedAt: eftTransactions.completedAt,
+        statusReason: eftTransactions.statusReason,
+        paymentMethod: eftTransactions.paymentMethod,
+        bankName: eftBanks.bankName,
         merchantName: users.name,
         merchantCompany: users.companyName,
       })
       .from(eftTransactions)
       .leftJoin(users, eq(eftTransactions.merchantId, users.id))
+      .leftJoin(eftBanks, eq(eftTransactions.eftBankId, eftBanks.id))
       .where(whereClause)
       .orderBy(desc(eftTransactions.createdAt))
       .limit(limit)

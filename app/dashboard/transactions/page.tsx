@@ -1,7 +1,7 @@
 import { requireAuth } from "@/lib/auth-server";
 import { db } from "@/lib/db";
 import { eftTransactions, eftBanks, users } from "@/lib/db/schema";
-import { eq, desc, and, gte, lte, like, or, sql } from "drizzle-orm";
+import { eq, desc, and, gte, lte, ilike, or, sql } from "drizzle-orm";
 import { TransactionsClient } from "@/components/dashboard/TransactionsClient";
 
 export default async function TransactionsPage({
@@ -50,13 +50,14 @@ export default async function TransactionsPage({
     conditions.push(lte(eftTransactions.createdAt, endDate));
   }
 
-  // Search
+  // Search — matches reference, customer email/name, and the transaction ID
   if (search) {
     conditions.push(
       or(
-        like(eftTransactions.reference, `%${search}%`),
-        like(eftTransactions.customerEmail, `%${search}%`),
-        like(eftTransactions.customerName, `%${search}%`)
+        ilike(eftTransactions.reference, `%${search}%`),
+        ilike(eftTransactions.customerEmail, `%${search}%`),
+        ilike(eftTransactions.customerName, `%${search}%`),
+        sql`${eftTransactions.id}::text ILIKE ${`%${search}%`}`
       )
     );
   }

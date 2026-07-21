@@ -395,7 +395,7 @@ export function TransactionsClient({
                   <div className="flex-1 relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <Input
-                      placeholder="Search by reference, email, or name..."
+                      placeholder="Search by reference, transaction ID, email, or name..."
                       value={localSearch}
                       onChange={(e) => setLocalSearch(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && handleSearch()}
