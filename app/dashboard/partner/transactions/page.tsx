@@ -352,7 +352,7 @@ function PartnerTransactionsInner() {
                 <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Merchant</th>
                 <th className="text-right px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Amount</th>
                 <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Customer</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Bank</th>
                 <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
                 <th className="text-right px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
               </tr>
@@ -398,8 +398,17 @@ function PartnerTransactionsInner() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-sm text-slate-600">
-                        {txn.customerName || txn.customerEmail || "—"}
+                      <span className="text-sm text-slate-600 inline-flex items-center gap-1.5">
+                        {txn.bankName ? (
+                          <>
+                            <Landmark className="w-3.5 h-3.5 text-slate-400" />
+                            {txn.bankName}
+                          </>
+                        ) : txn.paymentMethod === "card" ? (
+                          "Card"
+                        ) : (
+                          "—"
+                        )}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-600">
