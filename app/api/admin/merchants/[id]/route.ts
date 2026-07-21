@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/authorization';
 import { db } from '@/lib/db';
 import { users, eftTransactions, eftBankAccounts, settlementBanks, apiKeys, webhookConfigurations, merchantTeamMembers } from '@/lib/db/schema';
-import { eq, and, count, sum, sql } from 'drizzle-orm';
+import { eq, and, count, sum, sql, gte } from 'drizzle-orm';
 import { z } from 'zod';
 import { writeAuditLog } from '@/lib/audit';
 
@@ -36,12 +36,36 @@ export async function GET(
       .select({
         total: count(),
         totalAmount: sum(eftTransactions.amount),
+        completedAmount: sql<string>`COALESCE(SUM(CASE WHEN ${eftTransactions.status} = 'completed' THEN CAST(${eftTransactions.amount} AS NUMERIC) ELSE 0 END), 0)`,
         completed: count(sql`CASE WHEN ${eftTransactions.status} = 'completed' THEN 1 END`),
         failed: count(sql`CASE WHEN ${eftTransactions.status} = 'failed' THEN 1 END`),
         pending: count(sql`CASE WHEN ${eftTransactions.status} IN ('not_started', 'initiated') THEN 1 END`),
       })
       .from(eftTransactions)
       .where(eq(eftTransactions.merchantId, id));
+
+    // Status breakdown (for the overview charts)
+    const statusRows = await db
+      .select({ status: eftTransactions.status, count: count(), amount: sum(eftTransactions.amount) })
+      .from(eftTransactions)
+      .where(eq(eftTransactions.merchantId, id))
+      .groupBy(eftTransactions.status);
+
+    // Daily activity for the last 14 days (count + completed volume per day)
+    const fourteenDaysAgo = new Date();
+    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 13);
+    fourteenDaysAgo.setHours(0, 0, 0, 0);
+    const dailyRows = await db
+      .select({
+        day: sql<string>`TO_CHAR(${eftTransactions.createdAt}, 'YYYY-MM-DD')`,
+        total: count(),
+        completed: count(sql`CASE WHEN ${eftTransactions.status} = 'completed' THEN 1 END`),
+        completedAmount: sql<string>`COALESCE(SUM(CASE WHEN ${eftTransactions.status} = 'completed' THEN CAST(${eftTransactions.amount} AS NUMERIC) ELSE 0 END), 0)`,
+      })
+      .from(eftTransactions)
+      .where(and(eq(eftTransactions.merchantId, id), gte(eftTransactions.createdAt, fourteenDaysAgo)))
+      .groupBy(sql`TO_CHAR(${eftTransactions.createdAt}, 'YYYY-MM-DD')`)
+      .orderBy(sql`TO_CHAR(${eftTransactions.createdAt}, 'YYYY-MM-DD')`);
 
     // Get bank accounts count
     const [bankStats] = await db
@@ -101,10 +125,22 @@ export async function GET(
           transactions: {
             total: txStats?.total || 0,
             totalAmount: txStats?.totalAmount || '0',
+            completedAmount: txStats?.completedAmount || '0',
             completed: txStats?.completed || 0,
             failed: txStats?.failed || 0,
             pending: txStats?.pending || 0,
           },
+          statusBreakdown: statusRows.map((r) => ({
+            status: r.status || 'unknown',
+            count: r.count,
+            amount: parseFloat(r.amount || '0'),
+          })),
+          daily: dailyRows.map((r) => ({
+            day: r.day,
+            total: r.total,
+            completed: r.completed,
+            completedAmount: parseFloat(r.completedAmount || '0'),
+          })),
           bankAccounts: bankStats?.total || 0,
           apiKeys: keyStats?.total || 0,
           teamMembers: teamStats?.total || 0,

@@ -16,6 +16,10 @@ import { Card } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useToast } from '@/hooks/use-toast';
+import {
+  PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar,
+  XAxis, YAxis, Tooltip, CartesianGrid,
+} from 'recharts';
 
 type Tab = 'overview' | 'transactions' | 'team' | 'eft' | 'billing' | 'settings';
 
@@ -118,7 +122,7 @@ export default function MerchantDetailPage() {
             <div><p className="text-2xl font-bold text-green-500">R {parseFloat(merchant.stats.transactions.totalAmount || '0').toLocaleString()}</p><p className="text-xs text-slate-500">Total Volume</p></div>
             <div><p className="text-2xl font-bold text-slate-900 dark:text-white">{merchant.stats.teamMembers}</p><p className="text-xs text-slate-500">Team Members</p></div>
             <div><p className="text-2xl font-bold text-slate-900 dark:text-white">{merchant.stats.bankAccounts}</p><p className="text-xs text-slate-500">Bank Accounts</p></div>
-            <div><p className="text-2xl font-bold text-slate-900 dark:text-white">{merchant.stats.apiKeys}</p><p className="text-xs text-slate-500">API Keys</p></div>
+            <div><p className="text-2xl font-bold text-emerald-600">R {parseFloat(merchant.stats.transactions.completedAmount || '0').toLocaleString()}</p><p className="text-xs text-slate-500">Completed</p></div>
           </div>
         )}
       </Card>
@@ -151,9 +155,145 @@ export default function MerchantDetailPage() {
   );
 }
 
+const STATUS_COLORS: Record<string, string> = {
+  completed: '#10b981',
+  pending: '#f59e0b',
+  initiated: '#fbbf24',
+  not_started: '#94a3b8',
+  failed: '#ef4444',
+  cancelled: '#f97316',
+  aborted: '#dc2626',
+  expired: '#6b7280',
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  completed: 'Completed',
+  pending: 'Pending',
+  initiated: 'Initiated',
+  not_started: 'Not Started',
+  failed: 'Failed',
+  cancelled: 'Cancelled',
+  aborted: 'Aborted',
+  expired: 'Expired',
+};
+
 function OverviewTab({ merchant, onUpdate }: { merchant: any; onUpdate: () => void }) {
+  const breakdown: { status: string; count: number; amount: number }[] =
+    merchant.stats?.statusBreakdown || [];
+  const totalTx = breakdown.reduce((s, b) => s + b.count, 0);
+  const completedCount = breakdown.find((b) => b.status === 'completed')?.count || 0;
+  const successRate = totalTx > 0 ? Math.round((completedCount / totalTx) * 100) : 0;
+
+  // Fill missing days so the bar chart always shows a continuous 14-day window
+  const dailyRaw: { day: string; total: number; completed: number; completedAmount: number }[] =
+    merchant.stats?.daily || [];
+  const dailyMap = new Map(dailyRaw.map((d) => [d.day, d]));
+  const daily: { day: string; label: string; total: number; completed: number; completedAmount: number }[] = [];
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().split('T')[0];
+    const row = dailyMap.get(key);
+    daily.push({
+      day: key,
+      label: d.toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' }),
+      total: row?.total || 0,
+      completed: row?.completed || 0,
+      completedAmount: row?.completedAmount || 0,
+    });
+  }
+
   return (
     <div className="grid md:grid-cols-2 gap-6">
+      {/* Transaction Overview */}
+      {totalTx > 0 && (
+        <Card className="md:col-span-2 p-6 bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-green-600" />
+              Transaction Overview
+            </h3>
+            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+              successRate >= 70 ? 'bg-emerald-100 text-emerald-700' : successRate >= 40 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
+            }`}>
+              {successRate}% success rate
+            </span>
+          </div>
+
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Status donut + legend */}
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">By Status</p>
+              <div className="h-44">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={breakdown.map((b) => ({ name: STATUS_LABELS[b.status] || b.status, value: b.count, status: b.status }))}
+                      dataKey="value"
+                      nameKey="name"
+                      innerRadius={45}
+                      outerRadius={70}
+                      paddingAngle={2}
+                      strokeWidth={0}
+                    >
+                      {breakdown.map((b) => (
+                        <Cell key={b.status} fill={STATUS_COLORS[b.status] || '#94a3b8'} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value: any, name: any) => [`${value} transactions`, name]} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5">
+                {breakdown
+                  .slice()
+                  .sort((a, b) => b.count - a.count)
+                  .map((b) => (
+                    <div key={b.status} className="flex items-center gap-1.5 text-xs">
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: STATUS_COLORS[b.status] || '#94a3b8' }} />
+                      <span className="text-slate-600 dark:text-slate-400 truncate">{STATUS_LABELS[b.status] || b.status}</span>
+                      <span className="ml-auto font-semibold text-slate-900 dark:text-white">{b.count}</span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+            {/* Daily activity bars */}
+            <div className="lg:col-span-2">
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Last 14 Days</p>
+              <div className="h-56">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={daily} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <XAxis dataKey="label" tick={{ fontSize: 10 }} interval={1} />
+                    <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+                    <Tooltip
+                      formatter={(value: any, name: any) =>
+                        name === 'Completed volume'
+                          ? [`R ${Number(value).toLocaleString()}`, name]
+                          : [value, name]
+                      }
+                    />
+                    <Bar dataKey="total" name="Transactions" fill="#cbd5e1" radius={[3, 3, 0, 0]} />
+                    <Bar dataKey="completed" name="Completed" fill="#10b981" radius={[3, 3, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="mt-1 flex items-center gap-4 text-xs text-slate-500">
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-slate-300" />All transactions</span>
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-emerald-500" />Completed</span>
+                <span className="ml-auto">
+                  14-day completed volume:{' '}
+                  <span className="font-semibold text-emerald-600">
+                    R {daily.reduce((s, d) => s + d.completedAmount, 0).toLocaleString()}
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
+
       <Card className="p-6 bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50">
         <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2"><Building2 className="w-5 h-5 text-green-500" />Company Information</h3>
         <div className="space-y-3">
