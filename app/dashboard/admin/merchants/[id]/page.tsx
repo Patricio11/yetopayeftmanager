@@ -412,6 +412,7 @@ function EftBanksTab({ merchantId }: { merchantId: string }) {
   const [plainShowCancel, setPlainShowCancel] = useState(true);
   const [plainShowTerms, setPlainShowTerms] = useState(false);
   const [plainBackground, setPlainBackground] = useState('#ffffff');
+  const [auditEnabled, setAuditEnabled] = useState(false);
   const [layoutSaving, setLayoutSaving] = useState(false);
 
   useEffect(() => {
@@ -433,6 +434,7 @@ function EftBanksTab({ merchantId }: { merchantId: string }) {
           setPlainShowCancel(eft.plainShowCancel !== false);
           setPlainShowTerms(eft.plainShowTerms === true);
           setPlainBackground(eft.plainBackground || '#ffffff');
+          setAuditEnabled(eft.auditEnabled === true);
         }
       } catch { /* ignore */ }
     })();
@@ -713,6 +715,18 @@ function EftBanksTab({ merchantId }: { merchantId: string }) {
               checked={enableReceipt}
               onCheckedChange={handleReceiptToggle}
               disabled={receiptSaving}
+            />
+          </div>
+
+          <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-700/50 pt-5">
+            <div>
+              <p className="font-medium text-slate-900 dark:text-white">Audit Trail Access</p>
+              <p className="text-sm text-slate-500 mt-0.5">Allow this merchant to view session logs and screenshots for their transactions</p>
+            </div>
+            <Switch
+              checked={auditEnabled}
+              onCheckedChange={(checked) => { setAuditEnabled(checked); saveLayoutSettings({ auditEnabled: checked }); }}
+              disabled={layoutSaving}
             />
           </div>
 

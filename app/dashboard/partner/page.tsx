@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import {
   Building2, Users, Activity, DollarSign, TrendingUp,
-  CheckCircle, XCircle, Clock, AlertCircle,
+  CheckCircle, XCircle, Clock, AlertCircle, Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -229,12 +229,13 @@ export default function PartnerDashboardPage() {
                 <th className="text-right px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Amount</th>
                 <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
                 <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
+                <th className="text-right px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {data.recentTransactions.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-16 text-center">
+                  <td colSpan={6} className="px-6 py-16 text-center">
                     <Activity className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                     <p className="text-slate-500 font-medium">No transactions yet</p>
                     <p className="text-slate-400 text-sm mt-1">Transactions from your merchants will appear here</p>
@@ -268,6 +269,15 @@ export default function PartnerDashboardPage() {
                         hour: "2-digit",
                         minute: "2-digit",
                       })}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <Link
+                        href={`/dashboard/partner/transactions?search=${encodeURIComponent(txn.reference)}`}
+                        className="inline-flex p-2 rounded-lg text-slate-400 hover:text-green-700 hover:bg-green-50 transition-colors"
+                        title="View transaction"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Link>
                     </td>
                   </tr>
                 ))

@@ -12,6 +12,16 @@ export default async function TransactionsPage({
   const session = await requireAuth();
   const isAdmin = (session.user.role || 'merchant') === "admin";
 
+  // Audit access: admins always; merchants only when an admin granted it
+  let auditEnabled = isAdmin;
+  if (!isAdmin) {
+    const me = await db.query.users.findFirst({
+      where: eq(users.id, session.user.id),
+      columns: { eftSettings: true },
+    });
+    auditEnabled = !!(me?.eftSettings as any)?.auditEnabled;
+  }
+
   // Parse search params - Next.js 15 requires awaiting searchParams
   const params = await searchParams;
   const status = params.status as string | undefined;
@@ -136,6 +146,7 @@ export default async function TransactionsPage({
       merchants={merchants}
       banks={banks}
       isAdmin={isAdmin}
+      auditEnabled={auditEnabled}
       currentPage={page}
       totalPages={Math.ceil(totalCount / limit)}
     />

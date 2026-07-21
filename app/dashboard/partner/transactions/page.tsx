@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Activity, Search, CheckCircle, XCircle, Clock, AlertCircle,
   Filter, ChevronDown, Eye, X, Hash, Building2, User, Landmark, Calendar,
@@ -71,6 +72,15 @@ const statusIcon = (status: string) => {
 const LIMIT = 50;
 
 export default function PartnerTransactionsPage() {
+  return (
+    <Suspense fallback={<div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 text-slate-400">Loading...</div>}>
+      <PartnerTransactionsInner />
+    </Suspense>
+  );
+}
+
+function PartnerTransactionsInner() {
+  const urlSearch = useSearchParams().get("search") || "";
   const [merchants, setMerchants] = useState<Merchant[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -86,11 +96,12 @@ export default function PartnerTransactionsPage() {
   const [methodFilter, setMethodFilter] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const [searchInput, setSearchInput] = useState("");
-  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState(urlSearch);
+  const [search, setSearch] = useState(urlSearch);
   const [banks, setBanks] = useState<Bank[]>([]);
   const [viewTxn, setViewTxn] = useState<Transaction | null>(null);
   const [auditTxn, setAuditTxn] = useState<Transaction | null>(null);
+  const [auditEnabled, setAuditEnabled] = useState(false);
 
   // Load merchants + banks for the filter dropdowns
   useEffect(() => {
@@ -117,8 +128,18 @@ export default function PartnerTransactionsPage() {
         // Silently fail, filter just won't have banks
       }
     };
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch("/api/partner/settings");
+        const json = await res.json();
+        if (json.success) setAuditEnabled(!!json.data.auditEnabled);
+      } catch {
+        // Silently fail — audit button just stays hidden
+      }
+    };
     fetchMerchants();
     fetchBanks();
+    fetchSettings();
   }, []);
 
   const buildQuery = useCallback(
@@ -529,15 +550,17 @@ export default function PartnerTransactionsPage() {
             </div>
 
             <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex justify-between items-center">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => { setAuditTxn(viewTxn); setViewTxn(null); }}
-                className="gap-2"
-              >
-                <ScrollText className="w-4 h-4" />
-                View Audit
-              </Button>
+              {auditEnabled ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => { setAuditTxn(viewTxn); setViewTxn(null); }}
+                  className="gap-2"
+                >
+                  <ScrollText className="w-4 h-4" />
+                  View Audit
+                </Button>
+              ) : <span />}
               <Button variant="outline" size="sm" onClick={() => setViewTxn(null)}>Close</Button>
             </div>
           </div>

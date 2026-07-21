@@ -92,6 +92,9 @@ export const users = pgTable("user", {
     // Both must be set; empty means default YetoPay green.
     brandColorFrom?: string;
     brandColorTo?: string;
+    // Admin-granted access to the transaction audit trail (log + screenshots).
+    // Disabled by default; only an admin can enable it per merchant/partner.
+    auditEnabled?: boolean;
   }>().default({}),
 
   // Metadata

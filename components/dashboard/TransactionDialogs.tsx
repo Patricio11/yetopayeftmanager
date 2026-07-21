@@ -89,6 +89,7 @@ interface TransactionDetailDialogProps {
   onOpenChange: (open: boolean) => void;
   transaction: TransactionData | null;
   isAdmin: boolean;
+  auditEnabled?: boolean;
 }
 
 export function TransactionDetailDialog({
@@ -96,6 +97,7 @@ export function TransactionDetailDialog({
   onOpenChange,
   transaction,
   isAdmin,
+  auditEnabled = false,
 }: TransactionDetailDialogProps) {
   const { toast } = useToast();
   const [resending, setResending] = useState(false);
@@ -357,8 +359,8 @@ export function TransactionDetailDialog({
             </div>
           )}
 
-          {/* Audit trail (admin only) */}
-          {isAdmin && (
+          {/* Audit trail (admin, or merchant with granted access) */}
+          {(isAdmin || auditEnabled) && (
             <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
               <div className="space-y-1">
                 <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
@@ -404,12 +406,13 @@ export function TransactionDetailDialog({
         </div>
       </DialogContent>
 
-      {isAdmin && (
+      {(isAdmin || auditEnabled) && (
         <TransactionAuditDialog
           open={auditOpen}
           onOpenChange={setAuditOpen}
           transactionId={t.id}
           reference={t.reference}
+          endpoint={isAdmin ? "admin" : "merchant"}
         />
       )}
     </Dialog>
@@ -432,11 +435,13 @@ function TransactionAuditDialog({
   onOpenChange,
   transactionId,
   reference,
+  endpoint,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   transactionId: string;
   reference: string;
+  endpoint: "admin" | "merchant";
 }) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -446,7 +451,7 @@ function TransactionAuditDialog({
     if (!open) return;
     setAudit(null);
     setLoading(true);
-    fetch(`/api/admin/transactions/${transactionId}/audit`)
+    fetch(`/api/${endpoint}/transactions/${transactionId}/audit`)
       .then((r) => r.json())
       .then((j) => {
         if (j.success) {
@@ -457,7 +462,7 @@ function TransactionAuditDialog({
       })
       .catch(() => toast({ title: "Error", description: "Failed to load audit trail", variant: "destructive" }))
       .finally(() => setLoading(false));
-  }, [open, transactionId, toast]);
+  }, [open, transactionId, endpoint, toast]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

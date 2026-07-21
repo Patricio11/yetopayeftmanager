@@ -20,7 +20,7 @@ export async function GET() {
   try {
     const partner = await db.query.users.findFirst({
       where: eq(users.id, auth.session.user.id),
-      columns: { metadata: true, accountMode: true, kycStatus: true },
+      columns: { metadata: true, accountMode: true, kycStatus: true, eftSettings: true },
     });
 
     return NextResponse.json({
@@ -29,6 +29,7 @@ export async function GET() {
         subMerchantsDemoMode: !!(partner?.metadata as any)?.subMerchantsDemoMode,
         accountMode: partner?.accountMode || "demo",
         kycStatus: partner?.kycStatus || "pending",
+        auditEnabled: !!(partner?.eftSettings as any)?.auditEnabled,
       },
     });
   } catch (error) {

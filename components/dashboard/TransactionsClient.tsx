@@ -110,6 +110,7 @@ interface TransactionsClientProps {
   merchants: Merchant[];
   banks: Bank[];
   isAdmin: boolean;
+  auditEnabled?: boolean;
   currentPage: number;
   totalPages: number;
 }
@@ -120,6 +121,7 @@ export function TransactionsClient({
   merchants,
   banks,
   isAdmin,
+  auditEnabled = false,
   currentPage,
   totalPages,
 }: TransactionsClientProps) {
@@ -768,6 +770,7 @@ export function TransactionsClient({
         onOpenChange={setDetailOpen}
         transaction={selectedTransaction as any}
         isAdmin={isAdmin}
+        auditEnabled={auditEnabled}
       />
 
       {isAdmin && (

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
   ArrowLeft, Building2, Mail, Phone, Users, CheckCircle, XCircle, Clock,
   Shield, Save, Percent, ChevronRight, FileText, Settings, AlertTriangle,
-  LayoutTemplate
+  LayoutTemplate, ScrollText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,6 +34,7 @@ interface Partner {
     plainShowCancel?: boolean;
     plainShowTerms?: boolean;
     plainBackground?: string;
+    auditEnabled?: boolean;
   } | null;
   stats?: {
     merchantCount: number;
@@ -562,6 +563,7 @@ function SettingsTab({ partner, onUpdate }: { partner: Partner; onUpdate: () => 
   const [plainShowCancel, setPlainShowCancel] = useState(eft.plainShowCancel !== false);
   const [plainShowTerms, setPlainShowTerms] = useState(eft.plainShowTerms === true);
   const [plainBackground, setPlainBackground] = useState(eft.plainBackground || '#ffffff');
+  const [auditEnabled, setAuditEnabled] = useState(eft.auditEnabled === true);
   const [layoutSaving, setLayoutSaving] = useState(false);
 
   const saveLayoutSettings = async (updates: Record<string, any>) => {
@@ -701,6 +703,29 @@ function SettingsTab({ partner, onUpdate }: { partner: Partner; onUpdate: () => 
           >
             <Save className="w-4 h-4" />{saving ? 'Saving...' : 'Save Changes'}
           </Button>
+        </div>
+      </Card>
+
+      {/* Audit Access */}
+      <Card className="p-6 bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
+          <ScrollText className="w-5 h-5 text-green-700" />Audit Trail Access
+        </h3>
+        <p className="text-xs text-slate-500 mb-4">
+          Let this partner view the EFT session log and screenshots for their merchants&apos; transactions
+        </p>
+        <div className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-700 p-4">
+          <div>
+            <p className="text-sm font-medium text-slate-900 dark:text-white">Enable audit trail</p>
+            <p className="text-xs text-slate-500 mt-0.5">
+              {auditEnabled ? 'Partner can open the audit for their transactions' : 'Disabled — partner cannot access audit'}
+            </p>
+          </div>
+          <Switch
+            checked={auditEnabled}
+            onCheckedChange={(checked) => { setAuditEnabled(checked); saveLayoutSettings({ auditEnabled: checked }); }}
+            disabled={layoutSaving}
+          />
         </div>
       </Card>
 
