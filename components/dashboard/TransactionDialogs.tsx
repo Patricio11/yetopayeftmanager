@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -38,6 +38,10 @@ import {
   Code,
   ChevronDown,
   Copy,
+  ScrollText,
+  ExternalLink,
+  ImageIcon,
+  X,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -96,6 +100,7 @@ export function TransactionDetailDialog({
   const [resending, setResending] = useState(false);
   const [jsonOpen, setJsonOpen] = useState(false);
   const [jsonCopied, setJsonCopied] = useState(false);
+  const [auditOpen, setAuditOpen] = useState(false);
 
   if (!transaction) return null;
 
@@ -351,6 +356,24 @@ export function TransactionDetailDialog({
             </div>
           )}
 
+          {/* Audit trail (admin only) */}
+          {isAdmin && (
+            <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Audit Trail
+                </p>
+                <p className="text-xs text-slate-500">
+                  Full EFT session log and captured screenshots for this transaction
+                </p>
+              </div>
+              <Button size="sm" variant="outline" onClick={() => setAuditOpen(true)}>
+                <ScrollText className="w-4 h-4 mr-2" />
+                View Audit
+              </Button>
+            </div>
+          )}
+
           {/* Resend Webhook (admin only) */}
           {isAdmin && (
             <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
@@ -379,11 +402,196 @@ export function TransactionDetailDialog({
           )}
         </div>
       </DialogContent>
+
+      {isAdmin && (
+        <TransactionAuditDialog
+          open={auditOpen}
+          onOpenChange={setAuditOpen}
+          transactionId={t.id}
+          reference={t.reference}
+        />
+      )}
     </Dialog>
   );
 }
 
-// ─── Update Status Dialog ───────────────────────────────────────────────────
+// ─── Audit Trail Dialog (admin) ─────────────────────────────────────────────
+// Shows the EFT service's transaction log and the screenshots it captured,
+// fetched from the storage buckets ({date}/{transactionId}/...).
+
+interface AuditData {
+  date: string | null;
+  log: string | null;
+  screenshots: { name: string; url: string }[];
+  logFiles: { name: string; url: string }[];
+}
+
+function auditLineClass(line: string): string {
+  if (line.includes("[ERROR]")) return "text-red-400";
+  if (line.includes("[WARN]")) return "text-amber-400";
+  if (line.includes("[SCREENSHOT]")) return "text-sky-400";
+  if (line.includes("[STEP]") || line.includes("[TRANSACTION_START]") || line.includes("[SUCCESS]")) return "text-emerald-400";
+  return "text-slate-300";
+}
+
+function TransactionAuditDialog({
+  open,
+  onOpenChange,
+  transactionId,
+  reference,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  transactionId: string;
+  reference: string;
+}) {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [audit, setAudit] = useState<AuditData | null>(null);
+  const [tab, setTab] = useState<"screenshots" | "log">("screenshots");
+  const [lightbox, setLightbox] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    setAudit(null);
+    setLoading(true);
+    setTab("screenshots");
+    setLightbox(null);
+    fetch(`/api/admin/transactions/${transactionId}/audit`)
+      .then((r) => r.json())
+      .then((j) => {
+        if (j.success) {
+          setAudit(j.data);
+          if ((j.data.screenshots?.length || 0) === 0 && j.data.log) setTab("log");
+        } else {
+          toast({ title: "Error", description: j.message || "Failed to load audit", variant: "destructive" });
+        }
+      })
+      .catch(() => toast({ title: "Error", description: "Failed to load audit trail", variant: "destructive" }))
+      .finally(() => setLoading(false));
+  }, [open, transactionId, toast]);
+
+  const screenshots = audit?.screenshots || [];
+  const logLines = (audit?.log || "").split("\n");
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <ScrollText className="w-5 h-5 text-green-700" />
+            Transaction Audit
+          </DialogTitle>
+          <DialogDescription>
+            Session log and captured screenshots · Ref {reference}
+          </DialogDescription>
+        </DialogHeader>
+
+        {/* Tabs */}
+        <div className="flex items-center gap-1 border-b border-slate-200 dark:border-slate-700">
+          <button
+            onClick={() => setTab("screenshots")}
+            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+              tab === "screenshots"
+                ? "border-green-600 text-green-700 dark:text-green-400"
+                : "border-transparent text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            <ImageIcon className="w-4 h-4 inline mr-1.5" />
+            Screenshots {screenshots.length > 0 && `(${screenshots.length})`}
+          </button>
+          <button
+            onClick={() => setTab("log")}
+            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+              tab === "log"
+                ? "border-green-600 text-green-700 dark:text-green-400"
+                : "border-transparent text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            <Code className="w-4 h-4 inline mr-1.5" />
+            Log
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto min-h-[320px]">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <Loader2 className="w-8 h-8 text-slate-400 animate-spin mb-3" />
+              <p className="text-sm text-slate-500">Loading audit trail...</p>
+            </div>
+          ) : tab === "screenshots" ? (
+            screenshots.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <ImageIcon className="w-12 h-12 text-slate-300 mb-3" />
+                <p className="text-slate-500 font-medium">No screenshots found</p>
+                <p className="text-sm text-slate-400 mt-1">
+                  None were captured, or storage is not reachable for this transaction.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-1">
+                {screenshots.map((s) => (
+                  <button
+                    key={s.url}
+                    onClick={() => setLightbox(s.url)}
+                    className="group rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-green-400 transition-colors text-left"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={s.url} alt={s.name} loading="lazy" className="w-full h-28 object-cover object-top" />
+                    <div className="px-2 py-1.5">
+                      <p className="text-[11px] text-slate-600 dark:text-slate-300 truncate" title={s.name}>
+                        {s.name.replace(/^\d+_/, "").replace(/\.(png|jpe?g|webp)$/i, "")}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )
+          ) : audit?.log ? (
+            <div className="rounded-lg bg-slate-950 p-4 m-1 overflow-x-auto">
+              <pre className="text-[11px] leading-relaxed font-mono whitespace-pre-wrap break-all">
+                {logLines.map((line, i) => (
+                  <div key={i} className={auditLineClass(line)}>{line}</div>
+                ))}
+              </pre>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <Code className="w-12 h-12 text-slate-300 mb-3" />
+              <p className="text-slate-500 font-medium">No log found</p>
+              <p className="text-sm text-slate-400 mt-1">The transaction log is not available in storage.</p>
+            </div>
+          )}
+        </div>
+
+        <DialogFooter className="flex-row items-center justify-between sm:justify-between">
+          <span className="text-xs text-slate-400">{audit?.date ? `Stored under ${audit.date}` : ""}</span>
+          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>Close</Button>
+        </DialogFooter>
+      </DialogContent>
+
+      {/* Lightbox */}
+      {lightbox && (
+        <div className="fixed inset-0 z-[200] bg-black/85 flex items-center justify-center p-4" onClick={() => setLightbox(null)}>
+          <button className="absolute top-4 right-4 p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10" onClick={() => setLightbox(null)}>
+            <X className="w-6 h-6" />
+          </button>
+          <a
+            href={lightbox}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm"
+          >
+            <ExternalLink className="w-4 h-4" /> Open original
+          </a>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={lightbox} alt="Screenshot" className="max-w-full max-h-full object-contain rounded-lg" onClick={(e) => e.stopPropagation()} />
+        </div>
+      )}
+    </Dialog>
+  );
+}
 
 interface UpdateStatusDialogProps {
   open: boolean;
