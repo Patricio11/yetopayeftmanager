@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/webhook-retries",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/expire-stale-transactions",
+      "schedule": "*/10 * * * *"
+    }
+  ]
+}

@@ -788,11 +788,20 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     // interval — never let ticks overlap, or a second /final lands on the just-
     // terminated session and races the real result (seen in production).
     let tickInFlight = false;
+    // Failure caps — a dead session (reaped/expired/restarted instance) answers
+    // every poll with an HTTP error; without a cap the page polls forever and
+    // the transaction never leaves pending. HTTP errors are a definitive answer
+    // from the backend (3 strikes); bare network drops (backgrounded mobile,
+    // flaky connection) get a much longer leash (~5 min of consecutive failures).
+    let httpErrStrikes = 0;
+    let netErrStrikes = 0;
     finalPollTimer.current = setInterval(async () => {
       if (tickInFlight) return;
       tickInFlight = true;
       try {
         const res = await executeStepApi(bankCode, inAppPollStep.current, {});
+        httpErrStrikes = 0;
+        netErrStrikes = 0;
 
         // Terminal outcome (success / cancelled / failed) — finish and redirect.
         const norm = normalizeTerminal(res);
@@ -831,8 +840,28 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
           const plainMsg = (res.message || '').replace(/<[^>]*>/g, '') || 'Processing your payment...';
           setProcessingMessage(plainMsg);
         }
-      } catch {
-        // transient (dropped connection while backgrounded) — keep polling
+      } catch (err: any) {
+        if (err?.isHttpError) {
+          // The backend answered with an error (session ended/expired/mis-routed).
+          // That's a real verdict, not a blip — three in a row means this
+          // transaction cannot complete. Finish with the backend's reason.
+          httpErrStrikes++;
+          if (httpErrStrikes >= 3) {
+            stopPollingFallback();
+            await finishAndRedirect('failed', err.message || 'This transaction session has ended.', undefined);
+            return;
+          }
+        } else {
+          // Dropped connection (backgrounded mobile) — transient, keep polling,
+          // but not forever: ~5 minutes of solid failures means the service is
+          // unreachable and the customer must not be left hanging.
+          netErrStrikes++;
+          if (netErrStrikes >= 100) {
+            stopPollingFallback();
+            await finishAndRedirect('failed', 'Connection to the payment service was lost. If you approved the payment in your banking app, please check your account before trying again.');
+            return;
+          }
+        }
       } finally {
         tickInFlight = false;
       }
