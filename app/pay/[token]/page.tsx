@@ -89,6 +89,7 @@ export default async function PaymentPage({ params, searchParams }: PageProps) {
       id: sessionId,
       amount: paymentDetails.amount.toString(),
       reference: paymentDetails.reference,
+      merchantReference: paymentDetails.merchantReference || null,
       description: paymentDetails.description,
       notifyUrl: paymentDetails.notifyUrl,
       successUrl: paymentDetails.successUrl,

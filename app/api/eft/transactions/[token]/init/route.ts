@@ -214,6 +214,8 @@ export async function GET(
         paymentDetails: {
           amount: parseFloat(transaction.amount),
           reference: transaction.reference,
+          // Sub-merchant's own reference (connector links) — used on buyer redirects
+          merchantReference: (transaction.metadata as any)?.merchantReference || null,
           description: transaction.description,
           notifyUrl: transaction.notifyUrl,
           successUrl: transaction.successUrl,

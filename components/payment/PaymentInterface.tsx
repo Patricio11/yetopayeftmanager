@@ -27,6 +27,7 @@ interface PaymentInterfaceProps {
     id: string;
     amount: string;
     reference: string;
+    merchantReference?: string | null;
     description?: string;
     notifyUrl?: string;
     successUrl?: string;
@@ -158,7 +159,10 @@ export default function PaymentInterface({
       try {
         const url = new URL(redirectUrl);
         url.searchParams.set('status', cardStatus === 'success' ? 'success' : cardStatus === 'cancelled' ? 'cancelled' : 'failed');
-        url.searchParams.set('reference', transaction.reference);
+        // Buyer-facing reference: the sub-merchant's own reference when the
+        // link carried one; the internal link reference moves to link_reference
+        url.searchParams.set('reference', transaction.merchantReference || transaction.reference);
+        if (transaction.merchantReference) url.searchParams.set('link_reference', transaction.reference);
         url.searchParams.set('amount', transaction.amount);
         url.searchParams.set('payment_method', 'card');
         navigate(url.toString());
@@ -356,6 +360,7 @@ export default function PaymentInterface({
             id: transaction.id,
             amount: transaction.amount,
             reference: transaction.reference,
+            merchantReference: transaction.merchantReference,
             description: transaction.description,
             notifyUrl: transaction.notifyUrl,
             successUrl: transaction.successUrl,

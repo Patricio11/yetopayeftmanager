@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     // Partners integrated via connector can attribute the transaction to one
     // of their merchants. The payment goes to that merchant's bank account.
     let merchantId = callerId;
-    let subMerchantInfo: { id: string; name: string; created: boolean } | null = null;
+    let subMerchantInfo: { id: string; name: string; created: boolean; reference?: string } | null = null;
 
     if (validatedData.merchant) {
       if (caller?.role !== "partner") {
@@ -123,6 +123,7 @@ export async function POST(request: NextRequest) {
         id: resolved.merchant.id,
         name: resolved.merchant.companyName || resolved.merchant.name,
         created: resolved.created,
+        ...(validatedData.merchant.reference ? { reference: validatedData.merchant.reference } : {}),
       };
     }
 
@@ -227,6 +228,8 @@ export async function POST(request: NextRequest) {
         metadata: {
           ...(validatedData.metadata || {}),
           ...(preselectedBank ? { preselectedBank } : {}),
+          // Sub-merchant's own reference — used for buyer redirect params
+          ...(validatedData.merchant?.reference ? { merchantReference: validatedData.merchant.reference } : {}),
         },
       })
       .returning();
@@ -267,7 +270,9 @@ export async function POST(request: NextRequest) {
           expiresAt: expiresAt.toISOString(),
           metadata: transaction.metadata,
           createdAt: transaction.createdAt.toISOString(),
-          ...(subMerchantInfo ? { merchant: { id: subMerchantInfo.id, name: subMerchantInfo.name } } : {}),
+          ...(subMerchantInfo
+            ? { merchant: { id: subMerchantInfo.id, name: subMerchantInfo.name, ...(subMerchantInfo.reference ? { reference: subMerchantInfo.reference } : {}) } }
+            : {}),
         }
       );
       console.log(`📤 Webhook dispatched: transaction.created for ${transaction.id}`);

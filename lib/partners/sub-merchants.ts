@@ -36,6 +36,11 @@ export const subMerchantSchema = z.object({
   phone: z.string().max(50).optional(),
   logoUrl: z.string().url("Invalid logo URL").optional(),
   bankAccount: subMerchantBankAccountSchema.optional(),
+  // The sub-merchant's OWN transaction reference (per payment, not part of the
+  // merchant profile). Used as the `reference` query param on buyer redirects
+  // so the sub-merchant's system recognises it; the top-level payment-link
+  // reference stays the webhook correlation key.
+  reference: z.string().min(1).max(255).optional(),
 });
 
 export type SubMerchantInput = z.infer<typeof subMerchantSchema>;

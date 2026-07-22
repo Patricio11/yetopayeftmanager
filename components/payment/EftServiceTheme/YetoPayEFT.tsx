@@ -88,6 +88,7 @@ interface YetoPayEFTProps {
       id: string;
       amount: string;
       reference: string;
+      merchantReference?: string | null;
       description?: string;
       notifyUrl?: string;
       successUrl?: string;
@@ -126,7 +127,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   const [isInitializing, setIsInitializing] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [processingMessage, setProcessingMessage] = useState('Processing your payment...');
-  const [paymentDetails, setPaymentDetails] = useState({ amount: '0.00', reference: '...' });
+  const [paymentDetails, setPaymentDetails] = useState<{ amount: string; reference: string; merchantReference?: string }>({ amount: '0.00', reference: '...' });
   const [merchant, setMerchant] = useState<Merchant>({ name: 'Merchant' });
   const [banks, setBanks] = useState<Bank[]>([]);
   const [authSecretBearerToken, setAuthSecretBearerToken] = useState('');
@@ -346,10 +347,14 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     const redirectBase = pickRedirectUrl(uiStatus);
     if (!redirectBase) return;
 
+    // Buyer-facing reference: the sub-merchant's own reference when the link
+    // carried one (connector flows) — their systems don't recognise the
+    // internal link reference, which moves to link_reference for traceability.
     const redirectUrl = appendParams(redirectBase, {
       session_id: sessionId || raw?.sessionId,
       amount: raw?.amount || paymentDetails.amount,
-      reference: paymentDetails.reference,
+      reference: paymentDetails.merchantReference || paymentDetails.reference,
+      link_reference: paymentDetails.merchantReference ? paymentDetails.reference : undefined,
       bank: selectedBank?.code,
       status: uiStatus === 'completed' ? 'success' : uiStatus === 'cancelled' ? 'cancelled' : 'failed',
       message: message || '',
@@ -406,6 +411,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
         setPaymentDetails({
           amount: initialData.transaction.amount,
           reference: initialData.transaction.reference,
+          merchantReference: initialData.transaction.merchantReference || undefined,
         });
         console.log('[INIT] Setting merchant from initialData:', initialData.merchant);
         setMerchant({

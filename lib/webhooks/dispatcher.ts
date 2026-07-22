@@ -202,12 +202,15 @@ export async function dispatchWebhookEvent(
           );
 
         if (webhooks.length > 0) {
-          // Tag the payload so the partner can attribute the event
+          // Tag the payload so the partner can attribute the event. Include the
+          // sub-merchant's own reference (from transaction metadata) when set.
+          const merchantReference = eventData?.metadata?.merchantReference;
           eventData = {
             ...eventData,
             merchant: eventData.merchant || {
               id: merchantId,
               name: merchant.companyName || merchant.name,
+              ...(merchantReference ? { reference: merchantReference } : {}),
             },
           };
           console.log(`↪️ Routing ${eventType} for sub-merchant ${merchantId} to partner ${merchant.partnerId}`);
