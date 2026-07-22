@@ -175,6 +175,7 @@ Create a new payment link. Returns a URL to redirect your customer to.
 | `notifyUrl` | string | No | Per-request webhook URL (prefer Settings > Webhooks) |
 | `expiresInHours` | number | No | Link expiry in hours (default: 24, max: 168) |
 | `metadata` | object | No | Custom key-value data returned in webhooks |
+| `bank` | string | No | Pre-select a bank — the payment page opens directly on that bank's login, skipping the bank picker (see below) |
 | `merchant` | object | No | **Partner accounts only.** Attribute this transaction to one of your merchants (see below) |
 
 **Response:**
@@ -207,6 +208,33 @@ curl -X POST https://www.yetopay.co.za/api/payment-links \
   -H "Content-Type: application/json" \
   -d '{"amount":250,"reference":"INV-001","description":"Order #123"}'
 ```
+
+---
+
+#### Bank-specific payment links
+
+Pass a `bank` code to open the payment page **directly on that bank's login**,
+skipping the "choose your bank" step. Useful when your platform already asked
+the customer which bank they're paying from.
+
+```json
+{
+  "amount": 250.00,
+  "reference": "INV-001",
+  "bank": "fnb"
+}
+```
+
+**Bank codes:** `fnb`, `absa`, `nedbank`, `standardbank`, `capitec`, plus any
+others enabled on the platform. Always fetch the authoritative list for your
+account from `GET /api/merchant/banks` (each item's `code` is the value to send).
+
+Notes:
+- An unknown or disabled code returns `400`.
+- If the code is valid but not enabled for the paying merchant, the page
+  gracefully falls back to the normal bank picker.
+- When both card and Pay-by-Bank are enabled on the account, a `bank` value
+  implies Pay-by-Bank and skips the payment-method picker too.
 
 ---
 

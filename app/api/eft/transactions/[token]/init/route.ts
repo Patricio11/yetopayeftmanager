@@ -241,6 +241,15 @@ export async function GET(
           },
         },
         banks: mappedBanks,
+        // Bank the link was created for — only echoed when it's actually
+        // available to this merchant, so the payment page can open straight on
+        // that bank's login. Falls back to the picker if unavailable.
+        preselectedBank:
+          mappedBanks.some(
+            (b) => b.code.toLowerCase() === String((transaction.metadata as any)?.preselectedBank || "").toLowerCase()
+          )
+            ? (transaction.metadata as any).preselectedBank
+            : null,
         branding,
         layout,
         isDemo: !!transaction.isDemo,

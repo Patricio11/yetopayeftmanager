@@ -56,6 +56,7 @@ interface PaymentInterfaceProps {
   merchantBankAccount: any;
   branding?: PaymentPageBranding | null;
   layout?: PaymentPageLayout | null;
+  preselectedBank?: string | null;
   isDemo?: boolean;
   enableReceipt?: boolean;
   fnbVerifyResult?: boolean;
@@ -73,6 +74,7 @@ export default function PaymentInterface({
   merchantBankAccount,
   branding,
   layout,
+  preselectedBank,
   isDemo,
   enableReceipt,
   fnbVerifyResult,
@@ -97,7 +99,10 @@ export default function PaymentInterface({
 
   const hasCardService = availableServices.some(s => s.category === 'card');
   const hasEft = banks.length > 0;
-  const needsMethodPicker = hasCardService && hasEft;
+  // A bank-specific link implies Pay-by-Bank — skip the method picker even when
+  // card is also available, so it opens straight on the bank's login.
+  const bankPreselected = !!preselectedBank && hasEft;
+  const needsMethodPicker = hasCardService && hasEft && !bankPreselected;
 
   // Auto-select card when it's the only option
   useEffect(() => {
@@ -105,6 +110,13 @@ export default function PaymentInterface({
       initiateCardPayment();
     }
   }, [isClient, hasCardService, hasEft, cardStatus]);
+
+  // A bank-specific link goes straight to the EFT flow (bank auto-selects inside)
+  useEffect(() => {
+    if (isClient && bankPreselected && !cardStatus && selectedMethod === null) {
+      setSelectedMethod('eft');
+    }
+  }, [isClient, bankPreselected, cardStatus, selectedMethod]);
 
   // Update transaction status on card return (failed/cancelled only — success is handled by CallPay webhook)
   useEffect(() => {
@@ -374,6 +386,7 @@ export default function PaymentInterface({
           token,
           branding,
           layout,
+          preselectedBank,
           isDemo,
           enableReceipt,
           fnbVerifyResult,

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateMerchant } from "@/lib/auth/merchant-auth";
 import { db } from "@/lib/db";
-import { eftTransactions, paymentTokens, users } from "@/lib/db/schema";
+import { eftTransactions, paymentTokens, users, eftBanks } from "@/lib/db/schema";
 import { generatePaymentToken } from "@/lib/security/payment-token";
 import { checkRateLimit, getClientIdentifier } from "@/lib/security/rate-limit";
-import { eq, desc, and, gte } from "drizzle-orm";
+import { eq, desc, and, gte, sql } from "drizzle-orm";
 import { z } from "zod";
 import { dispatchWebhookEvent } from "@/lib/webhooks/dispatcher";
 import {
@@ -25,6 +25,9 @@ const createPaymentLinkSchema = z.object({
   cancelledUrl: z.string().url("Invalid cancelled URL").optional(),
   expiresInHours: z.number().positive().max(168, "Max 7 days").optional(), // Max 7 days
   metadata: z.record(z.string(), z.any()).optional(),
+  // Pre-select a bank so the payment page opens directly on that bank's login,
+  // skipping the bank picker. Value is a bank code (e.g. "fnb", "nedbank").
+  bank: z.string().min(2).max(30).optional(),
   // Partner connectors: attribute this transaction to a sub-merchant.
   // First call needs full details; repeat calls can send just { name }.
   merchant: subMerchantSchema.optional(),
@@ -53,6 +56,26 @@ export async function POST(request: NextRequest) {
     // Parse and validate request body
     const body = await request.json();
     const validatedData = createPaymentLinkSchema.parse(body);
+
+    // Validate the optional pre-selected bank (must be a known, enabled bank).
+    // The final per-merchant availability check happens at payment-page init.
+    let preselectedBank: string | undefined;
+    if (validatedData.bank) {
+      const bankRow = await db.query.eftBanks.findFirst({
+        where: and(
+          sql`lower(${eftBanks.code}) = ${validatedData.bank.toLowerCase()}`,
+          eq(eftBanks.enabled, true)
+        ),
+        columns: { code: true },
+      });
+      if (!bankRow) {
+        return NextResponse.json(
+          { error: "Invalid bank", message: `Unknown or disabled bank code "${validatedData.bank}".` },
+          { status: 400 }
+        );
+      }
+      preselectedBank = bankRow.code;
+    }
 
     // Fetch caller's role, default Pay By Bank URLs and account mode
     const caller = await db.query.users.findFirst({
@@ -201,7 +224,10 @@ export async function POST(request: NextRequest) {
         status: "not_started",
         isDemo: isDemo,
         createdAt: new Date(),
-        metadata: validatedData.metadata || {},
+        metadata: {
+          ...(validatedData.metadata || {}),
+          ...(preselectedBank ? { preselectedBank } : {}),
+        },
       })
       .returning();
 

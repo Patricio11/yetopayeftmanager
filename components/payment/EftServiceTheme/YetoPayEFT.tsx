@@ -106,6 +106,7 @@ interface YetoPayEFTProps {
     token: string;
     branding?: PaymentPageBranding | null;
     layout?: { mode: string; showCancel?: boolean; background?: string } | null;
+    preselectedBank?: string | null;
     isDemo?: boolean;
     enableReceipt?: boolean;
     fnbVerifyResult?: boolean;
@@ -135,6 +136,9 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   const [formErrors, setFormErrors] = useState<Record<string, string | null>>({});
   const [pageError, setPageError] = useState<string | null>(null);
   const hasMarkedInitiatedRef = useRef(false);
+  // Lets the init effect trigger bank selection for bank-specific links even
+  // though handleBankSelect is declared later in the component.
+  const handleBankSelectRef = useRef<((bank: Bank) => void) | null>(null);
   // A transaction has exactly ONE terminal outcome. SSE and the poll fallback
   // can race (two /final polls overlapped in production: the real signed result
   // and a quick unsigned tombstone reply, 16ms apart → a failed AND a completed
@@ -435,6 +439,18 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
         
         setCurrentStep('init');
         setIsInitializing(false);
+
+        // Bank-specific link: skip the picker and go straight to that bank's
+        // login. Deferred a tick so state (banks/merchant/JWT) is committed.
+        if (initialData.preselectedBank) {
+          const pre = initialData.banks.find(
+            (b) => b.code.toLowerCase() === initialData.preselectedBank!.toLowerCase()
+          );
+          if (pre) {
+            console.log(`[EFT] Pre-selected bank from payment link: ${pre.name} (${pre.code})`);
+            setTimeout(() => handleBankSelectRef.current?.(pre), 0);
+          }
+        }
         return;
       }
       
@@ -1032,6 +1048,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     // Continue with EFT flow
     handleStepExecution(bank.code, 'load_bank', merchant);
   };
+  handleBankSelectRef.current = handleBankSelect;
 
     // -------------------------
   // Cancel flow
