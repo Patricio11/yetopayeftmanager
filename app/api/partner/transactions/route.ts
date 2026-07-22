@@ -68,14 +68,17 @@ export async function GET(request: NextRequest) {
       endDate.setHours(23, 59, 59, 999);
       conditions.push(lte(eftTransactions.createdAt, endDate));
     }
-    // Search matches reference, customer email/name, and the transaction ID
+    // Search matches reference, customer email/name, the transaction ID, and
+    // the sub-merchant's own reference (metadata.merchantReference) — the
+    // latter is not unique, but search returns a list so that's fine.
     if (search) {
       conditions.push(
         or(
           ilike(eftTransactions.reference, `%${search}%`),
           ilike(eftTransactions.customerEmail, `%${search}%`),
           ilike(eftTransactions.customerName, `%${search}%`),
-          sql`${eftTransactions.id}::text ILIKE ${`%${search}%`}`
+          sql`${eftTransactions.id}::text ILIKE ${`%${search}%`}`,
+          sql`${eftTransactions.metadata}->>'merchantReference' ILIKE ${`%${search}%`}`
         )!
       );
     }

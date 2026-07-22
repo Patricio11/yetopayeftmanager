@@ -60,14 +60,16 @@ export default async function TransactionsPage({
     conditions.push(lte(eftTransactions.createdAt, endDate));
   }
 
-  // Search — matches reference, customer email/name, and the transaction ID
+  // Search — matches reference, customer email/name, the transaction ID, and
+  // the sub-merchant's own reference (metadata.merchantReference)
   if (search) {
     conditions.push(
       or(
         ilike(eftTransactions.reference, `%${search}%`),
         ilike(eftTransactions.customerEmail, `%${search}%`),
         ilike(eftTransactions.customerName, `%${search}%`),
-        sql`${eftTransactions.id}::text ILIKE ${`%${search}%`}`
+        sql`${eftTransactions.id}::text ILIKE ${`%${search}%`}`,
+        sql`${eftTransactions.metadata}->>'merchantReference' ILIKE ${`%${search}%`}`
       )
     );
   }
