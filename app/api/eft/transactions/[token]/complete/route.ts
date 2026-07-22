@@ -30,6 +30,9 @@ const completeSchema = z.object({
   sessionId: z.string().optional(),
   eftSignature: z.string().optional(),
   deviceFingerprint: z.string().optional(),
+  // Paying customer details from the EFT service (name/account/account_type/
+  // bank/branch_code + bank-specific extras like fnbUserDescription)
+  customer: z.record(z.string(), z.any()).optional(),
   metadata: z.record(z.string(), z.any()).optional(),
 });
 
@@ -221,6 +224,11 @@ export async function POST(
       console.log(`🧪 Demo transaction completion: ${transactionId} -> ${validatedData.status}`);
     }
 
+    // Paying customer details (EFT service payload) — persist to the customer
+    // columns and keep the full object (incl. bank-specific extras) in metadata
+    const cust = (validatedData.customer || {}) as Record<string, any>;
+    const hasCustomer = Object.keys(cust).length > 0;
+
     // Update transaction status + device fingerprint
     const [updatedTransaction] = await db
       .update(eftTransactions)
@@ -230,6 +238,13 @@ export async function POST(
         completedAt: validatedData.status === "completed" ? new Date() : null,
         updatedAt: new Date(),
         ...(validatedData.deviceFingerprint ? { deviceFingerprint: validatedData.deviceFingerprint } : {}),
+        ...(cust.name ? { customerName: String(cust.name) } : {}),
+        ...(cust.account ? { customerAccount: String(cust.account) } : {}),
+        ...(cust.account_type ? { customerAccountType: String(cust.account_type) } : {}),
+        ...(cust.bank || validatedData.customerBank
+          ? { customerBank: String(cust.bank || validatedData.customerBank) }
+          : {}),
+        ...(cust.branch_code ? { customerBranchCode: String(cust.branch_code) } : {}),
         metadata: {
           ...(transaction.metadata as any || {}),
           ...(transaction.isDemo ? { demo: true } : {}),
@@ -243,6 +258,7 @@ export async function POST(
           customer_bank: validatedData.customerBank,
           session_id: validatedData.sessionId,
           completion_message: validatedData.message,
+          ...(hasCustomer ? { customer: cust } : {}),
           ...(validatedData.metadata || {}),
         },
       })
@@ -263,13 +279,17 @@ export async function POST(
         status: updatedTransaction.status,
         customerEmail: updatedTransaction.customerEmail || undefined,
         customerName: updatedTransaction.customerName || undefined,
-        customer: {
-          name: updatedTransaction.customerName || undefined,
-          account: updatedTransaction.customerAccount || undefined,
-          account_type: updatedTransaction.customerAccountType || undefined,
-          bank: updatedTransaction.customerBank || undefined,
-          branch_code: updatedTransaction.customerBranchCode || undefined,
-        },
+        // Full customer object from the EFT service when provided (includes
+        // bank-specific extras like fnbUserDescription); else column fallback
+        customer: hasCustomer
+          ? cust
+          : {
+              name: updatedTransaction.customerName || undefined,
+              account: updatedTransaction.customerAccount || undefined,
+              account_type: updatedTransaction.customerAccountType || undefined,
+              bank: updatedTransaction.customerBank || undefined,
+              branch_code: updatedTransaction.customerBranchCode || undefined,
+            },
         bankName: validatedData.customerBank,
         metadata: updatedTransaction.metadata,
         createdAt: updatedTransaction.createdAt?.toISOString(),
@@ -327,7 +347,7 @@ export async function POST(
           reference: transaction.reference,
           amount: parseFloat(transaction.amount),
           status: validatedData.status,
-          customer: {
+          customer: hasCustomer ? cust : {
             name: updatedTransaction.customerName || undefined,
             account: updatedTransaction.customerAccount || undefined,
             account_type: updatedTransaction.customerAccountType || undefined,

@@ -311,6 +311,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
           destinationAccount: raw?.destinationAccount,
           destinationBank: raw?.destinationBank,
           customerBank: selectedBank?.code,
+          customer: (raw as any)?.customer,
           sessionId: sessionId || raw?.sessionId,
           deviceFingerprint: deviceFingerprint || undefined,
           metadata: raw,

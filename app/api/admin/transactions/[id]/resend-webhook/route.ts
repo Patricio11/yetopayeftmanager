@@ -41,11 +41,26 @@ export async function POST(
       ? "payment.cancelled"
       : "transaction.updated";
 
+    // Customer object: full stored payload from the EFT service if present
+    // (metadata.customer, incl. bank-specific extras), else the columns
+    const meta = (transaction.metadata as any) || {};
+    const customer = meta.customer && Object.keys(meta.customer).length > 0
+      ? meta.customer
+      : {
+          name: transaction.customerName || undefined,
+          account: transaction.customerAccount || undefined,
+          account_type: transaction.customerAccountType || undefined,
+          bank: transaction.customerBank || undefined,
+          branch_code: transaction.customerBranchCode || undefined,
+        };
+
     await dispatchWebhookEvent(transaction.merchantId, eventType as any, {
       id: transaction.id,
       reference: transaction.reference,
       amount: transaction.amount,
       status,
+      customer,
+      metadata: transaction.metadata,
       resent: true,
       resentBy: auth.session.user.email || auth.session.user.id,
       timestamp: new Date().toISOString(),
