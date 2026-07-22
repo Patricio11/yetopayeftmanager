@@ -103,9 +103,19 @@ export async function POST(request: NextRequest) {
       };
     }
 
-    // Check for duplicate reference within this merchant's transactions
-    const existingRef = await db
-      .select({ id: eftTransactions.id })
+    // ── Idempotent create per (merchant, reference) ─────────────────────────
+    // Re-posting the same reference returns the SAME transaction with a fresh
+    // payment token instead of erroring. This makes repeated calls harmless —
+    // e.g. Slack/WhatsApp link-preview bots hitting a connector's pay URL used
+    // to create one duplicate transaction per unfurl. A finished reference
+    // (completed/failed/etc.) still 409s: references are single-use per payment.
+    const [existing] = await db
+      .select({
+        id: eftTransactions.id,
+        status: eftTransactions.status,
+        amount: eftTransactions.amount,
+        createdAt: eftTransactions.createdAt,
+      })
       .from(eftTransactions)
       .where(
         and(
@@ -115,11 +125,44 @@ export async function POST(request: NextRequest) {
       )
       .limit(1);
 
-    if (existingRef.length > 0) {
+    if (existing) {
+      const OPEN_STATUSES = ["not_started", "initiated", "pending"];
+      const sameAmount = parseFloat(existing.amount) === validatedData.amount;
+
+      if (OPEN_STATUSES.includes(existing.status || "") && sameAmount) {
+        const expiresInHours = validatedData.expiresInHours || 24;
+        const token = await generatePaymentToken({
+          transactionId: existing.id,
+          merchantId,
+          amount: validatedData.amount,
+          expiresInHours,
+        });
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+        console.log(`♻️ Idempotent payment link replay: ${existing.id} (ref ${validatedData.reference})`);
+        return NextResponse.json({
+          success: true,
+          message: "Existing payment link returned",
+          data: {
+            transactionId: existing.id,
+            paymentUrl: `${appUrl}/pay/${token}`,
+            token,
+            reference: validatedData.reference,
+            amount: validatedData.amount,
+            expiresAt: new Date(Date.now() + expiresInHours * 60 * 60 * 1000).toISOString(),
+            status: existing.status,
+            createdAt: existing.createdAt.toISOString(),
+            existing: true,
+            ...(subMerchantInfo ? { merchant: subMerchantInfo } : {}),
+          },
+        });
+      }
+
       return NextResponse.json(
         {
           error: "Duplicate reference",
-          message: `A payment link with reference "${validatedData.reference}" already exists. Please use a unique reference.`,
+          message: sameAmount
+            ? `Reference "${validatedData.reference}" already belongs to a ${existing.status} payment. Use a new reference.`
+            : `Reference "${validatedData.reference}" already exists with a different amount. Use a new reference.`,
         },
         { status: 409 }
       );

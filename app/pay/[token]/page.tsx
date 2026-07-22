@@ -1,4 +1,5 @@
 import { notFound, redirect } from 'next/navigation';
+import type { Metadata } from 'next';
 import PaymentInterface from '@/components/payment/PaymentInterface';
 
 interface PageProps {
@@ -7,6 +8,21 @@ interface PageProps {
   }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
+
+// Static preview metadata for link unfurls (Slack/WhatsApp/etc.) — crawlers get
+// this cheap card WITHOUT executing the payment flow, and the page is marked
+// noindex so it never lands in search results. This keeps preview bots from
+// driving the live payment initialisation.
+export const metadata: Metadata = {
+  title: 'Secure Payment · YetoPay',
+  description: 'Complete your payment securely with YetoPay.',
+  robots: { index: false, follow: false },
+  openGraph: {
+    title: 'Secure Payment · YetoPay',
+    description: 'Complete your payment securely with YetoPay.',
+    type: 'website',
+  },
+};
 
 export default async function PaymentPage({ params, searchParams }: PageProps) {
   try {
