@@ -183,7 +183,7 @@ export async function POST(request: NextRequest) {
       )
       .limit(1);
 
-    const OPEN_STATUSES = ["not_started", "initiated", "pending"];
+    const OPEN_STATUSES: ("not_started" | "initiated" | "pending")[] = ["not_started", "initiated", "pending"];
 
     // Replay an existing open transaction with a fresh token instead of
     // creating a duplicate (used by both dedupe paths below).
@@ -220,7 +220,7 @@ export async function POST(request: NextRequest) {
       const sameAmount = parseFloat(existing.amount) === validatedData.amount;
       const sameCurrency = (existing.currency || "ZAR").toUpperCase() === currency;
 
-      if (OPEN_STATUSES.includes(existing.status || "") && sameAmount && sameCurrency) {
+      if ((OPEN_STATUSES as string[]).includes(existing.status || "") && sameAmount && sameCurrency) {
         return replayExisting(existing);
       }
 
