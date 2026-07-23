@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { eftTransactions, paymentTokens, users, eftBanks } from "@/lib/db/schema";
 import { generatePaymentToken } from "@/lib/security/payment-token";
 import { checkRateLimit, getClientIdentifier } from "@/lib/security/rate-limit";
-import { eq, desc, and, gte, sql } from "drizzle-orm";
+import { eq, desc, and, gte, sql, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { dispatchWebhookEvent } from "@/lib/webhooks/dispatcher";
 import {
@@ -183,38 +183,45 @@ export async function POST(request: NextRequest) {
       )
       .limit(1);
 
+    const OPEN_STATUSES = ["not_started", "initiated", "pending"];
+
+    // Replay an existing open transaction with a fresh token instead of
+    // creating a duplicate (used by both dedupe paths below).
+    const replayExisting = async (row: { id: string; status: string | null; currency: string | null; createdAt: Date; reference?: string }) => {
+      const expiresInHours = validatedData.expiresInHours || 24;
+      const token = await generatePaymentToken({
+        transactionId: row.id,
+        merchantId,
+        amount: validatedData.amount,
+        expiresInHours,
+      });
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+      console.log(`♻️ Idempotent payment link replay: ${row.id} (ref ${row.reference || validatedData.reference})`);
+      return NextResponse.json({
+        success: true,
+        message: "Existing payment link returned",
+        data: {
+          transactionId: row.id,
+          paymentUrl: `${appUrl}/pay/${token}`,
+          token,
+          reference: row.reference || validatedData.reference,
+          amount: validatedData.amount,
+          currency: row.currency || "ZAR",
+          expiresAt: new Date(Date.now() + expiresInHours * 60 * 60 * 1000).toISOString(),
+          status: row.status,
+          createdAt: row.createdAt.toISOString(),
+          existing: true,
+          ...(subMerchantInfo ? { merchant: subMerchantInfo } : {}),
+        },
+      });
+    };
+
     if (existing) {
-      const OPEN_STATUSES = ["not_started", "initiated", "pending"];
       const sameAmount = parseFloat(existing.amount) === validatedData.amount;
       const sameCurrency = (existing.currency || "ZAR").toUpperCase() === currency;
 
       if (OPEN_STATUSES.includes(existing.status || "") && sameAmount && sameCurrency) {
-        const expiresInHours = validatedData.expiresInHours || 24;
-        const token = await generatePaymentToken({
-          transactionId: existing.id,
-          merchantId,
-          amount: validatedData.amount,
-          expiresInHours,
-        });
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-        console.log(`♻️ Idempotent payment link replay: ${existing.id} (ref ${validatedData.reference})`);
-        return NextResponse.json({
-          success: true,
-          message: "Existing payment link returned",
-          data: {
-            transactionId: existing.id,
-            paymentUrl: `${appUrl}/pay/${token}`,
-            token,
-            reference: validatedData.reference,
-            amount: validatedData.amount,
-            currency: existing.currency || "ZAR",
-            expiresAt: new Date(Date.now() + expiresInHours * 60 * 60 * 1000).toISOString(),
-            status: existing.status,
-            createdAt: existing.createdAt.toISOString(),
-            existing: true,
-            ...(subMerchantInfo ? { merchant: subMerchantInfo } : {}),
-          },
-        });
+        return replayExisting(existing);
       }
 
       return NextResponse.json(
@@ -228,6 +235,46 @@ export async function POST(request: NextRequest) {
         },
         { status: 409 }
       );
+    }
+
+    // ── Second dedupe layer: merchant.reference ────────────────────────────
+    // Connectors that mint a fresh top-level reference per call (e.g. an
+    // order id + timestamp suffix) defeat the exact-reference check above —
+    // link-preview bots then create one duplicate per unfurl. When the caller
+    // supplies merchant.reference (their own stable order id), an OPEN
+    // transaction for the same sub-merchant with the same merchant.reference,
+    // amount and currency is the same payment: replay it instead of creating
+    // a duplicate. Closed transactions don't match, so a retry after a
+    // failed/expired payment still gets a fresh transaction.
+    if (validatedData.merchant?.reference) {
+      const [dupe] = await db
+        .select({
+          id: eftTransactions.id,
+          status: eftTransactions.status,
+          amount: eftTransactions.amount,
+          currency: eftTransactions.currency,
+          reference: eftTransactions.reference,
+          createdAt: eftTransactions.createdAt,
+        })
+        .from(eftTransactions)
+        .where(
+          and(
+            eq(eftTransactions.merchantId, merchantId),
+            sql`${eftTransactions.metadata}->>'merchantReference' = ${validatedData.merchant.reference}`,
+            inArray(eftTransactions.status, OPEN_STATUSES)
+          )
+        )
+        .orderBy(desc(eftTransactions.createdAt))
+        .limit(1);
+
+      if (
+        dupe &&
+        parseFloat(dupe.amount) === validatedData.amount &&
+        (dupe.currency || "ZAR").toUpperCase() === currency
+      ) {
+        console.log(`♻️ Deduped by merchant.reference "${validatedData.merchant.reference}" → ${dupe.id}`);
+        return replayExisting(dupe);
+      }
     }
 
     // Effective merchant for URLs/mode: the sub-merchant when set, else caller

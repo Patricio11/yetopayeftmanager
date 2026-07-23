@@ -285,7 +285,7 @@ the first call, you only need to send the name.
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `merchant.name` | string | Yes | Merchant name — unique per partner, used to match repeat calls |
-| `merchant.reference` | string | No | The merchant's OWN reference for this payment. Buyer redirects use it as the `reference` query param (the payment-link reference moves to `link_reference`); webhooks keep `data.reference` = the payment-link reference and echo this under `data.merchant.reference` |
+| `merchant.reference` | string | No | The merchant's OWN reference for this payment. Buyer redirects use it as the `reference` query param (the payment-link reference moves to `link_reference`); webhooks keep `data.reference` = the payment-link reference and echo this under `data.merchant.reference`. **Also used for duplicate protection**: while a payment with the same `merchant.reference`, amount and currency is still open (`not_started`/`initiated`/`pending`), repeat create calls return that SAME transaction (`existing: true`) even if the top-level `reference` differs — so link-preview bots and retries can't create duplicates. After the payment closes (completed/failed/expired), a new call creates a fresh transaction |
 | `merchant.email` | string | No | Merchant contact email |
 | `merchant.phone` | string | No | Merchant phone |
 | `merchant.logoUrl` | string | No | Logo shown on the payment page |
