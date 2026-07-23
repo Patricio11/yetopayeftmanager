@@ -28,6 +28,9 @@ const createPaymentLinkSchema = z.object({
   // Pre-select a bank so the payment page opens directly on that bank's login,
   // skipping the bank picker. Value is a bank code (e.g. "fnb", "nedbank").
   bank: z.string().min(2).max(30).optional(),
+  // ISO 4217 currency. Omitted → ZAR (South African banks). "NAD" shows only
+  // Namibian banks on the payment page. Must match an enabled bank's currency.
+  currency: z.string().trim().length(3, "Currency must be a 3-letter ISO code").optional(),
   // Partner connectors: attribute this transaction to a sub-merchant.
   // First call needs full details; repeat calls can send just { name }.
   merchant: subMerchantSchema.optional(),
@@ -57,8 +60,32 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = createPaymentLinkSchema.parse(body);
 
-    // Validate the optional pre-selected bank (must be a known, enabled bank).
-    // The final per-merchant availability check happens at payment-page init.
+    // Currency: default ZAR; anything else must be served by at least one
+    // enabled bank (e.g. NAD → FNB Namibia). The payment page then shows only
+    // banks in this currency.
+    const currency = (validatedData.currency || "ZAR").toUpperCase();
+    if (currency !== "ZAR") {
+      const currencyBank = await db.query.eftBanks.findFirst({
+        where: and(eq(eftBanks.currency, currency), eq(eftBanks.enabled, true)),
+        columns: { id: true },
+      });
+      if (!currencyBank) {
+        const supported = await db
+          .selectDistinct({ currency: eftBanks.currency })
+          .from(eftBanks)
+          .where(eq(eftBanks.enabled, true));
+        return NextResponse.json(
+          {
+            error: "Unsupported currency",
+            message: `No enabled banks accept "${currency}". Supported currencies: ${supported.map((s) => s.currency).join(", ")}.`,
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Validate the optional pre-selected bank (must be a known, enabled bank
+    // in the link's currency). Final per-merchant check happens at page init.
     let preselectedBank: string | undefined;
     if (validatedData.bank) {
       const bankRow = await db.query.eftBanks.findFirst({
@@ -66,11 +93,17 @@ export async function POST(request: NextRequest) {
           sql`lower(${eftBanks.code}) = ${validatedData.bank.toLowerCase()}`,
           eq(eftBanks.enabled, true)
         ),
-        columns: { code: true },
+        columns: { code: true, currency: true },
       });
       if (!bankRow) {
         return NextResponse.json(
           { error: "Invalid bank", message: `Unknown or disabled bank code "${validatedData.bank}".` },
+          { status: 400 }
+        );
+      }
+      if ((bankRow.currency || "ZAR").toUpperCase() !== currency) {
+        return NextResponse.json(
+          { error: "Bank/currency mismatch", message: `Bank "${bankRow.code}" accepts ${bankRow.currency}, but this link is in ${currency}.` },
           { status: 400 }
         );
       }
@@ -138,6 +171,7 @@ export async function POST(request: NextRequest) {
         id: eftTransactions.id,
         status: eftTransactions.status,
         amount: eftTransactions.amount,
+        currency: eftTransactions.currency,
         createdAt: eftTransactions.createdAt,
       })
       .from(eftTransactions)
@@ -152,8 +186,9 @@ export async function POST(request: NextRequest) {
     if (existing) {
       const OPEN_STATUSES = ["not_started", "initiated", "pending"];
       const sameAmount = parseFloat(existing.amount) === validatedData.amount;
+      const sameCurrency = (existing.currency || "ZAR").toUpperCase() === currency;
 
-      if (OPEN_STATUSES.includes(existing.status || "") && sameAmount) {
+      if (OPEN_STATUSES.includes(existing.status || "") && sameAmount && sameCurrency) {
         const expiresInHours = validatedData.expiresInHours || 24;
         const token = await generatePaymentToken({
           transactionId: existing.id,
@@ -172,6 +207,7 @@ export async function POST(request: NextRequest) {
             token,
             reference: validatedData.reference,
             amount: validatedData.amount,
+            currency: existing.currency || "ZAR",
             expiresAt: new Date(Date.now() + expiresInHours * 60 * 60 * 1000).toISOString(),
             status: existing.status,
             createdAt: existing.createdAt.toISOString(),
@@ -184,7 +220,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: "Duplicate reference",
-          message: sameAmount
+          message: !sameCurrency
+            ? `Reference "${validatedData.reference}" already exists in ${existing.currency || "ZAR"}. Use a new reference.`
+            : sameAmount
             ? `Reference "${validatedData.reference}" already belongs to a ${existing.status} payment. Use a new reference.`
             : `Reference "${validatedData.reference}" already exists with a different amount. Use a new reference.`,
         },
@@ -214,6 +252,7 @@ export async function POST(request: NextRequest) {
       .values({
         merchantId,
         amount: validatedData.amount.toString(),
+        currency,
         reference: validatedData.reference,
         description: validatedData.description,
         customerEmail: validatedData.customerEmail,
@@ -262,6 +301,7 @@ export async function POST(request: NextRequest) {
           id: transaction.id,
           reference: transaction.reference,
           amount: parseFloat(transaction.amount),
+          currency: transaction.currency || "ZAR",
           status: transaction.status,
           customerEmail: transaction.customerEmail || undefined,
           customerName: transaction.customerName || undefined,
@@ -290,6 +330,7 @@ export async function POST(request: NextRequest) {
         token, // Include token for reference
         reference: transaction.reference,
         amount: parseFloat(transaction.amount),
+        currency: transaction.currency || "ZAR",
         expiresAt: expiresAt.toISOString(),
         status: transaction.status,
         createdAt: transaction.createdAt.toISOString(),

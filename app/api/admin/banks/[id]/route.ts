@@ -12,6 +12,7 @@ const updateBankSchema = z.object({
   code: z.string().min(1, "Bank code is required").regex(/^[a-z0-9_-]+$/, "Code must be lowercase alphanumeric with hyphens/underscores").optional(),
   color: z.string().optional(),
   branchCode: z.string().optional(),
+  currency: z.string().trim().length(3).transform((v) => v.toUpperCase()).optional(),
   enabled: z.boolean().optional(),
   eftServiceUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
 });

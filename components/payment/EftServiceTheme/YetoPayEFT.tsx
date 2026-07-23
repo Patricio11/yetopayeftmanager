@@ -87,6 +87,7 @@ interface YetoPayEFTProps {
     transaction: {
       id: string;
       amount: string;
+      currency?: string;
       reference: string;
       merchantReference?: string | null;
       description?: string;
@@ -127,7 +128,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   const [isInitializing, setIsInitializing] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [processingMessage, setProcessingMessage] = useState('Processing your payment...');
-  const [paymentDetails, setPaymentDetails] = useState<{ amount: string; reference: string; merchantReference?: string }>({ amount: '0.00', reference: '...' });
+  const [paymentDetails, setPaymentDetails] = useState<{ amount: string; reference: string; merchantReference?: string; currency?: string }>({ amount: '0.00', reference: '...' });
   const [merchant, setMerchant] = useState<Merchant>({ name: 'Merchant' });
   const [banks, setBanks] = useState<Bank[]>([]);
   const [authSecretBearerToken, setAuthSecretBearerToken] = useState('');
@@ -354,6 +355,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     const redirectUrl = appendParams(redirectBase, {
       session_id: sessionId || raw?.sessionId,
       amount: raw?.amount || paymentDetails.amount,
+      currency: paymentDetails.currency || undefined,
       reference: paymentDetails.merchantReference || paymentDetails.reference,
       link_reference: paymentDetails.merchantReference ? paymentDetails.reference : undefined,
       bank: selectedBank?.code,
@@ -413,6 +415,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
           amount: initialData.transaction.amount,
           reference: initialData.transaction.reference,
           merchantReference: initialData.transaction.merchantReference || undefined,
+          currency: initialData.transaction.currency || 'ZAR',
         });
         console.log('[INIT] Setting merchant from initialData:', initialData.merchant);
         setMerchant({
@@ -2312,7 +2315,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="font-semibold text-gray-900">Pay {merchant.name}</h3>
-                      <p className="text-2xl font-bold text-gray-900">R{paymentDetails.amount}</p>
+                      <p className="text-2xl font-bold text-gray-900">{paymentDetails.currency === 'NAD' ? 'N$' : 'R'}{paymentDetails.amount}</p>
                       <p className="text-sm text-gray-500">Reference: {paymentDetails.reference}</p>
                     </div>
                     <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">

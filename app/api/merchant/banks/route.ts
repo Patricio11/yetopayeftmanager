@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authenticateMerchant } from "@/lib/auth/merchant-auth";
 import { db } from "@/lib/db";
 import { eftBanks } from "@/lib/db/schema";
-import { eq, asc } from "drizzle-orm";
+import { eq, asc, and } from "drizzle-orm";
 
 /**
  * GET /api/merchant/banks
@@ -14,6 +14,10 @@ export async function GET(request: NextRequest) {
     const auth = await authenticateMerchant(request, 'banks.read');
     if (!auth.success) return auth.response;
 
+    // Optional ?currency=NAD filter — e.g. to list the banks a NAD payment
+    // link would show. Omitted → all enabled banks (currency is per bank).
+    const currencyFilter = request.nextUrl.searchParams.get("currency")?.toUpperCase() || null;
+
     const banks = await db
       .select({
         id: eftBanks.id,
@@ -21,9 +25,14 @@ export async function GET(request: NextRequest) {
         code: eftBanks.code,
         color: eftBanks.color,
         branchCode: eftBanks.branchCode,
+        currency: eftBanks.currency,
       })
       .from(eftBanks)
-      .where(eq(eftBanks.enabled, true))
+      .where(
+        currencyFilter
+          ? and(eq(eftBanks.enabled, true), eq(eftBanks.currency, currencyFilter))
+          : eq(eftBanks.enabled, true)
+      )
       .orderBy(asc(eftBanks.displayOrder));
 
     return NextResponse.json({ success: true, data: { banks } });

@@ -58,6 +58,7 @@ export async function POST(
       id: transaction.id,
       reference: transaction.reference,
       amount: transaction.amount,
+      currency: (transaction as any).currency || "ZAR",
       status,
       customer,
       metadata: transaction.metadata,

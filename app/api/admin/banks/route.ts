@@ -11,6 +11,8 @@ const createBankSchema = z.object({
   code: z.string().min(1, "Bank code is required").regex(/^[a-z0-9_-]+$/, "Code must be lowercase alphanumeric with hyphens/underscores"),
   color: z.string().optional(),
   branchCode: z.string().optional(),
+  // ISO 4217 — payment links only show banks matching their currency
+  currency: z.string().trim().length(3).transform((v) => v.toUpperCase()).default("ZAR"),
   eftServiceUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
   enabled: z.boolean().default(true),
 });
@@ -97,6 +99,7 @@ export async function POST(request: NextRequest) {
         code: validatedData.code,
         color: validatedData.color,
         branchCode: validatedData.branchCode,
+        currency: validatedData.currency,
         eftServiceUrl: validatedData.eftServiceUrl || null,
         enabled: validatedData.enabled,
         createdAt: new Date(),

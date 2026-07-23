@@ -67,6 +67,7 @@ export async function GET(request: NextRequest) {
           id: txn.id,
           reference: txn.reference,
           amount: parseFloat(txn.amount),
+          currency: (txn as any).currency || "ZAR",
           status: "failed",
           customerEmail: txn.customerEmail || undefined,
           customerName: txn.customerName || undefined,

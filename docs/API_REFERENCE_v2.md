@@ -176,6 +176,7 @@ Create a new payment link. Returns a URL to redirect your customer to.
 | `expiresInHours` | number | No | Link expiry in hours (default: 24, max: 168) |
 | `metadata` | object | No | Custom key-value data returned in webhooks |
 | `bank` | string | No | Pre-select a bank — the payment page opens directly on that bank's login, skipping the bank picker (see below) |
+| `currency` | string | No | ISO 4217 currency code. Default `ZAR` (South African banks). `NAD` shows only Namibian banks on the payment page (see below) |
 | `merchant` | object | No | **Partner accounts only.** Attribute this transaction to one of your merchants (see below) |
 
 **Response:**
@@ -190,6 +191,7 @@ Create a new payment link. Returns a URL to redirect your customer to.
     "token": "abc123...",
     "reference": "INV-001",
     "amount": 250.00,
+    "currency": "ZAR",
     "expiresAt": "2024-12-02T15:00:00Z",
     "status": "not_started",
     "createdAt": "2024-12-01T15:00:00Z"
@@ -235,6 +237,34 @@ Notes:
   gracefully falls back to the normal bank picker.
 - When both card and Pay-by-Bank are enabled on the account, a `bank` value
   implies Pay-by-Bank and skips the payment-method picker too.
+
+---
+
+#### Multi-currency payment links
+
+Omit `currency` and everything works as before: the link is in **ZAR** and the
+payment page shows the South African banks. Set it to another supported
+currency and the page shows **only the banks that accept that currency** —
+e.g. `NAD` shows FNB Namibia, and amounts display as `N$`.
+
+```json
+{
+  "amount": 250.00,
+  "reference": "INV-001",
+  "currency": "NAD"
+}
+```
+
+Notes:
+- Supported values are determined by the enabled banks' currencies. A currency
+  no enabled bank accepts returns `400` listing the supported codes.
+- `GET /api/merchant/banks?currency=NAD` lists the banks such a link would
+  show (each bank's own `currency` is also included in the response).
+- A `bank` pre-selection must match the link's currency, otherwise `400`.
+- The `currency` is echoed in the create response, all webhook events
+  (`transaction.created`, `payment.completed`, `payment.failed`, …) and the
+  buyer redirect parameters, so you can reconcile per currency.
+- No FX is performed — the amount is charged in the link's currency.
 
 ---
 

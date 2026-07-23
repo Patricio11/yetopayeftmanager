@@ -43,6 +43,7 @@ type Bank = {
     code: string;
     color: string | null;
     branchCode: string | null;
+    currency: string | null;
     enabled: boolean | null;
     eftServiceUrl: string | null;
     createdAt: Date;
@@ -74,6 +75,7 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
     code: "",
     color: "#10b981",
     branchCode: "",
+    currency: "ZAR",
     eftServiceUrl: "",
     enabled: true,
     displayOrder: 0,
@@ -85,6 +87,7 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
       code: "",
       color: "#10b981",
       branchCode: "",
+      currency: "ZAR",
       eftServiceUrl: "",
       enabled: true,
       displayOrder: 0,
@@ -227,6 +230,7 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
       code: bank.bank.code,
       color: bank.bank.color || "#10b981",
       branchCode: bank.bank.branchCode || "",
+      currency: bank.bank.currency || "ZAR",
       eftServiceUrl: bank.bank.eftServiceUrl || "",
       enabled: bank.bank.enabled ?? true,
       displayOrder: (bank.bank as any).displayOrder ?? 0,
@@ -472,6 +476,11 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
                         <span className="font-mono text-sm text-slate-700 dark:text-slate-300">
                           {bank.bank.code}
                         </span>
+                        {(bank.bank.currency || "ZAR") !== "ZAR" && (
+                          <span className="ml-2 px-1.5 py-0.5 text-[10px] font-semibold rounded bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+                            {bank.bank.currency}
+                          </span>
+                        )}
                       </TableCell>
                       <TableCell>
                         <span className="text-sm text-slate-600 dark:text-slate-400">
@@ -628,6 +637,23 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
             </div>
 
             <div>
+              <Label htmlFor="currency">Currency</Label>
+              <select
+                id="currency"
+                value={formData.currency}
+                onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+              >
+                <option value="ZAR">ZAR — South African Rand</option>
+                <option value="NAD">NAD — Namibian Dollar</option>
+                <option value="AOA">AOA — Angolan Kwanza</option>
+              </select>
+              <p className="text-xs text-slate-500 mt-1">
+                Payment links only show banks matching the link&apos;s currency (default ZAR)
+              </p>
+            </div>
+
+            <div>
               <Label htmlFor="eftServiceUrl">EFT Service URL (Optional)</Label>
               <Input
                 id="eftServiceUrl"
@@ -719,6 +745,23 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
                 value={formData.branchCode}
                 onChange={(e) => setFormData({ ...formData, branchCode: e.target.value })}
               />
+            </div>
+
+            <div>
+              <Label htmlFor="edit-currency">Currency</Label>
+              <select
+                id="edit-currency"
+                value={formData.currency}
+                onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+              >
+                <option value="ZAR">ZAR — South African Rand</option>
+                <option value="NAD">NAD — Namibian Dollar</option>
+                <option value="AOA">AOA — Angolan Kwanza</option>
+              </select>
+              <p className="text-xs text-slate-500 mt-1">
+                Payment links only show banks matching the link&apos;s currency (default ZAR)
+              </p>
             </div>
 
             <div>

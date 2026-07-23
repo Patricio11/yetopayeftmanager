@@ -276,6 +276,7 @@ export async function POST(
         id: updatedTransaction.id,
         reference: updatedTransaction.reference,
         amount: parseFloat(updatedTransaction.amount),
+        currency: (updatedTransaction as any).currency || "ZAR",
         status: updatedTransaction.status,
         customerEmail: updatedTransaction.customerEmail || undefined,
         customerName: updatedTransaction.customerName || undefined,

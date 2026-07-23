@@ -88,6 +88,7 @@ export default async function PaymentPage({ params, searchParams }: PageProps) {
     const transaction = {
       id: sessionId,
       amount: paymentDetails.amount.toString(),
+      currency: paymentDetails.currency || 'ZAR',
       reference: paymentDetails.reference,
       merchantReference: paymentDetails.merchantReference || null,
       description: paymentDetails.description,

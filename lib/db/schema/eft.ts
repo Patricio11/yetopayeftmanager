@@ -8,6 +8,7 @@ export const eftBanks = pgTable("eft_banks", {
   code: text("code").notNull().unique(),
   color: text("color"), // Brand color for UI
   branchCode: text("branch_code"),
+  currency: text("currency").default("ZAR").notNull(), // ISO 4217 — banks are shown only for links in their currency
   enabled: boolean("enabled").default(true),
   eftServiceUrl: text("eft_service_url"), // Per-bank EFT service URL (overrides default)
   displayOrder: integer("display_order").default(0), // Order for display in payment page
@@ -22,6 +23,7 @@ export const eftTransactions = pgTable("eft_transactions", {
   id: uuid("id").defaultRandom().primaryKey(),
   merchantId: text("merchant_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: text("currency").default("ZAR").notNull(), // ISO 4217 (ZAR default; NAD → Namibian banks)
   reference: text("reference").notNull().unique(),
   eftBankId: uuid("eft_bank_id").references(() => eftBanks.id),
   

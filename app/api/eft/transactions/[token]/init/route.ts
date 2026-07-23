@@ -162,9 +162,15 @@ export async function GET(
         .where(eq(merchantDisabledBanks.merchantId, merchantId)),
     ]);
 
-    // Filter out banks disabled for this merchant
+    // Filter out banks disabled for this merchant, then keep only banks in the
+    // link's currency (ZAR default; NAD links show only Namibian banks).
+    const txnCurrency = ((transaction as any).currency || "ZAR").toUpperCase();
     const disabledBankIds = new Set(disabledBankRows.map(r => r.bankId));
-    const merchantBanks = enabledBanks.filter(bank => !disabledBankIds.has(bank.id));
+    const merchantBanks = enabledBanks.filter(
+      bank =>
+        !disabledBankIds.has(bank.id) &&
+        ((bank as any).currency || "ZAR").toUpperCase() === txnCurrency
+    );
 
     // Map banks to frontend format (include per-bank EFT service URL if set)
     const defaultEftUrl = process.env.NEXT_PUBLIC_EFT_SERVICE_URL || 'http://localhost:8080/v1/eft';
@@ -213,6 +219,7 @@ export async function GET(
         sessionId: transaction.id, // Session ID = Transaction ID
         paymentDetails: {
           amount: parseFloat(transaction.amount),
+          currency: txnCurrency,
           reference: transaction.reference,
           // Sub-merchant's own reference (connector links) — used on buyer redirects
           merchantReference: (transaction.metadata as any)?.merchantReference || null,
