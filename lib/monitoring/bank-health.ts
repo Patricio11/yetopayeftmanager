@@ -188,6 +188,12 @@ export async function checkBankHealth(
   // Only act when a finalized status was just recorded
   if (!(FINALIZED_STATUSES as readonly string[]).includes(newStatus)) return;
 
+  // Auto-disable is opt-in: an admin must switch it on in Settings →
+  // Monitoring (platform setting bank_auto_disable_enabled). Default OFF —
+  // a burst of failures then never takes a bank offline automatically.
+  const autoDisableEnabled = await getSetting("bank_auto_disable_enabled");
+  if (autoDisableEnabled !== "true") return;
+
   const bank = await db.query.eftBanks.findFirst({
     where: eq(eftBanks.id, bankId),
   });

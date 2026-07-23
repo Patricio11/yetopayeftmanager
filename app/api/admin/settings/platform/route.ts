@@ -5,6 +5,7 @@ import { platformSettings } from '@/lib/db/schema';
 
 const ALLOWED_KEYS = [
   'eft_tc_enabled',
+  'bank_auto_disable_enabled',
   'alert_emails',
   'alert_sms_numbers',
   'alert_slack_webhook_url',
@@ -46,6 +47,9 @@ export async function PATCH(request: NextRequest) {
 
     // T&C toggle
     if (body.eft_tc_enabled !== undefined) updates.push({ key: 'eft_tc_enabled', value: body.eft_tc_enabled ? 'true' : 'false' });
+
+    // Bank auto-disable toggle (default off — checkBankHealth no-ops unless 'true')
+    if (body.bank_auto_disable_enabled !== undefined) updates.push({ key: 'bank_auto_disable_enabled', value: body.bank_auto_disable_enabled ? 'true' : 'false' });
 
     // Monitoring/alert settings
     if (body.alert_emails !== undefined) updates.push({ key: 'alert_emails', value: body.alert_emails });

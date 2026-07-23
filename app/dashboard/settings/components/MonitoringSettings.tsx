@@ -5,6 +5,7 @@ import { Mail, MessageSquare, Hash, Save, Loader2, Info, AlertTriangle, Activity
 import { Button } from "@/components/ui/button";
 
 export function MonitoringSettings() {
+  const [autoDisableEnabled, setAutoDisableEnabled] = useState(false);
   const [alertEmails, setAlertEmails] = useState("");
   const [alertSmsNumbers, setAlertSmsNumbers] = useState("");
   const [alertSlackWebhookUrl, setAlertSlackWebhookUrl] = useState("");
@@ -18,6 +19,7 @@ export function MonitoringSettings() {
       .then((r) => r.json())
       .then((data) => {
         if (data.success) {
+          setAutoDisableEnabled(data.settings.bank_auto_disable_enabled === "true");
           setAlertEmails(data.settings.alert_emails ?? "");
           setAlertSmsNumbers(data.settings.alert_sms_numbers ?? "");
           setAlertSlackWebhookUrl(data.settings.alert_slack_webhook_url ?? "");
@@ -35,6 +37,7 @@ export function MonitoringSettings() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          bank_auto_disable_enabled: autoDisableEnabled,
           alert_emails: alertEmails.trim(),
           alert_sms_numbers: alertSmsNumbers.trim(),
           alert_slack_webhook_url: alertSlackWebhookUrl.trim(),
@@ -61,12 +64,45 @@ export function MonitoringSettings() {
 
   return (
     <div className="space-y-6">
+      {/* Auto-disable toggle */}
+      <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/50 p-5">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center text-white">
+              <Activity className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-900 dark:text-white">Automatic Bank Disabling</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Take a bank offline automatically after 10 consecutive failed transactions. Off by default.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={autoDisableEnabled}
+            onClick={() => setAutoDisableEnabled((v) => !v)}
+            className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${
+              autoDisableEnabled ? "bg-green-600" : "bg-slate-300 dark:bg-slate-600"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                autoDisableEnabled ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+        </div>
+      </div>
+
       {/* How it works */}
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 flex gap-3">
         <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
         <div className="text-sm text-blue-800 dark:text-blue-300 space-y-1">
           <p className="font-medium">How it works</p>
           <ul className="list-disc list-inside space-y-0.5 text-blue-700 dark:text-blue-400/80">
+            <li>Only active when Automatic Bank Disabling is switched on (it is off by default).</li>
             <li>After every transaction, the system checks the last 10 outcomes for that bank.</li>
             <li>If all 10 are non-successful, the bank is auto-disabled and alerts are sent.</li>
             <li>A 2-hour cooldown prevents duplicate alert spam per bank.</li>
@@ -145,7 +181,7 @@ export function MonitoringSettings() {
       ))}
 
       {/* No channels warning */}
-      {!alertEmails.trim() && !alertSmsNumbers.trim() && !alertSlackWebhookUrl.trim() && (
+      {autoDisableEnabled && !alertEmails.trim() && !alertSmsNumbers.trim() && !alertSlackWebhookUrl.trim() && (
         <div className="flex items-start gap-2 text-green-800 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4">
           <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
           <p className="text-sm">
