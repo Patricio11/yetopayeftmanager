@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requirePartner } from '@/lib/auth/authorization';
 import { db } from '@/lib/db';
-import { users, eftTransactions } from '@/lib/db/schema';
+import { users, eftTransactions, eftBanks } from '@/lib/db/schema';
 import { eq, and, count, sum, sql, desc, gte, inArray } from 'drizzle-orm';
 
 /**
@@ -83,9 +83,14 @@ export async function GET(request: NextRequest) {
           merchantId: eftTransactions.merchantId,
           merchantName: users.name,
           merchantCompany: users.companyName,
+          // Bank used for the payment: the joined eft_banks name, else the
+          // customer_bank code stored at completion.
+          bankName: eftBanks.bankName,
+          customerBank: eftTransactions.customerBank,
         })
         .from(eftTransactions)
         .leftJoin(users, eq(eftTransactions.merchantId, users.id))
+        .leftJoin(eftBanks, eq(eftTransactions.eftBankId, eftBanks.id))
         .where(inArray(eftTransactions.merchantId, merchantIds))
         .orderBy(desc(eftTransactions.createdAt))
         .limit(10);

@@ -17,6 +17,7 @@ interface DashboardData {
     id: string;
     reference: string;
     merchantName: string;
+    bankName: string | null;
     amount: number;
     status: string;
     createdAt: string;
@@ -75,6 +76,7 @@ export default function PartnerDashboardPage() {
               id: t.id,
               reference: t.reference || "—",
               merchantName: t.merchantCompany || t.merchantName || "Unknown",
+              bankName: t.bankName || t.customerBank || null,
               amount: parseFloat(t.amount || "0"),
               status: t.status,
               createdAt: t.createdAt,
@@ -226,6 +228,7 @@ export default function PartnerDashboardPage() {
               <tr className="bg-slate-50 border-b border-slate-100">
                 <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Reference</th>
                 <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Merchant</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Bank</th>
                 <th className="text-right px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Amount</th>
                 <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
                 <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
@@ -235,7 +238,7 @@ export default function PartnerDashboardPage() {
             <tbody className="divide-y divide-slate-100">
               {data.recentTransactions.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-16 text-center">
+                  <td colSpan={7} className="px-6 py-16 text-center">
                     <Activity className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                     <p className="text-slate-500 font-medium">No transactions yet</p>
                     <p className="text-slate-400 text-sm mt-1">Transactions from your merchants will appear here</p>
@@ -249,6 +252,9 @@ export default function PartnerDashboardPage() {
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-sm text-slate-700">{txn.merchantName}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm text-slate-700">{txn.bankName || "—"}</span>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <span className="text-sm font-bold text-slate-900">
