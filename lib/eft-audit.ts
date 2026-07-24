@@ -27,6 +27,10 @@ const STORAGE_KEY =
 const SCREENSHOTS_BUCKET = process.env.EFT_SCREENSHOTS_BUCKET || "screenshots";
 const LOGS_BUCKET = process.env.EFT_LOGS_BUCKET || "logs";
 const SIGNED_URL_TTL = 60 * 60; // 1 hour
+// Logs above this size are NOT inlined into the API JSON — a large payload can
+// be dropped/truncated by the serverless layer, leaving the viewer blank. The
+// client fetches these directly from the signed transaction.log URL instead.
+const MAX_INLINE_LOG_BYTES = 200_000;
 
 const storage =
   STORAGE_URL && STORAGE_KEY
@@ -116,8 +120,13 @@ export async function getTransactionAudit(txn: {
     for (const item of logItems) {
       const path = `${prefix}/${item.name}`;
       if (item.name === "transaction.log" && log === null) {
-        const { data: blob } = await storage.storage.from(LOGS_BUCKET).download(path);
-        if (blob) log = await blob.text();
+        // Inline the text only when it's small enough to travel safely in the
+        // JSON response; the signed URL below always covers the large case.
+        const size = (item as any).metadata?.size as number | undefined;
+        if (size === undefined || size <= MAX_INLINE_LOG_BYTES) {
+          const { data: blob } = await storage.storage.from(LOGS_BUCKET).download(path);
+          if (blob && blob.size <= MAX_INLINE_LOG_BYTES) log = await blob.text();
+        }
       }
       const { data: signed } = await storage.storage
         .from(LOGS_BUCKET)

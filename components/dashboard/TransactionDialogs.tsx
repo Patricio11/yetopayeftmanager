@@ -446,10 +446,15 @@ function TransactionAuditDialog({
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [audit, setAudit] = useState<AuditData | null>(null);
+  // Log text fetched client-side from its signed URL when the inline log is
+  // missing/empty (large logs can be dropped from the API JSON payload; the
+  // browser fetches the private-bucket file directly instead).
+  const [fetchedLog, setFetchedLog] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
     setAudit(null);
+    setFetchedLog(null);
     setLoading(true);
     fetch(`/api/${endpoint}/transactions/${transactionId}/audit`)
       .then((r) => r.json())
@@ -463,6 +468,21 @@ function TransactionAuditDialog({
       .catch(() => toast({ title: "Error", description: "Failed to load audit trail", variant: "destructive" }))
       .finally(() => setLoading(false));
   }, [open, transactionId, endpoint, toast]);
+
+  // Fallback: if the inline log is empty but a signed transaction.log URL is
+  // present, pull the text straight from storage in the browser.
+  useEffect(() => {
+    if (!audit) return;
+    if (audit.log && audit.log.length > 0) return;
+    const logFile = (audit.logFiles || []).find((f) => /transaction\.log$/i.test(f.name));
+    if (!logFile) return;
+    let cancelled = false;
+    fetch(logFile.url)
+      .then((r) => (r.ok ? r.text() : Promise.reject(new Error(`HTTP ${r.status}`))))
+      .then((text) => { if (!cancelled) setFetchedLog(text); })
+      .catch(() => { /* leave empty — storyline still shows screenshots */ });
+    return () => { cancelled = true; };
+  }, [audit]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -484,7 +504,7 @@ function TransactionAuditDialog({
               <p className="text-sm text-slate-500">Loading audit trail...</p>
             </div>
           ) : (
-            <AuditTimeline log={audit?.log ?? null} screenshots={audit?.screenshots || []} />
+            <AuditTimeline log={(audit?.log && audit.log.length > 0 ? audit.log : fetchedLog) ?? null} screenshots={audit?.screenshots || []} />
           )}
         </div>
 

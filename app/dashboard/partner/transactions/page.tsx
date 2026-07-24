@@ -590,14 +590,18 @@ interface AuditData {
   date: string | null;
   log: string | null;
   screenshots: { name: string; url: string }[];
+  logFiles?: { name: string; url: string }[];
 }
 
 function AuditDialog({ txn, onClose }: { txn: Transaction; onClose: () => void }) {
   const [loading, setLoading] = useState(true);
   const [audit, setAudit] = useState<AuditData | null>(null);
+  // Client-side fallback for large logs dropped from the API payload.
+  const [fetchedLog, setFetchedLog] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
+    setFetchedLog(null);
     fetch(`/api/partner/transactions/${txn.id}/audit`)
       .then((r) => r.json())
       .then((j) => {
@@ -606,6 +610,18 @@ function AuditDialog({ txn, onClose }: { txn: Transaction; onClose: () => void }
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [txn.id]);
+
+  useEffect(() => {
+    if (!audit || (audit.log && audit.log.length > 0)) return;
+    const logFile = (audit.logFiles || []).find((f) => /transaction\.log$/i.test(f.name));
+    if (!logFile) return;
+    let cancelled = false;
+    fetch(logFile.url)
+      .then((r) => (r.ok ? r.text() : Promise.reject(new Error(`HTTP ${r.status}`))))
+      .then((text) => { if (!cancelled) setFetchedLog(text); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [audit]);
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
@@ -633,7 +649,7 @@ function AuditDialog({ txn, onClose }: { txn: Transaction; onClose: () => void }
               <p className="text-sm text-slate-500">Loading audit trail...</p>
             </div>
           ) : (
-            <AuditTimeline log={audit?.log ?? null} screenshots={audit?.screenshots || []} />
+            <AuditTimeline log={(audit?.log && audit.log.length > 0 ? audit.log : fetchedLog) ?? null} screenshots={audit?.screenshots || []} />
           )}
         </div>
 
