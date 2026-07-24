@@ -63,6 +63,8 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [bankStats, setBankStats] = useState<any | null>(null);
+  const [statsLoading, setStatsLoading] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedBank, setSelectedBank] = useState<Bank | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -240,7 +242,14 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
 
   const openViewDialog = (bank: Bank) => {
     setSelectedBank(bank);
+    setBankStats(null);
     setIsViewDialogOpen(true);
+    setStatsLoading(true);
+    fetch(`/api/admin/banks/${bank.bank.id}/stats`)
+      .then((r) => r.json())
+      .then((j) => { if (j.success) setBankStats(j); })
+      .catch(() => {})
+      .finally(() => setStatsLoading(false));
   };
 
   const openDeleteDialog = (bank: Bank) => {
@@ -865,16 +874,72 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
                 <div>
                   <Label className="text-xs text-slate-600 dark:text-slate-400">Total Transactions</Label>
                   <p className="font-semibold text-slate-900 dark:text-white">
-                    {selectedBank.transactionCount}
+                    {bankStats?.stats?.total ?? selectedBank.transactionCount}
                   </p>
                 </div>
                 <div>
-                  <Label className="text-xs text-slate-600 dark:text-slate-400">Completed</Label>
-                  <p className="font-semibold text-green-600">
-                    {selectedBank.completedCount}
+                  <Label className="text-xs text-slate-600 dark:text-slate-400">Started Attempts</Label>
+                  <p className="font-semibold text-slate-900 dark:text-white">
+                    {statsLoading ? "…" : (bankStats?.stats?.attempts ?? "—")}
                   </p>
                 </div>
               </div>
+
+              {/* Full status breakdown + rates */}
+              <div className="rounded-lg border border-slate-200 dark:border-slate-700 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <Label className="text-sm font-semibold text-slate-900 dark:text-white">Transaction breakdown</Label>
+                  {statsLoading && <span className="text-xs text-slate-400">Loading…</span>}
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {[
+                    { label: "Completed", val: bankStats?.stats?.completed, cls: "text-emerald-600" },
+                    { label: "Failed", val: bankStats?.stats?.failed, cls: "text-red-600" },
+                    { label: "Cancelled", val: bankStats?.stats?.cancelled, cls: "text-amber-600" },
+                    { label: "Expired", val: bankStats?.stats?.expired, cls: "text-slate-500" },
+                    { label: "Not started", val: bankStats?.stats?.notStarted, cls: "text-slate-500" },
+                    { label: "Pending", val: bankStats?.stats?.pending, cls: "text-blue-600" },
+                  ].map((s) => (
+                    <div key={s.label} className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3">
+                      <p className="text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">{s.label}</p>
+                      <p className={`text-xl font-bold ${s.cls}`}>{statsLoading ? "…" : (s.val ?? 0)}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-2 gap-3 mt-3">
+                  <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3">
+                    <p className="text-[11px] uppercase tracking-wide text-emerald-700 dark:text-emerald-400">Success rate</p>
+                    <p className="text-2xl font-bold text-emerald-600">{statsLoading ? "…" : `${bankStats?.stats?.successRate ?? 0}%`}</p>
+                    <p className="text-[10px] text-slate-500">of started attempts</p>
+                  </div>
+                  <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-3">
+                    <p className="text-[11px] uppercase tracking-wide text-red-700 dark:text-red-400">Fail rate</p>
+                    <p className="text-2xl font-bold text-red-600">{statsLoading ? "…" : `${bankStats?.stats?.failRate ?? 0}%`}</p>
+                    <p className="text-[10px] text-slate-500">failed / cancelled / expired</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Recent transactions for this bank */}
+              {bankStats?.recent?.length > 0 && (
+                <div className="rounded-lg border border-slate-200 dark:border-slate-700 p-4">
+                  <Label className="text-sm font-semibold text-slate-900 dark:text-white">Recent transactions</Label>
+                  <div className="mt-2 space-y-1.5 max-h-56 overflow-y-auto">
+                    {bankStats.recent.map((t: any) => (
+                      <div key={t.id} className="flex items-center justify-between text-xs border-b border-slate-100 dark:border-slate-800 pb-1.5">
+                        <div className="min-w-0">
+                          <p className="font-mono text-slate-700 dark:text-slate-300 truncate">{t.reference}</p>
+                          {t.statusReason && <p className="text-[10px] text-slate-400 truncate">{t.statusReason}</p>}
+                        </div>
+                        <div className="text-right shrink-0 ml-2">
+                          <p className="font-semibold text-slate-900 dark:text-white">R {parseFloat(t.amount).toFixed(2)}</p>
+                          <p className={`text-[10px] ${t.status === "completed" ? "text-emerald-600" : t.status === "failed" ? "text-red-600" : "text-slate-500"}`}>{t.status}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="col-span-2">
                 <Label className="text-xs text-slate-600 dark:text-slate-400">EFT Service URL</Label>
