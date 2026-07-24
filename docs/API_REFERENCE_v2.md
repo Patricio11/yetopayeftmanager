@@ -1002,6 +1002,37 @@ if (!verifyWebhookSignature($payload, $signature, $webhookSecret)) {
 3. Listen for `postMessage` events from the iframe for status updates
 4. Handle webhooks for server-side confirmation
 
+#### Auto-resizing the iframe (important for mobile)
+
+The payment page content grows as the customer moves through the steps (bank
+list → bank login → OTP/approval). If the iframe has a **fixed height**, on
+mobile the login form and the **"Make payment" button can fall below the fold**
+with no reliable inner scroll — customers can't find the button.
+
+To prevent this, the payment page continuously posts its content height to the
+parent window. **Listen for it and resize the iframe** so it always fits its
+content (the page then scrolls naturally with the rest of your checkout):
+
+```html
+<iframe id="yetopay-frame" src="https://www.yetopay.co.za/pay/TOKEN"
+        style="width:100%;border:0;" scrolling="no"></iframe>
+<script>
+  window.addEventListener('message', function (e) {
+    var d = e.data || {};
+    if (d.type === 'yetopay:resize' && d.source === 'yetopay-payment' && d.height) {
+      document.getElementById('yetopay-frame').style.height = d.height + 'px';
+    }
+  });
+</script>
+```
+
+Notes:
+- The message is `{ type: 'yetopay:resize', source: 'yetopay-payment', height: <px> }`.
+- It fires on load and whenever the content height changes; setting the iframe
+  `height` to the reported value keeps the button always visible.
+- Set the iframe to `scrolling="no"` and full width so there's no inner scroll
+  bar — the height comes entirely from these messages.
+
 ---
 
 ## Support

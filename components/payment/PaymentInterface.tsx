@@ -99,6 +99,41 @@ export default function PaymentInterface({
 
   useEffect(() => { setIsClient(true); }, []);
 
+  // When embedded in a host iframe (ONEGATE/ZingPay etc.), report our content
+  // height to the parent so it can size the iframe to fit. Without this, on
+  // mobile the login form overflows a fixed-height iframe and the "Make payment"
+  // button sits below the fold with no working inner scroll — customers can't
+  // find it. The host listens for {type:'yetopay:resize'} and sets the iframe
+  // height (see docs). No-op when not embedded; harmless if the host ignores it.
+  useEffect(() => {
+    if (typeof window === "undefined" || window.parent === window) return;
+    let last = 0;
+    const post = () => {
+      const height = Math.ceil(
+        Math.max(
+          document.documentElement.scrollHeight,
+          document.body?.scrollHeight || 0,
+          document.documentElement.getBoundingClientRect().height
+        )
+      );
+      if (!height || Math.abs(height - last) < 2) return;
+      last = height;
+      window.parent.postMessage({ type: "yetopay:resize", source: "yetopay-payment", height }, "*");
+    };
+    post();
+    const ro = new ResizeObserver(() => post());
+    ro.observe(document.documentElement);
+    if (document.body) ro.observe(document.body);
+    window.addEventListener("load", post);
+    // Fallback: content can grow after async loads (bank list, forms, images).
+    const interval = window.setInterval(post, 800);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("load", post);
+      window.clearInterval(interval);
+    };
+  }, []);
+
   const hasCardService = availableServices.some(s => s.category === 'card');
   const hasEft = banks.length > 0;
   // A bank-specific link implies Pay-by-Bank — skip the method picker even when
