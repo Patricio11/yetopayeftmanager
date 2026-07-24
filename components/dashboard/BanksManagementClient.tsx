@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -547,12 +548,14 @@ export function BanksManagementClient({ initialBanks }: BanksManagementClientPro
                       <TableCell className="pr-0">
                         <div className="flex items-center gap-2">
                           <Button
+                            asChild
                             variant="ghost"
                             size="sm"
-                            onClick={() => openViewDialog(bank)}
                             className="hover:bg-blue-50 dark:hover:bg-blue-900/20"
                           >
-                            <Eye className="w-4 h-4" />
+                            <Link href={`/dashboard/banks/${bank.bank.id}`} title="View bank stats">
+                              <Eye className="w-4 h-4" />
+                            </Link>
                           </Button>
                           <Button
                             variant="ghost"
