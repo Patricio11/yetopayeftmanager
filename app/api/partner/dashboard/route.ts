@@ -77,6 +77,7 @@ export async function GET(request: NextRequest) {
           amount: eftTransactions.amount,
           status: eftTransactions.status,
           reference: eftTransactions.reference,
+          merchantReference: sql<string | null>`${eftTransactions.metadata}->>'merchantReference'`,
           description: eftTransactions.description,
           customerEmail: eftTransactions.customerEmail,
           createdAt: eftTransactions.createdAt,

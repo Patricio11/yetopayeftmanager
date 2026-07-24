@@ -123,7 +123,14 @@ export async function POST(
       merchant_account_number: primaryBankAccount!.accountNumber,
       merchant_account_name: primaryBankAccount!.accountHolderName,
       merchant_account_type: primaryBankAccount!.accountType,
-      merchant_reference: transaction.reference,
+      // The reference FILLED INTO THE BANK PAYMENT (shows on the proof of payment
+      // and the customer's/merchant's statement) must be the merchant's OWN
+      // reference. For connector (ONEGATE) links that is metadata.merchantReference;
+      // the top-level transaction.reference is our internal correlation id
+      // (e.g. 150018126-6A6380B01A) and must NOT be what the payer sees. For a
+      // direct merchant there is no separate merchant reference, so their own
+      // transaction.reference is already the right value.
+      merchant_reference: (transaction.metadata as any)?.merchantReference || transaction.reference,
       merchant_name: merchant.companyName || merchant.name,
       merchant_bank: primaryBankAccount!.bankCode?.toLowerCase(),
       notify_url: transaction.notifyUrl || '',

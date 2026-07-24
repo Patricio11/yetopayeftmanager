@@ -16,6 +16,7 @@ interface DashboardData {
   recentTransactions: {
     id: string;
     reference: string;
+    merchantReference?: string | null;
     merchantName: string;
     bankName: string | null;
     amount: number;
@@ -75,6 +76,7 @@ export default function PartnerDashboardPage() {
             recentTransactions: (d.recentTransactions || []).map((t: any) => ({
               id: t.id,
               reference: t.reference || "—",
+              merchantReference: t.merchantReference || null,
               merchantName: t.merchantCompany || t.merchantName || "Unknown",
               bankName: t.bankName || t.customerBank || null,
               amount: parseFloat(t.amount || "0"),
@@ -248,7 +250,7 @@ export default function PartnerDashboardPage() {
                 data.recentTransactions.map((txn) => (
                   <tr key={txn.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4">
-                      <span className="text-sm font-semibold text-slate-900">{txn.reference}</span>
+                      <span className="text-sm font-semibold text-slate-900">{txn.merchantReference || txn.reference}</span>
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-sm text-slate-700">{txn.merchantName}</span>

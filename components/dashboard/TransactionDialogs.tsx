@@ -140,7 +140,7 @@ export function TransactionDetailDialog({
             Transaction Details
           </DialogTitle>
           <DialogDescription>
-            Reference: {t.reference}
+            Reference: {(t.metadata as any)?.merchantReference || t.reference}
           </DialogDescription>
         </DialogHeader>
 
@@ -159,7 +159,12 @@ export function TransactionDetailDialog({
           {/* Details Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <DetailRow icon={Hash} label="Transaction ID" value={t.id} mono />
-            <DetailRow icon={Hash} label="Reference" value={t.reference} mono />
+            {/* Human-facing reference is the merchant's own (connector links);
+                the internal link reference stays available for webhook correlation. */}
+            <DetailRow icon={Hash} label="Reference" value={(t.metadata as any)?.merchantReference || t.reference} mono />
+            {(t.metadata as any)?.merchantReference && (t.metadata as any).merchantReference !== t.reference && (
+              <DetailRow icon={Hash} label="Link reference" value={t.reference} mono />
+            )}
             <DetailRow
               icon={Calendar}
               label="Created"

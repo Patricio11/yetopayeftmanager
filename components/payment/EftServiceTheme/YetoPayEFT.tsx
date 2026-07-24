@@ -2343,7 +2343,7 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
                     <div>
                       <h3 className="font-semibold text-gray-900">Pay {merchant.name}</h3>
                       <p className="text-2xl font-bold text-gray-900">{paymentDetails.currency === 'NAD' ? 'N$' : 'R'}{paymentDetails.amount}</p>
-                      <p className="text-sm text-gray-500">Reference: {paymentDetails.reference}</p>
+                      <p className="text-sm text-gray-500">Reference: {paymentDetails.merchantReference || paymentDetails.reference}</p>
                     </div>
                     <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
                       {merchant.logo ? (

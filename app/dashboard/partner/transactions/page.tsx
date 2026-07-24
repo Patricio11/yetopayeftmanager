@@ -24,6 +24,7 @@ interface Bank {
 interface Transaction {
   id: string;
   reference: string;
+  merchantReference?: string | null;
   merchantName: string;
   merchantCompany?: string | null;
   amount: number;
@@ -381,7 +382,10 @@ function PartnerTransactionsInner() {
                 transactions.map((txn) => (
                   <tr key={txn.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4">
-                      <span className="text-sm font-semibold text-slate-900">{txn.reference}</span>
+                      <span className="text-sm font-semibold text-slate-900">{txn.merchantReference || txn.reference}</span>
+                      {txn.merchantReference && txn.merchantReference !== txn.reference && (
+                        <span className="block text-[11px] font-mono text-slate-400 truncate max-w-[200px]" title={txn.reference}>{txn.reference}</span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-sm text-slate-700">{txn.merchantName}</span>
@@ -467,7 +471,7 @@ function PartnerTransactionsInner() {
             <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
               <div>
                 <h3 className="text-base font-semibold text-slate-900">Transaction Details</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Reference: {viewTxn.reference}</p>
+                <p className="text-xs text-slate-500 mt-0.5">Reference: {viewTxn.merchantReference || viewTxn.reference}</p>
               </div>
               <button onClick={() => setViewTxn(null)} className="p-1 rounded hover:bg-slate-100 transition-colors">
                 <X className="w-5 h-5 text-slate-400" />
@@ -496,6 +500,15 @@ function PartnerTransactionsInner() {
                     <p className="font-mono text-xs text-slate-900 break-all">{viewTxn.id}</p>
                   </div>
                 </div>
+                {viewTxn.merchantReference && viewTxn.merchantReference !== viewTxn.reference && (
+                  <div className="flex items-start gap-2.5">
+                    <Hash className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs text-slate-500">Link reference</p>
+                      <p className="font-mono text-xs text-slate-900 break-all">{viewTxn.reference}</p>
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-start gap-2.5">
                   <Building2 className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
                   <div>
@@ -635,7 +648,7 @@ function AuditDialog({ txn, onClose }: { txn: Transaction; onClose: () => void }
               <ScrollText className="w-5 h-5 text-green-700" />
               Transaction Audit
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">The full story of this transaction · Ref {txn.reference}</p>
+            <p className="text-xs text-slate-500 mt-0.5">The full story of this transaction · Ref {txn.merchantReference || txn.reference}</p>
           </div>
           <button onClick={onClose} className="p-1 rounded hover:bg-slate-100 transition-colors">
             <X className="w-5 h-5 text-slate-400" />

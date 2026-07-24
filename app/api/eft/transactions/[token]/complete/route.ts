@@ -45,7 +45,7 @@ function verifyEftServiceSignature(
   signature: string,
   transactionId: string,
   amount: string,
-  reference: string
+  references: string | (string | null | undefined)[]
 ): boolean {
   const secret = process.env.EFT_WEBHOOK_SECRET;
   if (!secret) {
@@ -53,21 +53,32 @@ function verifyEftServiceSignature(
     return false;
   }
 
-  const payload = `${transactionId}|${amount}|${reference}|completed`;
-  const expected = crypto
-    .createHmac("sha256", secret)
-    .update(payload)
-    .digest("hex");
+  // The EFT service signs with the reference it holds in its session. That is
+  // normally our internal transaction.reference, but the same field also carries
+  // the merchant's own reference (what's filled into the bank payment). Accept a
+  // signature computed with EITHER, so decoupling the bank reference from the
+  // correlation id can't break completion — regardless of deploy order.
+  const candidates = (Array.isArray(references) ? references : [references])
+    .filter((r): r is string => !!r);
 
-  // Constant-time comparison
-  try {
-    return crypto.timingSafeEqual(
-      Buffer.from(signature),
-      Buffer.from(expected)
-    );
-  } catch {
-    return false;
+  for (const reference of candidates) {
+    const payload = `${transactionId}|${amount}|${reference}|completed`;
+    const expected = crypto
+      .createHmac("sha256", secret)
+      .update(payload)
+      .digest("hex");
+    try {
+      if (
+        signature.length === expected.length &&
+        crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))
+      ) {
+        return true;
+      }
+    } catch {
+      /* try next candidate */
+    }
   }
+  return false;
 }
 
 /**
@@ -201,7 +212,7 @@ export async function POST(
         validatedData.eftSignature,
         transactionId,
         transaction.amount,
-        transaction.reference
+        [transaction.reference, (transaction.metadata as any)?.merchantReference]
       );
 
       if (!signatureValid) {

@@ -621,9 +621,18 @@ export function TransactionsClient({
                         </div>
                       </TableCell>
                       <TableCell>
+                        {/* Human-facing reference is the merchant's own (connector
+                            links); the internal link reference is shown small below
+                            for correlation/support. */}
                         <div className="font-mono text-sm text-slate-700 dark:text-slate-300">
-                          {item.transaction.reference}
+                          {(item.transaction.metadata as any)?.merchantReference || item.transaction.reference}
                         </div>
+                        {(item.transaction.metadata as any)?.merchantReference &&
+                          (item.transaction.metadata as any).merchantReference !== item.transaction.reference && (
+                            <div className="font-mono text-[11px] text-slate-400 truncate max-w-[180px]" title={item.transaction.reference}>
+                              {item.transaction.reference}
+                            </div>
+                          )}
                       </TableCell>
                       <TableCell>
                         <div className="text-sm font-medium text-slate-700 dark:text-slate-300">

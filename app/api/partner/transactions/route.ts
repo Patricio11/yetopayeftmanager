@@ -106,6 +106,8 @@ export async function GET(request: NextRequest) {
         merchantId: eftTransactions.merchantId,
         amount: eftTransactions.amount,
         reference: eftTransactions.reference,
+        // The sub-merchant's own reference (human-facing); internal reference above is webhook-only.
+        merchantReference: sql<string | null>`${eftTransactions.metadata}->>'merchantReference'`,
         status: eftTransactions.status,
         description: eftTransactions.description,
         customerEmail: eftTransactions.customerEmail,
