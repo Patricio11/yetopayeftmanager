@@ -117,6 +117,15 @@ interface YetoPayEFTProps {
   };
 }
 
+// Reassurance messages cycled under the processing spinner during longer waits.
+const PROCESSING_HINTS = [
+  'Setting up your payment…',
+  'Connecting securely to your bank…',
+  'Please do not close this window…',
+  'This will only take a moment…',
+  'Almost there — finalising with your bank…',
+];
+
 const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   // --- Auth Session (for admin testing) ---
   const { data: session } = useSession();
@@ -128,6 +137,9 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
   const [isInitializing, setIsInitializing] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [processingMessage, setProcessingMessage] = useState('Processing your payment...');
+  // Rotating reassurance shown under the processing spinner so a slow bank (e.g.
+  // Standard Bank) doesn't look frozen. Cycles while currentStep === 'processing'.
+  const [hintIndex, setHintIndex] = useState(0);
   const [paymentDetails, setPaymentDetails] = useState<{ amount: string; reference: string; merchantReference?: string; currency?: string }>({ amount: '0.00', reference: '...' });
   const [merchant, setMerchant] = useState<Merchant>({ name: 'Merchant' });
   const [banks, setBanks] = useState<Bank[]>([]);
@@ -521,6 +533,16 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Cycle the reassurance hint while the processing spinner is shown, so a slow
+  // bank never looks frozen. Resets when we leave the processing step.
+  useEffect(() => {
+    if (currentStep !== 'processing') { setHintIndex(0); return; }
+    const id = setInterval(() => {
+      setHintIndex((i) => (i + 1) % PROCESSING_HINTS.length);
+    }, 3500);
+    return () => clearInterval(id);
+  }, [currentStep]);
 
   // Initialize device fingerprint
   useEffect(() => {
@@ -1373,7 +1395,12 @@ const YetoPayEFT: React.FC<YetoPayEFTProps> = ({ initialData }) => {
         <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
       </div>
       <h3 className="text-lg font-semibold text-gray-900 mb-2">{processingMessage}</h3>
-      <p className="text-gray-600">This will only take a moment...</p>
+      <p
+        key={hintIndex}
+        className="text-gray-600 animate-in fade-in duration-700 min-h-[1.5rem]"
+      >
+        {PROCESSING_HINTS[hintIndex]}
+      </p>
     </div>
   );
 
