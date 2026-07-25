@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { MerchantBankingSection } from "@/components/dashboard/MerchantBankingSection";
 
 interface MerchantDetail {
   id: string;
@@ -496,6 +497,9 @@ export default function PartnerMerchantDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Merchant payout bank accounts (view + edit, full account number) */}
+      <MerchantBankingSection endpoint={`/api/partner/merchants/${merchantId}/banking`} />
     </div>
   );
 }

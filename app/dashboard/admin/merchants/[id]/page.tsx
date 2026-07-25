@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { EditBankAccountModal } from '@/components/dashboard/EditBankAccountModal';
 import { useToast } from '@/hooks/use-toast';
 import {
   PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar,
@@ -320,7 +321,7 @@ function OverviewTab({ merchant, onUpdate }: { merchant: any; onUpdate: () => vo
         <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2"><CreditCard className="w-5 h-5 text-purple-600" />Primary Bank Account</h3>
         <div className="space-y-3">
           <InfoRow label="Account Holder" value={merchant.bankAccount?.account_holder} />
-          <InfoRow label="Account Number" value={merchant.bankAccount?.account_number ? '••••' + merchant.bankAccount.account_number.slice(-4) : undefined} />
+          <InfoRow label="Account Number" value={merchant.bankAccount?.account_number} />
           <InfoRow label="Account Type" value={merchant.bankAccount?.account_type} />
           <InfoRow label="Bank Name" value={merchant.bankAccount?.bank_name} />
           <InfoRow label="Branch Code" value={merchant.bankAccount?.branch_code} />
@@ -554,14 +555,26 @@ function EftBanksTab({ merchantId }: { merchantId: string }) {
   const [plainBackground, setPlainBackground] = useState('#ffffff');
   const [auditEnabled, setAuditEnabled] = useState(false);
   const [layoutSaving, setLayoutSaving] = useState(false);
+  const [editAccount, setEditAccount] = useState<any | null>(null);
+  const [settlementBanks, setSettlementBanks] = useState<any[]>([]);
+
+  const loadAccounts = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/admin/merchants/${merchantId}/banking`);
+      const data = await res.json();
+      if (data.success) setAccounts(data.data || []);
+    } catch { /* ignore */ } finally { setAccountsLoading(false); }
+  }, [merchantId]);
 
   useEffect(() => {
+    loadAccounts();
+    // Settlement banks for the edit dialog's bank dropdown.
     (async () => {
       try {
-        const res = await fetch(`/api/admin/merchants/${merchantId}/banking`);
+        const res = await fetch(`/api/admin/settlement-banks`);
         const data = await res.json();
-        if (data.success) setAccounts(data.data || []);
-      } catch { /* ignore */ } finally { setAccountsLoading(false); }
+        if (data.success) setSettlementBanks(data.data || []);
+      } catch { /* ignore */ }
     })();
     (async () => {
       try {
@@ -724,10 +737,11 @@ function EftBanksTab({ merchantId }: { merchantId: string }) {
                     {a.isVerified
                       ? <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"><CheckCircle className="w-3 h-3 inline mr-1" />Verified</span>
                       : <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-400">Unverified</span>}
+                    <Button variant="outline" size="sm" onClick={() => setEditAccount(a)} className="h-7 px-2 text-xs">Edit</Button>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 pl-13">
-                  <div><p className="text-xs text-slate-500">Account No.</p><p className="text-sm font-mono text-slate-900 dark:text-white">••••{a.accountNumber?.slice(-4)}</p></div>
+                  <div><p className="text-xs text-slate-500">Account No.</p><p className="text-sm font-mono text-slate-900 dark:text-white">{a.accountNumber || '—'}</p></div>
                   <div><p className="text-xs text-slate-500">Type</p><p className="text-sm text-slate-900 dark:text-white capitalize">{a.accountType || '—'}</p></div>
                   <div><p className="text-xs text-slate-500">Branch</p><p className="text-sm text-slate-900 dark:text-white">{a.branchCode || '—'}</p></div>
                   <div><p className="text-xs text-slate-500">Added</p><p className="text-sm text-slate-900 dark:text-white">{new Date(a.createdAt).toLocaleDateString()}</p></div>
@@ -737,6 +751,16 @@ function EftBanksTab({ merchantId }: { merchantId: string }) {
           </div>
         )}
       </Card>
+
+      {editAccount && (
+        <EditBankAccountModal
+          account={editAccount}
+          banks={settlementBanks}
+          patchUrl={`/api/admin/merchants/${merchantId}/banking`}
+          onClose={() => setEditAccount(null)}
+          onSaved={loadAccounts}
+        />
+      )}
 
       {/* Payment Page Banks (admin-only enable/disable) */}
       <Card className="bg-white/80 dark:bg-slate-800/80 border-white/20 dark:border-slate-700/50 overflow-hidden">
