@@ -120,12 +120,18 @@ export interface TransactionAudit {
  * Resolve the audit artifacts for a transaction. Caller is responsible for
  * authorization (admin, or the owning partner/merchant).
  */
-export async function getTransactionAudit(txn: {
-  id: string;
-  createdAt: Date;
-  completedAt: Date | null;
-  updatedAt: Date;
-}): Promise<TransactionAudit> {
+export async function getTransactionAudit(
+  txn: {
+    id: string;
+    createdAt: Date;
+    completedAt: Date | null;
+    updatedAt: Date;
+  },
+  // Base path of the role's file proxy, e.g. `/api/admin/transactions/<id>/audit/file`.
+  // When provided, screenshot/log URLs point at our own server (private bucket, no
+  // CORS, no presigned URLs in the browser). When omitted, signed URLs are returned.
+  fileUrlBase?: string
+): Promise<TransactionAudit> {
   const empty: TransactionAudit = {
     transactionId: txn.id,
     date: null,
@@ -164,6 +170,15 @@ export async function getTransactionAudit(txn: {
     }
   };
 
+  // Build a URL for a file: our server proxy when fileUrlBase is set, else a signed URL.
+  const urlFor = async (bucket: "screenshots" | "logs", date: string, name: string) => {
+    if (fileUrlBase) {
+      const q = new URLSearchParams({ bucket, date, name });
+      return `${fileUrlBase}?${q.toString()}`;
+    }
+    return backend.signUrl(bucket, `${date}/${txn.id}/${name}`).catch(() => null);
+  };
+
   for (const date of candidates) {
     const prefix = `${date}/${txn.id}`;
 
@@ -179,21 +194,53 @@ export async function getTransactionAudit(txn: {
     usedDate = usedDate || date;
 
     for (const item of shotItems) {
-      const url = await backend.signUrl("screenshots", `${prefix}/${item.name}`).catch(() => null);
+      const url = await urlFor("screenshots", date, item.name);
       if (url) screenshots.push({ name: item.name, url });
     }
 
     for (const item of logItems) {
-      const path = `${prefix}/${item.name}`;
       if (item.name === "transaction.log" && log === null) {
         if (item.size === undefined || item.size <= MAX_INLINE_LOG_BYTES) {
-          log = await backend.downloadText("logs", path).catch(() => null);
+          log = await backend.downloadText("logs", `${prefix}/${item.name}`).catch(() => null);
         }
       }
-      const url = await backend.signUrl("logs", path).catch(() => null);
+      const url = await urlFor("logs", date, item.name);
       if (url) logFiles.push({ name: item.name, url });
     }
   }
 
   return { transactionId: txn.id, date: usedDate, log, screenshots, logFiles };
+}
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const NAME_RE = /^[A-Za-z0-9._-]+$/; // plain filename — no slashes or traversal
+
+export interface AuditFileBytes {
+  buffer: Buffer;
+  contentType: string;
+  name: string;
+}
+
+/**
+ * Resolve a single audit artifact's bytes for server-side proxying. The caller
+ * MUST have already authorized access to `txn` (admin, or owning merchant/partner).
+ * `bucket`/`date`/`name` come from the client but are strictly validated, and the
+ * object key is pinned to `${date}/${txn.id}/${name}` so a caller can only reach
+ * files under the transaction they're authorized for. Returns null if not found.
+ */
+export async function getAuditFile(
+  txn: { id: string },
+  params: { bucket: string; date: string; name: string }
+): Promise<AuditFileBytes | null> {
+  const bucket = params.bucket === "screenshots" ? "screenshots" : params.bucket === "logs" ? "logs" : null;
+  if (!bucket) return null;
+  if (!DATE_RE.test(params.date)) return null;
+  if (!NAME_RE.test(params.name) || params.name.includes("..")) return null;
+
+  const backend = await resolveBackend();
+  if (!backend) return null;
+
+  const obj = await backend.getObject(bucket, `${params.date}/${txn.id}/${params.name}`);
+  if (!obj) return null;
+  return { buffer: obj.buffer, contentType: obj.contentType, name: params.name };
 }

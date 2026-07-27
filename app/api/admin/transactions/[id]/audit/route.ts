@@ -35,7 +35,7 @@ export async function GET(
       );
     }
 
-    const data = await getTransactionAudit(transaction);
+    const data = await getTransactionAudit(transaction, `/api/admin/transactions/${id}/audit/file`);
     return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error("Error fetching transaction audit:", error);

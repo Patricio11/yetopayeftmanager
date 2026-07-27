@@ -24,6 +24,19 @@ const MAX_INLINE_LOG_BYTES = 200_000;
 
 export type LogicalBucket = "screenshots" | "logs";
 
+/** Best-effort content type from a filename, used when storage doesn't report one. */
+export function contentTypeFor(name: string): string {
+  const n = name.toLowerCase();
+  if (n.endsWith(".png")) return "image/png";
+  if (n.endsWith(".jpg") || n.endsWith(".jpeg")) return "image/jpeg";
+  if (n.endsWith(".webp")) return "image/webp";
+  if (n.endsWith(".json")) return "application/json";
+  if (n.endsWith(".jsonl")) return "application/x-ndjson";
+  if (n.endsWith(".html")) return "text/html; charset=utf-8";
+  if (n.endsWith(".log") || n.endsWith(".txt")) return "text/plain; charset=utf-8";
+  return "application/octet-stream";
+}
+
 export interface StorageBackend {
   /** List file names (not full paths) directly under `prefix`. */
   list(bucket: LogicalBucket, prefix: string): Promise<{ name: string; size?: number }[]>;
@@ -31,6 +44,8 @@ export interface StorageBackend {
   signUrl(bucket: LogicalBucket, path: string): Promise<string | null>;
   /** Download the object as text (only used for small logs). */
   downloadText(bucket: LogicalBucket, path: string): Promise<string | null>;
+  /** Download the raw bytes for server-side proxying (private bucket, no CORS). Null if not found. */
+  getObject(bucket: LogicalBucket, path: string): Promise<{ buffer: Buffer; contentType: string } | null>;
   /** Round-trip connectivity check for the admin panel. */
   test(): Promise<{ ok: boolean; message: string }>;
 }
@@ -86,6 +101,19 @@ function s3Backend(config: Record<string, string>): StorageBackend {
         chunks.push(buf);
       }
       return Buffer.concat(chunks).toString("utf8");
+    },
+    async getObject(bucket, path) {
+      try {
+        const res = await client.send(new GetObjectCommand({ Bucket: bucketOf(bucket), Key: path }));
+        const body = res.Body as any;
+        if (!body) return null;
+        const chunks: Buffer[] = [];
+        for await (const chunk of body) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+        return { buffer: Buffer.concat(chunks), contentType: res.ContentType || contentTypeFor(path) };
+      } catch (e: any) {
+        if (e?.name === "NoSuchKey" || e?.$metadata?.httpStatusCode === 404) return null;
+        throw e;
+      }
     },
     async test() {
       // Exercise exactly the perms that matter: write (the EFT service) + list
@@ -145,6 +173,12 @@ function supabaseBackend(config: Record<string, string>): StorageBackend {
       if (blob && blob.size <= MAX_INLINE_LOG_BYTES) return await blob.text();
       return null;
     },
+    async getObject(bucket, path) {
+      const { data: blob, error } = await client.storage.from(bucketOf(bucket)).download(path);
+      if (error || !blob) return null;
+      const buffer = Buffer.from(await blob.arrayBuffer());
+      return { buffer, contentType: blob.type || contentTypeFor(path) };
+    },
     async test() {
       const key = `__connection_test__/probe-${Date.now()}.txt`;
       try {
@@ -184,6 +218,9 @@ function postgresBackend(config: Record<string, string>): StorageBackend {
       return null;
     },
     async downloadText() {
+      return null;
+    },
+    async getObject() {
       return null;
     },
     async test() {

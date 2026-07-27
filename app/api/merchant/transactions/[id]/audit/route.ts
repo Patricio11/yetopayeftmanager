@@ -49,7 +49,7 @@ export async function GET(
       return NextResponse.json({ success: false, message: "Audit storage is not configured." }, { status: 500 });
     }
 
-    const data = await getTransactionAudit(transaction);
+    const data = await getTransactionAudit(transaction, `/api/merchant/transactions/${id}/audit/file`);
     return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error("Error fetching merchant transaction audit:", error);
