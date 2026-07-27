@@ -152,12 +152,24 @@ export async function getTransactionAudit(txn: {
   const screenshots: AuditFile[] = [];
   const logFiles: AuditFile[] = [];
 
+  // List each bucket independently and never let one failing bucket/permission
+  // (e.g. ListBucket granted on logs but not screenshots) throw the whole audit —
+  // degrade to what we can read and log the real error server-side.
+  const listSafe = async (bucket: "screenshots" | "logs", prefix: string) => {
+    try {
+      return await backend.list(bucket, prefix);
+    } catch (err) {
+      console.error(`[audit] list failed for ${bucket}/${prefix}:`, err);
+      return [] as { name: string; size?: number }[];
+    }
+  };
+
   for (const date of candidates) {
     const prefix = `${date}/${txn.id}`;
 
     const [shotList, logList] = await Promise.all([
-      backend.list("screenshots", prefix),
-      backend.list("logs", prefix),
+      listSafe("screenshots", prefix),
+      listSafe("logs", prefix),
     ]);
 
     const shotItems = shotList.filter((i) => IMAGE_RE.test(i.name));
@@ -167,7 +179,7 @@ export async function getTransactionAudit(txn: {
     usedDate = usedDate || date;
 
     for (const item of shotItems) {
-      const url = await backend.signUrl("screenshots", `${prefix}/${item.name}`);
+      const url = await backend.signUrl("screenshots", `${prefix}/${item.name}`).catch(() => null);
       if (url) screenshots.push({ name: item.name, url });
     }
 
@@ -175,10 +187,10 @@ export async function getTransactionAudit(txn: {
       const path = `${prefix}/${item.name}`;
       if (item.name === "transaction.log" && log === null) {
         if (item.size === undefined || item.size <= MAX_INLINE_LOG_BYTES) {
-          log = await backend.downloadText("logs", path);
+          log = await backend.downloadText("logs", path).catch(() => null);
         }
       }
-      const url = await backend.signUrl("logs", path);
+      const url = await backend.signUrl("logs", path).catch(() => null);
       if (url) logFiles.push({ name: item.name, url });
     }
   }
