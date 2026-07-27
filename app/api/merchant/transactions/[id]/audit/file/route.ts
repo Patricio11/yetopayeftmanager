@@ -56,8 +56,8 @@ export async function GET(
         "Cache-Control": "private, max-age=3600",
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error streaming merchant audit file:", error);
-    return NextResponse.json({ success: false, message: "Failed to fetch file" }, { status: 500 });
+    return NextResponse.json({ success: false, message: "Failed to fetch file", detail: error?.name || error?.message || String(error) }, { status: 500 });
   }
 }
