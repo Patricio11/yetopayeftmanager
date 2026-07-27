@@ -28,9 +28,9 @@ export async function GET(
       return NextResponse.json({ success: false, message: "Transaction not found" }, { status: 404 });
     }
 
-    if (!auditStorageConfigured) {
+    if (!(await auditStorageConfigured())) {
       return NextResponse.json(
-        { success: false, message: "Audit storage is not configured. Set EFT_STORAGE_SUPABASE_URL and EFT_STORAGE_SUPABASE_KEY (service_role)." },
+        { success: false, message: "Audit storage is not configured. Configure and activate a provider in admin → Storage (or set the EFT_STORAGE_* env vars)." },
         { status: 500 }
       );
     }

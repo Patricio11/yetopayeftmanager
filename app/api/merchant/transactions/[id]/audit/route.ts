@@ -45,7 +45,7 @@ export async function GET(
       return NextResponse.json({ success: false, message: "Transaction not found" }, { status: 404 });
     }
 
-    if (!auditStorageConfigured) {
+    if (!(await auditStorageConfigured())) {
       return NextResponse.json({ success: false, message: "Audit storage is not configured." }, { status: 500 });
     }
 

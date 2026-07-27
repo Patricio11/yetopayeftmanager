@@ -1,45 +1,103 @@
-import { createClient } from "@supabase/supabase-js";
+import "server-only";
+import { eq } from "drizzle-orm";
+import { db } from "@/lib/db";
+import { storageConfig } from "@/lib/db/schema";
+import { buildBackend, type StorageBackend } from "@/lib/storage-integrations/backends";
+import { getProviderDef, isStorageProvider, type StorageProviderKey } from "@/lib/storage-integrations/registry";
+import { decryptConfig } from "@/lib/storage-integrations/secret";
 
 /**
  * EFT transaction audit storage helper.
  *
- * The EFT service writes a transaction log and screenshots to PRIVATE Supabase
- * Storage buckets, organised as {bucket}/{YYYY-MM-DD}/{transactionId}/{file}
- * (the EFT session id IS the transaction id). This resolves those artifacts,
- * returning short-lived signed URLs for screenshots and the log text inline.
+ * The EFT service writes a transaction log and screenshots to a shared storage
+ * provider, organised as {bucket}/{YYYY-MM-DD}/{transactionId}/{file} (the EFT
+ * session id IS the transaction id). This resolves those artifacts, returning
+ * short-lived signed URLs for screenshots and the log text inline.
  *
- * Env (falls back to the app's Supabase project if the EFT-specific vars are
- * unset — set the EFT_STORAGE_* vars when the EFT service uses its own project):
- *   EFT_STORAGE_SUPABASE_URL   (or NEXT_PUBLIC_SUPABASE_URL)   ← canonical .supabase.co
- *   EFT_STORAGE_SUPABASE_KEY   (or SUPABASE_SERVICE_ROLE_KEY)  ← service_role
- *   EFT_SCREENSHOTS_BUCKET     (default: screenshots)
- *   EFT_LOGS_BUCKET            (default: logs)
+ * The active provider + credentials are resolved from the `storage_config` table
+ * (managed in admin → Storage). If no active row is configured, it falls back to
+ * environment variables so existing deployments keep working:
+ *   EFT_STORAGE_PROVIDER = s3 | supabase   (default supabase)
+ *   S3_* / AWS_*                            (S3)
+ *   EFT_STORAGE_SUPABASE_URL / _KEY, EFT_*_BUCKET (Supabase)
  */
 
-const STORAGE_URL =
-  process.env.EFT_STORAGE_SUPABASE_URL ||
-  process.env.NEXT_PUBLIC_SUPABASE_URL ||
-  "";
-const STORAGE_KEY =
-  process.env.EFT_STORAGE_SUPABASE_KEY ||
-  process.env.SUPABASE_SERVICE_ROLE_KEY ||
-  "";
-const SCREENSHOTS_BUCKET = process.env.EFT_SCREENSHOTS_BUCKET || "screenshots";
-const LOGS_BUCKET = process.env.EFT_LOGS_BUCKET || "logs";
-const SIGNED_URL_TTL = 60 * 60; // 1 hour
-// Logs above this size are NOT inlined into the API JSON — a large payload can
-// be dropped/truncated by the serverless layer, leaving the viewer blank. The
-// client fetches these directly from the signed transaction.log URL instead.
 const MAX_INLINE_LOG_BYTES = 200_000;
-
-const storage =
-  STORAGE_URL && STORAGE_KEY
-    ? createClient(STORAGE_URL, STORAGE_KEY, { auth: { persistSession: false } })
-    : null;
-
-export const auditStorageConfigured = !!storage;
-
 const IMAGE_RE = /\.(png|jpe?g|webp)$/i;
+
+// Cache the resolved backend briefly — audit views are infrequent, but a viewer
+// may open several transactions in a row; this avoids a DB hit + decrypt each time.
+let cached: { at: number; backend: StorageBackend | null } | null = null;
+const CACHE_MS = 30_000;
+
+function envConfigFor(provider: StorageProviderKey): Record<string, string> {
+  if (provider === "s3") {
+    return {
+      region: process.env.AWS_REGION || "us-east-1",
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID || "",
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "",
+      screenshotsBucket: process.env.S3_SCREENSHOTS_BUCKET || "eft-screenshots",
+      logsBucket: process.env.S3_LOGS_BUCKET || "eft-logs",
+      endpoint: process.env.S3_ENDPOINT || "",
+    };
+  }
+  if (provider === "supabase") {
+    return {
+      url: process.env.EFT_STORAGE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+      serviceKey: process.env.EFT_STORAGE_SUPABASE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+      screenshotsBucket: process.env.EFT_SCREENSHOTS_BUCKET || "screenshots",
+      logsBucket: process.env.EFT_LOGS_BUCKET || "logs",
+    };
+  }
+  return {};
+}
+
+/** True if the given env-derived config has enough to attempt a connection. */
+function envConfigUsable(provider: StorageProviderKey, config: Record<string, string>): boolean {
+  if (provider === "supabase") return !!(config.url && config.serviceKey);
+  if (provider === "s3") return !!(config.logsBucket && config.screenshotsBucket); // creds may come from role chain
+  return false;
+}
+
+async function resolveBackend(): Promise<StorageBackend | null> {
+  if (cached && Date.now() - cached.at < CACHE_MS) return cached.backend;
+
+  let backend: StorageBackend | null = null;
+
+  // 1) Active DB config wins.
+  try {
+    const [active] = await db.select().from(storageConfig).where(eq(storageConfig.isActive, true)).limit(1);
+    if (active && isStorageProvider(active.provider)) {
+      const def = getProviderDef(active.provider)!;
+      const decrypted = decryptConfig(def, (active.config as Record<string, string>) || {});
+      backend = buildBackend(active.provider, decrypted);
+    }
+  } catch {
+    // storage_config table may not exist yet (pre-migration) — fall through to env.
+  }
+
+  // 2) Env fallback.
+  if (!backend) {
+    const envProvider = (process.env.EFT_STORAGE_PROVIDER || "supabase").toLowerCase();
+    if (isStorageProvider(envProvider)) {
+      const cfg = envConfigFor(envProvider);
+      if (envConfigUsable(envProvider, cfg)) backend = buildBackend(envProvider, cfg);
+    }
+  }
+
+  cached = { at: Date.now(), backend };
+  return backend;
+}
+
+/** Clear the resolved-backend cache (call after activating/saving config). */
+export function invalidateAuditBackendCache() {
+  cached = null;
+}
+
+/** Whether a usable storage backend is currently resolvable (DB active row or env). */
+export async function auditStorageConfigured(): Promise<boolean> {
+  return (await resolveBackend()) !== null;
+}
 
 function dateFolder(d: Date): string {
   return d.toISOString().split("T")[0];
@@ -76,7 +134,8 @@ export async function getTransactionAudit(txn: {
     logFiles: [],
   };
 
-  if (!storage) return empty;
+  const backend = await resolveBackend();
+  if (!backend) return empty;
 
   // Artifacts live under the UTC date the session ran — try creation plus
   // adjacent dates (completion / next day) to cover sessions crossing midnight.
@@ -97,41 +156,30 @@ export async function getTransactionAudit(txn: {
     const prefix = `${date}/${txn.id}`;
 
     const [shotList, logList] = await Promise.all([
-      storage.storage.from(SCREENSHOTS_BUCKET).list(prefix, { limit: 200, sortBy: { column: "name", order: "asc" } }),
-      storage.storage.from(LOGS_BUCKET).list(prefix, { limit: 50, sortBy: { column: "name", order: "asc" } }),
+      backend.list("screenshots", prefix),
+      backend.list("logs", prefix),
     ]);
 
-    const shotItems = (shotList.data || []).filter((i) => i.name && IMAGE_RE.test(i.name));
-    const logItems = (logList.data || []).filter((i) => i.name);
+    const shotItems = shotList.filter((i) => IMAGE_RE.test(i.name));
+    const logItems = logList;
 
     if (shotItems.length === 0 && logItems.length === 0) continue;
     usedDate = usedDate || date;
 
-    if (shotItems.length > 0) {
-      const paths = shotItems.map((i) => `${prefix}/${i.name}`);
-      const { data: signed } = await storage.storage
-        .from(SCREENSHOTS_BUCKET)
-        .createSignedUrls(paths, SIGNED_URL_TTL);
-      (signed || []).forEach((s, idx) => {
-        if (s.signedUrl) screenshots.push({ name: shotItems[idx].name, url: s.signedUrl });
-      });
+    for (const item of shotItems) {
+      const url = await backend.signUrl("screenshots", `${prefix}/${item.name}`);
+      if (url) screenshots.push({ name: item.name, url });
     }
 
     for (const item of logItems) {
       const path = `${prefix}/${item.name}`;
       if (item.name === "transaction.log" && log === null) {
-        // Inline the text only when it's small enough to travel safely in the
-        // JSON response; the signed URL below always covers the large case.
-        const size = (item as any).metadata?.size as number | undefined;
-        if (size === undefined || size <= MAX_INLINE_LOG_BYTES) {
-          const { data: blob } = await storage.storage.from(LOGS_BUCKET).download(path);
-          if (blob && blob.size <= MAX_INLINE_LOG_BYTES) log = await blob.text();
+        if (item.size === undefined || item.size <= MAX_INLINE_LOG_BYTES) {
+          log = await backend.downloadText("logs", path);
         }
       }
-      const { data: signed } = await storage.storage
-        .from(LOGS_BUCKET)
-        .createSignedUrl(path, SIGNED_URL_TTL);
-      if (signed?.signedUrl) logFiles.push({ name: item.name, url: signed.signedUrl });
+      const url = await backend.signUrl("logs", path);
+      if (url) logFiles.push({ name: item.name, url });
     }
   }
 

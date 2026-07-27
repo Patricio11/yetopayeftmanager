@@ -10,3 +10,4 @@ export * from "./settings";
 export * from "./onboarding";
 export * from "./services";
 export * from "./broadcasts";
+export * from "./storage";
