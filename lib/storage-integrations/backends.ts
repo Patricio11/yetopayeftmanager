@@ -46,6 +46,11 @@ function s3Backend(config: Record<string, string>): StorageBackend {
 
   const client = new S3Client({
     region,
+    // Don't let the SDK add x-amz-checksum-mode / content-sha256 integrity params
+    // to presigned GET URLs — those extra query params break browser fetches (403)
+    // and add nothing for a simple object download.
+    requestChecksumCalculation: "WHEN_REQUIRED",
+    responseChecksumValidation: "WHEN_REQUIRED",
     ...(config.endpoint ? { endpoint: config.endpoint, forcePathStyle: true } : {}),
     ...(accessKeyId && secretAccessKey ? { credentials: { accessKeyId, secretAccessKey } } : {}),
   });
