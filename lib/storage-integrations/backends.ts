@@ -83,8 +83,10 @@ function s3Backend(config: Record<string, string>): StorageBackend {
       return Buffer.concat(chunks).toString("utf8");
     },
     async test() {
-      // Write → list → read → delete a probe object in the logs bucket. This
-      // exercises exactly the perms the EFT service (write) and audit (read) need.
+      // Exercise exactly the perms that matter: write (the EFT service) + list
+      // (the audit reader). Delete is only attempted as best-effort cleanup — many
+      // deploy policies (intentionally) don't grant DeleteObject, so its failure
+      // must NOT fail the test.
       const key = `__connection_test__/probe-${Date.now()}.txt`;
       const body = "yetopay storage connection test";
       try {
@@ -92,8 +94,18 @@ function s3Backend(config: Record<string, string>): StorageBackend {
           new PutObjectCommand({ Bucket: logsBucket, Key: key, Body: body, ContentType: "text/plain" })
         );
         await client.send(new ListObjectsV2Command({ Bucket: logsBucket, Prefix: "__connection_test__/", MaxKeys: 1 }));
-        await client.send(new DeleteObjectCommand({ Bucket: logsBucket, Key: key }));
-        return { ok: true, message: `Connected to S3 (${region}); write/read/delete on "${logsBucket}" OK.` };
+        let cleaned = true;
+        try {
+          await client.send(new DeleteObjectCommand({ Bucket: logsBucket, Key: key }));
+        } catch {
+          cleaned = false;
+        }
+        return {
+          ok: true,
+          message: `Connected to S3 (${region}); write + list on "${logsBucket}" OK${
+            cleaned ? "; probe cleaned up." : " (probe left — DeleteObject not granted, that's fine)."
+          }`,
+        };
       } catch (e: any) {
         return { ok: false, message: `S3 test failed: ${e?.name || ""} ${e?.message || String(e)}`.trim() };
       }
@@ -135,8 +147,20 @@ function supabaseBackend(config: Record<string, string>): StorageBackend {
           .from(logsBucket)
           .upload(key, new Blob(["yetopay storage connection test"]), { upsert: true });
         if (up.error) return { ok: false, message: `Supabase upload failed: ${up.error.message}` };
-        await client.storage.from(logsBucket).remove([key]);
-        return { ok: true, message: `Connected to Supabase; write/delete on "${logsBucket}" OK.` };
+        // Best-effort cleanup — don't fail the test if remove isn't permitted.
+        let cleaned = true;
+        try {
+          const rm = await client.storage.from(logsBucket).remove([key]);
+          if (rm.error) cleaned = false;
+        } catch {
+          cleaned = false;
+        }
+        return {
+          ok: true,
+          message: `Connected to Supabase; write on "${logsBucket}" OK${
+            cleaned ? "; probe cleaned up." : " (probe left — delete not permitted, that's fine)."
+          }`,
+        };
       } catch (e: any) {
         return { ok: false, message: `Supabase test failed: ${e?.message || String(e)}` };
       }
