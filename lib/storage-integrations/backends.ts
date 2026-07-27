@@ -127,6 +127,16 @@ function s3Backend(config: Record<string, string>): StorageBackend {
           new PutObjectCommand({ Bucket: logsBucket, Key: key, Body: body, ContentType: "text/plain" })
         );
         await client.send(new ListObjectsV2Command({ Bucket: logsBucket, Prefix: "__connection_test__/", MaxKeys: 1 }));
+        // Read it back — the audit proxy downloads objects with GetObject, so verify
+        // that permission too (a policy can grant Put+List but not Get).
+        try {
+          await client.send(new GetObjectCommand({ Bucket: logsBucket, Key: key }));
+        } catch (ge: any) {
+          return {
+            ok: false,
+            message: `Write + list OK, but read (GetObject) failed on "${logsBucket}": ${ge?.name || ge?.message || ge}. Grant s3:GetObject on the bucket objects (arn:…:${logsBucket}/*) — the audit view needs it.`,
+          };
+        }
         let cleaned = true;
         try {
           await client.send(new DeleteObjectCommand({ Bucket: logsBucket, Key: key }));
@@ -135,7 +145,7 @@ function s3Backend(config: Record<string, string>): StorageBackend {
         }
         return {
           ok: true,
-          message: `Connected to S3 (${region}); write + list on "${logsBucket}" OK${
+          message: `Connected to S3 (${region}); write + list + read on "${logsBucket}" OK${
             cleaned ? "; probe cleaned up." : " (probe left — DeleteObject not granted, that's fine)."
           }`,
         };
