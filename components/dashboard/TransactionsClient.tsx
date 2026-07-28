@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,8 +40,6 @@ import {
   CreditCard,
   Landmark,
 } from "lucide-react";
-import { format } from "date-fns";
-
 // Format dates/times in a FIXED timezone (SAST) so the server-rendered HTML and
 // the client hydration always produce identical text. date-fns `format` uses the
 // runtime's local zone — UTC on the server, the visitor's zone in the browser —
@@ -57,6 +56,45 @@ import {
   UpdateStatusDialog,
   ResendWebhookDialog,
 } from "./TransactionDialogs";
+import { STATUS_BUCKETS, type StatusTone } from "@/lib/transaction-status";
+
+type StatusBreakdown = {
+  not_started: number;
+  pending: number;
+  completed: number;
+  failed: number;
+  cancelled: number;
+  total: number;
+};
+
+// Tailwind classes per status tone, for the breakdown chips (active vs idle).
+const TONE_CLASSES: Record<StatusTone, { active: string; idle: string; dot: string }> = {
+  slate: {
+    active: "bg-slate-600 text-white border-slate-600 shadow-sm",
+    idle: "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-400",
+    dot: "bg-slate-400",
+  },
+  amber: {
+    active: "bg-amber-500 text-white border-amber-500 shadow-sm",
+    idle: "bg-white dark:bg-slate-800 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900/40 hover:border-amber-400",
+    dot: "bg-amber-500",
+  },
+  green: {
+    active: "bg-green-600 text-white border-green-600 shadow-sm",
+    idle: "bg-white dark:bg-slate-800 text-green-700 dark:text-green-400 border-green-200 dark:border-green-900/40 hover:border-green-400",
+    dot: "bg-green-600",
+  },
+  red: {
+    active: "bg-red-600 text-white border-red-600 shadow-sm",
+    idle: "bg-white dark:bg-slate-800 text-red-700 dark:text-red-400 border-red-200 dark:border-red-900/40 hover:border-red-400",
+    dot: "bg-red-600",
+  },
+  orange: {
+    active: "bg-orange-500 text-white border-orange-500 shadow-sm",
+    idle: "bg-white dark:bg-slate-800 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-900/40 hover:border-orange-400",
+    dot: "bg-orange-500",
+  },
+};
 
 type Transaction = {
   transaction: {
@@ -118,6 +156,7 @@ type Bank = {
 interface TransactionsClientProps {
   initialTransactions: Transaction[];
   initialStats: Stats;
+  statusBreakdown: StatusBreakdown;
   merchants: Merchant[];
   banks: Bank[];
   isAdmin: boolean;
@@ -129,6 +168,7 @@ interface TransactionsClientProps {
 export function TransactionsClient({
   initialTransactions,
   initialStats,
+  statusBreakdown,
   merchants,
   banks,
   isAdmin,
@@ -139,7 +179,7 @@ export function TransactionsClient({
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(true);
   const [localSearch, setLocalSearch] = useState(searchParams.get("search") || "");
   const [sortField, setSortField] = useState<"date" | "amount">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
@@ -182,57 +222,16 @@ export function TransactionsClient({
     updateFilters("search", localSearch);
   };
 
+  // Export ALL rows matching the current filters (not just this page) plus a
+  // status breakdown summary \u2014 generated server-side so pagination doesn't limit it.
   const handleExportCSV = () => {
-    // Helper to escape CSV fields containing commas or quotes
-    const esc = (v: string) => {
-      if (v.includes(",") || v.includes('"') || v.includes("\n")) {
-        return `"${v.replace(/"/g, '""')}"`;
-      }
-      return v;
-    };
-
-    // Derive failure reason from multiple sources
-    const getFailureReason = (t: Transaction["transaction"]): string => {
-      if (t.failureReason) return t.failureReason;
-      if (t.statusReason) return t.statusReason;
-      // Try metadata for legacy transactions
-      const meta = t.metadata as Record<string, any> | null;
-      if (meta?.failure_reason) return meta.failure_reason;
-      if (meta?.completion_message) return meta.completion_message;
-      if (meta?.error) return typeof meta.error === "string" ? meta.error : JSON.stringify(meta.error);
-      const failedStatuses = ["failed", "cancelled", "aborted", "expired"];
-      if (failedStatuses.includes(t.status || "")) return t.status || "Unknown";
-      return "-";
-    };
-
-    const headers = [
-      "Date", "Completed At", "Reference", "Bank", "Method", "Amount", "Status",
-      "Failure Reason", "Customer", "Email", "Description",
-      ...(isAdmin ? ["Merchant"] : []),
-    ];
-
-    const rows = sortedTransactions.map((t) => [
-      esc(format(new Date(t.transaction.createdAt), "yyyy-MM-dd HH:mm:ss")),
-      esc(t.transaction.completedAt ? format(new Date(t.transaction.completedAt), "yyyy-MM-dd HH:mm:ss") : "-"),
-      esc(t.transaction.reference),
-      esc(t.bank?.bankName || "-"),
-      esc(t.transaction.paymentMethod === 'card' ? 'Card' : t.transaction.paymentMethod === 'eft_direct' ? 'EFT' : (t.transaction.paymentMethod || '-')),
-      `R ${parseFloat(t.transaction.amount).toFixed(2)}`,
-      esc(t.transaction.status || "-"),
-      esc(getFailureReason(t.transaction)),
-      esc(t.transaction.customerName || "-"),
-      esc(t.transaction.customerEmail || "-"),
-      esc(t.transaction.description || "-"),
-      ...(isAdmin ? [esc(t.merchant?.companyName || t.merchant?.name || "-")] : []),
-    ]);
-
-    const csv = [headers, ...rows].map((row) => row.join(",")).join("\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" }); // BOM for Excel
-    const url = window.URL.createObjectURL(blob);
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("page");
     const a = document.createElement("a");
-    a.href = url;
-    a.download = `transactions-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.href = `/api/transactions/export?${params.toString()}`;
+    document.body.appendChild(a);
     a.click();
+    a.remove();
   };
 
   const getStatusColor = (status: string) => {
@@ -384,6 +383,65 @@ export function TransactionsClient({
         </Card>
       </div>
 
+        {/* Status breakdown — clickable chips with live counts for the current
+            merchant/date/search selection. Click a chip to filter the table by it. */}
+        <Card className="mb-6 p-4 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-slate-200/50 dark:border-slate-700/50">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 mr-1">
+              Status
+            </span>
+            {(() => {
+              const activeStatus = searchParams.get("status") || "all";
+              const chipBase =
+                "inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm font-medium transition-colors cursor-pointer";
+              const countBadge = (active: boolean) =>
+                cn(
+                  "text-xs px-1.5 py-0.5 rounded-full font-semibold tabular-nums",
+                  active ? "bg-white/25" : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+                );
+              const counts: Record<string, number> = {
+                not_started: statusBreakdown.not_started,
+                pending: statusBreakdown.pending,
+                completed: statusBreakdown.completed,
+                failed: statusBreakdown.failed,
+                cancelled: statusBreakdown.cancelled,
+              };
+              return (
+                <>
+                  <button
+                    onClick={() => updateFilters("status", "all")}
+                    className={cn(
+                      chipBase,
+                      activeStatus === "all"
+                        ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white shadow-sm"
+                        : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-400"
+                    )}
+                  >
+                    All
+                    <span className={countBadge(activeStatus === "all")}>{statusBreakdown.total}</span>
+                  </button>
+                  {STATUS_BUCKETS.map((b) => {
+                    const tone = TONE_CLASSES[b.tone];
+                    const isActive = activeStatus === b.key;
+                    return (
+                      <button
+                        key={b.key}
+                        onClick={() => updateFilters("status", isActive ? "all" : b.key)}
+                        className={cn(chipBase, isActive ? tone.active : tone.idle)}
+                        title={`${b.label}: ${counts[b.key]}`}
+                      >
+                        <span className={cn("w-2 h-2 rounded-full", isActive ? "bg-white/80" : tone.dot)} />
+                        {b.label}
+                        <span className={countBadge(isActive)}>{counts[b.key]}</span>
+                      </button>
+                    );
+                  })}
+                </>
+              );
+            })()}
+          </div>
+        </Card>
+
         {/* Filters */}
         <Card className="mb-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-slate-200/50 dark:border-slate-700/50">
           <div className="p-6">
@@ -420,28 +478,6 @@ export function TransactionsClient({
 
                 {/* Filters Row */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 block">
-                      Status
-                    </label>
-                    <Select
-                      value={searchParams.get("status") || "all"}
-                      onValueChange={(value) => updateFilters("status", value)}
-                    >
-                      <SelectTrigger className="cursor-pointer">
-                        <SelectValue placeholder="All Statuses" />
-                      </SelectTrigger>
-                      <SelectContent className="cursor-pointer">
-                        <SelectItem value="all" className="cursor-pointer">All Statuses</SelectItem>
-                        <SelectItem value="completed" className="cursor-pointer">Completed</SelectItem>
-                        <SelectItem value="initiated" className="cursor-pointer">Pending</SelectItem>
-                        <SelectItem value="failed" className="cursor-pointer">Failed</SelectItem>
-                        <SelectItem value="cancelled" className="cursor-pointer">Cancelled</SelectItem>
-                        <SelectItem value="expired" className="cursor-pointer">Expired</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
                   <div>
                     <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 block">
                       Bank

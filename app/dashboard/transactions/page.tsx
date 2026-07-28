@@ -1,8 +1,9 @@
 import { requireAuth } from "@/lib/auth-server";
 import { db } from "@/lib/db";
 import { eftTransactions, eftBanks, users } from "@/lib/db/schema";
-import { eq, desc, and, gte, lte, ilike, or, sql } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import { TransactionsClient } from "@/components/dashboard/TransactionsClient";
+import { buildTxConditions } from "@/lib/transactions-filter";
 
 export default async function TransactionsPage({
   searchParams,
@@ -35,54 +36,13 @@ export default async function TransactionsPage({
   const limit = 50;
   const offset = (page - 1) * limit;
 
-  // Build conditions
-  const conditions = [];
-  
-  // Role-based access
-  if (!isAdmin) {
-    conditions.push(eq(eftTransactions.merchantId, session.user.id));
-  } else if (merchantId) {
-    conditions.push(eq(eftTransactions.merchantId, merchantId));
-  }
-
-  // Status filter
-  if (status && status !== "all") {
-    conditions.push(eq(eftTransactions.status, status as any));
-  }
-
-  // Date range
-  if (fromDate) {
-    conditions.push(gte(eftTransactions.createdAt, new Date(fromDate)));
-  }
-  if (toDate) {
-    const endDate = new Date(toDate);
-    endDate.setHours(23, 59, 59, 999);
-    conditions.push(lte(eftTransactions.createdAt, endDate));
-  }
-
-  // Search — matches reference, customer email/name, the transaction ID, and
-  // the sub-merchant's own reference (metadata.merchantReference)
-  if (search) {
-    conditions.push(
-      or(
-        ilike(eftTransactions.reference, `%${search}%`),
-        ilike(eftTransactions.customerEmail, `%${search}%`),
-        ilike(eftTransactions.customerName, `%${search}%`),
-        sql`${eftTransactions.id}::text ILIKE ${`%${search}%`}`,
-        sql`${eftTransactions.metadata}->>'merchantReference' ILIKE ${`%${search}%`}`
-      )
-    );
-  }
-
-  // Bank filter
-  if (bankId && bankId !== "all") {
-    conditions.push(eq(eftTransactions.eftBankId, bankId));
-  }
-
-  // Payment method filter
-  if (paymentMethod && paymentMethod !== "all") {
-    conditions.push(eq(eftTransactions.paymentMethod, paymentMethod));
-  }
+  // Build filter conditions (shared with the CSV export). `whereBase` excludes the
+  // status filter so the status breakdown can count every bucket; `whereFull`
+  // adds it and drives the table + pagination.
+  const { whereBase, whereFull } = buildTxConditions(
+    { status, merchantId, bankId, paymentMethod, from: fromDate, to: toDate, search },
+    { isAdmin, userId: session.user.id }
+  );
 
   // Fetch transactions with merchant info and bank info
   const transactionsQuery = db
@@ -103,48 +63,61 @@ export default async function TransactionsPage({
     .from(eftTransactions)
     .leftJoin(users, eq(eftTransactions.merchantId, users.id))
     .leftJoin(eftBanks, eq(eftTransactions.eftBankId, eftBanks.id))
-    .where(conditions.length > 0 ? and(...conditions) : undefined)
+    .where(whereFull)
     .orderBy(desc(eftTransactions.createdAt))
     .limit(limit)
     .offset(offset);
 
-  const [transactions, totalCount, merchants, banks] = await Promise.all([
+  const [transactions, totalCount, merchants, banks, breakdown] = await Promise.all([
     transactionsQuery,
     db
       .select({ count: sql<number>`count(*)::int` })
       .from(eftTransactions)
-      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .where(whereFull)
       .then((res) => res[0]?.count || 0),
     isAdmin
       ? db.select({ id: users.id, name: users.name, email: users.email, companyName: users.companyName }).from(users).where(eq(users.role, "merchant"))
       : Promise.resolve([]),
     db.select({ id: eftBanks.id, bankName: eftBanks.bankName, code: eftBanks.code }).from(eftBanks).where(eq(eftBanks.enabled, true)).orderBy(eftBanks.bankName),
+    // Status breakdown — counts per bucket over the NON-status filters, so every
+    // chip shows its count no matter which status is selected.
+    db
+      .select({
+        not_started: sql<number>`COUNT(CASE WHEN ${eftTransactions.status} = 'not_started' THEN 1 END)::int`,
+        pending: sql<number>`COUNT(CASE WHEN ${eftTransactions.status} IN ('initiated','pending') THEN 1 END)::int`,
+        completed: sql<number>`COUNT(CASE WHEN ${eftTransactions.status} = 'completed' THEN 1 END)::int`,
+        failed: sql<number>`COUNT(CASE WHEN ${eftTransactions.status} IN ('failed','aborted','expired') THEN 1 END)::int`,
+        cancelled: sql<number>`COUNT(CASE WHEN ${eftTransactions.status} = 'cancelled' THEN 1 END)::int`,
+        total: sql<number>`COUNT(*)::int`,
+        totalAmount: sql<string>`COALESCE(SUM(CAST(${eftTransactions.amount} AS NUMERIC)), 0)`,
+        completedAmount: sql<string>`COALESCE(SUM(CASE WHEN ${eftTransactions.status} = 'completed' THEN CAST(${eftTransactions.amount} AS NUMERIC) ELSE 0 END), 0)`,
+      })
+      .from(eftTransactions)
+      .where(whereBase)
+      .then((res) => res[0]),
   ]);
 
-  // Get statistics for the filtered data
-  const stats = await db
-    .select({
-      totalAmount: sql<string>`COALESCE(SUM(CAST(${eftTransactions.amount} AS NUMERIC)), 0)`,
-      completedAmount: sql<string>`COALESCE(SUM(CASE WHEN ${eftTransactions.status} = 'completed' THEN CAST(${eftTransactions.amount} AS NUMERIC) ELSE 0 END), 0)`,
-      completedCount: sql<number>`COUNT(CASE WHEN ${eftTransactions.status} = 'completed' THEN 1 END)::int`,
-      pendingCount: sql<number>`COUNT(CASE WHEN ${eftTransactions.status} = 'initiated' THEN 1 END)::int`,
-      failedCount: sql<number>`COUNT(CASE WHEN ${eftTransactions.status} IN ('failed', 'cancelled', 'aborted', 'expired') THEN 1 END)::int`,
-    })
-    .from(eftTransactions)
-    .where(conditions.length > 0 ? and(...conditions) : undefined)
-    .then((res) => res[0]);
+  const statusBreakdown = {
+    not_started: breakdown?.not_started || 0,
+    pending: breakdown?.pending || 0,
+    completed: breakdown?.completed || 0,
+    failed: breakdown?.failed || 0,
+    cancelled: breakdown?.cancelled || 0,
+    total: breakdown?.total || 0,
+  };
 
   return (
     <TransactionsClient
       initialTransactions={transactions}
       initialStats={{
-        totalAmount: parseFloat(stats?.totalAmount || "0"),
-        completedAmount: parseFloat(stats?.completedAmount || "0"),
-        completedCount: stats?.completedCount || 0,
-        pendingCount: stats?.pendingCount || 0,
-        failedCount: stats?.failedCount || 0,
-        totalCount,
+        totalAmount: parseFloat(breakdown?.totalAmount || "0"),
+        completedAmount: parseFloat(breakdown?.completedAmount || "0"),
+        completedCount: statusBreakdown.completed,
+        pendingCount: statusBreakdown.pending,
+        failedCount: statusBreakdown.failed,
+        totalCount: statusBreakdown.total,
       }}
+      statusBreakdown={statusBreakdown}
       merchants={merchants}
       banks={banks}
       isAdmin={isAdmin}
