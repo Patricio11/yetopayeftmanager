@@ -187,7 +187,7 @@ export function TransactionsClient({
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  const [showFilters, setShowFilters] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
   const [localSearch, setLocalSearch] = useState(searchParams.get("search") || "");
   const [sortField, setSortField] = useState<"date" | "amount">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
@@ -453,13 +453,14 @@ export function TransactionsClient({
         </Card>
       </div>
 
-        {/* Status breakdown — clickable chips with live counts for the current
-            merchant/date/search selection. Click a chip to filter the table by it. */}
-        <Card className="mb-6 p-4 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-slate-200/50 dark:border-slate-700/50">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 mr-1">
-              Status
-            </span>
+        {/* Status + Filters — one card: breakdown chips on the left, a Filters
+            toggle top-right, and the filter controls expanding below when opened. */}
+        <Card className="mb-6 p-4 sm:p-5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-slate-200/50 dark:border-slate-700/50">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 mr-1">
+                Status
+              </span>
             {(() => {
               const activeStatus = searchParams.get("status") || "all";
               const chipBase =
@@ -509,58 +510,25 @@ export function TransactionsClient({
                 </>
               );
             })()}
-          </div>
-        </Card>
-
-        {/* Active filter pills — remove individually or clear all */}
-        {activePills.length > 0 && (
-          <div className="mb-6 flex flex-wrap items-center gap-2">
-            <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 mr-1">
-              Active
-            </span>
-            {activePills.map((p) => (
-              <span
-                key={p.key}
-                className="inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-sm border border-blue-200 dark:border-blue-800"
-              >
-                {p.label}
-                <button
-                  onClick={p.onRemove}
-                  className="hover:bg-blue-200/60 dark:hover:bg-blue-800/60 rounded-full p-0.5 transition-colors"
-                  aria-label={`Remove ${p.label}`}
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            ))}
-            <button
-              onClick={() => router.push("/dashboard/transactions")}
-              className="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 underline ml-1"
-            >
-              Clear all
-            </button>
-          </div>
-        )}
-
-        {/* Filters */}
-        <Card className="mb-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-slate-200/50 dark:border-slate-700/50">
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                <Filter className="w-5 h-5 text-blue-600" />
-                Filters
-              </h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowFilters(!showFilters)}
-              >
-                {showFilters ? "Hide" : "Show"} Filters
-              </Button>
             </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowFilters(!showFilters)}
+              className="shrink-0 text-slate-600 dark:text-slate-300"
+            >
+              <Filter className="w-4 h-4 mr-1.5 text-blue-600" />
+              {showFilters ? "Hide" : "Show"} Filters
+              {activePills.filter((p) => p.key !== "status").length > 0 && (
+                <span className="ml-1.5 text-xs px-1.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-semibold">
+                  {activePills.filter((p) => p.key !== "status").length}
+                </span>
+              )}
+            </Button>
+          </div>
 
-            {showFilters && (
-              <div className="space-y-4">
+          {showFilters && (
+            <div className="mt-5 pt-5 border-t border-slate-200/60 dark:border-slate-700/60 space-y-4">
                 {/* Search */}
                 <div className="flex gap-3">
                   <div className="flex-1 relative">
@@ -680,8 +648,37 @@ export function TransactionsClient({
                 )}
               </div>
             )}
-          </div>
         </Card>
+
+        {/* Active filter pills — remove individually or clear all */}
+        {activePills.length > 0 && (
+          <div className="mb-6 -mt-2 flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 mr-1">
+              Active
+            </span>
+            {activePills.map((p) => (
+              <span
+                key={p.key}
+                className="inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-sm border border-blue-200 dark:border-blue-800"
+              >
+                {p.label}
+                <button
+                  onClick={p.onRemove}
+                  className="hover:bg-blue-200/60 dark:hover:bg-blue-800/60 rounded-full p-0.5 transition-colors"
+                  aria-label={`Remove ${p.label}`}
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            ))}
+            <button
+              onClick={() => router.push("/dashboard/transactions")}
+              className="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 underline ml-1"
+            >
+              Clear all
+            </button>
+          </div>
+        )}
 
         {/* Transactions Table */}
         <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-slate-200/50 dark:border-slate-700/50 shadow-xl">
