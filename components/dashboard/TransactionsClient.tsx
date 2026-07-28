@@ -40,6 +40,17 @@ import {
   Landmark,
 } from "lucide-react";
 import { format } from "date-fns";
+
+// Format dates/times in a FIXED timezone (SAST) so the server-rendered HTML and
+// the client hydration always produce identical text. date-fns `format` uses the
+// runtime's local zone — UTC on the server, the visitor's zone in the browser —
+// which mismatches and throws React hydration error #418. Intl with an explicit
+// IANA timeZone is deterministic on both. (Africa/Johannesburg has no DST.)
+const ZA_TZ = "Africa/Johannesburg";
+const zaDate = (d: string | number | Date) =>
+  new Intl.DateTimeFormat("en-US", { timeZone: ZA_TZ, month: "short", day: "2-digit", year: "numeric" }).format(new Date(d));
+const zaTime = (d: string | number | Date) =>
+  new Intl.DateTimeFormat("en-GB", { timeZone: ZA_TZ, hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).format(new Date(d));
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   TransactionDetailDialog,
@@ -613,10 +624,10 @@ export function TransactionsClient({
                       <TableCell className="font-medium pl-0">
                         <div>
                           <div className="text-sm font-semibold text-slate-900 dark:text-white">
-                            {format(new Date(item.transaction.createdAt), "MMM dd, yyyy")}
+                            {zaDate(item.transaction.createdAt)}
                           </div>
                           <div className="text-xs text-slate-500">
-                            {format(new Date(item.transaction.createdAt), "HH:mm:ss")}
+                            {zaTime(item.transaction.createdAt)}
                           </div>
                         </div>
                       </TableCell>

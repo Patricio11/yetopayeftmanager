@@ -417,6 +417,9 @@ function PartnerTransactionsInner() {
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-600">
                       {new Date(txn.createdAt).toLocaleDateString("en-ZA", {
+                        // Pin the zone so SSR (UTC) and client (visitor zone) render
+                        // identical text — otherwise this row throws React #418.
+                        timeZone: "Africa/Johannesburg",
                         year: "numeric",
                         month: "short",
                         day: "numeric",
