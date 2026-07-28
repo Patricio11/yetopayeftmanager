@@ -39,7 +39,15 @@ import {
   Send,
   CreditCard,
   Landmark,
+  X,
+  ChevronDown,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 // Format dates/times in a FIXED timezone (SAST) so the server-rendered HTML and
 // the client hydration always produce identical text. date-fns `format` uses the
 // runtime's local zone — UTC on the server, the visitor's zone in the browser —
@@ -224,9 +232,10 @@ export function TransactionsClient({
 
   // Export ALL rows matching the current filters (not just this page) plus a
   // status breakdown summary \u2014 generated server-side so pagination doesn't limit it.
-  const handleExportCSV = () => {
+  const handleExport = (fileFormat: "xlsx" | "csv") => {
     const params = new URLSearchParams(searchParams.toString());
     params.delete("page");
+    params.set("format", fileFormat);
     const a = document.createElement("a");
     a.href = `/api/transactions/export?${params.toString()}`;
     document.body.appendChild(a);
@@ -261,6 +270,29 @@ export function TransactionsClient({
     }
   };
 
+  const activeStatus = searchParams.get("status") || "all";
+
+  // Active filter pills — each individually removable.
+  const activePills = (() => {
+    const g = (k: string) => searchParams.get(k);
+    const merchantLabel = (id: string) => {
+      const m = merchants.find((x) => x.id === id);
+      return m?.companyName || m?.name || id;
+    };
+    const bankLabel = (id: string) => banks.find((b) => b.id === id)?.bankName || id;
+    const methodLabelUi = (m: string) => (m === "card" ? "Card" : m === "eft_direct" ? "Pay by Bank" : m);
+    const statusLabelUi = (k: string) => STATUS_BUCKETS.find((b) => b.key === k)?.label || k;
+    const pills: { key: string; label: string; onRemove: () => void }[] = [];
+    if (g("status") && g("status") !== "all") pills.push({ key: "status", label: `Status: ${statusLabelUi(g("status")!)}`, onRemove: () => updateFilters("status", "all") });
+    if (g("merchantId")) pills.push({ key: "merchantId", label: `Merchant: ${merchantLabel(g("merchantId")!)}`, onRemove: () => updateFilters("merchantId", "all") });
+    if (g("bankId")) pills.push({ key: "bankId", label: `Bank: ${bankLabel(g("bankId")!)}`, onRemove: () => updateFilters("bankId", "all") });
+    if (g("paymentMethod")) pills.push({ key: "paymentMethod", label: `Method: ${methodLabelUi(g("paymentMethod")!)}`, onRemove: () => updateFilters("paymentMethod", "all") });
+    if (g("from")) pills.push({ key: "from", label: `From: ${g("from")}`, onRemove: () => updateFilters("from", "") });
+    if (g("to")) pills.push({ key: "to", label: `To: ${g("to")}`, onRemove: () => updateFilters("to", "") });
+    if (g("search")) pills.push({ key: "search", label: `Search: "${g("search")}"`, onRemove: () => { setLocalSearch(""); updateFilters("search", ""); } });
+    return pills;
+  })();
+
   return (
     <main className="max-w-7xl mx-auto px-6 py-8">
       {/* Header */}
@@ -283,20 +315,40 @@ export function TransactionsClient({
             <RefreshCw className="w-4 h-4" />
             Refresh
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExportCSV}
-            className="hover:bg-green-50 dark:hover:bg-green-900/20"
-          >
-            <Download className="w-4 h-4" />
-            Export CSV
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="hover:bg-green-50 dark:hover:bg-green-900/20"
+              >
+                <Download className="w-4 h-4" />
+                Export
+                <ChevronDown className="w-3 h-3 ml-1" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleExport("xlsx")} className="cursor-pointer">
+                <FileText className="w-4 h-4 mr-2 text-green-600" />
+                Export as Excel (.xlsx)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport("csv")} className="cursor-pointer">
+                <FileText className="w-4 h-4 mr-2 text-slate-500" />
+                Export as CSV
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card className="p-5 bg-gradient-to-br from-white to-blue-50/50 dark:from-slate-800 dark:to-blue-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer">
+        <Card
+          onClick={() => updateFilters("status", "all")}
+          className={cn(
+            "p-5 bg-gradient-to-br from-white to-blue-50/50 dark:from-slate-800 dark:to-blue-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer",
+            activeStatus === "all" && "ring-2 ring-blue-500"
+          )}
+        >
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
@@ -318,7 +370,13 @@ export function TransactionsClient({
           </div>
         </Card>
 
-        <Card className="p-5 bg-gradient-to-br from-white to-green-50/50 dark:from-slate-800 dark:to-green-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer">
+        <Card
+          onClick={() => updateFilters("status", activeStatus === "completed" ? "all" : "completed")}
+          className={cn(
+            "p-5 bg-gradient-to-br from-white to-green-50/50 dark:from-slate-800 dark:to-green-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer",
+            activeStatus === "completed" && "ring-2 ring-green-500"
+          )}
+        >
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
@@ -339,11 +397,17 @@ export function TransactionsClient({
           </div>
         </Card>
 
-        <Card className="p-5 bg-gradient-to-br from-white to-green-50/50 dark:from-slate-800 dark:to-green-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer">
+        <Card
+          onClick={() => updateFilters("status", activeStatus === "pending" ? "all" : "pending")}
+          className={cn(
+            "p-5 bg-gradient-to-br from-white to-amber-50/50 dark:from-slate-800 dark:to-amber-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer",
+            activeStatus === "pending" && "ring-2 ring-amber-500"
+          )}
+        >
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-9 h-9 bg-gradient-to-br from-green-600 to-green-500 rounded-lg flex items-center justify-center">
+                <div className="w-9 h-9 bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg flex items-center justify-center">
                   <Clock className="w-5 h-5 text-white" />
                 </div>
                 <h3 className="text-xs font-medium text-slate-600 dark:text-slate-400">
@@ -360,7 +424,13 @@ export function TransactionsClient({
           </div>
         </Card>
 
-        <Card className="p-5 bg-gradient-to-br from-white to-red-50/50 dark:from-slate-800 dark:to-red-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer">
+        <Card
+          onClick={() => updateFilters("status", activeStatus === "failed" ? "all" : "failed")}
+          className={cn(
+            "p-5 bg-gradient-to-br from-white to-red-50/50 dark:from-slate-800 dark:to-red-900/10 border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 cursor-pointer",
+            activeStatus === "failed" && "ring-2 ring-red-500"
+          )}
+        >
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
@@ -441,6 +511,36 @@ export function TransactionsClient({
             })()}
           </div>
         </Card>
+
+        {/* Active filter pills — remove individually or clear all */}
+        {activePills.length > 0 && (
+          <div className="mb-6 flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 mr-1">
+              Active
+            </span>
+            {activePills.map((p) => (
+              <span
+                key={p.key}
+                className="inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-sm border border-blue-200 dark:border-blue-800"
+              >
+                {p.label}
+                <button
+                  onClick={p.onRemove}
+                  className="hover:bg-blue-200/60 dark:hover:bg-blue-800/60 rounded-full p-0.5 transition-colors"
+                  aria-label={`Remove ${p.label}`}
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            ))}
+            <button
+              onClick={() => router.push("/dashboard/transactions")}
+              className="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 underline ml-1"
+            >
+              Clear all
+            </button>
+          </div>
+        )}
 
         {/* Filters */}
         <Card className="mb-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-slate-200/50 dark:border-slate-700/50">
